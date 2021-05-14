@@ -16,3 +16,10 @@ bcrypt = "^0.8"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 thiserror = "^1"
 phonenumber = "^0.3"
+
+[dev-dependencies]
+criterion = "^0.3"
+
+[[bench]]
+name = "benchmark"
+harness = false

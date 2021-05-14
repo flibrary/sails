@@ -2,8 +2,9 @@ use super::users::User;
 use crate::{
     error::{SailsDbError, SailsDbResult as Result},
     schema::products,
+    Cmp, Order,
 };
-use diesel::prelude::*;
+use diesel::{prelude::*, sqlite::Sqlite};
 use serde::{Deserialize, Serialize};
 use std::num::NonZeroI64;
 use uuid::Uuid;
@@ -12,48 +13,9 @@ use uuid::Uuid;
 pub struct Products;
 
 impl Products {
-    // CRUD: READ
+    // CRUD: READ. For convenience
     pub fn list(conn: &SqliteConnection) -> Result<Vec<Product>> {
-        use crate::schema::products::dsl::*;
-        Ok(products.load::<Product>(conn)?)
-    }
-
-    // CRUD: READ
-    pub fn find_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<Product> {
-        use crate::schema::products::dsl::*;
-        Ok(products.filter(id.eq(id_provided)).first::<Product>(conn)?)
-    }
-
-    pub fn search_by_price(
-        conn: &SqliteConnection,
-        prodname_p: &str,
-        price_p: NonZeroI64,
-        asc: bool,
-        gt: bool,
-    ) -> Result<Vec<Product>> {
-        use crate::schema::products::dsl::*;
-        Ok(match (asc, gt) {
-            (true, true) => products
-                .filter(prodname.eq(prodname_p))
-                .filter(price.gt(price_p.get()))
-                .order(price.asc())
-                .load::<Product>(conn)?,
-            (true, false) => products
-                .filter(prodname.eq(prodname_p))
-                .filter(price.lt(price_p.get()))
-                .order(price.asc())
-                .load::<Product>(conn)?,
-            (false, true) => products
-                .filter(prodname.eq(prodname_p))
-                .filter(price.gt(price_p.get()))
-                .order(price.desc())
-                .load::<Product>(conn)?,
-            (false, false) => products
-                .filter(prodname.eq(prodname_p))
-                .filter(price.lt(price_p.get()))
-                .order(price.desc())
-                .load::<Product>(conn)?,
-        })
+        ProductFinder::new(conn, None).search()
     }
 
     pub fn create_product<T: ToString>(
@@ -96,6 +58,116 @@ impl Products {
             diesel::update(products).set(product).execute(conn)?
         };
         Ok(())
+    }
+}
+
+type BoxedQuery<'a> = products::BoxedQuery<'a, Sqlite, products::SqlType>;
+
+/// A search query helper (builder)
+pub struct ProductFinder<'a> {
+    conn: &'a SqliteConnection,
+    query: Option<BoxedQuery<'a>>,
+}
+
+impl<'a> ProductFinder<'a> {
+    pub fn new(conn: &'a SqliteConnection, query: Option<BoxedQuery<'a>>) -> Self {
+        Self { conn, query }
+    }
+
+    pub fn search(self) -> Result<Vec<Product>> {
+        use crate::schema::products::dsl::*;
+        Ok(if let Some(query) = self.query {
+            query.load::<Product>(self.conn)?
+        } else {
+            products.load::<Product>(self.conn)?
+        })
+    }
+
+    pub fn id(mut self, id_provided: &'a str) -> Self {
+        use crate::schema::products::dsl::*;
+        // This looks awkward!
+        self.query = if let Some(q) = self.query {
+            Some(q.filter(id.eq(id_provided)))
+        } else {
+            Some(products.filter(id.eq(id_provided)).into_boxed())
+        };
+        self
+    }
+
+    pub fn prodname(mut self, prodname_provided: &'a str) -> Self {
+        use crate::schema::products::dsl::*;
+        self.query = if let Some(q) = self.query {
+            Some(q.filter(prodname.eq(prodname_provided)))
+        } else {
+            Some(products.filter(prodname.eq(prodname_provided)).into_boxed())
+        };
+        self
+    }
+
+    pub fn seller(mut self, seller: &'a User) -> Self {
+        use crate::schema::products::dsl::*;
+        self.query = if let Some(q) = self.query {
+            Some(q.filter(seller_id.eq(seller.id())))
+        } else {
+            Some(products.filter(seller_id.eq(seller.id())).into_boxed())
+        };
+        self
+    }
+
+    pub fn price(mut self, price_provided: NonZeroI64, cmp: Cmp) -> Self {
+        use crate::schema::products::dsl::*;
+        match cmp {
+            Cmp::GreaterThan => {
+                self.query = if let Some(q) = self.query {
+                    Some(q.filter(price.gt(price_provided.get())))
+                } else {
+                    Some(products.filter(price.gt(price_provided.get())).into_boxed())
+                };
+            }
+            Cmp::LessThan => {
+                self.query = if let Some(q) = self.query {
+                    Some(q.filter(price.lt(price_provided.get())))
+                } else {
+                    Some(products.filter(price.lt(price_provided.get())).into_boxed())
+                };
+            }
+            Cmp::GreaterEqual => {
+                self.query = if let Some(q) = self.query {
+                    Some(q.filter(price.ge(price_provided.get())))
+                } else {
+                    Some(products.filter(price.ge(price_provided.get())).into_boxed())
+                };
+            }
+            Cmp::LessEqual => {
+                self.query = if let Some(q) = self.query {
+                    Some(q.filter(price.le(price_provided.get())))
+                } else {
+                    Some(products.filter(price.le(price_provided.get())).into_boxed())
+                };
+            }
+        }
+        self
+    }
+
+    pub fn order_by_price(mut self, order: Order) -> Self {
+        use crate::schema::products::dsl::*;
+        match order {
+            Order::Asc => {
+                self.query = if let Some(q) = self.query {
+                    Some(q.order(price.asc()))
+                } else {
+                    Some(products.order(price.asc()).into_boxed())
+                };
+            }
+            Order::Desc => {
+                self.query = if let Some(q) = self.query {
+                    Some(q.order(price.desc()))
+                } else {
+                    Some(products.order(price.desc()).into_boxed())
+                };
+            }
+        }
+        self
     }
 }
 
@@ -143,137 +215,4 @@ impl Product {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use std::num::NonZeroI64;
-
-    use super::Products;
-    use crate::{
-        test_utils::establish_connection,
-        users::{User, Users},
-    };
-
-    #[test]
-    fn create_product() {
-        let conn = establish_connection();
-        // our seller
-        let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
-        Users::create_or_update(&conn, user.clone()).unwrap();
-        Products::create_product(
-            &conn,
-            &user,
-            "Krugman's Economics 2nd Edition",
-            NonZeroI64::new(700).unwrap(),
-            "A very great book on the subject of Economics",
-        )
-        .unwrap();
-        assert_eq!(Products::list(&conn).unwrap().len(), 1);
-    }
-
-    #[test]
-    fn search_products() {
-        let conn = establish_connection();
-        // our seller
-        let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
-        Users::create_or_update(&conn, user.clone()).unwrap();
-        Products::create_product(
-            &conn,
-            &user,
-            "Krugman's Economics 2nd Edition",
-            NonZeroI64::new(700).unwrap(),
-            "A very great book on the subject of Economics",
-        )
-        .unwrap();
-
-        // Another Krugman's Economics, with a lower price!
-        Products::create_product(
-            &conn,
-            &user,
-            "Krugman's Economics 2nd Edition",
-            NonZeroI64::new(500).unwrap(),
-            "A very great book on the subject of Economics",
-        )
-        .unwrap();
-
-        // Another Krugman's Economics, with a lower price!
-        Products::create_product(
-            &conn,
-            &user,
-            "Krugman's Economics 2nd Edition",
-            NonZeroI64::new(600).unwrap(),
-            "That is a bad book though",
-        )
-        .unwrap();
-
-        // Feynman's Lecture on Physics!
-        Products::create_product(
-            &conn,
-            &user,
-            "Feynman's Lecture on Physics",
-            NonZeroI64::new(900).unwrap(),
-            "A very masterpiece on the theory of the universe",
-        )
-        .unwrap();
-
-        // Search lower than CNY 300 Feynman's Lecture on Physics
-        assert_eq!(
-            Products::search_by_price(
-                &conn,
-                "Feynman's Lecture on Physics",
-                NonZeroI64::new(300).unwrap(),
-                true,
-                false
-            )
-            .unwrap()
-            .len(),
-            0
-        );
-
-        // Search higher than CNY 300 Feynman's Lecture on Physics
-        assert_eq!(
-            Products::search_by_price(
-                &conn,
-                "Feynman's Lecture on Physics",
-                NonZeroI64::new(300).unwrap(),
-                true,
-                true
-            )
-            .unwrap()
-            .len(),
-            1
-        );
-
-        // Krugman
-        assert_eq!(
-            Products::search_by_price(
-                &conn,
-                "Krugman's Economics 2nd Edition",
-                NonZeroI64::new(550).unwrap(),
-                true,
-                true
-            )
-            .unwrap()
-            .len(),
-            2
-        );
-    }
-
-    #[test]
-    fn delete_product() {
-        let conn = establish_connection();
-        // our seller
-        let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
-        Users::create_or_update(&conn, user.clone()).unwrap();
-        let id = Products::create_product(
-            &conn,
-            &user,
-            "Krugman's Economics 2nd Edition",
-            NonZeroI64::new(700).unwrap(),
-            "A very great book on the subject of Economics",
-        )
-        .unwrap();
-        assert_eq!(Products::list(&conn).unwrap().len(), 1);
-        Products::delete_by_id(&conn, &id).unwrap();
-        assert_eq!(Products::list(&conn).unwrap().len(), 0);
-    }
-}
+mod tests;
