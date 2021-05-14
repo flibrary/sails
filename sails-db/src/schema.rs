@@ -3,7 +3,7 @@ table! {
         id -> Text,
         seller_id -> Text,
         prodname -> Text,
-        price -> Integer,
+        price -> BigInt,
         description -> Text,
     }
 }

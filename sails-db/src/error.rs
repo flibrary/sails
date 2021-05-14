@@ -16,4 +16,7 @@ pub enum SailsDbError {
 
     #[error("invalid phone number")]
     InvalidPhoneNumber,
+
+    #[error("username already exists")]
+    UserRegistered,
 }

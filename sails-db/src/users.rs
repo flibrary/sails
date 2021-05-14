@@ -5,7 +5,7 @@ use crate::{
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-/// A Pseudo struct used to manage the table `users`
+/// A pseudo struct used to manage the table `users`
 pub struct Users;
 
 impl Users {
@@ -36,6 +36,25 @@ impl Users {
         }
     }
 
+    pub fn register<T: ToString>(
+        conn: &SqliteConnection,
+        id_p: T,
+        email_p: Option<T>,
+        school_p: T,
+        phone_p: &str,
+        passwd_p: T,
+    ) -> Result<()> {
+        use crate::schema::users::dsl::*;
+        let user = User::new(id_p, email_p, school_p, phone_p, passwd_p)?;
+        if let Ok(0) = users.filter(id.eq(&user.id)).count().get_result(conn) {
+            // This means that we have to insert
+            diesel::insert_into(users).values(user).execute(conn)?
+        } else {
+            return Err(SailsDbError::UserRegistered);
+        };
+        Ok(())
+    }
+
     // CRUD: DELETE
     pub fn delete_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<usize> {
         use crate::schema::users::dsl::*;
@@ -46,11 +65,7 @@ impl Users {
     pub fn create_or_update(conn: &SqliteConnection, user: User) -> Result<()> {
         use crate::schema::users::dsl::*;
 
-        if let Ok(0) = users
-            .filter(id.eq(user.id.clone()))
-            .count()
-            .get_result(conn)
-        {
+        if let Ok(0) = users.filter(id.eq(&user.id)).count().get_result(conn) {
             // This means that we have to insert
             diesel::insert_into(users).values(user).execute(conn)?
         } else {
@@ -118,6 +133,30 @@ mod tests {
         let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
         Users::create_or_update(&conn, user).unwrap();
         assert_eq!(Users::list(&conn).unwrap().len(), 1);
+    }
+
+    #[test]
+    fn register_user() {
+        let conn = establish_connection();
+        Users::register(
+            &conn,
+            "TestUser",
+            None,
+            "NFLS",
+            "+86 18353232340",
+            "strongpasswd",
+        )
+        .unwrap();
+        // User already registered
+        assert!(Users::register(
+            &conn,
+            "TestUser",
+            None,
+            "NFLS",
+            "+86 18353232340",
+            "strongpasswd",
+        )
+        .is_err());
     }
 
     #[test]
