@@ -1,9 +1,5 @@
 use super::users::User;
-use crate::{
-    error::{SailsDbError, SailsDbResult as Result},
-    schema::products,
-    Cmp, Order,
-};
+use crate::{error::SailsDbResult as Result, schema::products, Cmp, Order};
 use diesel::{prelude::*, sqlite::Sqlite};
 use serde::{Deserialize, Serialize};
 use std::num::NonZeroI64;
@@ -21,29 +17,37 @@ impl Products {
     // A convenient helper to create the product
     pub fn create_product<T: ToString>(
         conn: &SqliteConnection,
-        seller_p: &User,
+        seller_p: T,
+        category_p: T,
         prodname_p: T,
         price_p: NonZeroI64,
         description_p: T,
     ) -> Result<String> {
         use crate::schema::products::dsl::*;
-        let product = Product::new(seller_p, prodname_p, price_p, description_p);
-        let id_cloned: String = product.id().to_string();
+        let product = Product::new(seller_p, category_p, prodname_p, price_p, description_p);
+        let id_cloned: String = product.id.clone();
         if let Ok(0) = products.filter(id.eq(&product.id)).count().get_result(conn) {
             // This means that we have to insert
             diesel::insert_into(products)
                 .values(product)
                 .execute(conn)?
         } else {
-            return Err(SailsDbError::UserRegistered);
+            // This can never happen because we are using UUID.
+            unreachable!()
         };
         Ok(id_cloned)
     }
 
     // CRUD: DELETE
+    // We somehow cannot get product finder to help us to delete.
     pub fn delete_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<usize> {
         use crate::schema::products::dsl::*;
         Ok(diesel::delete(products.filter(id.eq(id_provided))).execute(conn)?)
+    }
+
+    pub fn delete_by_seller(conn: &SqliteConnection, seller: &str) -> Result<usize> {
+        use crate::schema::products::dsl::*;
+        Ok(diesel::delete(products.filter(seller_id.eq(seller))).execute(conn)?)
     }
 
     // CRUD: UPDATE AND CREATE
@@ -54,9 +58,9 @@ impl Products {
             // This means that we have to insert
             diesel::insert_into(products)
                 .values(product)
-                .execute(conn)?
+                .execute(conn)?;
         } else {
-            diesel::update(products).set(product).execute(conn)?
+            product.save_changes::<Product>(conn)?;
         };
         Ok(())
     }
@@ -99,9 +103,15 @@ impl<'a> ProductFinder<'a> {
         self
     }
 
-    pub fn seller(mut self, seller: &'a User) -> Self {
+    pub fn seller(mut self, seller: &'a str) -> Self {
         use crate::schema::products::dsl::*;
-        self.query = self.query.filter(seller_id.eq(seller.id()));
+        self.query = self.query.filter(seller_id.eq(seller));
+        self
+    }
+
+    pub fn category(mut self, category_provided: &'a str) -> Self {
+        use crate::schema::products::dsl::*;
+        self.query = self.query.filter(category.eq(category_provided));
         self
     }
 
@@ -135,6 +145,7 @@ impl<'a> ProductFinder<'a> {
 pub struct Product {
     id: String,
     seller_id: String,
+    category: String,
     pub prodname: String,
     // Price should not be negative
     price: i64,
@@ -143,10 +154,17 @@ pub struct Product {
 
 impl Product {
     // This prevent on a type level that seller_id and price are valid
-    pub fn new<T: ToString>(seller: &User, prodname: T, price: NonZeroI64, description: T) -> Self {
+    pub fn new<T: ToString>(
+        seller_id: T,
+        category: T,
+        prodname: T,
+        price: NonZeroI64,
+        description: T,
+    ) -> Self {
         Self {
             id: Uuid::new_v4().to_string(),
-            seller_id: seller.id.clone(),
+            seller_id: seller_id.to_string(),
+            category: category.to_string(),
             prodname: prodname.to_string(),
             price: price.get(),
             description: description.to_string(),

@@ -1,7 +1,7 @@
 use std::num::NonZeroI64;
 
 use criterion::{criterion_group, criterion_main, Criterion};
-use sails_db::{products::*, test_utils::establish_connection, users::*};
+use sails_db::{categories::Categories, products::*, test_utils::establish_connection, users::*};
 
 fn login_user(c: &mut Criterion) {
     let conn = establish_connection();
@@ -23,11 +23,24 @@ fn login_user(c: &mut Criterion) {
 fn products(c: &mut Criterion) {
     let conn = establish_connection();
     // our seller
-    let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
-    Users::create_or_update(&conn, user.clone()).unwrap();
+    let user_id = Users::register(
+        &conn,
+        "TestUser",
+        None,
+        "NFLS",
+        "+86 18353232340",
+        "strongpasswd",
+    )
+    .unwrap();
+
+    // The book category
+    let econ_id = Categories::create(&conn, "Economics Books").unwrap();
+    let phys_id = Categories::create(&conn, "Physics Books").unwrap();
+
     Products::create_product(
         &conn,
-        &user,
+        user_id.as_str(),
+        econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         NonZeroI64::new(700).unwrap(),
         "A very great book on the subject of Economics",
@@ -37,7 +50,8 @@ fn products(c: &mut Criterion) {
     // Another Krugman's Economics, with a lower price!
     Products::create_product(
         &conn,
-        &user,
+        user_id.as_str(),
+        econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         NonZeroI64::new(500).unwrap(),
         "A very great book on the subject of Economics",
@@ -47,17 +61,30 @@ fn products(c: &mut Criterion) {
     // Another Krugman's Economics, with a lower price!
     Products::create_product(
         &conn,
-        &user,
+        user_id.as_str(),
+        econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         NonZeroI64::new(600).unwrap(),
         "That is a bad book though",
     )
     .unwrap();
 
+    // Another different economics book
+    Products::create_product(
+        &conn,
+        user_id.as_str(),
+        econ_id.as_str(),
+        "The Economics",
+        NonZeroI64::new(600).unwrap(),
+        "I finally had got a different econ textbook!",
+    )
+    .unwrap();
+
     // Feynman's Lecture on Physics!
     Products::create_product(
         &conn,
-        &user,
+        user_id.as_str(),
+        phys_id.as_str(),
         "Feynman's Lecture on Physics",
         NonZeroI64::new(900).unwrap(),
         "A very masterpiece on the theory of the universe",

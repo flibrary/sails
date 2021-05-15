@@ -1,5 +1,6 @@
 use crate::{
     error::{SailsDbError, SailsDbResult as Result},
+    products::Products,
     schema::users,
 };
 use diesel::prelude::*;
@@ -43,21 +44,24 @@ impl Users {
         school_p: T,
         phone_p: impl AsRef<str>,
         passwd_p: T,
-    ) -> Result<()> {
+    ) -> Result<String> {
         use crate::schema::users::dsl::*;
         let user = User::new(id_p, email_p, school_p, phone_p.as_ref(), passwd_p)?;
+        let id_cloned: String = user.id.clone();
         if let Ok(0) = users.filter(id.eq(&user.id)).count().get_result(conn) {
             // This means that we have to insert
             diesel::insert_into(users).values(user).execute(conn)?
         } else {
             return Err(SailsDbError::UserRegistered);
         };
-        Ok(())
+        Ok(id_cloned)
     }
 
     // CRUD: DELETE
     pub fn delete_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<usize> {
         use crate::schema::users::dsl::*;
+        // We need to also delete all the products associated with the user.
+        Products::delete_by_seller(conn, id_provided)?;
         Ok(diesel::delete(users.filter(id.eq(id_provided))).execute(conn)?)
     }
 
@@ -67,9 +71,9 @@ impl Users {
 
         if let Ok(0) = users.filter(id.eq(&user.id)).count().get_result(conn) {
             // This means that we have to insert
-            diesel::insert_into(users).values(user).execute(conn)?
+            diesel::insert_into(users).values(user).execute(conn)?;
         } else {
-            diesel::update(users).set(user).execute(conn)?
+            user.save_changes::<User>(conn)?;
         };
         Ok(())
     }

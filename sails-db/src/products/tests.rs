@@ -1,21 +1,28 @@
 use std::num::NonZeroI64;
 
 use super::{ProductFinder, Products};
-use crate::{
-    test_utils::establish_connection,
-    users::{User, Users},
-    Cmp,
-};
+use crate::{categories::Categories, test_utils::establish_connection, users::Users, Cmp};
 
 #[test]
 fn create_product() {
     let conn = establish_connection();
     // our seller
-    let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
-    Users::create_or_update(&conn, user.clone()).unwrap();
+    let user_id = Users::register(
+        &conn,
+        "TestUser",
+        None,
+        "NFLS",
+        "+86 18353232340",
+        "strongpasswd",
+    )
+    .unwrap();
+
+    // The book category
+    let econ_id = Categories::create(&conn, "Economics Books").unwrap();
     Products::create_product(
         &conn,
-        &user,
+        user_id.as_str(),
+        econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         NonZeroI64::new(700).unwrap(),
         "A very great book on the subject of Economics",
@@ -28,11 +35,24 @@ fn create_product() {
 fn search_products() {
     let conn = establish_connection();
     // our seller
-    let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
-    Users::create_or_update(&conn, user.clone()).unwrap();
+    let user_id = Users::register(
+        &conn,
+        "TestUser",
+        None,
+        "NFLS",
+        "+86 18353232340",
+        "strongpasswd",
+    )
+    .unwrap();
+
+    // The book category
+    let econ_id = Categories::create(&conn, "Economics Books").unwrap();
+    let phys_id = Categories::create(&conn, "Physics Books").unwrap();
+
     Products::create_product(
         &conn,
-        &user,
+        user_id.as_str(),
+        econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         NonZeroI64::new(700).unwrap(),
         "A very great book on the subject of Economics",
@@ -42,7 +62,8 @@ fn search_products() {
     // Another Krugman's Economics, with a lower price!
     Products::create_product(
         &conn,
-        &user,
+        user_id.as_str(),
+        econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         NonZeroI64::new(500).unwrap(),
         "A very great book on the subject of Economics",
@@ -52,17 +73,30 @@ fn search_products() {
     // Another Krugman's Economics, with a lower price!
     Products::create_product(
         &conn,
-        &user,
+        user_id.as_str(),
+        econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         NonZeroI64::new(600).unwrap(),
         "That is a bad book though",
     )
     .unwrap();
 
+    // Another different economics book
+    Products::create_product(
+        &conn,
+        user_id.as_str(),
+        econ_id.as_str(),
+        "The Economics",
+        NonZeroI64::new(600).unwrap(),
+        "I finally had got a different econ textbook!",
+    )
+    .unwrap();
+
     // Feynman's Lecture on Physics!
     Products::create_product(
         &conn,
-        &user,
+        user_id.as_str(),
+        phys_id.as_str(),
         "Feynman's Lecture on Physics",
         NonZeroI64::new(900).unwrap(),
         "A very masterpiece on the theory of the universe",
@@ -101,20 +135,42 @@ fn search_products() {
             .len(),
         2
     );
+
+    // Search by category
+    assert_eq!(
+        ProductFinder::new(&conn, None)
+            .category(&econ_id)
+            .price(NonZeroI64::new(550).unwrap(), Cmp::GreaterThan)
+            .search()
+            .unwrap()
+            .len(),
+        3
+    );
 }
 
 #[test]
 fn delete_product() {
     let conn = establish_connection();
     // our seller
-    let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
-    Users::create_or_update(&conn, user.clone()).unwrap();
+    let user_id = Users::register(
+        &conn,
+        "TestUser",
+        None,
+        "NFLS",
+        "+86 18353232340",
+        "strongpasswd",
+    )
+    .unwrap();
+
+    // The book category
+    let econ_id = Categories::create(&conn, "Economics Books").unwrap();
     let id = Products::create_product(
         &conn,
-        &user,
+        user_id.as_str(),
+        econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
-        NonZeroI64::new(700).unwrap(),
-        "A very great book on the subject of Economics",
+        NonZeroI64::new(600).unwrap(),
+        "That is a bad book though",
     )
     .unwrap();
     assert_eq!(Products::list(&conn).unwrap().len(), 1);

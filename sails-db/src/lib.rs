@@ -8,23 +8,26 @@ pub mod error;
 pub mod products;
 #[rustfmt::skip]
 mod schema;
+pub mod categories;
 pub mod test_utils;
 pub mod users;
 
+/// Enum representing order
 pub enum Order {
-    // Ascending
+    /// Ascending
     Asc,
-    // descending
+    /// Descending
     Desc,
 }
 
+/// Enum used for comparison operation
 pub enum Cmp {
-    // Greater than
+    /// Greater than
     GreaterThan,
-    // Less than,
+    /// Less than,
     LessThan,
-    // Greater than or equal to,
+    /// Greater than or equal to,
     GreaterEqual,
-    // Less than or equal to
+    /// Less than or equal to
     LessEqual,
 }
