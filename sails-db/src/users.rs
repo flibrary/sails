@@ -122,4 +122,5 @@ impl User {
     }
 }
 
+#[cfg(test)]
 mod tests;
