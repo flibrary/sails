@@ -10,7 +10,7 @@
         </a>
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <li><a href="/" class="nav-link px-2 text-white">Home</a></li>
+          <li><a href="/" class="nav-link px-2 text-white">FLibrary</a></li>
           <li><a href="/market" class="nav-link px-2 text-white">Market</a></li>
           <li><a href="#" class="nav-link px-2 text-secondary">Portal</a></li>
         </ul>
@@ -21,4 +21,56 @@
       </div>
     </div>
   </header>
+
+<br>
+<main class="container">
+  {% if flash %}
+    <br>
+    <div class="alert alert-warning" role="alert">
+      {{ flash }}
+    </div>
+    <br>
+  {% endif %}
+  <div class="bg-light p-5 rounded">
+    <h1>Welcome to the user portal</h1>
+    <p class="lead">This page helps you to manage your books posted in the market and your basic account information.</p>
+  </div>
+  <br>
+
+  <div class="bg-light p-5 rounded">
+    <h1>User info</h1>
+    <form action="/user/update_user" method="post">
+    <div class="form-group row">
+      <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
+      <div class="col-sm-10">
+        <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{ content.id }}" name="email">
+      </div>
+    </div>
+    <br>
+    <div class="form-group row">
+      <label for="inputSchool" class="col-sm-2 col-form-label">School name</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="inputSchool" placeholder="School name" value="{{ content.school }}" name="school">
+      </div>
+      </div>
+    <br>
+    <div class="form-group row">
+      <label for="inputPhone" class="col-sm-2 col-form-label">Phone number</label>
+      <div class="col-sm-10">
+        <input type="tel" class="form-control" id="inputPhone" placeholder="Phone number" value="{{ content.phone }}" name="phone">
+      </div>
+    </div>
+    <br>
+    <div class="form-group row">
+      <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
+      <div class="col-sm-10">
+        <input type="password" class="form-control" id="inputPassword" placeholder="Password" name="password">
+      </div>
+    </div>
+    <br>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Update</button>
+  </form>
+  </div>
+  <br>
+</main>
 {% endblock content %}

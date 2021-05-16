@@ -84,7 +84,8 @@ fn rocket() -> _ {
                 user::validate,
                 user::signup,
                 user::create_user,
-                user::logout
+                user::logout,
+                user::update_user
             ],
         )
         .register("/", catchers![page404])
