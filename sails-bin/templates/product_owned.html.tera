@@ -1,0 +1,19 @@
+{% extends "market" %}
+{% block inner %}
+<main class="container">
+    {% if flash %}
+    <br>
+    <div class="alert alert-warning" role="alert">
+      {{ flash }}
+    </div>
+    <br>
+    {% endif %}
+
+  <div class="bg-light p-5 rounded">
+    <h1>Welcome to the market</h1>
+    <p class="lead">Here you can see what books are on sale and post your own books.</p>
+    <a href="all_products" class="btn btn-primary" role="button">Browse all books</a>
+  </div>
+  <br>
+</main>
+{% endblock inner %}

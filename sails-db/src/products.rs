@@ -1,5 +1,9 @@
 use super::users::User;
-use crate::{error::SailsDbResult as Result, schema::products, Cmp, Order};
+use crate::{
+    error::{SailsDbError, SailsDbResult as Result},
+    schema::products,
+    Cmp, Order,
+};
 use diesel::{prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
@@ -60,6 +64,18 @@ impl Products {
             diesel::insert_into(products)
                 .values(product)
                 .execute(conn)?;
+        } else {
+            product.save_changes::<Product>(conn)?;
+        };
+        Ok(())
+    }
+
+    // CRUD: UPDATE AND CREATE
+    pub fn update(conn: &SqliteConnection, product: Product) -> Result<()> {
+        use crate::schema::products::dsl::*;
+
+        if let Ok(0) = products.filter(id.eq(&product.id)).count().get_result(conn) {
+            return Err(SailsDbError::ProductNotFound);
         } else {
             product.save_changes::<Product>(conn)?;
         };

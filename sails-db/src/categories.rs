@@ -1,8 +1,10 @@
-use crate::{error::SailsDbResult as Result, schema::categories};
+use crate::{
+    error::{SailsDbError, SailsDbResult as Result},
+    schema::categories,
+};
 use diesel::{prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 // A pseudo struct for managing the categories table.
 pub struct Categories;
@@ -15,14 +17,34 @@ impl Categories {
         Ok(categories.load::<Category>(conn)?)
     }
 
+    pub fn list_top(conn: &SqliteConnection) -> Result<Vec<Category>> {
+        use crate::schema::categories::dsl::*;
+        Ok(categories
+            .filter(parent_id.is_null())
+            .load::<Category>(conn)?)
+    }
+
+    pub fn list_leaves(conn: &SqliteConnection) -> Result<Vec<Category>> {
+        use crate::schema::categories::dsl::*;
+        Ok(categories.filter(is_leaf.eq(true)).load::<Category>(conn)?)
+    }
+
     fn by_id(id_provided: &'_ str) -> BoxedQuery<'_> {
         use crate::schema::categories::dsl::*;
         categories.into_boxed().filter(id.eq(id_provided))
     }
 
-    pub fn create(conn: &SqliteConnection, ctgname_provided: impl ToString) -> Result<String> {
+    pub fn find_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<Category> {
         use crate::schema::categories::dsl::*;
-        let category = Category::new(ctgname_provided);
+        Ok(categories
+            .into_boxed()
+            .filter(id.eq(id_provided))
+            .get_result::<Category>(conn)?)
+    }
+
+    pub fn create(conn: &SqliteConnection, id_provided: impl ToString) -> Result<String> {
+        use crate::schema::categories::dsl::*;
+        let category = Category::new(id_provided);
         let id_cloned: String = category.id.clone();
         if let Ok(0) = Self::by_id(&category.id).count().get_result(conn) {
             // This means that we have to insert
@@ -30,8 +52,7 @@ impl Categories {
                 .values(category)
                 .execute(conn)?
         } else {
-            // This can never happen because we are using UUID.
-            unreachable!()
+            return Err(SailsDbError::CategoryExisted);
         };
         Ok(id_cloned)
     }
@@ -50,6 +71,11 @@ impl Categories {
         Self::create_or_update(conn, self_category)?;
         Self::create_or_update(conn, parent_category)?;
         Ok(())
+    }
+
+    pub fn delete_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<usize> {
+        use crate::schema::categories::dsl::*;
+        Ok(diesel::delete(categories.filter(id.eq(id_provided))).execute(conn)?)
     }
 
     pub fn create_or_update(conn: &SqliteConnection, category: Category) -> Result<()> {
@@ -76,18 +102,16 @@ impl Categories {
 )]
 #[table_name = "categories"]
 pub struct Category {
-    id: String,
-    pub ctgname: String,
+    pub id: String,
     parent_id: Option<String>,
     is_leaf: bool,
 }
 
 impl Category {
     // Create a new leaf node with no parent_id
-    pub fn new(ctgname: impl ToString) -> Self {
+    pub fn new(id: impl ToString) -> Self {
         Self {
-            id: Uuid::new_v4().to_string(),
-            ctgname: ctgname.to_string(),
+            id: id.to_string(),
             parent_id: None,
             is_leaf: true,
         }
@@ -95,6 +119,10 @@ impl Category {
 
     pub fn id(&self) -> &str {
         &self.id
+    }
+
+    pub fn is_leaf(&self) -> bool {
+        self.is_leaf
     }
 
     // To insert a node between A and B, first insert the node to A, then insert B to the node.

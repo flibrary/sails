@@ -17,7 +17,7 @@ pub enum SailsDbError {
     #[error("invalid phone number or email address")]
     InvalidIdentity,
 
-    #[error("username already exists")]
+    #[error("email has already been registered")]
     UserRegistered,
 
     #[error("no user found given the information")]
@@ -25,4 +25,13 @@ pub enum SailsDbError {
 
     #[error("password was incorrect")]
     IncorrectPassword,
+
+    #[error("category already existed")]
+    CategoryExisted,
+
+    #[error("category doesn't exist")]
+    CategoryNotFound,
+
+    #[error("product doesn't exist")]
+    ProductNotFound,
 }

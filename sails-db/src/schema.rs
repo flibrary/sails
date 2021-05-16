@@ -1,7 +1,6 @@
 table! {
     categories (id) {
         id -> Text,
-        ctgname -> Text,
         parent_id -> Nullable<Text>,
         is_leaf -> Bool,
     }

@@ -94,6 +94,18 @@ impl Users {
         };
         Ok(())
     }
+
+    pub fn update(conn: &SqliteConnection, user: User) -> Result<()> {
+        use crate::schema::users::dsl::*;
+
+        if let Ok(0) = users.filter(id.eq(&user.id)).count().get_result(conn) {
+            // This means that we have to insert
+            return Err(SailsDbError::UserNotFound);
+        } else {
+            user.save_changes::<User>(conn)?;
+        };
+        Ok(())
+    }
 }
 
 /// A single user, corresponding to a row in the table `users`

@@ -1,5 +1,8 @@
+mod market;
 mod user;
 
+use rocket_contrib::helmet::SpaceHelmet;
+use sails_db::categories::Categories;
 use serde::Serialize;
 use serde_json::json;
 #[macro_use]
@@ -21,6 +24,13 @@ pub struct Context<T> {
 impl<T: Serialize> Context<T> {
     pub fn with_flash(&mut self, flash: Option<FlashMessage<'_>>) {
         self.flash = flash.map(|f| format!("{}: {}", f.kind(), f.message()))
+    }
+
+    pub fn msg(content: T, msg: impl ToString) -> Self {
+        Self {
+            content,
+            flash: Some(msg.to_string()),
+        }
     }
 
     pub fn new(content: T) -> Self {
@@ -49,10 +59,35 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     conn.run(|c| {
         // Enforce foreign key relation
         c.batch_execute("PRAGMA foreign_keys = ON;").unwrap();
-        embedded_migrations::run(c)
+        embedded_migrations::run(c).expect("can run migrations");
+
+        if Categories::list(c).unwrap().is_empty() {
+            // The categories table is empty, create new one by default.
+            // If there is an error, ignore it
+            let _ = Categories::create(c, "High School");
+
+            let _ = Categories::create(c, "Economics");
+            let _ = Categories::insert(c, "Economics", "High School");
+
+            let _ = Categories::create(c, "Physics");
+            let _ = Categories::insert(c, "Physics", "High School");
+
+            let _ = Categories::create(c, "English");
+            let _ = Categories::insert(c, "English", "High School");
+
+            let _ = Categories::create(c, "Chemistry");
+            let _ = Categories::insert(c, "Chemistry", "High School");
+
+            let _ = Categories::create(c, "Biology");
+            let _ = Categories::insert(c, "Biology", "High School");
+
+            let _ = Categories::create(c, "Business");
+            let _ = Categories::insert(c, "Business", "High School");
+        } else {
+            // Do nothing because else UUID of the category changes, which breaks the product references
+        }
     })
-    .await
-    .expect("can run migrations");
+    .await;
 
     rocket
 }
@@ -72,6 +107,7 @@ fn rocket() -> _ {
     rocket::build()
         .attach(DbConn::fairing())
         .attach(Template::fairing())
+        .attach(SpaceHelmet::default())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .mount("/", StaticFiles::from(crate_relative!("static")))
         .mount("/", routes![index])
@@ -88,6 +124,16 @@ fn rocket() -> _ {
                 user::update_user
             ],
         )
+        .mount(
+            "/market",
+            routes![
+                market::market,
+                market::all_products,
+                market::categories,
+                market::post_book,
+                market::create_book,
+                market::book_page
+            ],
+        )
         .register("/", catchers![page404])
-    //        .mount("/todo", routes![new, toggle, delete])
 }

@@ -5,7 +5,11 @@ use rocket::{
     response::{Flash, Redirect},
 };
 use rocket_contrib::templates::Template;
-use sails_db::users::{User, Users};
+use sails_db::{
+    products::{Product, ProductFinder},
+    users::{User, Users},
+};
+use serde::Serialize;
 use serde_json::json;
 
 use crate::{Context, DbConn};
@@ -70,7 +74,7 @@ pub async fn create_user(
 pub async fn update_user(info: Form<UserInfo>, conn: DbConn) -> Result<Redirect, Flash<Redirect>> {
     let user = User::new(&info.email, &info.school, &info.phone, &info.password)
         .map_err(|e| Flash::error(Redirect::to(uri!("/user", portal)), e.to_string()))?;
-    conn.run(move |c| Users::create_or_update(c, user))
+    conn.run(move |c| Users::update(c, user))
         .await
         .map_err(|e| Flash::error(Redirect::to(uri!("/user", portal)), e.to_string()))?;
 
@@ -112,9 +116,22 @@ pub async fn portal(
     jar: &CookieJar<'_>,
     conn: DbConn,
 ) -> Result<Template, Redirect> {
+    #[derive(Serialize)]
+    struct UserPortal {
+        user: User,
+        books: Vec<Product>,
+    }
+
     if let Some(uid) = jar.get_private("uid") {
         let uid = uid.value().to_string();
-        let mut cx = Context::new(conn.run(move |c| Users::find_by_id(c, &uid)).await.unwrap());
+        // It is only possible that we signed the cookie, which means it is safe to unwrap
+        let uid_cloned = uid.clone();
+        let user = conn.run(move |c| Users::find_by_id(c, &uid)).await.unwrap();
+        let books = conn
+            .run(move |c| ProductFinder::new(c, None).seller(&uid_cloned).search())
+            .await
+            .unwrap();
+        let mut cx = Context::new(UserPortal { user, books });
         cx.with_flash(flash);
         Ok(Template::render("portal", cx))
     } else {

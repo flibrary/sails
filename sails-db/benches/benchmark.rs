@@ -32,13 +32,13 @@ fn products(c: &mut Criterion) {
     .unwrap();
 
     // The book category
-    let econ_id = Categories::create(&conn, "Economics Books").unwrap();
-    let phys_id = Categories::create(&conn, "Physics Books").unwrap();
+    Categories::create(&conn, "Economics Books").unwrap();
+    Categories::create(&conn, "Physics Books").unwrap();
 
     Products::create_product(
         &conn,
         user_id.as_str(),
-        econ_id.as_str(),
+        "Economics Books",
         "Krugman's Economics 2nd Edition",
         NonZeroI64::new(700).unwrap(),
         "A very great book on the subject of Economics",
@@ -49,7 +49,7 @@ fn products(c: &mut Criterion) {
     Products::create_product(
         &conn,
         user_id.as_str(),
-        econ_id.as_str(),
+        "Economics Books",
         "Krugman's Economics 2nd Edition",
         NonZeroI64::new(500).unwrap(),
         "A very great book on the subject of Economics",
@@ -60,7 +60,7 @@ fn products(c: &mut Criterion) {
     Products::create_product(
         &conn,
         user_id.as_str(),
-        econ_id.as_str(),
+        "Economics Books",
         "Krugman's Economics 2nd Edition",
         NonZeroI64::new(600).unwrap(),
         "That is a bad book though",
@@ -71,7 +71,7 @@ fn products(c: &mut Criterion) {
     Products::create_product(
         &conn,
         user_id.as_str(),
-        econ_id.as_str(),
+        "Economics Books",
         "The Economics",
         NonZeroI64::new(600).unwrap(),
         "I finally had got a different econ textbook!",
@@ -82,7 +82,7 @@ fn products(c: &mut Criterion) {
     Products::create_product(
         &conn,
         user_id.as_str(),
-        phys_id.as_str(),
+        "Physics Books",
         "Feynman's Lecture on Physics",
         NonZeroI64::new(900).unwrap(),
         "A very masterpiece on the theory of the universe",

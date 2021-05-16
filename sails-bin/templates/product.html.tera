@@ -1,0 +1,80 @@
+{% extends "market" %}
+{% block inner %}
+<main class="container">
+    {% if flash %}
+    <br>
+    <div class="alert alert-warning" role="alert">
+      {{ flash }}
+    </div>
+    <br>
+    {% endif %}
+
+    <div class="bg-light p-5 rounded">
+    {% if content.is_seller != true %}
+    <h1>{{ content.book.prodname }}</h1>
+    <table class="table table-hover">
+    <tbody>
+    <tr>
+      <th scope="row">Price</th>
+      <td>CN¥ {{ content.book.price }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Category</th>
+      <td>{{ content.book.category }}</td>
+    </tr>
+    </tbody>
+    </table>
+    {% else %}
+    <form action="create_book" method="post">
+    <div class="form-group row">
+      <label for="inputBook" class="col-sm-2 col-form-label">Book name</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="inputBook" placeholder="Book name" value="{{ content.book.prodname }}" name="prodname">
+      </div>
+    </div>
+    <br>
+    <div class="form-group row">
+      <label for="inputPrice" class="col-sm-2 col-form-label">Price</label>
+      <div class="col-sm-4">
+        <input type="number" min="0" class="form-control" id="inputPrice" placeholder="Price" value="{{ content.book.price }}" name="price">
+      </div>
+    </div>
+    <br>
+    <div class="form-group row">
+      <label for="inputPassword" class="col-sm-2 col-form-label">Description</label>
+      <div class="col-sm-10">
+	<textarea class="form-control" id="exampleFormControlTextarea1" rows="3" value="{{ content.book.description }}" name="description"></textarea>
+      </div>
+    </div>
+    <br>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Update</button>
+  </form>
+    {% endif %}
+    </div>
+    <br>
+
+    {% if content.signedin %}
+    <div class="bg-light p-5 rounded">
+    <table class="table table-hover">
+      <tbody>
+	<tr>
+	  <th scope="row">Seller's email</th>
+	  <td><a href="mailto:{{content.seller.id}}">{{ content.seller.id }}</a></td>
+	</tr>
+	<tr>
+	  <th scope="row">Seller's phone number</th>
+	  <td><a href="tel:{{content.seller.phone}}">{{ content.seller.phone }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">Seller's school</th>
+	  <td>{{ content.seller.school }}</td>
+	</tr>
+      </tbody>
+    </table>
+    {% else %}
+    <a href="/user" class="btn btn-primary" role="button">Sign in to contact the seller</a>
+    {% endif %}
+  </div>
+  <br>
+</main>
+{% endblock inner %}

@@ -12,7 +12,7 @@
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
           <li><a href="/" class="nav-link px-2 text-white">FLibrary</a></li>
           <li><a href="/market" class="nav-link px-2 text-white">Market</a></li>
-          <li><a href="#" class="nav-link px-2 text-secondary">Portal</a></li>
+          <li><a href="/user" class="nav-link px-2 text-secondary">Portal</a></li>
         </ul>
 
         <div class="text-end">
@@ -43,21 +43,21 @@
     <div class="form-group row">
       <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
       <div class="col-sm-10">
-        <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{ content.id }}" name="email">
+        <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{ content.user.id }}" name="email">
       </div>
     </div>
     <br>
     <div class="form-group row">
       <label for="inputSchool" class="col-sm-2 col-form-label">School name</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" id="inputSchool" placeholder="School name" value="{{ content.school }}" name="school">
+        <input type="text" class="form-control" id="inputSchool" placeholder="School name" value="{{ content.user.school }}" name="school">
       </div>
       </div>
     <br>
     <div class="form-group row">
       <label for="inputPhone" class="col-sm-2 col-form-label">Phone number</label>
       <div class="col-sm-10">
-        <input type="tel" class="form-control" id="inputPhone" placeholder="Phone number" value="{{ content.phone }}" name="phone">
+        <input type="tel" class="form-control" id="inputPhone" placeholder="Phone number" value="{{ content.user.phone }}" name="phone">
       </div>
     </div>
     <br>
@@ -72,5 +72,36 @@
   </form>
   </div>
   <br>
+  {% if content.books %}
+  <div class="bg-light p-5 rounded">
+    <h3>Books posted</h3>
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Book name</th>
+      <th scope="col">Category</th>
+      <th scope="col">Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for book in content.books %}
+    <tr>
+    <th scope="row">{{loop.index}}</th>
+      <td><a href="/market/product?book_id={{ book.id }}">{{book.prodname}}</a></td>
+      <td>{{book.category}}</td>
+    <td>CN¥ {{book.price}}</td>
+    </tr>
+      {% endfor %}
+  </tbody>
+</table>
+  </div>
+  <br>
+  {% else %}
+  <div class="bg-light p-5 rounded">
+    <h3>No books posted on the market</h3>
+  </div>
+  <br>
+  {% endif %}
 </main>
 {% endblock content %}

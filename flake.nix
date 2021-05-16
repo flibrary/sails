@@ -47,6 +47,7 @@
             })
             rust-analyzer
 
+            # used by check_email
             openssl
             pkg-config
             # Used by diesel
