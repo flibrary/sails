@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% block head %}
+  <meta charset="utf-8">
+  <title>{% block title %}{% endblock title %} | FLibrary</title>
+  <meta name="description" content="An online second-hand book market">
+  <meta name="author" content="Harry Ying">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap core CSS -->
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  {% endblock head %}
+</head>
+<body>
+  {% block content %}{% endblock content %}
+
+  <footer class="footer mt-auto py-3 bg-light fixed-bottom">
+    <div class="container">
+      <span class="text-muted">Made with ❤ by Harry Ying. Powered by NixOS, Rust, and Bootstrap.</span>
+    </div>
+  </footer>
+</body>
+</html>

@@ -4,6 +4,7 @@ use crate::{
     schema::users,
 };
 use diesel::prelude::*;
+use rocket::FromForm;
 use serde::{Deserialize, Serialize};
 
 /// A pseudo struct used to manage the table `users`
@@ -23,30 +24,46 @@ impl Users {
     }
 
     // An convenient method to login the user
+    // Return the ID of the user logged in
     pub fn login(
         conn: &SqliteConnection,
         id_provided: &str,
         passwd_provided: &str,
-    ) -> Result<Option<User>> {
+    ) -> Result<String> {
         use crate::schema::users::dsl::*;
-        let user = users.filter(id.eq(id_provided)).first::<User>(conn)?;
-        if user.verify_passwd(passwd_provided)? {
-            Ok(Some(user))
-        } else {
-            Ok(None)
+        let user = users
+            .filter(id.eq(id_provided))
+            .first::<User>(conn)
+            .optional()?;
+        match user.clone().map(|u| u.verify_passwd(passwd_provided)) {
+            Some(Ok(true)) => {
+                // Successfully validated
+                Ok(user.unwrap().id)
+            }
+            Some(Ok(false)) => {
+                // User exists, but password is not right
+                Err(SailsDbError::IncorrectPassword)
+            }
+            Some(Err(e)) => {
+                // Some error occured during validation
+                Err(e)
+            }
+            None => {
+                // No user found
+                Err(SailsDbError::UserNotFound)
+            }
         }
     }
 
     pub fn register<T: ToString>(
         conn: &SqliteConnection,
-        id_p: T,
-        email_p: Option<T>,
+        id_p: impl AsRef<str> + ToString,
         school_p: T,
-        phone_p: impl AsRef<str>,
+        phone_p: impl AsRef<str> + ToString,
         passwd_p: T,
     ) -> Result<String> {
         use crate::schema::users::dsl::*;
-        let user = User::new(id_p, email_p, school_p, phone_p.as_ref(), passwd_p)?;
+        let user = User::new(id_p, school_p, phone_p, passwd_p)?;
         let id_cloned: String = user.id.clone();
         if let Ok(0) = users.filter(id.eq(&user.id)).count().get_result(conn) {
             // This means that we have to insert
@@ -81,13 +98,13 @@ impl Users {
 
 /// A single user, corresponding to a row in the table `users`
 #[derive(
-    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
+    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone, FromForm,
 )]
 // We want to keep it intuitive
 #[changeset_options(treat_none_as_null = "true")]
 pub struct User {
+    // This is actually email
     pub id: String,
-    pub email: Option<String>,
     pub school: String,
     pub phone: String,
     hashed_passwd: String,
@@ -96,23 +113,23 @@ pub struct User {
 impl User {
     // Note that the passwd here is unhashed
     pub fn new<T: ToString>(
-        id: T,
-        email: Option<T>,
+        id: impl AsRef<str> + ToString,
         school: T,
-        phone: &str,
+        phone: impl AsRef<str> + ToString,
         passwd: T,
     ) -> Result<Self> {
         let phone = phonenumber::parse(None, phone)?;
-        if phone.is_valid() {
-            Ok(Self {
+        match (
+            phone.is_valid(),
+            check_if_email_exists::syntax::check_syntax(id.as_ref()).is_valid_syntax,
+        ) {
+            (true, true) => Ok(Self {
                 id: id.to_string(),
                 hashed_passwd: bcrypt::hash(passwd.to_string(), bcrypt::DEFAULT_COST)?,
-                email: email.map(|s| s.to_string()),
                 school: school.to_string(),
                 phone: phone.to_string(),
-            })
-        } else {
-            Err(SailsDbError::InvalidPhoneNumber)
+            }),
+            _ => Err(SailsDbError::InvalidIdentity),
         }
     }
 

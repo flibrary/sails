@@ -1,0 +1,20 @@
+[package]
+name = "sails-bin"
+version = "0.1.0"
+authors = ["Harry Ying <lexugeyky@outlook.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = { version = "0.5.0-dev", features = ["secrets"] }
+serde = { version = "^1", features = ["derive"] }
+serde_json = "^1"
+diesel = { version = "^1.4", features = ["sqlite", "r2d2"] }
+diesel_migrations = "^1.4"
+sails-db = { path = "../sails-db" }
+
+[dependencies.rocket_contrib]
+version = "0.5.0-dev"
+default_features = false
+features = ["tera_templates", "diesel_sqlite_pool", "serve"]

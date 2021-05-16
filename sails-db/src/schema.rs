@@ -21,7 +21,6 @@ table! {
 table! {
     users (id) {
         id -> Text,
-        email -> Nullable<Text>,
         school -> Text,
         phone -> Text,
         hashed_passwd -> Text,

@@ -1,5 +1,6 @@
 use crate::{error::SailsDbResult as Result, schema::categories};
 use diesel::{prelude::*, sqlite::Sqlite};
+use rocket::FromForm;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -71,7 +72,7 @@ impl Categories {
 }
 
 #[derive(
-    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
+    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone, FromForm,
 )]
 #[table_name = "categories"]
 pub struct Category {

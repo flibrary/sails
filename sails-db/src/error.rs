@@ -14,9 +14,15 @@ pub enum SailsDbError {
     #[error("failed to convert to a phone number: {0}")]
     PhoneParseError(#[from] phonenumber::ParseError),
 
-    #[error("invalid phone number")]
-    InvalidPhoneNumber,
+    #[error("invalid phone number or email address")]
+    InvalidIdentity,
 
     #[error("username already exists")]
     UserRegistered,
+
+    #[error("no user found given the information")]
+    UserNotFound,
+
+    #[error("password was incorrect")]
+    IncorrectPassword,
 }

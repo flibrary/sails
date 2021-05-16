@@ -6,7 +6,13 @@ use crate::{categories::Categories, products::Products, test_utils::establish_co
 #[test]
 fn create_user() {
     let conn = establish_connection();
-    let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
+    let user = User::new(
+        "TestUser@example.org",
+        "NFLS",
+        "+86 18353232340",
+        "strongpasswd",
+    )
+    .unwrap();
     Users::create_or_update(&conn, user).unwrap();
     assert_eq!(Users::list(&conn).unwrap().len(), 1);
 }
@@ -16,8 +22,7 @@ fn register_user() {
     let conn = establish_connection();
     Users::register(
         &conn,
-        "TestUser",
-        None,
+        "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
@@ -26,8 +31,7 @@ fn register_user() {
     // User already registered
     assert!(Users::register(
         &conn,
-        "TestUser",
-        None,
+        "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
@@ -38,25 +42,34 @@ fn register_user() {
 #[test]
 fn login_user() {
     let conn = establish_connection();
-    let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
+    let user = User::new(
+        "TestUser@example.org",
+        "NFLS",
+        "+86 18353232340",
+        "strongpasswd",
+    )
+    .unwrap();
     Users::create_or_update(&conn, user).unwrap();
     assert_eq!(Users::list(&conn).unwrap().len(), 1);
 
-    assert!(Users::login(&conn, "TestUser", "strongpasswd")
-        .unwrap()
-        .is_some());
+    assert!(Users::login(&conn, "TestUser@example.org", "strongpasswd").is_ok());
 }
 
 #[test]
 fn delete_user() {
     let conn = establish_connection();
-    let user = User::new("TestUser", None, "NFLS", "+86 18353232340", "strongpasswd").unwrap();
+    let user = User::new(
+        "TestUser@example.org",
+        "NFLS",
+        "+86 18353232340",
+        "strongpasswd",
+    )
+    .unwrap();
     Users::create_or_update(&conn, user.clone()).unwrap();
 
     let another_user = Users::register(
         &conn,
-        "TestUser2",
-        None,
+        "TestUser2@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
@@ -106,8 +119,7 @@ fn update_user() {
     let conn = establish_connection();
     let user_id = Users::register(
         &conn,
-        "TestUser",
-        None,
+        "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
@@ -115,8 +127,7 @@ fn update_user() {
     .unwrap();
     let another_user = Users::register(
         &conn,
-        "AnotherUser",
-        None,
+        "AnotherUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",

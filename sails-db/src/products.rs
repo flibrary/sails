@@ -1,6 +1,7 @@
 use super::users::User;
 use crate::{error::SailsDbResult as Result, schema::products, Cmp, Order};
 use diesel::{prelude::*, sqlite::Sqlite};
+use rocket::FromForm;
 use serde::{Deserialize, Serialize};
 use std::num::NonZeroI64;
 use uuid::Uuid;
@@ -138,7 +139,7 @@ impl<'a> ProductFinder<'a> {
 
 /// A single user, corresponding to a row in the table `products`
 #[derive(
-    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
+    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone, FromForm,
 )]
 // We want to keep it intuitive
 #[changeset_options(treat_none_as_null = "true")]
@@ -175,7 +176,7 @@ impl Product {
         &self.seller_id
     }
 
-    pub fn set_seller_id(&mut self, seller: &User) {
+    pub fn set_seller(&mut self, seller: &User) {
         self.seller_id = seller.id.clone();
     }
 

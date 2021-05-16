@@ -12,6 +12,8 @@ lib.mkApp {
         sqlite
 
         gcc
+        openssl
+        pkg-config
 
         # write rustfmt first to ensure we are using nightly rustfmt
         rust-bin.nightly."2021-01-01".rustfmt

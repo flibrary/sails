@@ -1,0 +1,39 @@
+{% extends "base" %}
+{% block title %}Sign up{% endblock title %}
+{% block head %}
+    {{ super() }}
+    <!-- Custom styles for sign in page -->
+    <link href="/css/signin.css" rel="stylesheet">
+{% endblock head %}
+
+{% block content %}
+<main class="form-signin text-center">
+  <form action="create_user" method="post">
+    <h1 class="h3 mb-3 fw-normal">Please enter information</h1>
+
+    <div class="form-floating">
+      <input type="email" class="form-control" id="floatingInput" placeholder="Email" name="email">
+      <label for="floatingInput">Email</label>
+    </div>
+    <div class="form-floating">
+      <input type="text" class="form-control" id="floatingInput" placeholder="School" name="school">
+      <label for="floatingInput">School</label>
+    </div>
+    <div class="form-floating">
+      <input type="tel" class="form-control" id="floatingInput" placeholder="Phone" name="phone">
+      <label for="floatingInput">Phone</label>
+    </div>
+    <div class="form-floating">
+      <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password">
+      <label for="floatingPassword">Password</label>
+    </div>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign up</button>
+  </form>
+  {% if flash %}
+    <br>
+    <div class="alert alert-warning" role="alert">
+      {{ flash }}
+    </div>
+  {% endif %}
+</main>
+{% endblock content %}

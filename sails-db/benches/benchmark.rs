@@ -7,8 +7,7 @@ fn login_user(c: &mut Criterion) {
     let conn = establish_connection();
     Users::register(
         &conn,
-        "TestUser",
-        None,
+        "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
@@ -16,7 +15,7 @@ fn login_user(c: &mut Criterion) {
     .unwrap();
 
     c.bench_function("login an user", |b| {
-        b.iter(|| Users::login(&conn, "TestUser", "strongpasswd").unwrap())
+        b.iter(|| Users::login(&conn, "TestUser@example.org", "strongpasswd").unwrap())
     });
 }
 
@@ -25,8 +24,7 @@ fn products(c: &mut Criterion) {
     // our seller
     let user_id = Users::register(
         &conn,
-        "TestUser",
-        None,
+        "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",

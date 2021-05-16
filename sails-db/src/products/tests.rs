@@ -9,8 +9,7 @@ fn create_product() {
     // our seller
     let user_id = Users::register(
         &conn,
-        "TestUser",
-        None,
+        "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
@@ -37,8 +36,7 @@ fn search_products() {
     // our seller
     let user_id = Users::register(
         &conn,
-        "TestUser",
-        None,
+        "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
@@ -154,8 +152,7 @@ fn delete_product() {
     // our seller
     let user_id = Users::register(
         &conn,
-        "TestUser",
-        None,
+        "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",

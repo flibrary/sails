@@ -47,6 +47,8 @@
             })
             rust-analyzer
 
+            openssl
+            pkg-config
             # Used by diesel
             sqlite
 
