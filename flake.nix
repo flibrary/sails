@@ -16,6 +16,13 @@
         version = "git";
         root = ./.;
         passthru.exePath = "/bin/sails-bin";
+        nativeBuildInputs = with import nixpkgs { system = "${system}"; }; [
+          # used by check_email
+          openssl
+          pkg-config
+          # Used by diesel
+          sqlite
+        ];
       });
 
       defaultPackage = packages.sails-bin;

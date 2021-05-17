@@ -1,5 +1,3 @@
-use std::num::NonZeroI64;
-
 use super::{ProductFinder, Products};
 use crate::{categories::Categories, test_utils::establish_connection, users::Users, Cmp};
 
@@ -18,12 +16,12 @@ fn create_product() {
 
     // The book category
     let econ_id = Categories::create(&conn, "Economics Books").unwrap();
-    Products::create_product(
+    Products::create(
         &conn,
         user_id.as_str(),
         econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
-        NonZeroI64::new(700).unwrap(),
+        700,
         "A very great book on the subject of Economics",
     )
     .unwrap();
@@ -47,56 +45,56 @@ fn search_products() {
     let econ_id = Categories::create(&conn, "Economics Books").unwrap();
     let phys_id = Categories::create(&conn, "Physics Books").unwrap();
 
-    Products::create_product(
+    Products::create(
         &conn,
         user_id.as_str(),
         econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
-        NonZeroI64::new(700).unwrap(),
+        700,
         "A very great book on the subject of Economics",
     )
     .unwrap();
 
     // Another Krugman's Economics, with a lower price!
-    Products::create_product(
+    Products::create(
         &conn,
         user_id.as_str(),
         econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
-        NonZeroI64::new(500).unwrap(),
+        500,
         "A very great book on the subject of Economics",
     )
     .unwrap();
 
     // Another Krugman's Economics, with a lower price!
-    Products::create_product(
+    Products::create(
         &conn,
         user_id.as_str(),
         econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
-        NonZeroI64::new(600).unwrap(),
+        600,
         "That is a bad book though",
     )
     .unwrap();
 
     // Another different economics book
-    Products::create_product(
+    Products::create(
         &conn,
         user_id.as_str(),
         econ_id.as_str(),
         "The Economics",
-        NonZeroI64::new(600).unwrap(),
+        600,
         "I finally had got a different econ textbook!",
     )
     .unwrap();
 
     // Feynman's Lecture on Physics!
-    Products::create_product(
+    Products::create(
         &conn,
         user_id.as_str(),
         phys_id.as_str(),
         "Feynman's Lecture on Physics",
-        NonZeroI64::new(900).unwrap(),
+        900,
         "A very masterpiece on the theory of the universe",
     )
     .unwrap();
@@ -105,7 +103,7 @@ fn search_products() {
     assert_eq!(
         ProductFinder::new(&conn, None)
             .prodname("Feynman's Lecture on Physics")
-            .price(NonZeroI64::new(300).unwrap(), Cmp::LessThan)
+            .price(300, Cmp::LessThan)
             .search()
             .unwrap()
             .len(),
@@ -116,7 +114,7 @@ fn search_products() {
     assert_eq!(
         ProductFinder::new(&conn, None)
             .prodname("Feynman's Lecture on Physics")
-            .price(NonZeroI64::new(300).unwrap(), Cmp::GreaterThan)
+            .price(300, Cmp::GreaterThan)
             .search()
             .unwrap()
             .len(),
@@ -127,7 +125,7 @@ fn search_products() {
     assert_eq!(
         ProductFinder::new(&conn, None)
             .prodname("Krugman's Economics 2nd Edition")
-            .price(NonZeroI64::new(550).unwrap(), Cmp::GreaterThan)
+            .price(550, Cmp::GreaterThan)
             .search()
             .unwrap()
             .len(),
@@ -138,7 +136,7 @@ fn search_products() {
     assert_eq!(
         ProductFinder::new(&conn, None)
             .category(&econ_id)
-            .price(NonZeroI64::new(550).unwrap(), Cmp::GreaterThan)
+            .price(550, Cmp::GreaterThan)
             .search()
             .unwrap()
             .len(),
@@ -161,12 +159,12 @@ fn delete_product() {
 
     // The book category
     let econ_id = Categories::create(&conn, "Economics Books").unwrap();
-    let id = Products::create_product(
+    let id = Products::create(
         &conn,
         user_id.as_str(),
         econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
-        NonZeroI64::new(600).unwrap(),
+        600,
         "That is a bad book though",
     )
     .unwrap();

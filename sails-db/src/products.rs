@@ -1,13 +1,7 @@
-use super::users::User;
-use crate::{
-    error::{SailsDbError, SailsDbResult as Result},
-    schema::products,
-    Cmp, Order,
-};
+use crate::{error::SailsDbResult as Result, schema::products, Cmp, Order};
 use diesel::{prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
-use std::num::NonZeroI64;
 use uuid::Uuid;
 
 /// A pseudo products used to manage table `products`
@@ -19,13 +13,14 @@ impl Products {
         ProductFinder::new(conn, None).search()
     }
 
-    // A convenient helper to create the product
-    pub fn create_product<T: ToString>(
+    // create the product
+    // This ensures that category cannot be optional
+    pub fn create<T: ToString>(
         conn: &SqliteConnection,
         seller_p: T,
         category_p: T,
         prodname_p: T,
-        price_p: NonZeroI64,
+        price_p: i64,
         description_p: T,
     ) -> Result<String> {
         use crate::schema::products::dsl::*;
@@ -55,30 +50,9 @@ impl Products {
         Ok(diesel::delete(products.filter(seller_id.eq(seller))).execute(conn)?)
     }
 
-    // CRUD: UPDATE AND CREATE
-    pub fn create_or_update(conn: &SqliteConnection, product: Product) -> Result<()> {
-        use crate::schema::products::dsl::*;
-
-        if let Ok(0) = products.filter(id.eq(&product.id)).count().get_result(conn) {
-            // This means that we have to insert
-            diesel::insert_into(products)
-                .values(product)
-                .execute(conn)?;
-        } else {
-            product.save_changes::<Product>(conn)?;
-        };
-        Ok(())
-    }
-
-    // CRUD: UPDATE AND CREATE
+    // CRUD: UPDATE
     pub fn update(conn: &SqliteConnection, product: Product) -> Result<()> {
-        use crate::schema::products::dsl::*;
-
-        if let Ok(0) = products.filter(id.eq(&product.id)).count().get_result(conn) {
-            return Err(SailsDbError::ProductNotFound);
-        } else {
-            product.save_changes::<Product>(conn)?;
-        };
+        product.save_changes::<Product>(conn)?;
         Ok(())
     }
 }
@@ -132,13 +106,13 @@ impl<'a> ProductFinder<'a> {
         self
     }
 
-    pub fn price(mut self, price_provided: NonZeroI64, cmp: Cmp) -> Self {
+    pub fn price(mut self, price_provided: i64, cmp: Cmp) -> Self {
         use crate::schema::products::dsl::*;
         match cmp {
-            Cmp::GreaterThan => self.query = self.query.filter(price.gt(price_provided.get())),
-            Cmp::LessThan => self.query = self.query.filter(price.lt(price_provided.get())),
-            Cmp::GreaterEqual => self.query = self.query.filter(price.ge(price_provided.get())),
-            Cmp::LessEqual => self.query = self.query.filter(price.le(price_provided.get())),
+            Cmp::GreaterThan => self.query = self.query.filter(price.gt(price_provided)),
+            Cmp::LessThan => self.query = self.query.filter(price.lt(price_provided)),
+            Cmp::GreaterEqual => self.query = self.query.filter(price.ge(price_provided)),
+            Cmp::LessEqual => self.query = self.query.filter(price.le(price_provided)),
         }
         self
     }
@@ -153,6 +127,25 @@ impl<'a> ProductFinder<'a> {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, FromForm)]
+pub struct UpdateProduct {
+    pub category: Option<String>,
+    pub prodname: Option<String>,
+    pub price: Option<i64>,
+    pub description: Option<String>,
+}
+
+impl Default for UpdateProduct {
+    fn default() -> Self {
+        Self {
+            category: None,
+            prodname: None,
+            price: None,
+            description: None,
+        }
+    }
+}
+
 /// A single user, corresponding to a row in the table `products`
 #[derive(
     Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone, FromForm,
@@ -163,19 +156,17 @@ pub struct Product {
     id: String,
     seller_id: String,
     category: String,
-    pub prodname: String,
-    // Price should not be negative
+    prodname: String,
     price: i64,
-    pub description: String,
+    description: String,
 }
 
 impl Product {
-    // This prevent on a type level that seller_id and price are valid
     pub fn new<T: ToString>(
         seller_id: T,
         category: T,
         prodname: T,
-        price: NonZeroI64,
+        price: i64,
         description: T,
     ) -> Self {
         Self {
@@ -183,25 +174,48 @@ impl Product {
             seller_id: seller_id.to_string(),
             category: category.to_string(),
             prodname: prodname.to_string(),
-            price: price.get(),
+            price,
             description: description.to_string(),
         }
     }
 
-    pub fn seller_id(&self) -> &str {
+    pub fn update(&mut self, update: UpdateProduct) {
+        if let Some(category) = update.category {
+            self.category = category
+        }
+        if let Some(prodname) = update.prodname {
+            self.prodname = prodname
+        }
+        if let Some(price) = update.price {
+            self.price = price
+        }
+        if let Some(desc) = update.description {
+            self.description = desc
+        }
+    }
+
+    pub fn get_id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn get_seller_id(&self) -> &str {
         &self.seller_id
     }
 
-    pub fn set_seller(&mut self, seller: &User) {
-        self.seller_id = seller.id.clone();
+    pub fn get_description(&self) -> &str {
+        &self.description
     }
 
-    pub fn price(&self) -> u32 {
-        self.price as u32
+    pub fn get_category(&self) -> &str {
+        &self.category
     }
 
-    pub fn set_price(&mut self, price: NonZeroI64) {
-        self.price = price.get();
+    pub fn get_prodname(&self) -> &str {
+        &self.prodname
+    }
+
+    pub fn get_price(&self) -> i64 {
+        self.price
     }
 }
 

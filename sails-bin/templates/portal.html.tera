@@ -87,19 +87,20 @@
   <tbody>
     {% for book in content.books %}
     <tr>
-    <th scope="row">{{loop.index}}</th>
-      <td><a href="/market/product?book_id={{ book.id }}">{{book.prodname}}</a></td>
+    <th scope="row"><a href="product?book_id={{ book.id }}">{{loop.index}}</a></th>
+      <td>{{book.prodname}}</td>
       <td>{{book.category}}</td>
     <td>CN¥ {{book.price}}</td>
     </tr>
       {% endfor %}
   </tbody>
-</table>
+    </table>
   </div>
   <br>
   {% else %}
   <div class="bg-light p-5 rounded">
     <h3>No books posted on the market</h3>
+    <a href="/market/post_book" class="btn btn-primary" role="button">Post a book</a>
   </div>
   <br>
   {% endif %}

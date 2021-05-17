@@ -1,19 +1,19 @@
-use std::num::NonZeroI64;
-
-use super::{User, Users};
-use crate::{categories::Categories, products::Products, test_utils::establish_connection};
+use super::Users;
+use crate::{
+    categories::Categories, products::Products, test_utils::establish_connection, users::User,
+};
 
 #[test]
 fn create_user() {
     let conn = establish_connection();
-    let user = User::new(
+    Users::register(
+        &conn,
         "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
     )
     .unwrap();
-    Users::create_or_update(&conn, user).unwrap();
     assert_eq!(Users::list(&conn).unwrap().len(), 1);
 }
 
@@ -42,14 +42,14 @@ fn register_user() {
 #[test]
 fn login_user() {
     let conn = establish_connection();
-    let user = User::new(
+    Users::register(
+        &conn,
         "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
     )
     .unwrap();
-    Users::create_or_update(&conn, user).unwrap();
     assert_eq!(Users::list(&conn).unwrap().len(), 1);
 
     assert!(Users::login(&conn, "TestUser@example.org", "strongpasswd").is_ok());
@@ -58,14 +58,14 @@ fn login_user() {
 #[test]
 fn delete_user() {
     let conn = establish_connection();
-    let user = User::new(
+    let user = Users::register(
+        &conn,
         "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
     )
     .unwrap();
-    Users::create_or_update(&conn, user.clone()).unwrap();
 
     let another_user = Users::register(
         &conn,
@@ -76,38 +76,38 @@ fn delete_user() {
     )
     .unwrap();
     let econ_id = Categories::create(&conn, "Economics").unwrap();
-    Products::create_product(
+    Products::create(
         &conn,
-        user.id.as_str(),
+        user.as_str(),
         econ_id.as_str(),
         "Economics",
-        NonZeroI64::new(1).unwrap(),
+        1,
         "A horrible book",
     )
     .unwrap();
 
-    Products::create_product(
+    Products::create(
         &conn,
-        user.id.as_str(),
+        user.as_str(),
         econ_id.as_str(),
         "The Economics",
-        NonZeroI64::new(1).unwrap(),
+        1,
         "Another horrible book",
     )
     .unwrap();
 
-    Products::create_product(
+    Products::create(
         &conn,
         another_user.as_str(),
         econ_id.as_str(),
         "Economics Principle",
-        NonZeroI64::new(1).unwrap(),
+        1,
         "Another horrible book",
     )
     .unwrap();
     assert_eq!(Products::list(&conn).unwrap().len(), 3);
     assert_eq!(Users::list(&conn).unwrap().len(), 2);
-    Users::delete_by_id(&conn, &user.id).unwrap();
+    Users::delete_by_id(&conn, &user).unwrap();
     // There is still one book created by TestUser2
     assert_eq!(Products::list(&conn).unwrap().len(), 1);
     // Only TestUser2 is left
@@ -117,6 +117,17 @@ fn delete_user() {
 #[test]
 fn update_user() {
     let conn = establish_connection();
+
+    let fake_user = User::new(
+        "a@example.org",
+        "Fake School",
+        "+8618368203450",
+        "abadpasswd",
+    )
+    .unwrap();
+    // User doesn't exist
+    assert!(Users::update(&conn, fake_user).is_err());
+
     let user_id = Users::register(
         &conn,
         "TestUser@example.org",
@@ -138,7 +149,7 @@ fn update_user() {
     let mut user_returned = Users::find_by_id(&conn, &user_id).unwrap();
     user_returned.change_passwd("SomeStrongPasswd").unwrap();
     user_returned.school = "University of Cambridge".to_string();
-    Users::create_or_update(&conn, user_returned).unwrap();
+    Users::update(&conn, user_returned).unwrap();
 
     // ID should not change
     let user_changed = Users::find_by_id(&conn, &user_id).unwrap();

@@ -42,6 +42,11 @@ impl Categories {
             .get_result::<Category>(conn)?)
     }
 
+    pub fn delete_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<usize> {
+        use crate::schema::categories::dsl::*;
+        Ok(diesel::delete(categories.filter(id.eq(id_provided))).execute(conn)?)
+    }
+
     pub fn create(conn: &SqliteConnection, id_provided: impl ToString) -> Result<String> {
         use crate::schema::categories::dsl::*;
         let category = Category::new(id_provided);
@@ -68,31 +73,13 @@ impl Categories {
         let mut self_category = Self::by_id(self_id).first::<Category>(conn)?;
         let mut parent_category = Self::by_id(parent_id_provided).first::<Category>(conn)?;
         self_category.insert(&mut parent_category);
-        Self::create_or_update(conn, self_category)?;
-        Self::create_or_update(conn, parent_category)?;
+        Self::update(conn, self_category)?;
+        Self::update(conn, parent_category)?;
         Ok(())
     }
 
-    pub fn delete_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<usize> {
-        use crate::schema::categories::dsl::*;
-        Ok(diesel::delete(categories.filter(id.eq(id_provided))).execute(conn)?)
-    }
-
-    pub fn create_or_update(conn: &SqliteConnection, category: Category) -> Result<()> {
-        use crate::schema::categories::dsl::*;
-
-        if let Ok(0) = categories
-            .filter(id.eq(&category.id))
-            .count()
-            .get_result(conn)
-        {
-            // This means that we have to insert
-            diesel::insert_into(categories)
-                .values(category)
-                .execute(conn)?;
-        } else {
-            category.save_changes::<Category>(conn)?;
-        };
+    pub fn update(conn: &SqliteConnection, category: Category) -> Result<()> {
+        category.save_changes::<Category>(conn)?;
         Ok(())
     }
 }

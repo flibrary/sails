@@ -1,0 +1,4 @@
+{% extends "post_book" %}
+{% block form_link %}
+<form action="update_book?book_id={{ content.book.id }}" method="post">
+{% endblock form_link %}

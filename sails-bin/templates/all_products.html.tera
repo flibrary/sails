@@ -1,6 +1,14 @@
 {% extends "market" %}
 {% block inner %}
 <main class="container">
+  {% if flash %}
+    <br>
+    <div class="alert alert-warning" role="alert">
+      {{ flash }}
+    </div>
+    <br>
+    {% endif %}
+
   <div class="bg-light p-5 rounded">
     <h1>Welcome to the market</h1>
     <p class="lead">Here you can see what books are on sale and post your own books.</p>
@@ -23,14 +31,14 @@
   <tbody>
     {% for book in content %}
     <tr>
-    <th scope="row">{{loop.index}}</th>
-      <td><a href="product?book_id={{ book.id }}">{{book.prodname}}</a></td>
+    <th scope="row"><a href="product?book_id={{ book.id }}">{{loop.index}}</a></th>
+      <td>{{book.prodname}}</td>
       <td>{{book.category}}</td>
     <td>CN¥ {{book.price}}</td>
     </tr>
       {% endfor %}
   </tbody>
-</table>
+  </table>
   </div>
   <br>
   {% else %}

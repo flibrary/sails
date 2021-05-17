@@ -82,29 +82,26 @@ impl Users {
         Ok(diesel::delete(users.filter(id.eq(id_provided))).execute(conn)?)
     }
 
-    // CRUD: UPDATE AND CREATE
-    pub fn create_or_update(conn: &SqliteConnection, user: User) -> Result<()> {
-        use crate::schema::users::dsl::*;
-
-        if let Ok(0) = users.filter(id.eq(&user.id)).count().get_result(conn) {
-            // This means that we have to insert
-            diesel::insert_into(users).values(user).execute(conn)?;
-        } else {
-            user.save_changes::<User>(conn)?;
-        };
+    pub fn update(conn: &SqliteConnection, user: User) -> Result<()> {
+        user.save_changes::<User>(conn)?;
         Ok(())
     }
+}
 
-    pub fn update(conn: &SqliteConnection, user: User) -> Result<()> {
-        use crate::schema::users::dsl::*;
+#[derive(Debug, Serialize, Deserialize, Clone, FromForm)]
+pub struct UpdateUser {
+    school: Option<String>,
+    phone: Option<String>,
+    password: Option<String>,
+}
 
-        if let Ok(0) = users.filter(id.eq(&user.id)).count().get_result(conn) {
-            // This means that we have to insert
-            return Err(SailsDbError::UserNotFound);
-        } else {
-            user.save_changes::<User>(conn)?;
-        };
-        Ok(())
+impl Default for UpdateUser {
+    fn default() -> Self {
+        Self {
+            school: None,
+            phone: None,
+            password: None,
+        }
     }
 }
 
@@ -116,9 +113,9 @@ impl Users {
 #[changeset_options(treat_none_as_null = "true")]
 pub struct User {
     // This is actually email
-    pub id: String,
-    pub school: String,
-    pub phone: String,
+    id: String,
+    school: String,
+    phone: String,
     hashed_passwd: String,
 }
 
@@ -143,6 +140,36 @@ impl User {
             }),
             _ => Err(SailsDbError::InvalidIdentity),
         }
+    }
+
+    pub fn update(&mut self, update: UpdateUser) -> Result<()> {
+        if let Some(raw_passwd) = update.password {
+            self.hashed_passwd = bcrypt::hash(raw_passwd, bcrypt::DEFAULT_COST)?;
+        }
+        if let Some(school) = update.school {
+            self.school = school;
+        }
+        if let Some(phone) = update.phone {
+            let phone = phonenumber::parse(None, phone)?;
+            self.phone = if phone.is_valid() {
+                phone.to_string()
+            } else {
+                return Err(SailsDbError::InvalidIdentity);
+            };
+        }
+        Ok(())
+    }
+
+    pub fn get_id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn get_phone(&self) -> &str {
+        &self.phone
+    }
+
+    pub fn get_school(&self) -> &str {
+        &self.school
     }
 
     pub fn verify_passwd(&self, passwd: impl AsRef<[u8]>) -> Result<bool> {

@@ -19,8 +19,8 @@
   <div class="bg-light p-5 rounded">
     <h3>Categories</h3>
     <div class="list-group">
-      {% for book in content %}
-      <a href="categories?name={{book.id}}" class="list-group-item list-group-item-action">{{book.id}}</a>
+      {% for category in content %}
+      <a href="categories?name={{category.id}}" class="list-group-item list-group-item-action">{{category.id}}</a>
       {% endfor %}
     </div>
   </div>

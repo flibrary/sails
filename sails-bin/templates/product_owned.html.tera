@@ -1,19 +1,10 @@
-{% extends "market" %}
-{% block inner %}
-<main class="container">
-    {% if flash %}
-    <br>
-    <div class="alert alert-warning" role="alert">
-      {{ flash }}
-    </div>
-    <br>
-    {% endif %}
+{% extends "product" %}
+{% block book %}
+{{ super() }}
+<a href="post_book?book_id={{content.book.id}}" class="btn btn-primary" role="button">Update the book</a>
+{% endblock book %}
 
-  <div class="bg-light p-5 rounded">
-    <h1>Welcome to the market</h1>
-    <p class="lead">Here you can see what books are on sale and post your own books.</p>
-    <a href="all_products" class="btn btn-primary" role="button">Browse all books</a>
-  </div>
-  <br>
-</main>
-{% endblock inner %}
+{% block seller %}
+<h1>Danger zone</h1>
+<a href="delete?book_id={{content.book.id}}" class="btn btn-danger" role="button">Delete the book</a>
+{% endblock seller %}
