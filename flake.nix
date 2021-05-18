@@ -27,11 +27,13 @@
           root = ./.;
           # Otherwise Nix tries to use `/bin/sails-bin-git`
           passthru.exePath = "/bin/sails-bin";
-          nativeBuildInputs = with import nixpkgs { system = "${system}"; };
-            [
-              # Used by diesel
-              sqlite
-            ];
+          nativeBuildInputs = with import nixpkgs { system = "${system}"; }; [
+            # used by check_email
+            openssl
+            pkgconfig
+            # Used by diesel
+            sqlite
+          ];
         });
       };
 
