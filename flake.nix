@@ -5,31 +5,15 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
     utils.url = "github:numtide/flake-utils";
-    naersk.url = "github:nmattia/naersk";
+    # This is required for recursive dependency
+    naersk.url = "github:nmattia/naersk/pull/167/head";
   };
 
   outputs = { nixpkgs, rust-overlay, utils, naersk, ... }:
     utils.lib.eachSystem (utils.lib.defaultSystems) (system: rec {
       # `nix build`
-      packages.sails-bin = (naersk.lib."${system}".buildPackage {
-        name = "sails-bin";
-        version = "git";
-        root = ./.;
-        passthru.exePath = "/bin/sails-bin";
-        nativeBuildInputs = with import nixpkgs { system = "${system}"; }; [
-          # used by check_email
-          openssl
-          pkg-config
-          # Used by diesel
-          sqlite
-        ];
-      });
-
-      defaultPackage = packages.sails-bin;
-
-      checks = packages;
-
-      apps = {
+      packages = {
+        # We have to do it like `nix develop .#commit` because libraries don't play well with `makeBinPath` or `makeLibraryPath`.
         commit = (import ./commit.nix {
           lib = utils.lib;
           pkgs = import nixpkgs {
@@ -37,7 +21,27 @@
             overlays = [ rust-overlay.overlay ];
           };
         });
+        sails-bin = (naersk.lib."${system}".buildPackage {
+          name = "sails-bin";
+          version = "git";
+          root = ./.;
+          # Otherwise Nix tries to use `/bin/sails-bin-git`
+          passthru.exePath = "/bin/sails-bin";
+          nativeBuildInputs = with import nixpkgs { system = "${system}"; };
+            [
+              # Used by diesel
+              sqlite
+            ];
+        });
       };
+
+      defaultPackage = packages.sails-bin;
+
+      checks = packages;
+
+      apps = { sails-bin = utils.lib.mkApp { drv = packages.sails-bin; }; };
+
+      defaultApp = apps.sails-bin;
 
       # `nix develop`
       devShell = with import nixpkgs {
@@ -54,9 +58,6 @@
             })
             rust-analyzer
 
-            # used by check_email
-            openssl
-            pkg-config
             # Used by diesel
             sqlite
 

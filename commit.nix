@@ -1,27 +1,26 @@
 { pkgs, lib }:
 with pkgs;
-lib.mkApp {
-  drv = pkgs.writeShellScriptBin "sails-commit" ''
-    export PATH=${
-      pkgs.lib.strings.makeBinPath [
-        git
-        coreutils
-        findutils
-        nixfmt
 
-        sqlite
+pkgs.mkShell {
+  # this will make all the build inputs from hello and gnutar
+  # available to the shell environment
+  nativeBuildInputs = [
+    git
+    coreutils
+    findutils
+    nixfmt
+    gcc
 
-        gcc
-        openssl
-        pkg-config
+    # write rustfmt first to ensure we are using nightly rustfmt
+    rust-bin.nightly."2021-01-01".rustfmt
+    rust-bin.stable.latest.default
+    binutils-unwrapped
+    sqlite
+    openssl
+    pkgconfig
+  ];
 
-        # write rustfmt first to ensure we are using nightly rustfmt
-        rust-bin.nightly."2021-01-01".rustfmt
-        rust-bin.stable.latest.default
-        binutils-unwrapped
-      ]
-    }
-
+  shellHook = ''
     set -e
 
     find . -type f -name '*.nix' -exec nixfmt {} +
@@ -49,5 +48,6 @@ lib.mkApp {
     git push
     echo "Done."
 
+    exit
   '';
 }
