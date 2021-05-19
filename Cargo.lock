@@ -92,9 +92,8 @@ checksum = "71938f30533e4d95a6d17aa530939da3842c2ab6f4f84b9dae68447e4129f74a"
 
 [[package]]
 name = "askama"
-version = "0.10.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d298738b6e47e1034e560e5afe63aa488fea34e25ec11b855a76f0d7b8e73134"
+version = "0.10.6"
+source = "git+https://github.com/flibrary/askama?branch=main#cf45b1f65f8ee10762954d79dfc431ec14d5b892"
 dependencies = [
  "askama_derive",
  "askama_escape",
@@ -106,8 +105,7 @@ dependencies = [
 [[package]]
 name = "askama_derive"
 version = "0.10.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca2925c4c290382f9d2fa3d1c1b6a63fa1427099721ecca4749b154cc9c25522"
+source = "git+https://github.com/flibrary/askama?branch=main#cf45b1f65f8ee10762954d79dfc431ec14d5b892"
 dependencies = [
  "askama_shared",
  "proc-macro2",
@@ -117,12 +115,12 @@ dependencies = [
 [[package]]
 name = "askama_escape"
 version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90c108c1a94380c89d2215d0ac54ce09796823cca0fd91b299cfff3b33e346fb"
+source = "git+https://github.com/flibrary/askama?branch=main#cf45b1f65f8ee10762954d79dfc431ec14d5b892"
 
 [[package]]
 name = "askama_rocket"
 version = "0.10.0"
+source = "git+https://github.com/flibrary/askama?branch=main#cf45b1f65f8ee10762954d79dfc431ec14d5b892"
 dependencies = [
  "askama",
  "rocket",
@@ -131,6 +129,7 @@ dependencies = [
 [[package]]
 name = "askama_shared"
 version = "0.11.2"
+source = "git+https://github.com/flibrary/askama?branch=main#cf45b1f65f8ee10762954d79dfc431ec14d5b892"
 dependencies = [
  "askama_escape",
  "funty",
@@ -141,9 +140,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "serde",
- "serde_derive",
- "serde_json",
- "serde_yaml",
  "syn",
  "toml",
 ]
@@ -906,12 +902,6 @@ name = "discard"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "212d0f5754cb6769937f4501cc0e67f4f4483c8d2c3e1e922ee9edbe4ab4c7c0"
-
-[[package]]
-name = "dtoa"
-version = "0.4.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56899898ce76aaf4a0f24d914c97ea6ed976d42fec6ad33fcbb0a1103e07b2b0"
 
 [[package]]
 name = "either"
@@ -2618,18 +2608,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_yaml"
-version = "0.8.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15654ed4ab61726bf918a39cb8d98a2e2995b002387807fa6ba58fdf7f59bb23"
-dependencies = [
- "dtoa",
- "linked-hash-map",
- "serde",
- "yaml-rust",
-]
-
-[[package]]
 name = "sha1"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3444,15 +3422,6 @@ name = "wyz"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "85e60b0d1b5f99db2556934e21937020776a5d31520bf169e851ac44e6420214"
-
-[[package]]
-name = "yaml-rust"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56c1936c4cc7a1c9ab21a1ebb602eb942ba868cbd44a99cb7cdc5892335e1c85"
-dependencies = [
- "linked-hash-map",
-]
 
 [[package]]
 name = "yansi"
