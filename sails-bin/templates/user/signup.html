@@ -1,9 +1,9 @@
-{% extends "base" %}
+{% extends "base.html" %}
 {% block title %}Sign up{% endblock title %}
 {% block head %}
-    {{ super() }}
+    {% call super() %}
     <!-- Custom styles for sign in page -->
-    <link href="/css/signin.css" rel="stylesheet">
+    <link href="/static/css/signin.css" rel="stylesheet">
 {% endblock head %}
 
 {% block content %}
@@ -29,11 +29,6 @@
     </div>
     <button class="w-100 btn btn-lg btn-primary" type="submit">Sign up</button>
   </form>
-  {% if flash %}
-    <br>
-    <div class="alert alert-warning" role="alert">
-      {{ flash }}
-    </div>
-  {% endif %}
+  {% include "display_flash.html" %}
 </main>
 {% endblock content %}

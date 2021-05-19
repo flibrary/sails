@@ -1,30 +1,25 @@
-{% extends "market" %}
+{% extends "market.html" %}
 {% block inner %}
 <main class="container">
-  {% if flash %}
-    <br>
-    <div class="alert alert-warning" role="alert">
-      {{ flash }}
-    </div>
-    <br>
-    {% endif %}
-
   <div class="bg-light p-5 rounded">
     <h1>Welcome to the market</h1>
     <p class="lead">Here you can see what books are on sale and post your own books.</p>
     <a href="all_products" class="btn btn-primary" role="button">Browse all books</a>
   </div>
   <br>
-  {% if content %}
+
   <div class="bg-light p-5 rounded">
+  {% if categories.len() > 0 %}
     <h3>Categories</h3>
     <div class="list-group">
-      {% for category in content %}
-      <a href="categories?name={{category.id}}" class="list-group-item list-group-item-action">{{category.id}}</a>
+      {% for category in categories %}
+      <a href="categories?ctg={{category.id}}" class="list-group-item list-group-item-action">{{category.id}}</a>
       {% endfor %}
     </div>
+  {% else %}
+    <h3>No categoris found under your request, this is considered as an error. Please contact the administrator</h3>
+  {% endif %}
   </div>
   <br>
-  {% endif %}
 </main>
 {% endblock inner %}

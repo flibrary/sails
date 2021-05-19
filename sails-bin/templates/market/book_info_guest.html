@@ -1,0 +1,33 @@
+{% extends "market.html" %}
+{% block inner %}
+<main class="container">
+    <div class="bg-light p-5 rounded">
+    {% block book %}
+    <h1>{{ book.get_prodname() }}</h1>
+    <table class="table table-hover">
+    <tbody>
+    <tr>
+      <th scope="row">Price</th>
+      <td>CN¥ {{ book.get_price() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Category</th>
+      <td><a href="categories?ctg={{ book.get_category() }}">{{ book.get_category() }}</a></td>
+    </tr>
+    </tbody>
+    </table>
+    <h5>Description</h5>
+    <pre>{{ book.get_description() }}</pre>
+    {% endblock %}
+    </div>
+    <br>
+
+    <div class="bg-light p-5 rounded">
+    {% block seller %}
+    <h1>Seller's contact info</h1>
+    <a href="/user" class="btn btn-primary" role="button">Sign in to contact the seller</a>
+    {% endblock seller %}
+    </div>
+    <br>
+</main>
+{% endblock inner %}

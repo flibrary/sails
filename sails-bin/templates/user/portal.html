@@ -1,4 +1,4 @@
-{% extends "base" %}
+{% extends "base.html" %}
 {% block title %}Portal{% endblock title %}
 
 {% block content %}
@@ -24,13 +24,7 @@
 
 <br>
 <main class="container">
-  {% if flash %}
-    <br>
-    <div class="alert alert-warning" role="alert">
-      {{ flash }}
-    </div>
-    <br>
-  {% endif %}
+  {% include "display_flash.html" %}
   <div class="bg-light p-5 rounded">
     <h1>Welcome to the user portal</h1>
     <p class="lead">This page helps you to manage your books posted in the market and your basic account information.</p>
@@ -43,21 +37,21 @@
     <div class="form-group row">
       <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
       <div class="col-sm-10">
-        <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{ content.user.id }}" name="email">
+        <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{ user.get_id() }}" name="email">
       </div>
     </div>
     <br>
     <div class="form-group row">
       <label for="inputSchool" class="col-sm-2 col-form-label">School name</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" id="inputSchool" placeholder="School name" value="{{ content.user.school }}" name="school">
+        <input type="text" class="form-control" id="inputSchool" placeholder="School name" value="{{ user.get_school() }}" name="school">
       </div>
       </div>
     <br>
     <div class="form-group row">
       <label for="inputPhone" class="col-sm-2 col-form-label">Phone number</label>
       <div class="col-sm-10">
-        <input type="tel" class="form-control" id="inputPhone" placeholder="Phone number" value="{{ content.user.phone }}" name="phone">
+        <input type="tel" class="form-control" id="inputPhone" placeholder="Phone number" value="{{ user.get_phone() }}" name="phone">
       </div>
     </div>
     <br>
@@ -72,37 +66,14 @@
   </form>
   </div>
   <br>
-  {% if content.books %}
-  <div class="bg-light p-5 rounded">
-    <h3>Books posted</h3>
-    <table class="table">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Book name</th>
-      <th scope="col">Category</th>
-      <th scope="col">Price</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for book in content.books %}
-    <tr>
-    <th scope="row"><a href="product?book_id={{ book.id }}">{{loop.index}}</a></th>
-      <td>{{book.prodname}}</td>
-      <td>{{book.category}}</td>
-    <td>CN¥ {{book.price}}</td>
-    </tr>
-      {% endfor %}
-  </tbody>
-    </table>
-  </div>
-  <br>
+  {% if books.len() > 0 %}
+  {% include "book_list.html" %}
   {% else %}
-  <div class="bg-light p-5 rounded">
-    <h3>No books posted on the market</h3>
-    <a href="/market/post_book" class="btn btn-primary" role="button">Post a book</a>
-  </div>
-  <br>
+    <div class="bg-light p-5 rounded">
+      <h3>No books posted on the market</h3>
+      <a href="/market/post_book" class="btn btn-primary" role="button">Post a book</a>
+    </div>
+    <br>
   {% endif %}
 </main>
 {% endblock content %}

@@ -39,7 +39,8 @@
 
       defaultPackage = packages.sails-bin;
 
-      checks = packages;
+      # We don't check packages.commit because techinically it is not a pacakge
+      checks = builtins.removeAttrs packages [ "commit" ];
 
       apps = { sails-bin = utils.lib.mkApp { drv = packages.sails-bin; }; };
 
@@ -60,6 +61,9 @@
             })
             rust-analyzer
 
+            # used by check_email
+            openssl
+            pkgconfig
             # Used by diesel
             sqlite
 

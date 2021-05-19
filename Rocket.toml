@@ -1,5 +1,0 @@
-[default]
-template_dir = "./sails-bin/templates"
-
-[default.databases.sqlite_database]
-url = "db/bin-db.sqlite"

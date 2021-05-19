@@ -1,3 +1,8 @@
 edition = "2018"
 merge_imports=true
 report_fixme="Always"
+# We don't want to be the format-police here!
+ignore = [
+    "askama_shared",
+    "askama_rocket",
+]

@@ -1,0 +1,72 @@
+{% extends "market.html" %}
+{% block title %}Post book{% endblock title %}
+{% block content %}
+  <header class="p-3 bg-dark text-white">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+          <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"/></svg>
+        </a>
+
+        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+          <li><a href="/" class="nav-link px-2 text-white">FLibrary</a></li>
+          <li><a href="/market" class="nav-link px-2 text-secondary">Market</a></li>
+          <li><a href="/user" class="nav-link px-2 text-white">Portal</a></li>
+        </ul>
+	<div class="text-end">
+	  <a href="/market" class="btn btn-warning" role="button">Back</a>
+	</div>
+      </div>
+    </div>
+  </header>
+  <br>
+  <main class="container">
+  <div class="bg-light p-5 rounded">
+    <h1>Post a book</h1>
+    <p class="lead">Fill in relevant information to post a book for sale. If you want to add pictures, upload them elsewhere and paste link in the description below.</p>
+  </div>
+  <br>
+
+  <div class="bg-light p-5 rounded">
+    <h1>Book info</h1>
+    {% block form_link %}
+    <form action="cow_book" method="post">
+    {% endblock form_link %}
+    <div class="form-group row">
+      <label for="inputBook" class="col-sm-2 col-form-label">Book name</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="inputBook" placeholder="Book name" name="prodname">
+      </div>
+    </div>
+    <br>
+    <div class="form-group row">
+      <label for="inputCategory" class="col-sm-2 col-form-label">Category</label>
+      <div class="col-sm-4">
+        <select class="form-select" aria-label="Default select example" name="category">
+	  {% for category in categories %}
+	    <option value="{{category.id}}">{{category.id}}</option>
+	  {% endfor %}
+	</select>
+      </div>
+    </div>
+    <br>
+    <div class="form-group row">
+      <label for="inputPrice" class="col-sm-2 col-form-label">Price</label>
+      <div class="col-sm-4">
+        <input type="number" min="0" class="form-control" id="inputPrice" placeholder="Price" name="price">
+      </div>
+    </div>
+    <br>
+    <div class="form-group row">
+      <label for="inputPassword" class="col-sm-2 col-form-label">Description</label>
+      <div class="col-sm-10">
+	<textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="description"></textarea>
+      </div>
+    </div>
+    <br>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Post the book!</button>
+  </form>
+  </div>
+  <br>
+</main>
+{% endblock content %}

@@ -1,0 +1,20 @@
+{% extends "book_info_guest.html" %}
+{% block seller %}
+    <h1>Seller's contact info</h1>
+    <table class="table table-hover">
+      <tbody>
+	<tr>
+	  <th scope="row">Seller's email</th>
+	  <td><a href="mailto:{{seller.get_id()}}">{{ seller.get_id() }}</a></td>
+	</tr>
+	<tr>
+	  <th scope="row">Seller's phone number</th>
+	  <td><a href="tel:{{seller.get_phone()}}">{{ seller.get_phone() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">Seller's school</th>
+	  <td>{{ seller.get_school() }}</td>
+	</tr>
+      </tbody>
+    </table>
+{% endblock seller %}

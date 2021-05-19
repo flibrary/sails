@@ -1,13 +1,7 @@
-{% extends "base" %}
+{% extends "base.html" %}
 {% block title %}Homepage{% endblock title %}
 {% block content %}
-    {% if flash %}
-    <br>
-    <div class="alert alert-warning" role="alert">
-      {{ flash }}
-    </div>
-    <br>
-    {% endif %}
+    {% include "display_flash.html" %}
 
     <div class="px-4 pt-5 my-5 text-center">
     <h1 class="display-4 fw-bold">FLibrary</h1>

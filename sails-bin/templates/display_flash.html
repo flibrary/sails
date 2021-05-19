@@ -1,0 +1,9 @@
+{% match inner.flash %}
+  {% when Some with (flash) %}
+  <br>
+  <div class="alert alert-warning" role="alert">
+    {{ flash }}
+  </div>
+  <br>
+  {% when None %}
+{% endmatch %}

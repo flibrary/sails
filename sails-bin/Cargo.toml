@@ -14,9 +14,15 @@ diesel = { version = "^1.4", features = ["sqlite", "r2d2"] }
 diesel_migrations = "^1.4"
 sails-db = { path = "../sails-db" }
 thiserror = "^1"
+rust-embed="^5.9"
+structopt = "^0.3"
+# We need askama as the backend template engine because it is type safe, however, it doesn't work with rocket 0.5 yet.
+# See also: https://github.com/djc/askama/pull/412
+askama = { version = "^0.10", features = ["with-rocket", "mime", "mime_guess"]}
+askama_rocket = "^0.10"
 
 [dependencies.rocket_contrib]
 version = "0.5.0-dev"
 git = "https://github.com/SergioBenitez/Rocket"
 default_features = false
-features = ["tera_templates", "diesel_sqlite_pool", "serve", "helmet"]
+features = ["diesel_sqlite_pool", "serve", "helmet"]

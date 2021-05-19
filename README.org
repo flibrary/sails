@@ -1,0 +1,8 @@
+* Sails
+The name has been taken both literally as "sail" and phonetically as "sale". This repository powers the heart of the FLibrary by providing interface on database and core data structure specially-designed, and by running the embedded web server.
+
+** Design
+There are two Rust crates in this workspace, namely ~sails-db~ and ~sails-bin~.
+1. ~sails-db~ is a pure data structure interface built on diesel. It doesn't provide any imperative database operation. However, it does contain ~migrations~ which are like the recipes for the database construction.
+2. ~sails-bin~ is a web server built on ~askama~ template engine and ~rocket~. It embeds /everything/ except a few critical configuration parameters (e.g. path to the database and the secret key). This means that as long as the configuration is provided, it will construct the database on need, use compiled templates to render web pages, and use embedded static files in the binary to host assets. All in single binary!
+3. Some other basic infrastructures are provided as NixOS modules, Nix pacakges, and Nix dev shell.

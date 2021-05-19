@@ -1,0 +1,10 @@
+{% extends "book_info_guest.html" %}
+{% block book %}
+{% call super() %}
+<a href="post_book?book_id={{book.get_id()}}" class="btn btn-primary" role="button">Update the book</a>
+{% endblock book %}
+
+{% block seller %}
+<h1>Danger zone</h1>
+<a href="delete?book_id={{book.get_id()}}" class="btn btn-danger" role="button">Delete the book</a>
+{% endblock seller %}

@@ -1,5 +1,5 @@
-{% extends "market" %}
-{% block title %}Post book{% endblock title %}
+{% extends "market.html" %}
+{% block title %}Update book{% endblock title %}
 {% block content %}
   <header class="p-3 bg-dark text-white">
     <div class="container">
@@ -22,7 +22,7 @@
   <br>
   <main class="container">
   <div class="bg-light p-5 rounded">
-    <h1>Post or update a book</h1>
+    <h1>Update the book</h1>
     <p class="lead">Fill in relevant information to post a book for sale. If you want to add pictures, upload them elsewhere and paste link in the description below.</p>
   </div>
   <br>
@@ -30,12 +30,12 @@
   <div class="bg-light p-5 rounded">
     <h1>Book info</h1>
     {% block form_link %}
-    <form action="update_book" method="post">
+    <form action="cow_book?book_id={{book.get_id()}}" method="post">
     {% endblock form_link %}
     <div class="form-group row">
       <label for="inputBook" class="col-sm-2 col-form-label">Book name</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" id="inputBook" placeholder="Book name" value="{% if content.book %}{{ content.book.prodname }}{% endif %}" name="prodname">
+        <input type="text" class="form-control" id="inputBook" placeholder="Book name" value="{{ book.get_prodname() }}" name="prodname">
       </div>
     </div>
     <br>
@@ -43,13 +43,9 @@
       <label for="inputCategory" class="col-sm-2 col-form-label">Category</label>
       <div class="col-sm-4">
         <select class="form-select" aria-label="Default select example" name="category">
-	  {% if content.categories %}
-	  {% for category in content.categories %}
+	  {% for category in categories %}
 	    <option value="{{category.id}}">{{category.id}}</option>
 	  {% endfor %}
-	  {% else %}
-	    <h3>No category eligible, this is considered as an error, please report</h3>
-	  {% endif %}
 	</select>
       </div>
     </div>
@@ -57,18 +53,18 @@
     <div class="form-group row">
       <label for="inputPrice" class="col-sm-2 col-form-label">Price</label>
       <div class="col-sm-4">
-        <input type="number" min="0" class="form-control" id="inputPrice" placeholder="Price" value="{% if content.book %}{{ content.book.price }}{% endif %}" name="price">
+        <input type="number" min="0" class="form-control" id="inputPrice" placeholder="Price" value="{{ book.get_price() }}" name="price">
       </div>
     </div>
     <br>
     <div class="form-group row">
       <label for="inputPassword" class="col-sm-2 col-form-label">Description</label>
       <div class="col-sm-10">
-	<textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="description">{% if content.book %}{{ content.book.description }}{% endif %}</textarea>
+	<textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="description">{{ book.get_description() }}</textarea>
       </div>
     </div>
     <br>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Post the book!</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Update the book!</button>
   </form>
   </div>
   <br>

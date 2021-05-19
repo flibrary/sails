@@ -5,15 +5,28 @@
 // Handle general database errors by redirecting using flash message to some big pages like `/market`, `/user`. Flash message will only be used up when called.
 // All for loops in templates should be able to handle empty vec.
 
+mod guards;
 mod market;
 mod user;
 
-use std::convert::TryInto;
-
+use askama::Template;
+use diesel::connection::SimpleConnection;
+use rocket::{
+    fairing::AdHoc,
+    figment::{
+        providers::{Format, Toml},
+        Figment,
+    },
+    http::{uri::Uri, Status},
+    request::FlashMessage,
+    response::{self, Flash, Redirect},
+    Build, Rocket,
+};
 use rocket_contrib::helmet::SpaceHelmet;
+use rust_embed::RustEmbed;
 use sails_db::{categories::Categories, error::SailsDbError};
-use serde::Serialize;
-use serde_json::{json, Value};
+use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
+use structopt::StructOpt;
 #[macro_use]
 extern crate rocket;
 #[macro_use]
@@ -29,70 +42,28 @@ pub fn wrap_op<T>(
     x.map_err(|e| Flash::error(Redirect::to(uri), e.to_string()))
 }
 
-#[database("sqlite_database")]
+#[database("flibrary")]
 pub struct DbConn(diesel::SqliteConnection);
 
-#[derive(Serialize)]
-pub struct Context<T> {
-    content: T,
+// A short hand message <-> flash conversion
+pub struct Msg {
     flash: Option<String>,
 }
 
-impl Context<Value> {
-    // Construct a context from a flash message and an empty json set
+impl Msg {
+    // Construct a message from a flash message
     pub fn from_flash(flash: Option<FlashMessage<'_>>) -> Self {
-        Context::new(json!({}), flash)
-    }
-
-    // Construct a context from a custom error message and an empty json set
-    pub fn err(err: impl ToString) -> Self {
-        Context::new_raw(json!({}), Some(err))
-    }
-}
-
-impl<T: Serialize> Context<T> {
-    // Add a flash message to an existing context
-    pub fn with_flash(&mut self, flash: Option<FlashMessage<'_>>) {
-        self.flash = flash.map(|f| format!("{}: {}", f.kind(), f.message()))
-    }
-
-    // Create a new context
-    pub fn new_raw(content: T, flash: Option<impl ToString>) -> Context<T> {
         Self {
-            content,
-            flash: flash.map(|f| f.to_string()),
+            flash: flash.map(|f| format!("{}: {}", f.kind(), f.message())),
         }
     }
 
-    pub fn new(content: T, flash: Option<FlashMessage<'_>>) -> Context<T> {
-        Self::new_raw(
-            content,
-            flash.map(|f| format!("{}: {}", f.kind(), f.message())),
-        )
-    }
-
-    // Create a new context with an existing content and no flash
-    pub fn from_content(content: T) -> Self {
+    pub fn msg(msg: impl ToString) -> Self {
         Self {
-            content,
-            flash: None,
+            flash: Some(msg.to_string()),
         }
     }
 }
-
-use diesel::connection::SimpleConnection;
-use rocket::{
-    fairing::AdHoc,
-    http::uri::Uri,
-    request::FlashMessage,
-    response::{content, Flash, Redirect},
-    Build, Rocket,
-};
-
-use rocket_contrib::{
-    serve::{crate_relative, StaticFiles},
-    templates::Template,
-};
 
 async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     // This macro from `diesel_migrations` defines an `embedded_migrations`
@@ -137,35 +108,94 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     rocket
 }
 
+#[derive(Template)]
+#[template(path = "index.html")]
+struct Index {
+    inner: Msg,
+}
+
 #[get("/")]
-async fn index<'a>(flash: Option<FlashMessage<'_>>) -> Template {
-    Template::render("index", Context::from_flash(flash))
+async fn index<'a>(flash: Option<FlashMessage<'_>>) -> Index {
+    Index {
+        inner: Msg::from_flash(flash),
+    }
+}
+
+#[derive(RustEmbed)]
+#[folder = "static/"]
+struct Asset;
+
+struct StaticFile(PathBuf);
+
+impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for StaticFile {
+    fn respond_to(self, _: &'r rocket::request::Request<'_>) -> rocket::response::Result<'o> {
+        let filename = self.0.display().to_string();
+        Asset::get(&filename).map_or_else(
+            || Err(Status::NotFound),
+            |d| {
+                let ext = self
+                    .0
+                    .as_path()
+                    .extension()
+                    .and_then(OsStr::to_str)
+                    .ok_or_else(|| Status::new(400))?;
+                let content_type = rocket::http::ContentType::from_extension(ext)
+                    .ok_or_else(|| Status::new(400))?;
+                response::Response::build()
+                    .header(content_type)
+                    .sized_body(d.len(), Cursor::new(d))
+                    .ok()
+            },
+        )
+    }
+}
+
+#[get("/<path..>")]
+async fn get_file(path: PathBuf) -> StaticFile {
+    StaticFile(path)
 }
 
 #[catch(404)]
-async fn page404<'a>() -> content::Html<&'a str> {
-    content::Html(include_str!("../static/404.html"))
+async fn page404<'a>() -> Redirect {
+    Redirect::to("/static/404.html")
 }
 
 #[catch(422)]
-async fn page422<'a>() -> content::Html<&'a str> {
-    content::Html(include_str!("../static/422.html"))
+async fn page422<'a>() -> Redirect {
+    Redirect::to("/static/422.html")
 }
 
 #[catch(500)]
-async fn page500<'a>() -> content::Html<&'a str> {
-    content::Html(include_str!("../static/500.html"))
+async fn page500<'a>() -> Redirect {
+    Redirect::to("/static/500.html")
+}
+
+#[derive(Debug, StructOpt)]
+#[structopt(
+    name = "sails-bin",
+    about = "The web server for FLibrary, an online second-hand book market"
+)]
+struct DcompassOpts {
+    /// Path to the TOML configuration file.
+    #[structopt(short, long, parse(from_os_str))]
+    config: PathBuf,
 }
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build()
+    let args: DcompassOpts = DcompassOpts::from_args();
+
+    // This helps us manage run-time Rocket.toml easily
+    let figment = Figment::from(rocket::Config::default()).merge(Toml::file(args.config).nested());
+
+    // According to the documentation, this will not read `Rocket.toml`
+    // only Rocket::build reads it.
+    rocket::custom(figment)
         .attach(DbConn::fairing())
-        .attach(Template::fairing())
         .attach(SpaceHelmet::default())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
-        .mount("/", StaticFiles::from(crate_relative!("static")))
         .mount("/", routes![index])
+        .mount("/static", routes![get_file])
         // Mount user namespace
         .mount(
             "/user",
@@ -183,12 +213,19 @@ fn rocket() -> _ {
             "/market",
             routes![
                 market::market,
-                market::all_products,
+                market::all_books,
                 market::categories,
-                market::post_book,
+                market::post_book_page,
+                market::update_book_page,
+                market::post_book_error_page,
                 market::update_book,
-                market::book_page,
-                market::delete_book
+                market::book_page_guest,
+                market::book_page_owned,
+                market::book_page_user,
+                market::book_page_error,
+                market::categories_all,
+                market::delete_book,
+                market::create_book
             ],
         )
         .register("/", catchers![page404, page422, page500])

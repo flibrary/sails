@@ -1,0 +1,22 @@
+{% extends "market.html" %}
+{% block inner %}
+<main class="container">
+  {% include "display_flash.html" %}
+
+  <div class="bg-light p-5 rounded">
+    <h1>Welcome to the market</h1>
+    <p class="lead">Here you can see what books are on sale and post your own books.</p>
+    <a href="categories" class="btn btn-primary" role="button">Browse by categories</a>
+  </div>
+  <br>
+
+  {% if books.len() > 0 %}
+  {% include "book_list.html" %}
+  {% else %}
+    <div class="bg-light p-5 rounded">
+      <h3>No books under your request</h3>
+    </div>
+    <br>
+  {% endif %}
+</main>
+{% endblock inner %}
