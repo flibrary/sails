@@ -12,8 +12,6 @@ use sails_db::{
 
 use crate::{guards::UserGuard, wrap_op, DbConn, Msg};
 
-const NAMESPACE: &str = "/user";
-
 // Form used for validating an user
 #[derive(FromForm)]
 pub struct Validation {
@@ -66,7 +64,7 @@ pub async fn create_user(info: Form<UserInfo>, conn: DbConn) -> Result<Redirect,
         .await,
         uri!("/user", signup),
     )?;
-    Ok(Redirect::to(NAMESPACE))
+    Ok(Redirect::to(uri!(portal)))
 }
 
 #[post("/update_user", data = "<info>")]
@@ -92,13 +90,13 @@ pub async fn validate(
     let user = wrap_op(
         conn.run(move |c| Users::login(c, &info.email, &info.password))
             .await,
-        NAMESPACE,
+        uri!(portal),
     )?;
     let mut cookie = Cookie::new("uid", user);
     cookie.set_secure(true);
     // Successfully validated, set private cookie.
     jar.add_private(cookie);
-    Ok(Redirect::to(NAMESPACE))
+    Ok(Redirect::to(uri!(portal)))
 }
 
 #[get("/logout")]

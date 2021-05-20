@@ -10,7 +10,7 @@
   };
 
   outputs = { nixpkgs, rust-overlay, utils, naersk, ... }:
-    utils.lib.eachSystem (utils.lib.defaultSystems) (system: rec {
+    (utils.lib.eachSystem (utils.lib.defaultSystems) (system: rec {
       # `nix build`
       packages = {
         # We have to do it like `nix develop .#commit` because libraries don't play well with `makeBinPath` or `makeLibraryPath`.
@@ -72,5 +72,7 @@
             binutils-unwrapped
           ];
         };
-    });
+    })) // {
+      nixosModule = (import ./module.nix);
+    };
 }

@@ -17,7 +17,7 @@ use rocket::{
         providers::{Format, Toml},
         Figment,
     },
-    http::{uri::Uri, Status},
+    http::{uri::Reference, Status},
     request::FlashMessage,
     response::{self, Flash, Redirect},
     Build, Rocket,
@@ -37,7 +37,7 @@ extern crate rocket_contrib;
 // Wraps around the db operation
 pub fn wrap_op<T>(
     x: Result<T, SailsDbError>,
-    uri: impl TryInto<Uri<'static>>,
+    uri: impl TryInto<Reference<'static>>,
 ) -> Result<T, Flash<Redirect>> {
     x.map_err(|e| Flash::error(Redirect::to(uri), e.to_string()))
 }

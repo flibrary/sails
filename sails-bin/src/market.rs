@@ -15,8 +15,6 @@ use crate::{
     wrap_op, DbConn, Msg,
 };
 
-const NAMESPACE: &str = "/market";
-
 // Delete can happen if and only if the user is authorized and the product is specified
 #[get("/delete")]
 pub async fn delete_book(
@@ -27,9 +25,9 @@ pub async fn delete_book(
     wrap_op(
         conn.run(move |c| Products::delete_by_id(c, book.book.get_id()))
             .await,
-        NAMESPACE,
+        uri!(market),
     )?;
-    Ok(Redirect::to(NAMESPACE))
+    Ok(Redirect::to(uri!(market)))
 }
 
 // Form used for creating new/updating books
@@ -73,7 +71,7 @@ pub async fn update_book(
     book.book.update(info.into_inner().into());
     wrap_op(
         conn.run(move |c| Products::update(c, book.book)).await,
-        NAMESPACE,
+        uri!(market),
     )?;
     Ok(Redirect::to(format!(
         "/market/book_info?book_id={}",
@@ -100,7 +98,7 @@ pub async fn create_book(
             )
         })
         .await,
-        NAMESPACE,
+        uri!(market),
     )?;
     Ok(Redirect::to(format!(
         "/market/book_info?book_id={}",
@@ -128,7 +126,7 @@ pub async fn update_book_page(
         // TODO: categories should only be fetched once
         categories: wrap_op(
             conn.run(move |c| Categories::list_leaves(c)).await,
-            uri!("/market", all_books: _),
+            uri!("/market", all_books(_)),
         )?,
         book: book.book,
     })
@@ -149,7 +147,7 @@ pub async fn post_book_page(conn: DbConn, _user: UserGuard) -> Result<PostBook, 
         // TODO: categories should only be fetched once
         categories: wrap_op(
             conn.run(move |c| Categories::list_leaves(c)).await,
-            uri!("/market", all_books: _),
+            uri!("/market", all_books(_)),
         )?,
     })
 }
@@ -210,7 +208,7 @@ pub async fn book_page_guest(book: BookGuard) -> BookPageGuest {
 #[get("/book_info", rank = 4)]
 pub async fn book_page_error() -> Flash<Redirect> {
     Flash::error(
-        Redirect::to(NAMESPACE),
+        Redirect::to(uri!(market)),
         "no book found with the given book ID",
     )
 }
@@ -224,8 +222,11 @@ pub struct CategoriesPage {
 // If there is no category specified, we simply go for the top categories
 #[get("/categories", rank = 2)]
 pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redirect>> {
-    wrap_op(conn.run(move |c| Categories::list_top(c)).await, NAMESPACE)
-        .map(|v| CategoriesPage { categories: v })
+    wrap_op(
+        conn.run(move |c| Categories::list_top(c)).await,
+        uri!(market),
+    )
+    .map(|v| CategoriesPage { categories: v })
 }
 
 // Category browsing
@@ -239,18 +240,18 @@ pub async fn categories(
     let category = wrap_op(
         conn.run(move |c| Categories::find_by_id(c, &ctg_cloned))
             .await,
-        NAMESPACE,
+        uri!(market),
     )?;
 
     // The category is a leaf, meaning that we then have to search for books related to that
     if category.is_leaf() {
-        Ok(Err(Redirect::to(uri!("/market", all_books: Some(ctg)))))
+        Ok(Err(Redirect::to(uri!("/market", all_books(Some(ctg))))))
     } else {
         // The category is not a leaf, continuing down the path
         Ok(Ok(CategoriesPage {
             categories: wrap_op(
                 conn.run(move |c| Categories::subcategory(c, &ctg)).await,
-                NAMESPACE,
+                uri!(market),
             )?,
         }))
     }
@@ -287,5 +288,5 @@ pub async fn all_books(
 
 #[get("/")]
 pub async fn market() -> Redirect {
-    Redirect::to(uri!("/market", all_books: _))
+    Redirect::to(uri!("/market", all_books(_)))
 }
