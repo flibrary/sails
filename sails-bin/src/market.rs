@@ -25,9 +25,9 @@ pub async fn delete_book(
     wrap_op(
         conn.run(move |c| Products::delete_by_id(c, book.book.get_id()))
             .await,
-        uri!(market),
+        uri!("/market", market),
     )?;
-    Ok(Redirect::to(uri!(market)))
+    Ok(Redirect::to(uri!("/market", market)))
 }
 
 // Form used for creating new/updating books
@@ -71,7 +71,7 @@ pub async fn update_book(
     book.book.update(info.into_inner().into());
     wrap_op(
         conn.run(move |c| Products::update(c, book.book)).await,
-        uri!(market),
+        uri!("/market", market),
     )?;
     Ok(Redirect::to(format!(
         "/market/book_info?book_id={}",
@@ -98,7 +98,7 @@ pub async fn create_book(
             )
         })
         .await,
-        uri!(market),
+        uri!("/market", market),
     )?;
     Ok(Redirect::to(format!(
         "/market/book_info?book_id={}",
@@ -208,7 +208,7 @@ pub async fn book_page_guest(book: BookGuard) -> BookPageGuest {
 #[get("/book_info", rank = 4)]
 pub async fn book_page_error() -> Flash<Redirect> {
     Flash::error(
-        Redirect::to(uri!(market)),
+        Redirect::to(uri!("/market", market)),
         "no book found with the given book ID",
     )
 }
@@ -224,7 +224,7 @@ pub struct CategoriesPage {
 pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redirect>> {
     wrap_op(
         conn.run(move |c| Categories::list_top(c)).await,
-        uri!(market),
+        uri!("/market", market),
     )
     .map(|v| CategoriesPage { categories: v })
 }
@@ -240,7 +240,7 @@ pub async fn categories(
     let category = wrap_op(
         conn.run(move |c| Categories::find_by_id(c, &ctg_cloned))
             .await,
-        uri!(market),
+        uri!("/market", market),
     )?;
 
     // The category is a leaf, meaning that we then have to search for books related to that
@@ -251,7 +251,7 @@ pub async fn categories(
         Ok(Ok(CategoriesPage {
             categories: wrap_op(
                 conn.run(move |c| Categories::subcategory(c, &ctg)).await,
-                uri!(market),
+                uri!("/market", market),
             )?,
         }))
     }

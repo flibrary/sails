@@ -64,7 +64,7 @@ pub async fn create_user(info: Form<UserInfo>, conn: DbConn) -> Result<Redirect,
         .await,
         uri!("/user", signup),
     )?;
-    Ok(Redirect::to(uri!(portal)))
+    Ok(Redirect::to(uri!("/user", portal)))
 }
 
 #[post("/update_user", data = "<info>")]
@@ -90,13 +90,13 @@ pub async fn validate(
     let user = wrap_op(
         conn.run(move |c| Users::login(c, &info.email, &info.password))
             .await,
-        uri!(portal),
+        uri!("/user", portal),
     )?;
     let mut cookie = Cookie::new("uid", user);
     cookie.set_secure(true);
     // Successfully validated, set private cookie.
     jar.add_private(cookie);
-    Ok(Redirect::to(uri!(portal)))
+    Ok(Redirect::to(uri!("/user", portal)))
 }
 
 #[get("/logout")]
