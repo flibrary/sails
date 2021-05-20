@@ -20,7 +20,7 @@ in {
 
     dataDir = mkOption {
       type = types.path;
-      default = "/var/lib/sails-bin";
+      default = "/var/lib/sails";
       description = "The data dir that the service has access with";
     };
 
@@ -40,6 +40,7 @@ in {
 
     systemd.services.sails = {
       description = "Sails Server Service";
+      wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
 
       serviceConfig = {
@@ -49,7 +50,6 @@ in {
         Restart = "on-failure";
 
         # WorkingDirectory = cfg.dataDir;
-        PrivateNetwork = true;
         PrivateTmp = true;
         # Users Database is not available for within the unit, only root and minecraft is available, everybody else is nobody
         PrivateUsers = true;

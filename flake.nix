@@ -10,18 +10,9 @@
   };
 
   outputs = { nixpkgs, rust-overlay, utils, naersk, ... }:
-    (utils.lib.eachSystem (utils.lib.defaultSystems) (system: rec {
-      # `nix build`
-      packages = {
-        # We have to do it like `nix develop .#commit` because libraries don't play well with `makeBinPath` or `makeLibraryPath`.
-        commit = (import ./commit.nix {
-          lib = utils.lib;
-          pkgs = import nixpkgs {
-            system = "${system}";
-            overlays = [ rust-overlay.overlay ];
-          };
-        });
-        sails-bin = (naersk.lib."${system}".buildPackage {
+    let
+      pkgWith = system:
+        naersk.lib."${system}".buildPackage {
           name = "sails-bin";
           version = "git";
           root = ./.;
@@ -34,7 +25,19 @@
             # Used by diesel
             sqlite
           ];
+        };
+    in (utils.lib.eachSystem (utils.lib.defaultSystems) (system: rec {
+      # `nix build`
+      packages = {
+        # We have to do it like `nix develop .#commit` because libraries don't play well with `makeBinPath` or `makeLibraryPath`.
+        commit = (import ./commit.nix {
+          lib = utils.lib;
+          pkgs = import nixpkgs {
+            system = "${system}";
+            overlays = [ rust-overlay.overlay ];
+          };
         });
+        sails-bin = (pkgWith "${system}");
       };
 
       defaultPackage = packages.sails-bin;
@@ -74,5 +77,7 @@
         };
     })) // {
       nixosModule = (import ./module.nix);
+
+      overlay = final: prev: { sails = (pkgWith "${prev.pkgs.system}"); };
     };
 }
