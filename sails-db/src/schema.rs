@@ -7,6 +7,16 @@ table! {
 }
 
 table! {
+    messages (id) {
+        id -> Text,
+        send -> Text,
+        recv -> Text,
+        body -> Text,
+        time_sent -> Timestamp,
+    }
+}
+
+table! {
     products (id) {
         id -> Text,
         seller_id -> Text,
@@ -31,6 +41,7 @@ joinable!(products -> users (seller_id));
 
 allow_tables_to_appear_in_same_query!(
     categories,
+    messages,
     products,
     users,
 );

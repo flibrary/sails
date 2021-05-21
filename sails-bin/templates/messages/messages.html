@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Market{% endblock title %}
+{% block title %}Messages{% endblock title %}
 
 {% block content %}
   <header class="p-3 bg-dark text-white">
@@ -11,14 +11,10 @@
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
           <li><a href="/" class="nav-link px-2 text-white">FLibrary</a></li>
-          <li><a href="/market" class="nav-link px-2 text-secondary">Market</a></li>
+          <li><a href="/market" class="nav-link px-2 text-white">Market</a></li>
           <li><a href="/user" class="nav-link px-2 text-white">Portal</a></li>
-	  <li><a href="/messages" class="nav-link px-2 text-white">Messages</a></li>
+	  <li><a href="/messages" class="nav-link px-2 text-secondary">Messages</a></li>
         </ul>
-
-        <div class="text-end">
-	  <a href="/market/post_book" class="btn btn-warning" role="button">Post a book</a>
-        </div>
       </div>
     </div>
   </header>

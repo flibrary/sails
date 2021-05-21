@@ -1,3 +1,4 @@
+use crate::{guards::UserGuard, wrap_op, DbConn, Msg};
 use askama::Template;
 use rocket::{
     form::Form,
@@ -9,8 +10,6 @@ use sails_db::{
     products::{Product, ProductFinder},
     users::{User, Users},
 };
-
-use crate::{guards::UserGuard, wrap_op, DbConn, Msg};
 
 // Form used for validating an user
 #[derive(FromForm)]

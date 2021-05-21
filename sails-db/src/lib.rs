@@ -5,6 +5,7 @@ extern crate diesel;
 extern crate diesel_migrations;
 
 pub mod error;
+pub mod messages;
 pub mod products;
 #[rustfmt::skip]
 mod schema;

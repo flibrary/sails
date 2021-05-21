@@ -104,3 +104,34 @@ impl<'r> FromRequest<'r> for Authorized {
         }
     }
 }
+
+pub struct ReceiverGuard {
+    pub receiver: User,
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for ReceiverGuard {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let recv_id = request
+            .query_value::<String>("receiver_id")
+            .and_then(|x| x.ok());
+        if let Some(uid) = recv_id {
+            let uid_inner = uid.clone();
+            db.run(move |c| -> Result<ReceiverGuard, SailsDbError> {
+                Ok(ReceiverGuard {
+                    receiver: Users::find_by_id(c, &uid_inner)?,
+                })
+            })
+            .await
+            .ok()
+            .or_forward(())
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}

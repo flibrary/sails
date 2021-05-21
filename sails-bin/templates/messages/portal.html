@@ -1,0 +1,42 @@
+{% extends "messages.html" %}
+{% block inner %}
+<main class="container">
+  {% include "display_flash.html" %}
+
+  <div class="bg-light p-5 rounded">
+    <h1>Messages</h1>
+    <p class="lead">Below is a list of recent messages sent to you.</p>
+  </div>
+  <br>
+
+  {% if message_list.len() > 0 %}
+    <div class="bg-light p-5 rounded">
+      <h3>Recent messages</h3>
+      <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+        <thead>
+	  <tr>
+	    <th data-field="id" scope="col">User</th>
+	    <th data-field="body" scope="col">Message</th>
+	    <th data-field="time" data-sortable="true" scope="col">Time</th>
+	  </tr>
+        </thead>
+        <tbody>
+	  {% for message in message_list %}
+	  <tr>
+	    <th scope="row"><a href="/messages/chat?receiver_id={{ message.get_send() }}">{{ message.get_send() }}</a></th>
+	    <td>{{message.get_body()}}</td>
+	    <td>{{message.get_time_sent()}}</td>
+	  </tr>
+	  {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <br>
+  {% else %}
+    <div class="bg-light p-5 rounded">
+      <h3>You have not received any message</h3>
+    </div>
+    <br>
+  {% endif %}
+</main>
+{% endblock inner %}

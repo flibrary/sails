@@ -7,6 +7,7 @@
 
 mod guards;
 mod market;
+mod messages;
 mod user;
 
 use askama::Template;
@@ -226,6 +227,15 @@ fn rocket() -> _ {
                 market::categories_all,
                 market::delete_book,
                 market::create_book
+            ],
+        )
+        .mount(
+            "/messages",
+            routes![
+                messages::portal,
+                messages::chat,
+                messages::chat_error,
+                messages::send
             ],
         )
         .register("/", catchers![page404, page422, page500])
