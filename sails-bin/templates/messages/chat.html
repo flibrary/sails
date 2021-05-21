@@ -6,14 +6,24 @@
     <br>
 
   {% if messages.len() > 0 %}
-  {% for message in messages %}
-    <h5>{{message.get_send()}} at {{message.get_time_sent()}}</h5>
-    <br>
-    <pre>{{ message.get_body() }}</pre>
+    {% for message in messages %}
+    {% if message.get_send() == receiver.get_id() %}
+    <div class="card bg-light mb-3">
+    {% else %}
+    <div class="card border-primary border-3 mb-3">
+    {% endif %}
+      <div class="card-header">{{message.get_send()}}
+	<small class="float-right text-secondary">{{message.get_time_sent().format("%Y-%m-%d %H:%M:%S")}}</small>
+      </div>
+      <div class="card-body">
+        <p class="card-text"><pre>{{ message.get_body() }}</pre></p>
+     </div>
+    </div>
   {% endfor %}
   {% else %}
     <h3>There was no message between you and {{ receiver.get_id() }}</h3>
-    {% endif %}
+  {% endif %}
+
   </div>
   <br>
   <div class="bg-light p-5 rounded" id="draft_section">
