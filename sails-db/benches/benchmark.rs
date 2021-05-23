@@ -3,89 +3,90 @@ use sails_db::{categories::Categories, products::*, test_utils::establish_connec
 
 fn login_user(c: &mut Criterion) {
     let conn = establish_connection();
-    Users::register(
-        &conn,
+    UserForm::new(
         "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
     )
+    .to_ref()
+    .unwrap()
+    .create(&conn)
     .unwrap();
 
     c.bench_function("login an user", |b| {
-        b.iter(|| Users::login(&conn, "TestUser@example.org", "strongpasswd").unwrap())
+        b.iter(|| UserId::login(&conn, "TestUser@example.org", "strongpasswd").unwrap())
     });
 }
 
 fn products(c: &mut Criterion) {
     let conn = establish_connection();
     // our seller
-    let user_id = Users::register(
-        &conn,
+    let user_id = UserForm::new(
         "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
     )
+    .to_ref()
+    .unwrap()
+    .create(&conn)
     .unwrap();
 
     // The book category
     Categories::create(&conn, "Economics Books").unwrap();
     Categories::create(&conn, "Physics Books").unwrap();
 
-    Products::create(
-        &conn,
-        user_id.as_str(),
+    IncompleteProduct::new(
         "Economics Books",
         "Krugman's Economics 2nd Edition",
         700,
         "A very great book on the subject of Economics",
     )
+    .create(&conn, &user_id)
     .unwrap();
 
     // Another Krugman's Economics, with a lower price!
-    Products::create(
-        &conn,
-        user_id.as_str(),
+    IncompleteProduct::new(
         "Economics Books",
         "Krugman's Economics 2nd Edition",
         500,
         "A very great book on the subject of Economics",
     )
+    .create(&conn, &user_id)
     .unwrap();
 
     // Another Krugman's Economics, with a lower price!
-    Products::create(
-        &conn,
-        user_id.as_str(),
+    IncompleteProduct::new(
         "Economics Books",
         "Krugman's Economics 2nd Edition",
         600,
-        "That is a bad book though",
+        "A very great book on the subject of Economics",
     )
+    .create(&conn, &user_id)
     .unwrap();
 
     // Another different economics book
-    Products::create(
-        &conn,
-        user_id.as_str(),
+    IncompleteProduct::new(
         "Economics Books",
         "The Economics",
         600,
         "I finally had got a different econ textbook!",
     )
+    .create(&conn, &user_id)
     .unwrap();
 
     // Feynman's Lecture on Physics!
-    Products::create(
-        &conn,
-        user_id.as_str(),
-        "Physics Books",
-        "Feynman's Lecture on Physics",
-        900,
-        "A very masterpiece on the theory of the universe",
-    )
-    .unwrap();
+    for _ in 1..200 {
+        IncompleteProduct::new(
+            "Physics Books",
+            "Feynman's Lecture on Physics",
+            900,
+            "A very masterpiece on the theory of the universe",
+        )
+        .create(&conn, &user_id)
+        .unwrap();
+    }
 
     c.bench_function("search products", |b| {
         b.iter(|| {

@@ -1,59 +1,55 @@
-use crate::{error::SailsDbResult as Result, schema::products, Cmp, Order};
+use crate::{error::SailsDbResult as Result, schema::products, users::UserId, Cmp, Order};
 use diesel::{prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[derive(Debug, Serialize, Deserialize, Identifiable, Queryable, Clone)]
+#[table_name = "products"]
+pub struct ProductId {
+    id: String,
+}
+
+impl ProductId {
+    pub fn get_info(&self, conn: &SqliteConnection) -> Result<ProductInfo> {
+        use crate::schema::products::dsl::*;
+        Ok(products
+            .filter(id.eq(&self.id))
+            .first::<ProductInfo>(conn)?)
+    }
+
+    pub fn delete(self, conn: &SqliteConnection) -> Result<()> {
+        use crate::schema::products::dsl::*;
+        diesel::delete(products.filter(id.eq(&self.id))).execute(conn)?;
+        Ok(())
+    }
+
+    pub fn update(&self, conn: &SqliteConnection, info: IncompleteProduct) -> Result<()> {
+        diesel::update(self).set(info).execute(conn)?;
+        Ok(())
+    }
+
+    pub fn update_owned(
+        &self,
+        conn: &SqliteConnection,
+        info: IncompleteProductOwned,
+    ) -> Result<()> {
+        diesel::update(self).set(info).execute(conn)?;
+        Ok(())
+    }
+
+    pub fn get_id(&self) -> &str {
+        &self.id
+    }
+}
+
 /// A pseudo products used to manage table `products`
 pub struct Products;
 
 impl Products {
-    // CRUD: READ. For convenience
-    pub fn list(conn: &SqliteConnection) -> Result<Vec<Product>> {
-        ProductFinder::new(conn, None).search()
-    }
-
-    // create the product
-    // This ensures that category cannot be optional
-    pub fn create<T: ToString>(
-        conn: &SqliteConnection,
-        seller_p: T,
-        category_p: T,
-        prodname_p: T,
-        price_p: i64,
-        description_p: T,
-    ) -> Result<String> {
+    pub fn delete_by_seller(conn: &SqliteConnection, seller: &UserId) -> Result<usize> {
         use crate::schema::products::dsl::*;
-        let product = Product::new(seller_p, category_p, prodname_p, price_p, description_p);
-        let id_cloned: String = product.id.clone();
-        if let Ok(0) = products.filter(id.eq(&product.id)).count().get_result(conn) {
-            // This means that we have to insert
-            diesel::insert_into(products)
-                .values(product)
-                .execute(conn)?
-        } else {
-            // This can never happen because we are using UUID.
-            unreachable!()
-        };
-        Ok(id_cloned)
-    }
-
-    // CRUD: DELETE
-    // We somehow cannot get product finder to help us to delete.
-    pub fn delete_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<usize> {
-        use crate::schema::products::dsl::*;
-        Ok(diesel::delete(products.filter(id.eq(id_provided))).execute(conn)?)
-    }
-
-    pub fn delete_by_seller(conn: &SqliteConnection, seller: &str) -> Result<usize> {
-        use crate::schema::products::dsl::*;
-        Ok(diesel::delete(products.filter(seller_id.eq(seller))).execute(conn)?)
-    }
-
-    // CRUD: UPDATE
-    pub fn update(conn: &SqliteConnection, product: Product) -> Result<()> {
-        product.save_changes::<Product>(conn)?;
-        Ok(())
+        Ok(diesel::delete(products.filter(seller_id.eq(seller.get_id()))).execute(conn)?)
     }
 }
 
@@ -66,6 +62,14 @@ pub struct ProductFinder<'a> {
 }
 
 impl<'a> ProductFinder<'a> {
+    pub fn list_info(conn: &'a SqliteConnection) -> Result<Vec<ProductInfo>> {
+        Self::new(conn, None).search_info()
+    }
+
+    pub fn list(conn: &'a SqliteConnection) -> Result<Vec<ProductId>> {
+        Self::new(conn, None).search()
+    }
+
     pub fn new(conn: &'a SqliteConnection, query: Option<BoxedQuery<'a>>) -> Self {
         use crate::schema::products::dsl::*;
         if let Some(q) = query {
@@ -78,8 +82,30 @@ impl<'a> ProductFinder<'a> {
         }
     }
 
-    pub fn search(self) -> Result<Vec<Product>> {
-        Ok(self.query.load::<Product>(self.conn)?)
+    pub fn search(self) -> Result<Vec<ProductId>> {
+        use crate::schema::products::dsl::*;
+        Ok(self
+            .query
+            .select(id)
+            .load::<String>(self.conn)?
+            .into_iter()
+            .map(|x| ProductId { id: x })
+            .collect())
+    }
+
+    pub fn search_info(self) -> Result<Vec<ProductInfo>> {
+        Ok(self.query.load::<ProductInfo>(self.conn)?)
+    }
+
+    pub fn first(self) -> Result<ProductId> {
+        use crate::schema::products::dsl::*;
+        Ok(ProductId {
+            id: self.query.select(id).first::<String>(self.conn)?,
+        })
+    }
+
+    pub fn first_info(self) -> Result<ProductInfo> {
+        Ok(self.query.first::<ProductInfo>(self.conn)?)
     }
 
     pub fn id(mut self, id_provided: &'a str) -> Self {
@@ -127,32 +153,77 @@ impl<'a> ProductFinder<'a> {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, FromForm)]
-pub struct UpdateProduct {
-    pub category: Option<String>,
-    pub prodname: Option<String>,
-    pub price: Option<i64>,
-    pub description: Option<String>,
+#[derive(Debug, Serialize, Deserialize, Clone, FromForm, AsChangeset)]
+#[table_name = "products"]
+pub struct IncompleteProductOwned {
+    pub category: String,
+    pub prodname: String,
+    pub price: i64,
+    pub description: String,
 }
 
-impl Default for UpdateProduct {
-    fn default() -> Self {
+impl IncompleteProductOwned {
+    pub fn new<T: ToString>(category: T, prodname: T, price: i64, description: T) -> Self {
         Self {
-            category: None,
-            prodname: None,
-            price: None,
-            description: None,
+            category: category.to_string(),
+            prodname: prodname.to_string(),
+            price,
+            description: description.to_string(),
         }
+    }
+
+    pub fn create(&self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
+        let refed = IncompleteProduct {
+            category: &self.category,
+            prodname: &self.prodname,
+            price: self.price,
+            description: &self.description,
+        };
+        refed.create(conn, seller)
     }
 }
 
-/// A single user, corresponding to a row in the table `products`
+#[derive(Debug, Serialize, Deserialize, Clone, FromForm, AsChangeset)]
+#[table_name = "products"]
+pub struct IncompleteProduct<'a> {
+    pub category: &'a str,
+    pub prodname: &'a str,
+    pub price: i64,
+    pub description: &'a str,
+}
+
+impl<'a> IncompleteProduct<'a> {
+    pub fn new(category: &'a str, prodname: &'a str, price: i64, description: &'a str) -> Self {
+        Self {
+            category,
+            prodname,
+            price,
+            description,
+        }
+    }
+
+    pub fn create(self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
+        use crate::schema::products::dsl::*;
+        let id_cloned = Uuid::new_v4().to_string();
+        let value = (
+            id.eq(&id_cloned),
+            seller_id.eq(seller.get_id()),
+            category.eq(self.category),
+            prodname.eq(self.prodname),
+            price.eq(self.price),
+            description.eq(self.description),
+        );
+        diesel::insert_into(products).values(value).execute(conn)?;
+        Ok(ProductId { id: id_cloned })
+    }
+}
+
+/// A single product info entry, corresponding to a row in the table `products`
 #[derive(
-    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone, FromForm,
+    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
 )]
-// We want to keep it intuitive
-#[changeset_options(treat_none_as_null = "true")]
-pub struct Product {
+#[table_name = "products"]
+pub struct ProductInfo {
     id: String,
     seller_id: String,
     category: String,
@@ -161,37 +232,9 @@ pub struct Product {
     description: String,
 }
 
-impl Product {
-    pub fn new<T: ToString>(
-        seller_id: T,
-        category: T,
-        prodname: T,
-        price: i64,
-        description: T,
-    ) -> Self {
-        Self {
-            id: Uuid::new_v4().to_string(),
-            seller_id: seller_id.to_string(),
-            category: category.to_string(),
-            prodname: prodname.to_string(),
-            price,
-            description: description.to_string(),
-        }
-    }
-
-    pub fn update(&mut self, update: UpdateProduct) {
-        if let Some(category) = update.category {
-            self.category = category
-        }
-        if let Some(prodname) = update.prodname {
-            self.prodname = prodname
-        }
-        if let Some(price) = update.price {
-            self.price = price
-        }
-        if let Some(desc) = update.description {
-            self.description = desc
-        }
+impl ProductInfo {
+    pub fn update(self, conn: &SqliteConnection) -> Result<Self> {
+        Ok(self.save_changes::<ProductInfo>(conn)?)
     }
 
     pub fn get_id(&self) -> &str {
@@ -216,6 +259,36 @@ impl Product {
 
     pub fn get_price(&self) -> i64 {
         self.price
+    }
+
+    /// Set the product info's seller id.
+    pub fn set_seller_id(mut self, seller_id: impl ToString) -> Self {
+        self.seller_id = seller_id.to_string();
+        self
+    }
+
+    /// Set the product info's category.
+    pub fn set_category(mut self, category: impl ToString) -> Self {
+        self.category = category.to_string();
+        self
+    }
+
+    /// Set the product info's prodname.
+    pub fn set_prodname(mut self, prodname: impl ToString) -> Self {
+        self.prodname = prodname.to_string();
+        self
+    }
+
+    /// Set the product info's price.
+    pub fn set_price(mut self, price: i64) -> Self {
+        self.price = price;
+        self
+    }
+
+    /// Set the product info's description.
+    pub fn set_description(mut self, description: impl ToString) -> Self {
+        self.description = description.to_string();
+        self
     }
 }
 

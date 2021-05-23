@@ -1,4 +1,4 @@
-use crate::{error::SailsDbResult as Result, schema::messages};
+use crate::{error::SailsDbResult as Result, schema::messages, users::UserId};
 use chrono::naive::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -10,25 +10,29 @@ pub struct Messages;
 impl Messages {
     pub fn get_conv(
         conn: &SqliteConnection,
-        participant_a: &str,
-        participant_b: &str,
+        participant_a: &UserId,
+        participant_b: &UserId,
     ) -> Result<Vec<Message>> {
         use crate::schema::messages::dsl::*;
         // ((send == A) && (recv == B)) && ((send == B) && (recv A))
         Ok(messages
             .filter(
-                (send.eq(participant_a).and(recv.eq(participant_b)))
-                    .or(send.eq(participant_b).and(recv.eq(participant_a))),
+                (send
+                    .eq(participant_a.get_id())
+                    .and(recv.eq(participant_b.get_id())))
+                .or(send
+                    .eq(participant_b.get_id())
+                    .and(recv.eq(participant_a.get_id()))),
             )
             .order(time_sent.asc())
             .load::<Message>(conn)?)
     }
 
     // Return a vector of messages sent by distinct users in a descending chronological order.
-    pub fn get_list(conn: &SqliteConnection, receiver: &str) -> Result<Vec<Message>> {
+    pub fn get_list(conn: &SqliteConnection, receiver: &UserId) -> Result<Vec<Message>> {
         use crate::schema::messages::dsl::*;
         Ok(messages
-            .filter(recv.eq(receiver))
+            .filter(recv.eq(receiver.get_id()))
             .group_by(send)
             .order(diesel::dsl::max(time_sent).desc())
             .load::<Message>(conn)?)
@@ -36,8 +40,8 @@ impl Messages {
 
     pub fn send<T: ToString>(
         conn: &SqliteConnection,
-        sender: T,
-        receiver: T,
+        sender: &UserId,
+        receiver: &UserId,
         body_provided: T,
     ) -> Result<()> {
         use crate::schema::messages::dsl::*;
@@ -68,11 +72,11 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn new<T: ToString>(sender: T, receiver: T, body: T) -> Self {
+    pub fn new<T: ToString>(sender: &UserId, receiver: &UserId, body: T) -> Self {
         Self {
             id: Uuid::new_v4().to_string(),
-            send: sender.to_string(),
-            recv: receiver.to_string(),
+            send: sender.get_id().to_string(),
+            recv: receiver.get_id().to_string(),
             body: body.to_string(),
             // This might have some issue with UTC
             time_sent: chrono::offset::Local::now().naive_utc(),
@@ -103,63 +107,53 @@ impl Message {
 #[cfg(test)]
 mod tests {
     use super::Messages;
-    use crate::{test_utils::establish_connection, users::Users};
+    use crate::{test_utils::establish_connection, users::*};
 
     #[test]
     fn get_list() {
         let conn = establish_connection();
         // Our sender
-        let sender = Users::register(
-            &conn,
+        let sender = UserForm::new(
             "TestUser@example.org",
             "NFLS",
             "+86 18353232340",
             "strongpasswd",
         )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
         .unwrap();
 
-        let sender2 = Users::register(
-            &conn,
+        let sender2 = UserForm::new(
             "AnotherSender@example.org",
             "NFLS",
             "+86 18353232340",
             "strongpasswd",
         )
-        .unwrap();
-        let receiver = Users::register(
-            &conn,
-            "Him@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-        )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
         .unwrap();
 
-        Messages::send(&conn, sender.as_str(), receiver.as_str(), "Hello").unwrap();
-        Messages::send(&conn, sender.as_str(), receiver.as_str(), "Are you there?").unwrap();
-        Messages::send(&conn, receiver.as_str(), sender.as_str(), "Yes!").unwrap();
-        Messages::send(&conn, sender2.as_str(), receiver.as_str(), "Hello?").unwrap();
+        let receiver = UserForm::new("Him@example.org", "NFLS", "+86 18353232340", "strongpasswd")
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
+
+        Messages::send(&conn, &sender, &receiver, "Hello").unwrap();
+        Messages::send(&conn, &sender, &receiver, "Are you there?").unwrap();
+        Messages::send(&conn, &receiver, &sender, "Yes!").unwrap();
+        Messages::send(&conn, &sender2, &receiver, "Hello?").unwrap();
+        Messages::send(&conn, &sender, &receiver, "Do you have that book?").unwrap();
         Messages::send(
             &conn,
-            sender.as_str(),
-            receiver.as_str(),
-            "Do you have that book?",
-        )
-        .unwrap();
-        Messages::send(
-            &conn,
-            receiver.as_str(),
-            sender.as_str(),
+            &receiver,
+            &sender,
             "Sure, it is in pretty good condition",
         )
         .unwrap();
-        Messages::send(
-            &conn,
-            sender2.as_str(),
-            receiver.as_str(),
-            "Can you hear me?",
-        )
-        .unwrap();
+        Messages::send(&conn, &sender2, &receiver, "Can you hear me?").unwrap();
 
         let list = Messages::get_list(&conn, &receiver).unwrap();
         assert_eq!(list.get(0).unwrap().send, "AnotherSender@example.org");
@@ -170,47 +164,44 @@ mod tests {
     fn trivial() {
         let conn = establish_connection();
         // Our sender
-        let sender = Users::register(
-            &conn,
+        let sender = UserForm::new(
             "TestUser@example.org",
             "NFLS",
             "+86 18353232340",
             "strongpasswd",
         )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
         .unwrap();
-        let sender2 = Users::register(
-            &conn,
-            "TestUser2@example.org",
+
+        let sender2 = UserForm::new(
+            "AnotherSender@example.org",
             "NFLS",
             "+86 18353232340",
             "strongpasswd",
         )
-        .unwrap();
-        let receiver = Users::register(
-            &conn,
-            "Him@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-        )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
         .unwrap();
 
-        Messages::send(&conn, receiver.as_str(), receiver.as_str(), "Self-message").unwrap();
+        let receiver = UserForm::new("Him@example.org", "NFLS", "+86 18353232340", "strongpasswd")
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
-        Messages::send(&conn, sender.as_str(), receiver.as_str(), "Hello").unwrap();
-        Messages::send(&conn, sender.as_str(), receiver.as_str(), "Are you there?").unwrap();
-        Messages::send(&conn, receiver.as_str(), sender.as_str(), "Yes!").unwrap();
+        Messages::send(&conn, &receiver, &receiver, "Self-message").unwrap();
+
+        Messages::send(&conn, &sender, &receiver, "Hello").unwrap();
+        Messages::send(&conn, &sender, &receiver, "Are you there?").unwrap();
+        Messages::send(&conn, &receiver, &sender, "Yes!").unwrap();
+        Messages::send(&conn, &sender, &receiver, "Do you have that book?").unwrap();
         Messages::send(
             &conn,
-            sender.as_str(),
-            receiver.as_str(),
-            "Do you have that book?",
-        )
-        .unwrap();
-        Messages::send(
-            &conn,
-            receiver.as_str(),
-            sender.as_str(),
+            &receiver,
+            &sender,
             "Sure, it is in pretty good condition",
         )
         .unwrap();

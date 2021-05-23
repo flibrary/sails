@@ -1,102 +1,100 @@
-use super::{ProductFinder, Products};
-use crate::{categories::Categories, test_utils::establish_connection, users::Users, Cmp};
+use super::*;
+use crate::{categories::Categories, test_utils::establish_connection, users::*, Cmp};
 
 #[test]
 fn create_product() {
     let conn = establish_connection();
     // our seller
-    let user_id = Users::register(
-        &conn,
+    let user_id = UserForm::new(
         "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
     )
+    .to_ref()
+    .unwrap()
+    .create(&conn)
     .unwrap();
 
     // The book category
     let econ_id = Categories::create(&conn, "Economics Books").unwrap();
-    Products::create(
-        &conn,
-        user_id.as_str(),
+    IncompleteProduct::new(
         econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         700,
         "A very great book on the subject of Economics",
     )
+    .create(&conn, &user_id)
     .unwrap();
-    assert_eq!(Products::list(&conn).unwrap().len(), 1);
+    assert_eq!(ProductFinder::list(&conn).unwrap().len(), 1);
 }
 
 #[test]
 fn search_products() {
     let conn = establish_connection();
     // our seller
-    let user_id = Users::register(
-        &conn,
+    let user_id = UserForm::new(
         "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
     )
+    .to_ref()
+    .unwrap()
+    .create(&conn)
     .unwrap();
 
     // The book category
     let econ_id = Categories::create(&conn, "Economics Books").unwrap();
     let phys_id = Categories::create(&conn, "Physics Books").unwrap();
 
-    Products::create(
-        &conn,
-        user_id.as_str(),
+    IncompleteProduct::new(
         econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         700,
         "A very great book on the subject of Economics",
     )
+    .create(&conn, &user_id)
     .unwrap();
 
     // Another Krugman's Economics, with a lower price!
-    Products::create(
-        &conn,
-        user_id.as_str(),
+    IncompleteProduct::new(
         econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         500,
         "A very great book on the subject of Economics",
     )
+    .create(&conn, &user_id)
     .unwrap();
 
     // Another Krugman's Economics, with a lower price!
-    Products::create(
-        &conn,
-        user_id.as_str(),
+    IncompleteProduct::new(
         econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         600,
         "That is a bad book though",
     )
+    .create(&conn, &user_id)
     .unwrap();
 
     // Another different economics book
-    Products::create(
-        &conn,
-        user_id.as_str(),
+    IncompleteProduct::new(
         econ_id.as_str(),
         "The Economics",
         600,
         "I finally had got a different econ textbook!",
     )
+    .create(&conn, &user_id)
     .unwrap();
 
     // Feynman's Lecture on Physics!
-    Products::create(
-        &conn,
-        user_id.as_str(),
+    IncompleteProduct::new(
         phys_id.as_str(),
         "Feynman's Lecture on Physics",
         900,
         "A very masterpiece on the theory of the universe",
     )
+    .create(&conn, &user_id)
     .unwrap();
 
     // Search lower than CNY 300 Feynman's Lecture on Physics
@@ -148,27 +146,29 @@ fn search_products() {
 fn delete_product() {
     let conn = establish_connection();
     // our seller
-    let user_id = Users::register(
-        &conn,
+    let user_id = UserForm::new(
         "TestUser@example.org",
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
     )
+    .to_ref()
+    .unwrap()
+    .create(&conn)
     .unwrap();
 
     // The book category
     let econ_id = Categories::create(&conn, "Economics Books").unwrap();
-    let id = Products::create(
-        &conn,
-        user_id.as_str(),
+    let id = IncompleteProduct::new(
         econ_id.as_str(),
         "Krugman's Economics 2nd Edition",
         600,
         "That is a bad book though",
     )
+    .create(&conn, &user_id)
     .unwrap();
-    assert_eq!(Products::list(&conn).unwrap().len(), 1);
-    Products::delete_by_id(&conn, &id).unwrap();
-    assert_eq!(Products::list(&conn).unwrap().len(), 0);
+
+    assert_eq!(ProductFinder::list(&conn).unwrap().len(), 1);
+    id.delete(&conn).unwrap();
+    assert_eq!(ProductFinder::list(&conn).unwrap().len(), 0);
 }

@@ -1,29 +1,20 @@
-use crate::{guards::UserGuard, wrap_op, DbConn, Msg};
+use crate::{
+    guards::{UserIdGuard, UserInfoGuard},
+    wrap_op, DbConn, Msg,
+};
 use askama::Template;
 use rocket::{
-    form::Form,
+    form::{Form, Strict},
     http::{Cookie, CookieJar},
     request::FlashMessage,
     response::{Flash, Redirect},
 };
-use sails_db::{
-    products::{Product, ProductFinder},
-    users::{User, Users},
-};
+use sails_db::{products::*, users::*};
 
 // Form used for validating an user
 #[derive(FromForm)]
 pub struct Validation {
     email: String,
-    password: String,
-}
-
-// Form used for registration
-#[derive(FromForm)]
-pub struct UserInfo {
-    email: String,
-    school: String,
-    phone: String,
     password: String,
 }
 
@@ -55,29 +46,36 @@ pub async fn signup<'a>(flash: Option<FlashMessage<'_>>) -> SignUpPage {
 }
 
 #[post("/create_user", data = "<info>")]
-pub async fn create_user(info: Form<UserInfo>, conn: DbConn) -> Result<Redirect, Flash<Redirect>> {
+pub async fn create_user(
+    info: Form<Strict<UserFormOwned>>,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
     wrap_op(
-        conn.run(move |c| {
-            Users::register(c, &info.email, &info.school, &info.phone, &info.password)
-        })
-        .await,
+        conn.run(move |c| info.to_ref()?.create(c)).await,
         uri!("/user", signup),
     )?;
     Ok(Redirect::to(uri!("/user", portal)))
 }
 
 #[post("/update_user", data = "<info>")]
-pub async fn update_user(info: Form<UserInfo>, conn: DbConn) -> Result<Redirect, Flash<Redirect>> {
-    let user = wrap_op(
-        User::new(&info.email, &info.school, &info.phone, &info.password),
-        uri!("/user", portal),
-    )?;
-    wrap_op(
-        conn.run(move |c| Users::update(c, user)).await,
-        uri!("/user", portal),
-    )?;
+pub async fn update_user(
+    user: UserIdGuard,
+    info: Form<UserFormOwned>,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    if user.id.get_id() == info.id {
+        wrap_op(
+            conn.run(move |c| info.to_ref()?.update(c)).await,
+            uri!("/user", portal),
+        )?;
 
-    Ok(Redirect::to(uri!("/user", portal)))
+        Ok(Redirect::to(uri!("/user", portal)))
+    } else {
+        Err(Flash::error(
+            Redirect::to(uri!("/user", portal)),
+            "not authorized to update",
+        ))
+    }
 }
 
 #[post("/validate", data = "<info>")]
@@ -87,11 +85,11 @@ pub async fn validate(
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     let user = wrap_op(
-        conn.run(move |c| Users::login(c, &info.email, &info.password))
+        conn.run(move |c| UserId::login(c, &info.email, &info.password))
             .await,
         uri!("/user", portal),
     )?;
-    let mut cookie = Cookie::new("uid", user);
+    let mut cookie = Cookie::new("uid", user.get_id().to_string());
     cookie.set_secure(true);
     // Successfully validated, set private cookie.
     jar.add_private(cookie);
@@ -112,8 +110,8 @@ pub async fn logout(jar: &CookieJar<'_>) -> Redirect {
 #[derive(Template)]
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
-    user: User,
-    books: Vec<Product>,
+    user: UserInfo,
+    books: Vec<ProductInfo>,
     inner: Msg,
 }
 
@@ -121,14 +119,18 @@ pub struct PortalPage {
 #[get("/")]
 pub async fn portal(
     flash: Option<FlashMessage<'_>>,
-    user: Option<UserGuard>,
+    user: Option<UserInfoGuard>,
     conn: DbConn,
 ) -> Result<PortalPage, Redirect> {
-    if let Some(user) = user.map(|u| u.user) {
+    if let Some(user) = user.map(|u| u.info) {
         let uid_cloned = user.get_id().to_string();
         // TODO: get rid of this unwrap
         let books = conn
-            .run(move |c| ProductFinder::new(c, None).seller(&uid_cloned).search())
+            .run(move |c| {
+                ProductFinder::new(c, None)
+                    .seller(&uid_cloned)
+                    .search_info()
+            })
             .await
             .unwrap();
         Ok(PortalPage {

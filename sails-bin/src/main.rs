@@ -21,9 +21,9 @@ use rocket::{
     http::{uri::Reference, Status},
     request::FlashMessage,
     response::{self, Flash, Redirect},
+    shield::Shield,
     Build, Rocket,
 };
-use rocket_contrib::helmet::SpaceHelmet;
 use rust_embed::RustEmbed;
 use sails_db::{categories::Categories, error::SailsDbError};
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
@@ -193,7 +193,7 @@ fn rocket() -> _ {
     // only Rocket::build reads it.
     rocket::custom(figment)
         .attach(DbConn::fairing())
-        .attach(SpaceHelmet::default())
+        .attach(Shield::new())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .mount("/", routes![index])
         .mount("/static", routes![get_file])

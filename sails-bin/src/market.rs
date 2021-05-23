@@ -4,51 +4,22 @@ use rocket::{
     request::FlashMessage,
     response::{Flash, Redirect},
 };
-use sails_db::{
-    categories::*,
-    products::{Product, ProductFinder, Products, UpdateProduct},
-    users::User,
-};
+use sails_db::{categories::*, products::*, users::*};
 
-use crate::{
-    guards::{Authorized, BookGuard, UserGuard},
-    wrap_op, DbConn, Msg,
-};
+use crate::{guards::*, wrap_op, DbConn, Msg};
 
 // Delete can happen if and only if the user is authorized and the product is specified
 #[get("/delete")]
 pub async fn delete_book(
     _auth: Authorized,
-    book: BookGuard,
+    book: BookIdGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     wrap_op(
-        conn.run(move |c| Products::delete_by_id(c, book.book.get_id()))
-            .await,
+        conn.run(move |c| book.book_id.delete(c)).await,
         uri!("/market", market),
     )?;
     Ok(Redirect::to(uri!("/market", market)))
-}
-
-// Form used for creating new/updating books
-// The reason why we don't directly use the UpdateProduct struct is that we have to use the same form for both update and creation. While updates allows left out fields, creation doesn't. And we use auto-completion on the frontend to comply with this design choice.
-#[derive(FromForm)]
-pub struct BookInfo {
-    category: String,
-    prodname: String,
-    price: i64,
-    description: String,
-}
-
-impl From<BookInfo> for UpdateProduct {
-    fn from(x: BookInfo) -> Self {
-        UpdateProduct {
-            category: Some(x.category),
-            prodname: Some(x.prodname),
-            price: Some(x.price),
-            description: Some(x.description),
-        }
-    }
 }
 
 // Handle book creation or update
@@ -60,17 +31,17 @@ impl From<BookInfo> for UpdateProduct {
 // Update the book, this is more specific than creation, meaning that it should be routed first
 #[post("/cow_book", data = "<info>", rank = 1)]
 pub async fn update_book(
-    mut book: BookGuard,
-    _user: UserGuard,
+    book: BookIdGuard,
+    _user: UserIdGuard,
     _auth: Authorized,
-    info: Form<BookInfo>,
+    info: Form<IncompleteProductOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book_id = book.book.get_id().to_string();
+    let book_id = book.book_id.get_id().to_string();
     // The user is the seller, he/she is authorized
-    book.book.update(info.into_inner().into());
     wrap_op(
-        conn.run(move |c| Products::update(c, book.book)).await,
+        conn.run(move |c| book.book_id.update_owned(c, info.into_inner()))
+            .await,
         uri!("/market", market),
     )?;
     Ok(Redirect::to(format!(
@@ -82,34 +53,33 @@ pub async fn update_book(
 // User is logged in, creating the book.
 #[post("/cow_book", data = "<info>", rank = 2)]
 pub async fn create_book(
-    user: UserGuard,
-    info: Form<BookInfo>,
+    user: UserIdGuard,
+    info: Form<IncompleteProductOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     let product_id = wrap_op(
         conn.run(move |c| {
-            Products::create(
-                c,
-                user.user.get_id(),
+            IncompleteProduct::new(
                 &info.category,
                 &info.prodname,
                 info.price,
                 &info.description,
             )
+            .create(c, &user.id)
         })
         .await,
         uri!("/market", market),
     )?;
     Ok(Redirect::to(format!(
         "/market/book_info?book_id={}",
-        product_id
+        product_id.get_id()
     )))
 }
 
 #[derive(Template)]
 #[template(path = "market/update_book.html")]
 pub struct UpdateBook {
-    book: Product,
+    book: ProductInfo,
     categories: Vec<Category>,
 }
 
@@ -117,9 +87,10 @@ pub struct UpdateBook {
 #[get("/post_book", rank = 1)]
 pub async fn update_book_page(
     conn: DbConn,
-    _user: UserGuard,
+    // Can we remove this guard
+    _user: UserIdGuard,
     _auth: Authorized,
-    book: BookGuard,
+    book: BookInfoGuard,
 ) -> Result<UpdateBook, Flash<Redirect>> {
     Ok(UpdateBook {
         // If there is no leaves, user cannot create any books, a message should be displayed inside the template
@@ -128,7 +99,7 @@ pub async fn update_book_page(
             conn.run(move |c| Categories::list_leaves(c)).await,
             uri!("/market", all_books(_)),
         )?,
-        book: book.book,
+        book: book.book_info,
     })
 }
 
@@ -141,7 +112,7 @@ pub struct PostBook {
 // post_book page
 // If there is a book specified, we then use the default value of that specified book for update
 #[get("/post_book", rank = 2)]
-pub async fn post_book_page(conn: DbConn, _user: UserGuard) -> Result<PostBook, Flash<Redirect>> {
+pub async fn post_book_page(conn: DbConn, _user: UserIdGuard) -> Result<PostBook, Flash<Redirect>> {
     Ok(PostBook {
         // If there is no leaves, user cannot create any books, a message should be displayed inside the template
         // TODO: categories should only be fetched once
@@ -163,45 +134,45 @@ pub async fn post_book_error_page() -> Flash<Redirect> {
 #[derive(Template)]
 #[template(path = "market/book_info_owned.html")]
 pub struct BookPageOwned {
-    book: Product,
+    book: ProductInfo,
 }
 
 #[derive(Template)]
 #[template(path = "market/book_info_user.html")]
 pub struct BookPageUser {
-    book: Product,
-    seller: User,
+    book: ProductInfo,
+    seller: UserInfo,
 }
 
 #[derive(Template)]
 #[template(path = "market/book_info_guest.html")]
 pub struct BookPageGuest {
-    book: Product,
+    book: ProductInfo,
 }
 
 // If the seller is the user, buttons like update and delete are displayed
 #[get("/book_info", rank = 1)]
-pub async fn book_page_owned(
-    book: BookGuard,
-    _user: UserGuard,
-    _auth: Authorized,
-) -> BookPageOwned {
-    BookPageOwned { book: book.book }
+pub async fn book_page_owned(book: BookInfoGuard, _auth: Authorized) -> BookPageOwned {
+    BookPageOwned {
+        book: book.book_info,
+    }
 }
 
 // If the user is signed in but not authorized, book information and seller information will be displayed
 #[get("/book_info", rank = 2)]
-pub async fn book_page_user(book: BookGuard, _user: UserGuard) -> BookPageUser {
+pub async fn book_page_user(book: BookInfoGuard, _user: UserIdGuard) -> BookPageUser {
     BookPageUser {
-        book: book.book,
-        seller: book.seller,
+        book: book.book_info,
+        seller: book.seller_info,
     }
 }
 
 // If the user is not signed in, only book information will be displayed
 #[get("/book_info", rank = 3)]
-pub async fn book_page_guest(book: BookGuard) -> BookPageGuest {
-    BookPageGuest { book: book.book }
+pub async fn book_page_guest(book: BookInfoGuard) -> BookPageGuest {
+    BookPageGuest {
+        book: book.book_info,
+    }
 }
 
 // If the book is not specified, error id returned
@@ -260,7 +231,7 @@ pub async fn categories(
 #[derive(Template)]
 #[template(path = "market/all_books.html")]
 pub struct AllBooks {
-    books: Vec<Product>,
+    books: Vec<ProductInfo>,
     inner: crate::Msg,
 }
 
@@ -274,13 +245,13 @@ pub async fn all_books(
     Ok(AllBooks {
         books: if let Some(name) = category {
             wrap_op(
-                conn.run(move |c| ProductFinder::new(c, None).category(&name).search())
+                conn.run(move |c| ProductFinder::new(c, None).category(&name).search_info())
                     .await,
                 "/",
             )?
         } else {
             // Default with all products
-            wrap_op(conn.run(move |c| Products::list(c)).await, "/")?
+            wrap_op(conn.run(move |c| ProductFinder::list_info(c)).await, "/")?
         },
         inner: Msg::from_flash(flash),
     })

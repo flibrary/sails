@@ -1,7 +1,4 @@
-use crate::{
-    guards::{ReceiverGuard, UserGuard},
-    wrap_op, DbConn, Msg,
-};
+use crate::{guards::*, wrap_op, DbConn, Msg};
 use askama::Template;
 use rocket::{
     form::Form,
@@ -10,7 +7,7 @@ use rocket::{
 };
 use sails_db::{
     messages::{Message, Messages},
-    users::User,
+    users::*,
 };
 
 // Form used for sending messages
@@ -21,27 +18,20 @@ pub struct SendMessage {
 
 #[post("/send", data = "<info>")]
 pub async fn send(
-    user: UserGuard,
-    receiver: ReceiverGuard,
+    user: UserIdGuard,
+    receiver: ReceiverIdGuard,
     info: Form<SendMessage>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let receiver_id = receiver.receiver.get_id().to_string();
+    let receiver_id = receiver.id.clone();
     wrap_op(
-        conn.run(move |c| {
-            Messages::send(
-                c,
-                user.user.get_id(),
-                receiver.receiver.get_id(),
-                &info.body,
-            )
-        })
-        .await,
+        conn.run(move |c| Messages::send(c, &user.id, &receiver.id, &info.body))
+            .await,
         uri!("/messages"),
     )?;
     Ok(Redirect::to(format!(
         "/messages/chat?receiver_id={}#draft_section",
-        receiver_id
+        receiver_id.get_id()
     )))
 }
 
@@ -49,7 +39,7 @@ pub async fn send(
 #[template(path = "messages/chat.html")]
 pub struct ChatPage {
     messages: Vec<Message>,
-    receiver: User,
+    receiver: UserInfo,
 }
 
 #[get("/chat", rank = 2)]
@@ -63,18 +53,18 @@ pub async fn chat_error() -> Flash<Redirect> {
 #[get("/chat", rank = 1)]
 pub async fn chat(
     conn: DbConn,
-    user: UserGuard,
-    receiver: ReceiverGuard,
+    user: UserIdGuard,
+    receiver: ReceiverInfoGuard,
 ) -> Result<ChatPage, Flash<Redirect>> {
-    let receiver_id = receiver.receiver.get_id().to_string();
+    let receiver_id = receiver.info.to_id();
     let messages = wrap_op(
-        conn.run(move |c| Messages::get_conv(c, user.user.get_id(), &receiver_id))
+        conn.run(move |c| Messages::get_conv(c, &user.id, &receiver_id))
             .await,
         uri!("/"),
     )?;
     Ok(ChatPage {
         messages,
-        receiver: receiver.receiver,
+        receiver: receiver.info,
     })
 }
 
@@ -88,13 +78,12 @@ pub struct PortalPage {
 #[get("/")]
 pub async fn portal(
     flash: Option<FlashMessage<'_>>,
-    user: Option<UserGuard>,
+    user: Option<UserIdGuard>,
     conn: DbConn,
 ) -> Result<PortalPage, Flash<Redirect>> {
-    if let Some(user) = user.map(|u| u.user) {
+    if let Some(user) = user.map(|u| u.id) {
         let message_list = wrap_op(
-            conn.run(move |c| Messages::get_list(c, user.get_id()))
-                .await,
+            conn.run(move |c| Messages::get_list(c, &user)).await,
             uri!("/"),
         )?;
         Ok(PortalPage {
