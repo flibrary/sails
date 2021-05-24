@@ -6,7 +6,7 @@
     <link href="/static/css/signin.css" rel="stylesheet">
 {% endblock head %}
 
-{% block content %}
+{% block body %}
 <main class="form-signin text-center">
   <form action="validate" method="post">
     <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
@@ -24,4 +24,4 @@
   </form>
   {% include "display_flash.html" %}
 </main>
-{% endblock content %}
+{% endblock body %}

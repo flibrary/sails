@@ -1,5 +1,6 @@
-{% extends "messages.html" %}
-{% block inner %}
+{% extends "base.html" %}
+{% block title %}Chat{% endblock title %}
+{% block content %}
 <main class="container">
   <div class="bg-light p-5 rounded">
     <h1>Chat with {{receiver.get_id() }}</h1>
@@ -38,4 +39,4 @@
     </form>
   </div>
 </main>
-{% endblock inner %}
+{% endblock content %}
