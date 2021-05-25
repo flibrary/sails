@@ -32,10 +32,10 @@ jobs:
       - run: nix flake check -vL
       - name: Create repository dispatch event
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           gh api repos/flibrary/infra/dispatches \
-              --raw-field event_type=trigger_deploy
+              --raw-field event_type=sails_trigger_deploy
 
   check:
     name: Build all feature permutations
