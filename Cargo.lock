@@ -547,9 +547,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.67"
+version = "1.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3c69b077ad434294d3ce9f1f6143a2a4b89a8a2d54ef813d85003a4fd1137fd"
+checksum = "4a72c244c1ff497a746a7e1fb3d14bd08420ecda70c8f25c7112f2781652d787"
 
 [[package]]
 name = "cfg-if"
@@ -1338,9 +1338,9 @@ checksum = "f3a87b616e37e93c22fb19bcd386f02f3af5ea98a25670ad0fce773de23c5e68"
 
 [[package]]
 name = "httpdate"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05842d0d43232b23ccb7060ecb0f0626922c21f30012e97b767b30afd4a5d4b9"
+checksum = "6456b8a6c8f33fee7d958fcd1b60d55b11940a79e63ae87013e6d22e26034440"
 
 [[package]]
 name = "humansize"
@@ -2290,7 +2290,7 @@ dependencies = [
 [[package]]
 name = "rocket"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#bf9de1d39e0b33c0172f89f98a43e266e9ae5bd7"
+source = "git+https://github.com/SergioBenitez/Rocket#faaa9c90653c26e53ff10c23106297f7851910e0"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2326,7 +2326,7 @@ dependencies = [
 [[package]]
 name = "rocket_codegen"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#bf9de1d39e0b33c0172f89f98a43e266e9ae5bd7"
+source = "git+https://github.com/SergioBenitez/Rocket#faaa9c90653c26e53ff10c23106297f7851910e0"
 dependencies = [
  "devise",
  "glob",
@@ -2341,7 +2341,7 @@ dependencies = [
 [[package]]
 name = "rocket_contrib"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#bf9de1d39e0b33c0172f89f98a43e266e9ae5bd7"
+source = "git+https://github.com/SergioBenitez/Rocket#faaa9c90653c26e53ff10c23106297f7851910e0"
 dependencies = [
  "diesel",
  "log",
@@ -2355,7 +2355,7 @@ dependencies = [
 [[package]]
 name = "rocket_contrib_codegen"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#bf9de1d39e0b33c0172f89f98a43e266e9ae5bd7"
+source = "git+https://github.com/SergioBenitez/Rocket#faaa9c90653c26e53ff10c23106297f7851910e0"
 dependencies = [
  "devise",
  "quote",
@@ -2364,7 +2364,7 @@ dependencies = [
 [[package]]
 name = "rocket_http"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#bf9de1d39e0b33c0172f89f98a43e266e9ae5bd7"
+source = "git+https://github.com/SergioBenitez/Rocket#faaa9c90653c26e53ff10c23106297f7851910e0"
 dependencies = [
  "cookie",
  "either",
@@ -2457,6 +2457,7 @@ version = "0.1.0"
 dependencies = [
  "askama",
  "askama_rocket",
+ "check-if-email-exists",
  "diesel",
  "diesel_migrations",
  "rocket",

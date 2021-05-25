@@ -3,6 +3,7 @@ use crate::{
     wrap_op, DbConn, Msg,
 };
 use askama::Template;
+use check_if_email_exists::{check_email, CheckEmailInput, Reachable};
 use rocket::{
     form::{Form, Strict},
     http::{Cookie, CookieJar},
@@ -50,11 +51,24 @@ pub async fn create_user(
     info: Form<Strict<UserFormOwned>>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    wrap_op(
-        conn.run(move |c| info.to_ref()?.create(c)).await,
-        uri!("/user", signup),
-    )?;
-    Ok(Redirect::to(uri!("/user", portal)))
+    if check_email(&CheckEmailInput::new(vec![info.id.clone()]))
+        .await
+        .get(0)
+        .unwrap()
+        .is_reachable
+        == Reachable::Safe
+    {
+        wrap_op(
+            conn.run(move |c| info.to_ref()?.create(c)).await,
+            uri!("/user", signup),
+        )?;
+        Ok(Redirect::to(uri!("/user", portal)))
+    } else {
+        Err(Flash::error(
+            Redirect::to(uri!("/user", portal)),
+            "your email address is considered unreachable",
+        ))
+    }
 }
 
 #[post("/update_user", data = "<info>")]

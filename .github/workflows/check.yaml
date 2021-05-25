@@ -30,6 +30,12 @@ jobs:
 
       # Run the general flake checks
       - run: nix flake check -vL
+      - name: Create repository dispatch event
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api repos/flibrary/infra/dispatches \
+              --raw-field event_type=trigger_deploy
 
   check:
     name: Build all feature permutations
