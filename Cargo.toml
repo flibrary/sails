@@ -7,7 +7,7 @@ members = [
 
 [patch.crates-io]
 rocket = { git = "https://github.com/SergioBenitez/Rocket" }
-rocket_contrib = { git = "https://github.com/SergioBenitez/Rocket" }
+rocket_sync_db_pools = { git = "https://github.com/SergioBenitez/Rocket" }
 # This workaround should be removed once the PR is merged
 # askama_rocket = { path = "../askama/askama_rocket" }
 # askama = { path = "../askama/askama" }

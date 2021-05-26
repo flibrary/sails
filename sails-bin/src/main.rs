@@ -33,7 +33,7 @@ extern crate rocket;
 #[macro_use]
 extern crate diesel_migrations;
 #[macro_use]
-extern crate rocket_contrib;
+extern crate rocket_sync_db_pools;
 
 // Wraps around the db operation
 pub fn wrap_op<T>(

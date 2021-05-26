@@ -1350,9 +1350,9 @@ checksum = "02296996cb8796d7c6e3bc2d9211b7802812d36999a51bb754123ead7d37d026"
 
 [[package]]
 name = "hyper"
-version = "0.14.7"
+version = "0.14.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e5f105c494081baa3bf9e200b279e27ec1623895cd504c7dbef8d0b080fcf54"
+checksum = "d3f71a7eea53a3f8257a7b4795373ff886397178cd634430ea94e12d7fe4fe34"
 dependencies = [
  "bytes",
  "futures-channel",
@@ -1503,9 +1503,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.94"
+version = "0.2.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18794a8ad5b29321f790b55d93dfba91e125cb1a9edbd4f8e3150acc771c1a5e"
+checksum = "789da6d93f1b866ffe175afc5322a4d76c038605a1c3319bb57b06967ca98a36"
 
 [[package]]
 name = "libsqlite3-sys"
@@ -2290,7 +2290,7 @@ dependencies = [
 [[package]]
 name = "rocket"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#faaa9c90653c26e53ff10c23106297f7851910e0"
+source = "git+https://github.com/SergioBenitez/Rocket#5a4e66ec439411d30f16e5c045f8e4986f5883a4"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2326,7 +2326,7 @@ dependencies = [
 [[package]]
 name = "rocket_codegen"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#faaa9c90653c26e53ff10c23106297f7851910e0"
+source = "git+https://github.com/SergioBenitez/Rocket#5a4e66ec439411d30f16e5c045f8e4986f5883a4"
 dependencies = [
  "devise",
  "glob",
@@ -2339,32 +2339,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "rocket_contrib"
-version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#faaa9c90653c26e53ff10c23106297f7851910e0"
-dependencies = [
- "diesel",
- "log",
- "r2d2",
- "rocket",
- "rocket_contrib_codegen",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "rocket_contrib_codegen"
-version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#faaa9c90653c26e53ff10c23106297f7851910e0"
-dependencies = [
- "devise",
- "quote",
-]
-
-[[package]]
 name = "rocket_http"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#faaa9c90653c26e53ff10c23106297f7851910e0"
+source = "git+https://github.com/SergioBenitez/Rocket#5a4e66ec439411d30f16e5c045f8e4986f5883a4"
 dependencies = [
  "cookie",
  "either",
@@ -2386,6 +2363,28 @@ dependencies = [
  "time 0.2.26",
  "tokio",
  "uncased",
+]
+
+[[package]]
+name = "rocket_sync_db_pools"
+version = "0.1.0-dev"
+source = "git+https://github.com/SergioBenitez/Rocket#5a4e66ec439411d30f16e5c045f8e4986f5883a4"
+dependencies = [
+ "diesel",
+ "r2d2",
+ "rocket",
+ "rocket_sync_db_pools_codegen",
+ "serde",
+ "tokio",
+]
+
+[[package]]
+name = "rocket_sync_db_pools_codegen"
+version = "0.1.0-dev"
+source = "git+https://github.com/SergioBenitez/Rocket#5a4e66ec439411d30f16e5c045f8e4986f5883a4"
+dependencies = [
+ "devise",
+ "quote",
 ]
 
 [[package]]
@@ -2461,7 +2460,7 @@ dependencies = [
  "diesel",
  "diesel_migrations",
  "rocket",
- "rocket_contrib",
+ "rocket_sync_db_pools",
  "rust-embed",
  "sails-db",
  "serde",

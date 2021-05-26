@@ -4,7 +4,7 @@ on:
       - '**'
   pull_request:
 
-name: Build, test, and bench
+name: Build, test, bench, and continuous deployment
 
 jobs:
   cachix:
@@ -30,12 +30,6 @@ jobs:
 
       # Run the general flake checks
       - run: nix flake check -vL
-      - name: Create repository dispatch event
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: |
-          gh api repos/flibrary/infra/dispatches \
-              --raw-field event_type=sails_trigger_deploy
 
   check:
     name: Build all feature permutations
@@ -49,9 +43,12 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-check
-      - uses: actions-rs/cargo@v1
+      - uses: actions-rs/install@v0.1
         with:
-          command: check
+          crate: cargo-all-features
+          version: latest
+          use-tool-cache: true
+      - run: cargo build-all-features
 
   test:
     name: Test Suite
@@ -65,9 +62,12 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-test
-      - uses: actions-rs/cargo@v1
+      - uses: actions-rs/install@v0.1
         with:
-          command: test
+          crate: cargo-all-features
+          version: latest
+          use-tool-cache: true
+      - run: cargo test-all-features
 
   bench:
     name: Benchmark
@@ -112,3 +112,16 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
+
+  repo_dispatch:
+    name: Create repository dispatch
+    runs-on: ubuntu-latest
+    needs:
+      [cachix, check, test, bench, clippy]
+    steps:
+      - name: Create repository dispatch event
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          gh api repos/flibrary/infra/dispatches \
+              --raw-field event_type=sails_trigger_deploy
