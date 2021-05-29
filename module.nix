@@ -5,7 +5,10 @@ with lib;
 let
   cfg = config.sails;
   toTOML = (import ./to-toml.nix { inherit lib; });
-  confFile = pkgs.writeText "sails-config.toml" (toTOML cfg.config);
+  confFile = if cfg.configFile != null then
+    cfg.configFile
+  else
+    pkgs.writeText "sails-config.toml" (toTOML cfg.config);
 in {
   options.sails = {
     enable = mkOption {
@@ -14,8 +17,15 @@ in {
     };
 
     config = mkOption {
-      type = types.unspecified;
+      type = types.nullOr types.unspecified;
+      default = null;
       description = "Rocket.toml compatiable config";
+    };
+
+    configFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = "Path to the Rocket.toml compatiable config file";
     };
 
     dataDir = mkOption {
@@ -30,6 +40,12 @@ in {
     };
   };
   config = mkIf cfg.enable {
+    assertions = [{
+      assertion = (cfg.configFile == null) != (cfg.config == null);
+      message =
+        "Either but not both `configFile` and `config` should be specified for sails.";
+    }];
+
     users.users.sails = {
       description = "Sails server daemon user";
       home = cfg.dataDir;

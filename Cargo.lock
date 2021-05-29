@@ -514,9 +514,9 @@ checksum = "40e38929add23cdf8a366df9b0e088953150724bcbe5fc330b0d8eb3b328eec8"
 
 [[package]]
 name = "bumpalo"
-version = "3.6.1"
+version = "3.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63396b8a4b9de3f4fdfb320ab6080762242f66a8ef174c49d8e19b674db4cdbe"
+checksum = "9c59e7af012c713f529e7a3ee57ce9b31ddd858d4b512923602f74608b009631"
 
 [[package]]
 name = "byteorder"
@@ -844,7 +844,7 @@ dependencies = [
 [[package]]
 name = "devise"
 version = "0.3.0"
-source = "git+https://github.com/SergioBenitez/Devise.git?rev=df00b5#df00b5162edd53e8d496e7935774e69b5f7f6bdf"
+source = "git+https://github.com/SergioBenitez/Devise.git?rev=f2431b#f2431bd122f55b03c3bc5b1c8d2267894d3c8142"
 dependencies = [
  "devise_codegen",
  "devise_core",
@@ -853,7 +853,7 @@ dependencies = [
 [[package]]
 name = "devise_codegen"
 version = "0.3.0"
-source = "git+https://github.com/SergioBenitez/Devise.git?rev=df00b5#df00b5162edd53e8d496e7935774e69b5f7f6bdf"
+source = "git+https://github.com/SergioBenitez/Devise.git?rev=f2431b#f2431bd122f55b03c3bc5b1c8d2267894d3c8142"
 dependencies = [
  "devise_core",
  "quote",
@@ -862,7 +862,7 @@ dependencies = [
 [[package]]
 name = "devise_core"
 version = "0.3.0"
-source = "git+https://github.com/SergioBenitez/Devise.git?rev=df00b5#df00b5162edd53e8d496e7935774e69b5f7f6bdf"
+source = "git+https://github.com/SergioBenitez/Devise.git?rev=f2431b#f2431bd122f55b03c3bc5b1c8d2267894d3c8142"
 dependencies = [
  "bitflags",
  "proc-macro2",
@@ -1593,9 +1593,9 @@ checksum = "b16bd47d9e329435e309c58469fe0791c2d0d1ba96ec0954152a5ae2b04387dc"
 
 [[package]]
 name = "memoffset"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f83fb6581e8ed1f85fd45c116db8405483899489e38406156c25eb743554361d"
+checksum = "59accc507f1338036a0477ef61afdae33cde60840f4dfe481319ce3ad116ddf9"
 dependencies = [
  "autocfg",
 ]
@@ -2290,7 +2290,7 @@ dependencies = [
 [[package]]
 name = "rocket"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#5a4e66ec439411d30f16e5c045f8e4986f5883a4"
+source = "git+https://github.com/SergioBenitez/Rocket#1f1976f8bf8531daf4ac596d83ea7ad589dd7368"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2326,7 +2326,7 @@ dependencies = [
 [[package]]
 name = "rocket_codegen"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#5a4e66ec439411d30f16e5c045f8e4986f5883a4"
+source = "git+https://github.com/SergioBenitez/Rocket#1f1976f8bf8531daf4ac596d83ea7ad589dd7368"
 dependencies = [
  "devise",
  "glob",
@@ -2341,7 +2341,7 @@ dependencies = [
 [[package]]
 name = "rocket_http"
 version = "0.5.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#5a4e66ec439411d30f16e5c045f8e4986f5883a4"
+source = "git+https://github.com/SergioBenitez/Rocket#1f1976f8bf8531daf4ac596d83ea7ad589dd7368"
 dependencies = [
  "cookie",
  "either",
@@ -2368,7 +2368,7 @@ dependencies = [
 [[package]]
 name = "rocket_sync_db_pools"
 version = "0.1.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#5a4e66ec439411d30f16e5c045f8e4986f5883a4"
+source = "git+https://github.com/SergioBenitez/Rocket#1f1976f8bf8531daf4ac596d83ea7ad589dd7368"
 dependencies = [
  "diesel",
  "r2d2",
@@ -2381,7 +2381,7 @@ dependencies = [
 [[package]]
 name = "rocket_sync_db_pools_codegen"
 version = "0.1.0-dev"
-source = "git+https://github.com/SergioBenitez/Rocket#5a4e66ec439411d30f16e5c045f8e4986f5883a4"
+source = "git+https://github.com/SergioBenitez/Rocket#1f1976f8bf8531daf4ac596d83ea7ad589dd7368"
 dependencies = [
  "devise",
  "quote",
@@ -2965,9 +2965,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.6.0"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd3076b5c8cc18138b8f8814895c11eb4de37114a5d127bafdc5e55798ceef37"
+checksum = "83f0c8e7c0addab50b663055baf787d0af7f413a46e6e7fb9559a4e4db7137a5"
 dependencies = [
  "autocfg",
  "bytes",
@@ -3181,9 +3181,9 @@ dependencies = [
 
 [[package]]
 name = "unicode-normalization"
-version = "0.1.17"
+version = "0.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07fbfce1c8a97d547e8b5334978438d9d6ec8c20e38f56d4a4374d181493eaef"
+checksum = "33717dca7ac877f497014e10d73f3acf948c342bee31b5ca7892faf94ccc6b49"
 dependencies = [
  "tinyvec",
 ]
