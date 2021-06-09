@@ -51,12 +51,10 @@ pub async fn create_user(
     info: Form<Strict<UserFormOwned>>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    if check_email(&CheckEmailInput::new(vec![info.id.clone()]))
-        .await
-        .get(0)
-        .unwrap()
-        .is_reachable
-        == Reachable::Safe
+    let res = check_email(&CheckEmailInput::new(vec![info.id.clone()])).await;
+    // If the server is invalid, then the output will be `Reachable::Invalid`
+    if (res.get(0).unwrap().is_reachable == Reachable::Safe)
+        || (res.get(0).unwrap().is_reachable == Reachable::Unknown)
     {
         wrap_op(
             conn.run(move |c| info.to_ref()?.create(c)).await,
