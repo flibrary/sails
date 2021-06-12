@@ -1,4 +1,6 @@
 use askama::Template;
+use comrak::{markdown_to_html, ComrakOptions};
+use once_cell::sync::Lazy;
 use rocket::{
     form::Form,
     request::FlashMessage,
@@ -7,6 +9,17 @@ use rocket::{
 use sails_db::{categories::*, products::*, users::*};
 
 use crate::{guards::*, wrap_op, DbConn, Msg};
+
+// Comrak options. We selectively enabled a few GFM standards.
+static COMRAK_OPT: Lazy<ComrakOptions> = Lazy::new(|| {
+    let mut opts = ComrakOptions::default();
+    opts.extension.table = true;
+    opts.extension.tasklist = true;
+    opts.extension.strikethrough = true;
+    opts.extension.autolink = true;
+    opts.extension.footnotes = true;
+    opts
+});
 
 // Delete can happen if and only if the user is authorized and the product is specified
 #[get("/delete")]
@@ -135,12 +148,14 @@ pub async fn post_book_error_page() -> Flash<Redirect> {
 #[template(path = "market/book_info_owned.html")]
 pub struct BookPageOwned {
     book: ProductInfo,
+    desc_rendered: String,
 }
 
 #[derive(Template)]
 #[template(path = "market/book_info_user.html")]
 pub struct BookPageUser {
     book: ProductInfo,
+    desc_rendered: String,
     seller: UserInfo,
 }
 
@@ -148,21 +163,26 @@ pub struct BookPageUser {
 #[template(path = "market/book_info_guest.html")]
 pub struct BookPageGuest {
     book: ProductInfo,
+    desc_rendered: String,
 }
 
 // If the seller is the user, buttons like update and delete are displayed
 #[get("/book_info", rank = 1)]
 pub async fn book_page_owned(book: BookInfoGuard, _auth: Authorized) -> BookPageOwned {
+    let rendered = markdown_to_html(book.book_info.get_description(), &COMRAK_OPT);
     BookPageOwned {
         book: book.book_info,
+        desc_rendered: rendered,
     }
 }
 
 // If the user is signed in but not authorized, book information and seller information will be displayed
 #[get("/book_info", rank = 2)]
 pub async fn book_page_user(book: BookInfoGuard, _user: UserIdGuard) -> BookPageUser {
+    let rendered = markdown_to_html(book.book_info.get_description(), &COMRAK_OPT);
     BookPageUser {
         book: book.book_info,
+        desc_rendered: rendered,
         seller: book.seller_info,
     }
 }
@@ -170,8 +190,10 @@ pub async fn book_page_user(book: BookInfoGuard, _user: UserIdGuard) -> BookPage
 // If the user is not signed in, only book information will be displayed
 #[get("/book_info", rank = 3)]
 pub async fn book_page_guest(book: BookInfoGuard) -> BookPageGuest {
+    let rendered = markdown_to_html(book.book_info.get_description(), &COMRAK_OPT);
     BookPageGuest {
         book: book.book_info,
+        desc_rendered: rendered,
     }
 }
 

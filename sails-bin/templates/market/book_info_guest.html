@@ -1,5 +1,24 @@
 {% extends "base.html" %}
+{% block head %}
+{% call super() %}
+<link href="/static/css/markdown.css" rel="stylesheet">
+<style>
+	.markdown-body {
+		box-sizing: border-box;
+		min-width: 200px;
+		margin: 0 auto;
+		padding: 45px;
+	}
+
+	@media (max-width: 767px) {
+		.markdown-body {
+			padding: 15px;
+		}
+	}
+</style>
+{% endblock head %}
 {% block title %}Book info{% endblock title %}
+
 {% block content %}
 <main class="container">
     <div class="bg-light p-5 rounded">
@@ -17,9 +36,13 @@
     </tr>
     </tbody>
     </table>
-    <h5>Description</h5>
-    <pre>{{ book.get_description() }}</pre>
     {% endblock %}
+    </div>
+    <br>
+
+    <div class="bg-light p-5 rounded markdown-body">
+      <h1>Description</h1>
+      {{ desc_rendered|safe }}
     </div>
     <br>
 
