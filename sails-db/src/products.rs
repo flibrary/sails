@@ -1,4 +1,10 @@
-use crate::{error::SailsDbResult as Result, schema::products, users::UserId, Cmp, Order};
+use crate::{
+    categories::Categories,
+    error::{SailsDbError, SailsDbResult as Result},
+    schema::products,
+    users::UserId,
+    Cmp, Order,
+};
 use diesel::{prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
@@ -156,6 +162,7 @@ impl<'a> ProductFinder<'a> {
 #[derive(Debug, Serialize, Deserialize, Clone, FromForm, AsChangeset)]
 #[table_name = "products"]
 pub struct IncompleteProductOwned {
+    // This is the ID (UUID) of the category
     pub category: String,
     pub prodname: String,
     pub price: i64,
@@ -205,6 +212,13 @@ impl<'a> IncompleteProduct<'a> {
     pub fn create(self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
         use crate::schema::products::dsl::*;
         let id_cloned = Uuid::new_v4().to_string();
+
+        let ctg = Categories::find_by_id(conn, self.category)?;
+        if !ctg.is_leaf() {
+            return Err(SailsDbError::NonLeafCategory);
+        } else {
+        }
+
         let value = (
             id.eq(&id_cloned),
             seller_id.eq(seller.get_id()),

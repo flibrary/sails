@@ -6,7 +6,7 @@ use rocket::{
     request::FlashMessage,
     response::{Flash, Redirect},
 };
-use sails_db::{categories::*, products::*, users::*};
+use sails_db::{categories::*, error::SailsDbError, products::*, users::*};
 
 use crate::{guards::*, wrap_op, DbConn, Msg};
 
@@ -148,6 +148,7 @@ pub async fn post_book_error_page() -> Flash<Redirect> {
 #[template(path = "market/book_info_owned.html")]
 pub struct BookPageOwned {
     book: ProductInfo,
+    category: Category,
     desc_rendered: String,
 }
 
@@ -155,6 +156,7 @@ pub struct BookPageOwned {
 #[template(path = "market/book_info_user.html")]
 pub struct BookPageUser {
     book: ProductInfo,
+    category: Category,
     desc_rendered: String,
     seller: UserInfo,
 }
@@ -163,6 +165,7 @@ pub struct BookPageUser {
 #[template(path = "market/book_info_guest.html")]
 pub struct BookPageGuest {
     book: ProductInfo,
+    category: Category,
     desc_rendered: String,
 }
 
@@ -172,6 +175,7 @@ pub async fn book_page_owned(book: BookInfoGuard, _auth: Authorized) -> BookPage
     let rendered = markdown_to_html(book.book_info.get_description(), &COMRAK_OPT);
     BookPageOwned {
         book: book.book_info,
+        category: book.category,
         desc_rendered: rendered,
     }
 }
@@ -182,6 +186,7 @@ pub async fn book_page_user(book: BookInfoGuard, _user: UserIdGuard) -> BookPage
     let rendered = markdown_to_html(book.book_info.get_description(), &COMRAK_OPT);
     BookPageUser {
         book: book.book_info,
+        category: book.category,
         desc_rendered: rendered,
         seller: book.seller_info,
     }
@@ -193,6 +198,7 @@ pub async fn book_page_guest(book: BookInfoGuard) -> BookPageGuest {
     let rendered = markdown_to_html(book.book_info.get_description(), &COMRAK_OPT);
     BookPageGuest {
         book: book.book_info,
+        category: book.category,
         desc_rendered: rendered,
     }
 }
@@ -253,7 +259,7 @@ pub async fn categories(
 #[derive(Template)]
 #[template(path = "market/all_books.html")]
 pub struct AllBooks {
-    books: Vec<ProductInfo>,
+    books: Vec<(ProductInfo, Category)>,
     inner: crate::Msg,
 }
 
@@ -265,16 +271,26 @@ pub async fn all_books(
     flash: Option<FlashMessage<'_>>,
 ) -> Result<AllBooks, Flash<Redirect>> {
     Ok(AllBooks {
-        books: if let Some(name) = category {
-            wrap_op(
-                conn.run(move |c| ProductFinder::new(c, None).category(&name).search_info())
-                    .await,
-                "/",
-            )?
-        } else {
-            // Default with all products
-            wrap_op(conn.run(move |c| ProductFinder::list_info(c)).await, "/")?
-        },
+        books: conn
+            .run(
+                move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
+                    let book_info = if let Some(id) = category {
+                        ProductFinder::new(c, None).category(&id).search_info()?
+                    } else {
+                        ProductFinder::list_info(c)?
+                    };
+
+                    book_info
+                        .into_iter()
+                        .map(|x| {
+                            let ctg = Categories::find_by_id(c, x.get_category()).unwrap();
+                            Ok((x, ctg))
+                        })
+                        .collect()
+                },
+            )
+            .await
+            .unwrap(),
         inner: Msg::from_flash(flash),
     })
 }

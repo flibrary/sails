@@ -10,7 +10,12 @@ use rocket::{
     request::FlashMessage,
     response::{Flash, Redirect},
 };
-use sails_db::{products::*, users::*};
+use sails_db::{
+    categories::{Categories, Category},
+    error::SailsDbError,
+    products::*,
+    users::*,
+};
 
 // Form used for validating an user
 #[derive(FromForm)]
@@ -123,7 +128,7 @@ pub async fn logout(jar: &CookieJar<'_>) -> Redirect {
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
     user: UserInfo,
-    books: Vec<ProductInfo>,
+    books: Vec<(ProductInfo, Category)>,
     inner: Msg,
 }
 
@@ -138,13 +143,21 @@ pub async fn portal(
         let uid_cloned = user.get_id().to_string();
         // TODO: get rid of this unwrap
         let books = conn
-            .run(move |c| {
-                ProductFinder::new(c, None)
-                    .seller(&uid_cloned)
-                    .search_info()
-            })
+            .run(
+                move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
+                    ProductFinder::new(c, None)
+                        .seller(&uid_cloned)
+                        .search_info()?
+                        .into_iter()
+                        .map(|x| {
+                            let ctg = Categories::find_by_id(c, x.get_category())?;
+                            Ok((x, ctg))
+                        })
+                        .collect()
+                },
+            )
             .await
-            .unwrap();
+            .unwrap(); // No error should be tolerated here. 500 is expected
         Ok(PortalPage {
             user,
             books,

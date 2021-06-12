@@ -5,6 +5,7 @@ use crate::{
 use diesel::{prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 // A pseudo struct for managing the categories table.
 pub struct Categories;
@@ -47,9 +48,22 @@ impl Categories {
         Ok(diesel::delete(categories.filter(id.eq(id_provided))).execute(conn)?)
     }
 
-    pub fn create(conn: &SqliteConnection, id_provided: impl ToString) -> Result<String> {
+    pub fn delete_all(conn: &SqliteConnection) -> Result<usize> {
         use crate::schema::categories::dsl::*;
-        let category = Category::new(id_provided);
+        Ok(diesel::delete(categories).execute(conn)?)
+    }
+
+    pub fn create(conn: &SqliteConnection, name_provided: impl ToString) -> Result<String> {
+        Self::create_with_id(conn, name_provided, Uuid::new_v4().to_string())
+    }
+
+    pub fn create_with_id(
+        conn: &SqliteConnection,
+        name_provided: impl ToString,
+        id_provided: impl ToString,
+    ) -> Result<String> {
+        use crate::schema::categories::dsl::*;
+        let category = Category::new(name_provided, id_provided);
         let id_cloned: String = category.id.clone();
         if let Ok(0) = Self::by_id(&category.id).count().get_result(conn) {
             // This means that we have to insert
@@ -89,16 +103,18 @@ impl Categories {
 )]
 #[table_name = "categories"]
 pub struct Category {
-    pub id: String,
+    id: String,
+    name: String,
     parent_id: Option<String>,
     is_leaf: bool,
 }
 
 impl Category {
     // Create a new leaf node with no parent_id
-    pub fn new(id: impl ToString) -> Self {
+    pub fn new(name: impl ToString, id: impl ToString) -> Self {
         Self {
             id: id.to_string(),
+            name: name.to_string(),
             parent_id: None,
             is_leaf: true,
         }
@@ -106,6 +122,10 @@ impl Category {
 
     pub fn id(&self) -> &str {
         &self.id
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     pub fn is_leaf(&self) -> bool {
@@ -119,6 +139,61 @@ impl Category {
         if parent.is_leaf {
             parent.is_leaf = false;
         }
+    }
+}
+
+use std::collections::BTreeMap;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Value {
+    Id(Uuid),
+    SubCategory(CategoryBuilderInner),
+}
+
+pub type CategoryBuilderInner = BTreeMap<String, Value>;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct CtgBuilder {
+    #[serde(rename = "categories")]
+    inner: CategoryBuilderInner,
+}
+
+impl CtgBuilder {
+    pub fn build(self, conn: &SqliteConnection) -> Result<()> {
+        fn walk(
+            c: &diesel::SqliteConnection,
+            parent_id: Option<&str>,
+            current: &CategoryBuilderInner,
+        ) -> Result<()> {
+            for (name, value) in current {
+                match value {
+                    Value::Id(id) => {
+                        println!("{:?}", id);
+                        // Create the node
+                        Categories::create_with_id(c, name, id)?;
+
+                        // If there is a parent, link it back
+                        if let Some(parent_id) = parent_id {
+                            Categories::insert(c, &id.to_string(), parent_id)?;
+                        } else {
+                        }
+                    }
+                    Value::SubCategory(sub) => {
+                        println!("{:?}", sub);
+                        let self_id = Categories::create(c, name).unwrap();
+                        if let Some(parent_id) = parent_id {
+                            Categories::insert(c, &self_id.to_string(), parent_id)?;
+                        } else {
+                        }
+                        walk(c, Some(&self_id), sub)?
+                    }
+                }
+            }
+            Ok(())
+        }
+
+        walk(conn, None, &self.inner)
     }
 }
 

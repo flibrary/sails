@@ -34,4 +34,7 @@ pub enum SailsDbError {
 
     #[error("product doesn't exist")]
     ProductNotFound,
+
+    #[error("inserting product on non-leaf category is not allowed")]
+    NonLeafCategory,
 }

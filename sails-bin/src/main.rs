@@ -25,9 +25,13 @@ use rocket::{
     Build, Rocket,
 };
 use rust_embed::RustEmbed;
-use sails_db::{categories::Categories, error::SailsDbError};
+use sails_db::{
+    categories::{Categories, CtgBuilder},
+    error::SailsDbError,
+};
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
+
 #[macro_use]
 extern crate rocket;
 #[macro_use]
@@ -73,39 +77,26 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     embed_migrations!();
 
     let conn = DbConn::get_one(&rocket).await.expect("database connection");
+
+    let ctg = rocket.state::<CtgBuilder>().cloned();
+    // Initialize the database
     conn.run(|c| {
         // Enforce foreign key relation
-        c.batch_execute("PRAGMA foreign_keys = ON;").unwrap();
         embedded_migrations::run(c).expect("can run migrations");
 
-        if Categories::list(c).unwrap().is_empty() {
-            // The categories table is empty, create new one by default.
-            // If there is an error, ignore it
-            let _ = Categories::create(c, "High School");
+        c.batch_execute("PRAGMA foreign_keys = OFF;").unwrap();
 
-            let _ = Categories::create(c, "Economics");
-            let _ = Categories::insert(c, "Economics", "High School");
+        // Delete all the categories by default
+        Categories::delete_all(c).unwrap();
 
-            let _ = Categories::create(c, "Physics");
-            let _ = Categories::insert(c, "Physics", "High School");
+        c.batch_execute("PRAGMA foreign_keys = ON;").unwrap();
 
-            let _ = Categories::create(c, "English");
-            let _ = Categories::insert(c, "English", "High School");
-
-            let _ = Categories::create(c, "Chemistry");
-            let _ = Categories::insert(c, "Chemistry", "High School");
-
-            let _ = Categories::create(c, "Biology");
-            let _ = Categories::insert(c, "Biology", "High School");
-
-            let _ = Categories::create(c, "Business");
-            let _ = Categories::insert(c, "Business", "High School");
+        if let Some(ctg) = ctg {
+            ctg.build(c).unwrap()
         } else {
-            // Do nothing because else UUID of the category changes, which breaks the product references
         }
     })
     .await;
-
     rocket
 }
 
@@ -194,6 +185,7 @@ fn rocket() -> _ {
     rocket::custom(figment)
         .attach(DbConn::fairing())
         .attach(Shield::new())
+        .attach(AdHoc::config::<CtgBuilder>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .mount("/", routes![index])
         .mount("/static", routes![get_file])

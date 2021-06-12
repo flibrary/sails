@@ -45,8 +45,22 @@ fn search_products() {
     .unwrap();
 
     // The book category
+    let books = Categories::create(&conn, "Books").unwrap();
     let econ_id = Categories::create(&conn, "Economics Books").unwrap();
     let phys_id = Categories::create(&conn, "Physics Books").unwrap();
+
+    Categories::insert(&conn, &econ_id, &books).unwrap();
+    Categories::insert(&conn, &phys_id, &books).unwrap();
+
+    // Non-leaf categories are not allowed to insert
+    assert!(IncompleteProduct::new(
+        books.as_str(),
+        "Krugman's Economics 2nd Edition",
+        700,
+        "A very great book on the subject of Economics",
+    )
+    .create(&conn, &user_id)
+    .is_err());
 
     IncompleteProduct::new(
         econ_id.as_str(),
