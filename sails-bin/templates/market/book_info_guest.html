@@ -32,7 +32,12 @@
     </tr>
     <tr>
       <th scope="row">Category</th>
-      <td><a href="categories?ctg={{ category.id() }}">{{ category.name() }}</a></td>
+      	{% match category %}
+	{% when Some with (ctg) %}
+        <td><a href="categories?ctg={{ ctg.id() }}">{{ ctg.name() }}</a></td>
+        {% when None %}
+	<td>Not categorized</td>
+        {% endmatch %}
     </tr>
     </tbody>
     </table>

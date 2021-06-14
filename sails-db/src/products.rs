@@ -1,5 +1,8 @@
+// We have to ensure: all the places where category can be supplied has to be using type Category instead of String.
+// If we cannot ensure on derivations like those did by serde, we then have to use isolation types to ensure it on a type level
+
 use crate::{
-    categories::Categories,
+    categories::{Categories, CtgTrait, LeafCategory},
     error::{SailsDbError, SailsDbResult as Result},
     schema::products,
     users::UserId,
@@ -30,7 +33,7 @@ impl ProductId {
         Ok(())
     }
 
-    pub fn update(&self, conn: &SqliteConnection, info: IncompleteProduct) -> Result<()> {
+    pub fn update(&self, conn: &SqliteConnection, info: SafeIncompleteProduct) -> Result<()> {
         diesel::update(self).set(info).execute(conn)?;
         Ok(())
     }
@@ -38,7 +41,7 @@ impl ProductId {
     pub fn update_owned(
         &self,
         conn: &SqliteConnection,
-        info: IncompleteProductOwned,
+        info: SafeIncompleteProductOwned,
     ) -> Result<()> {
         diesel::update(self).set(info).execute(conn)?;
         Ok(())
@@ -132,9 +135,9 @@ impl<'a> ProductFinder<'a> {
         self
     }
 
-    pub fn category(mut self, category_provided: &'a str) -> Self {
+    pub fn category(mut self, category_provided: &'a LeafCategory) -> Self {
         use crate::schema::products::dsl::*;
-        self.query = self.query.filter(category.eq(category_provided));
+        self.query = self.query.filter(category.eq(category_provided.id()));
         self
     }
 
@@ -159,8 +162,23 @@ impl<'a> ProductFinder<'a> {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, FromForm, AsChangeset)]
+pub trait ToSafe<T> {
+    fn verify(self, conn: &SqliteConnection) -> Result<T>;
+}
+
+// category-verified product
+#[derive(Debug, Clone, AsChangeset)]
 #[table_name = "products"]
+pub struct SafeIncompleteProductOwned {
+    // This is the ID (UUID) of the category
+    pub category: String,
+    pub prodname: String,
+    pub price: i64,
+    pub description: String,
+}
+
+// TODO: We can ensure that category does exist, but we cannot ensure that category is the leaf
+#[derive(Debug, Serialize, Deserialize, Clone, FromForm)]
 pub struct IncompleteProductOwned {
     // This is the ID (UUID) of the category
     pub category: String,
@@ -169,10 +187,31 @@ pub struct IncompleteProductOwned {
     pub description: String,
 }
 
+impl ToSafe<SafeIncompleteProductOwned> for IncompleteProductOwned {
+    fn verify(self, conn: &SqliteConnection) -> Result<SafeIncompleteProductOwned> {
+        let ctg = Categories::find_by_id(conn, &self.category)?;
+        if ctg.is_leaf() {
+            Ok(SafeIncompleteProductOwned {
+                category: self.category,
+                prodname: self.prodname,
+                price: self.price,
+                description: self.description,
+            })
+        } else {
+            Err(SailsDbError::NonLeafCategory)
+        }
+    }
+}
+
 impl IncompleteProductOwned {
-    pub fn new<T: ToString>(category: T, prodname: T, price: i64, description: T) -> Self {
+    pub fn new<T: ToString>(
+        category: &LeafCategory,
+        prodname: T,
+        price: i64,
+        description: T,
+    ) -> Self {
         Self {
-            category: category.to_string(),
+            category: category.id().to_string(),
             prodname: prodname.to_string(),
             price,
             description: description.to_string(),
@@ -190,35 +229,36 @@ impl IncompleteProductOwned {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, FromForm, AsChangeset)]
+// category-verified product
+#[derive(Debug, Clone, AsChangeset)]
 #[table_name = "products"]
-pub struct IncompleteProduct<'a> {
+pub struct SafeIncompleteProduct<'a> {
     pub category: &'a str,
     pub prodname: &'a str,
     pub price: i64,
     pub description: &'a str,
 }
 
-impl<'a> IncompleteProduct<'a> {
-    pub fn new(category: &'a str, prodname: &'a str, price: i64, description: &'a str) -> Self {
-        Self {
-            category,
-            prodname,
-            price,
-            description,
+impl<'a> ToSafe<SafeIncompleteProduct<'a>> for IncompleteProduct<'a> {
+    fn verify(self, conn: &SqliteConnection) -> Result<SafeIncompleteProduct<'a>> {
+        let ctg = Categories::find_by_id(conn, &self.category)?;
+        if ctg.is_leaf() {
+            Ok(SafeIncompleteProduct {
+                category: self.category,
+                prodname: self.prodname,
+                price: self.price,
+                description: self.description,
+            })
+        } else {
+            Err(SailsDbError::NonLeafCategory)
         }
     }
+}
 
+impl<'a> SafeIncompleteProduct<'a> {
     pub fn create(self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
         use crate::schema::products::dsl::*;
         let id_cloned = Uuid::new_v4().to_string();
-
-        let ctg = Categories::find_by_id(conn, self.category)?;
-        if !ctg.is_leaf() {
-            return Err(SailsDbError::NonLeafCategory);
-        } else {
-        }
-
         let value = (
             id.eq(&id_cloned),
             seller_id.eq(seller.get_id()),
@@ -229,6 +269,34 @@ impl<'a> IncompleteProduct<'a> {
         );
         diesel::insert_into(products).values(value).execute(conn)?;
         Ok(ProductId { id: id_cloned })
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, FromForm)]
+pub struct IncompleteProduct<'a> {
+    pub category: &'a str,
+    pub prodname: &'a str,
+    pub price: i64,
+    pub description: &'a str,
+}
+
+impl<'a> IncompleteProduct<'a> {
+    pub fn new(
+        category: &'a LeafCategory,
+        prodname: &'a str,
+        price: i64,
+        description: &'a str,
+    ) -> Self {
+        Self {
+            category: category.id(),
+            prodname,
+            price,
+            description,
+        }
+    }
+
+    pub fn create(self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
+        self.verify(conn)?.create(conn, seller)
     }
 }
 
@@ -263,7 +331,7 @@ impl ProductInfo {
         &self.description
     }
 
-    pub fn get_category(&self) -> &str {
+    pub fn get_category_id(&self) -> &str {
         &self.category
     }
 
@@ -282,9 +350,9 @@ impl ProductInfo {
     }
 
     /// Set the product info's category.
-    pub fn set_category(mut self, category: impl ToString) -> Self {
-        self.category = category.to_string();
-        self
+    pub fn set_category(mut self, category: &LeafCategory) -> Result<Self> {
+        self.category = category.id().to_string();
+        Ok(self)
     }
 
     /// Set the product info's prodname.

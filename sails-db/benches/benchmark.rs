@@ -1,5 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use sails_db::{categories::Categories, products::*, test_utils::establish_connection, users::*};
+use sails_db::{categories::Category, products::*, test_utils::establish_connection, users::*};
 
 fn login_user(c: &mut Criterion) {
     let conn = establish_connection();
@@ -34,11 +34,15 @@ fn products(c: &mut Criterion) {
     .unwrap();
 
     // The book category
-    Categories::create(&conn, "Economics Books").unwrap();
-    Categories::create(&conn, "Physics Books").unwrap();
+    let econ = Category::create(&conn, "Economics Books")
+        .and_then(Category::into_leaf)
+        .unwrap();
+    let phys = Category::create(&conn, "Physics Books")
+        .and_then(Category::into_leaf)
+        .unwrap();
 
     IncompleteProduct::new(
-        "Economics Books",
+        &econ,
         "Krugman's Economics 2nd Edition",
         700,
         "A very great book on the subject of Economics",
@@ -48,7 +52,7 @@ fn products(c: &mut Criterion) {
 
     // Another Krugman's Economics, with a lower price!
     IncompleteProduct::new(
-        "Economics Books",
+        &econ,
         "Krugman's Economics 2nd Edition",
         500,
         "A very great book on the subject of Economics",
@@ -58,7 +62,7 @@ fn products(c: &mut Criterion) {
 
     // Another Krugman's Economics, with a lower price!
     IncompleteProduct::new(
-        "Economics Books",
+        &econ,
         "Krugman's Economics 2nd Edition",
         600,
         "A very great book on the subject of Economics",
@@ -68,7 +72,7 @@ fn products(c: &mut Criterion) {
 
     // Another different economics book
     IncompleteProduct::new(
-        "Economics Books",
+        &econ,
         "The Economics",
         600,
         "I finally had got a different econ textbook!",
@@ -79,7 +83,7 @@ fn products(c: &mut Criterion) {
     // Feynman's Lecture on Physics!
     for _ in 1..200 {
         IncompleteProduct::new(
-            "Physics Books",
+            &phys,
             "Feynman's Lecture on Physics",
             900,
             "A very masterpiece on the theory of the universe",

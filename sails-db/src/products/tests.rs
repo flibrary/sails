@@ -1,5 +1,5 @@
 use super::*;
-use crate::{categories::Categories, test_utils::establish_connection, users::*, Cmp};
+use crate::{categories::Category, test_utils::establish_connection, users::*, Cmp};
 
 #[test]
 fn create_product() {
@@ -17,9 +17,11 @@ fn create_product() {
     .unwrap();
 
     // The book category
-    let econ_id = Categories::create(&conn, "Economics Books").unwrap();
+    let econ = Category::create(&conn, "Economics Books")
+        .and_then(Category::into_leaf)
+        .unwrap();
     IncompleteProduct::new(
-        econ_id.as_str(),
+        &econ,
         "Krugman's Economics 2nd Edition",
         700,
         "A very great book on the subject of Economics",
@@ -45,16 +47,22 @@ fn search_products() {
     .unwrap();
 
     // The book category
-    let books = Categories::create(&conn, "Books").unwrap();
-    let econ_id = Categories::create(&conn, "Economics Books").unwrap();
-    let phys_id = Categories::create(&conn, "Physics Books").unwrap();
+    let mut books = Category::create(&conn, "Books")
+        .and_then(Category::into_leaf)
+        .unwrap();
+    let mut econ = Category::create(&conn, "Economics Books")
+        .and_then(Category::into_leaf)
+        .unwrap();
+    let mut phys = Category::create(&conn, "Physics Books")
+        .and_then(Category::into_leaf)
+        .unwrap();
 
-    Categories::insert(&conn, &econ_id, &books).unwrap();
-    Categories::insert(&conn, &phys_id, &books).unwrap();
+    econ.insert(&conn, &mut books).unwrap();
+    phys.insert(&conn, &mut books).unwrap();
 
     // Non-leaf categories are not allowed to insert
     assert!(IncompleteProduct::new(
-        books.as_str(),
+        &books,
         "Krugman's Economics 2nd Edition",
         700,
         "A very great book on the subject of Economics",
@@ -63,7 +71,7 @@ fn search_products() {
     .is_err());
 
     IncompleteProduct::new(
-        econ_id.as_str(),
+        &econ,
         "Krugman's Economics 2nd Edition",
         700,
         "A very great book on the subject of Economics",
@@ -73,7 +81,7 @@ fn search_products() {
 
     // Another Krugman's Economics, with a lower price!
     IncompleteProduct::new(
-        econ_id.as_str(),
+        &econ,
         "Krugman's Economics 2nd Edition",
         500,
         "A very great book on the subject of Economics",
@@ -83,7 +91,7 @@ fn search_products() {
 
     // Another Krugman's Economics, with a lower price!
     IncompleteProduct::new(
-        econ_id.as_str(),
+        &econ,
         "Krugman's Economics 2nd Edition",
         600,
         "That is a bad book though",
@@ -93,7 +101,7 @@ fn search_products() {
 
     // Another different economics book
     IncompleteProduct::new(
-        econ_id.as_str(),
+        &econ,
         "The Economics",
         600,
         "I finally had got a different econ textbook!",
@@ -103,7 +111,7 @@ fn search_products() {
 
     // Feynman's Lecture on Physics!
     IncompleteProduct::new(
-        phys_id.as_str(),
+        &phys,
         "Feynman's Lecture on Physics",
         900,
         "A very masterpiece on the theory of the universe",
@@ -147,7 +155,7 @@ fn search_products() {
     // Search by category
     assert_eq!(
         ProductFinder::new(&conn, None)
-            .category(&econ_id)
+            .category(&econ)
             .price(550, Cmp::GreaterThan)
             .search()
             .unwrap()
@@ -172,9 +180,11 @@ fn delete_product() {
     .unwrap();
 
     // The book category
-    let econ_id = Categories::create(&conn, "Economics Books").unwrap();
+    let econ = Category::create(&conn, "Economics Books")
+        .and_then(Category::into_leaf)
+        .unwrap();
     let id = IncompleteProduct::new(
-        econ_id.as_str(),
+        &econ,
         "Krugman's Economics 2nd Edition",
         600,
         "That is a bad book though",

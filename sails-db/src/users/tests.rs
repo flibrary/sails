@@ -1,5 +1,5 @@
 use super::*;
-use crate::{categories::Categories, products::*, test_utils::establish_connection};
+use crate::{categories::Category, products::*, test_utils::establish_connection};
 
 #[test]
 fn create_user() {
@@ -86,28 +86,20 @@ fn delete_user() {
     .create(&conn)
     .unwrap();
 
-    let econ_id = Categories::create(&conn, "Economics").unwrap();
-    IncompleteProduct::new(econ_id.as_str(), "Economics", 1, "A horrible book")
+    let econ = Category::create(&conn, "Economics")
+        .and_then(Category::into_leaf)
+        .unwrap();
+    IncompleteProduct::new(&econ, "Economics", 1, "A horrible book")
         .create(&conn, &user)
         .unwrap();
 
-    IncompleteProduct::new(
-        econ_id.as_str(),
-        "The Economics",
-        1,
-        "Another horrible book",
-    )
-    .create(&conn, &user)
-    .unwrap();
+    IncompleteProduct::new(&econ, "The Economics", 1, "Another horrible book")
+        .create(&conn, &user)
+        .unwrap();
 
-    IncompleteProduct::new(
-        econ_id.as_str(),
-        "Economics Principle",
-        1,
-        "Another horrible book",
-    )
-    .create(&conn, &another_user)
-    .unwrap();
+    IncompleteProduct::new(&econ, "Economics Principle", 1, "Another horrible book")
+        .create(&conn, &another_user)
+        .unwrap();
 
     assert_eq!(ProductFinder::list(&conn).unwrap().len(), 3);
     assert_eq!(UserFinder::list(&conn).unwrap().len(), 2);

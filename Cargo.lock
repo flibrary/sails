@@ -696,7 +696,7 @@ dependencies = [
  "rand",
  "sha2",
  "subtle",
- "time 0.2.26",
+ "time 0.2.27",
  "version_check",
 ]
 
@@ -869,6 +869,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ee2393c4a91429dffb4bedf19f4d6abf27d8a732c8ce4980305d782e5426d57"
 
 [[package]]
+name = "delegate-attr"
+version = "0.2.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee7e7ea0dba407429d816e8e38dda1a467cd74737722f2ccc8eae60429a1a3ab"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "derive_more"
 version = "0.99.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -924,6 +935,7 @@ dependencies = [
  "diesel_derives",
  "libsqlite3-sys",
  "r2d2",
+ "uuid",
 ]
 
 [[package]]
@@ -1839,9 +1851,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.7.2"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af8b08b04175473088b46763e51ee54da5f9a164bc162f615b91bc179dbf15a3"
+checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
 
 [[package]]
 name = "oncemutex"
@@ -2405,7 +2417,8 @@ dependencies = [
 [[package]]
 name = "rocket"
 version = "0.5.0-rc.1"
-source = "git+https://github.com/SergioBenitez/Rocket?rev=e45e164#e45e16456160b31c6506e5c13bc6b2f1dfa795a6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a71c18c42a0eb15bf3816831caf0dad11e7966f2a41aaf486a701979c4dd1f2"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2430,7 +2443,7 @@ dependencies = [
  "serde",
  "state",
  "tempfile",
- "time 0.2.26",
+ "time 0.2.27",
  "tokio",
  "tokio-stream",
  "tokio-util",
@@ -2442,7 +2455,8 @@ dependencies = [
 [[package]]
 name = "rocket_codegen"
 version = "0.5.0-rc.1"
-source = "git+https://github.com/SergioBenitez/Rocket?rev=e45e164#e45e16456160b31c6506e5c13bc6b2f1dfa795a6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "66f5fa462f7eb958bba8710c17c5d774bbbd59809fa76fb1957af7e545aea8bb"
 dependencies = [
  "devise",
  "glob",
@@ -2457,7 +2471,8 @@ dependencies = [
 [[package]]
 name = "rocket_http"
 version = "0.5.0-rc.1"
-source = "git+https://github.com/SergioBenitez/Rocket?rev=e45e164#e45e16456160b31c6506e5c13bc6b2f1dfa795a6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23c8b7d512d2fcac2316ebe590cde67573844b99e6cc9ee0f53375fa16e25ebd"
 dependencies = [
  "cookie",
  "either",
@@ -2476,7 +2491,7 @@ dependencies = [
  "smallvec",
  "stable-pattern",
  "state",
- "time 0.2.26",
+ "time 0.2.27",
  "tokio",
  "uncased",
 ]
@@ -2484,7 +2499,8 @@ dependencies = [
 [[package]]
 name = "rocket_sync_db_pools"
 version = "0.1.0-rc.1"
-source = "git+https://github.com/SergioBenitez/Rocket?rev=e45e164#e45e16456160b31c6506e5c13bc6b2f1dfa795a6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38cfdfebd552d075c368e641c88a5cd6ce1c58c5c710548aeb777abb48830f4b"
 dependencies = [
  "diesel",
  "r2d2",
@@ -2497,7 +2513,8 @@ dependencies = [
 [[package]]
 name = "rocket_sync_db_pools_codegen"
 version = "0.1.0-rc.1"
-source = "git+https://github.com/SergioBenitez/Rocket?rev=e45e164#e45e16456160b31c6506e5c13bc6b2f1dfa795a6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5267808c094db5366e1d8925aaf9f2ce05ff9b3bd92cb18c7040a1fe219c2e25"
 dependencies = [
  "devise",
  "quote",
@@ -2596,8 +2613,10 @@ dependencies = [
  "check-if-email-exists",
  "chrono",
  "criterion",
+ "delegate-attr",
  "diesel",
  "diesel_migrations",
+ "maplit",
  "phonenumber",
  "rocket",
  "serde",
@@ -3040,9 +3059,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.2.26"
+version = "0.2.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08a8cbfbf47955132d0202d1662f49b2423ae35862aee471f3ba4b133358f372"
+checksum = "4752a97f8eebd6854ff91f1c1824cd6160626ac4bd44287f7f4ea2035a02a242"
 dependencies = [
  "const_fn",
  "libc",
@@ -3065,9 +3084,9 @@ dependencies = [
 
 [[package]]
 name = "time-macros-impl"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5c3be1edfad6027c69f5491cf4cb310d1a71ecd6af742788c6ff8bced86b8fa"
+checksum = "fd3c141a1b43194f3f56a1411225df8646c55781d5f26db825b3d98507eb482f"
 dependencies = [
  "proc-macro-hack",
  "proc-macro2",

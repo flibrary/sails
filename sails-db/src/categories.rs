@@ -2,7 +2,8 @@ use crate::{
     error::{SailsDbError, SailsDbResult as Result},
     schema::categories,
 };
-use diesel::{prelude::*, sqlite::Sqlite};
+use delegate_attr::delegate;
+use diesel::prelude::*;
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -10,10 +11,8 @@ use uuid::Uuid;
 // A pseudo struct for managing the categories table.
 pub struct Categories;
 
-type BoxedQuery<'a> = categories::BoxedQuery<'a, Sqlite, categories::SqlType>;
-
 impl Categories {
-    pub fn list(conn: &SqliteConnection) -> Result<Vec<Category>> {
+    pub fn list_all(conn: &SqliteConnection) -> Result<Vec<Category>> {
         use crate::schema::categories::dsl::*;
         Ok(categories.load::<Category>(conn)?)
     }
@@ -30,11 +29,6 @@ impl Categories {
         Ok(categories.filter(is_leaf.eq(true)).load::<Category>(conn)?)
     }
 
-    fn by_id(id_provided: &'_ str) -> BoxedQuery<'_> {
-        use crate::schema::categories::dsl::*;
-        categories.into_boxed().filter(id.eq(id_provided))
-    }
-
     pub fn find_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<Category> {
         use crate::schema::categories::dsl::*;
         Ok(categories
@@ -43,58 +37,54 @@ impl Categories {
             .get_result::<Category>(conn)?)
     }
 
-    pub fn delete_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<usize> {
-        use crate::schema::categories::dsl::*;
-        Ok(diesel::delete(categories.filter(id.eq(id_provided))).execute(conn)?)
-    }
-
     pub fn delete_all(conn: &SqliteConnection) -> Result<usize> {
         use crate::schema::categories::dsl::*;
         Ok(diesel::delete(categories).execute(conn)?)
     }
+}
 
-    pub fn create(conn: &SqliteConnection, name_provided: impl ToString) -> Result<String> {
-        Self::create_with_id(conn, name_provided, Uuid::new_v4().to_string())
+// A trait governing both LeafCategory and Category
+pub trait CtgTrait: Sized {
+    type SubCategory: CtgTrait;
+
+    fn id(&self) -> &str;
+    fn name(&self) -> &str;
+    fn is_leaf(&self) -> bool;
+    fn insert(&mut self, conn: &SqliteConnection, parent: &mut impl CtgTrait) -> Result<()>;
+    fn set_leaf(&mut self, is_leaf: bool);
+    fn update(&self, conn: &SqliteConnection) -> Result<Self>;
+    fn delete(self, conn: &SqliteConnection) -> Result<usize>;
+    fn subcategory(&self, conn: &SqliteConnection) -> Result<Vec<Self::SubCategory>>;
+}
+
+// A type-level wraper to ensuer that the category is leaf
+pub struct LeafCategory(Category);
+
+// Rustfmt tends to remove pub
+impl CtgTrait for LeafCategory {
+    type SubCategory = Category;
+
+    fn id(&self) -> &str {
+        CtgTrait::id(&self.0)
+    }
+    #[delegate(self.0)]
+    fn name(&self) -> &str;
+    #[delegate(self.0)]
+    fn insert(&mut self, conn: &SqliteConnection, parent: &mut impl CtgTrait) -> Result<()>;
+    #[delegate(self.0)]
+    fn is_leaf(&self) -> bool;
+    #[delegate(self.0)]
+    fn set_leaf(&mut self, is_leaf: bool);
+
+    fn update(&self, conn: &SqliteConnection) -> Result<Self> {
+        Ok(LeafCategory(self.0.update(conn)?))
     }
 
-    pub fn create_with_id(
-        conn: &SqliteConnection,
-        name_provided: impl ToString,
-        id_provided: impl ToString,
-    ) -> Result<String> {
-        use crate::schema::categories::dsl::*;
-        let category = Category::new(name_provided, id_provided);
-        let id_cloned: String = category.id.clone();
-        if let Ok(0) = Self::by_id(&category.id).count().get_result(conn) {
-            // This means that we have to insert
-            diesel::insert_into(categories)
-                .values(category)
-                .execute(conn)?
-        } else {
-            return Err(SailsDbError::CategoryExisted);
-        };
-        Ok(id_cloned)
-    }
+    #[delegate(self.0)]
+    fn delete(self, conn: &SqliteConnection) -> Result<usize>;
 
-    pub fn subcategory(conn: &SqliteConnection, id_provided: &str) -> Result<Vec<Category>> {
-        use crate::schema::categories::dsl::*;
-        Ok(categories
-            .filter(parent_id.eq(id_provided))
-            .load::<Category>(conn)?)
-    }
-
-    pub fn insert(conn: &SqliteConnection, self_id: &str, parent_id_provided: &str) -> Result<()> {
-        let mut self_category = Self::by_id(self_id).first::<Category>(conn)?;
-        let mut parent_category = Self::by_id(parent_id_provided).first::<Category>(conn)?;
-        self_category.insert(&mut parent_category);
-        Self::update(conn, self_category)?;
-        Self::update(conn, parent_category)?;
-        Ok(())
-    }
-
-    pub fn update(conn: &SqliteConnection, category: Category) -> Result<()> {
-        category.save_changes::<Category>(conn)?;
-        Ok(())
+    fn subcategory(&self, conn: &SqliteConnection) -> Result<Vec<Category>> {
+        self.0.subcategory(conn)
     }
 }
 
@@ -110,8 +100,15 @@ pub struct Category {
 }
 
 impl Category {
-    // Create a new leaf node with no parent_id
-    pub fn new(name: impl ToString, id: impl ToString) -> Self {
+    pub fn into_leaf(self) -> Result<LeafCategory> {
+        if self.is_leaf() {
+            Ok(LeafCategory(self))
+        } else {
+            Err(SailsDbError::NonLeafCategory)
+        }
+    }
+
+    fn new(name: impl ToString, id: impl ToString) -> Self {
         Self {
             id: id.to_string(),
             name: name.to_string(),
@@ -120,29 +117,84 @@ impl Category {
         }
     }
 
-    pub fn id(&self) -> &str {
+    // Create a new category with a random UUID
+    pub fn create(conn: &SqliteConnection, name_provided: impl ToString) -> Result<Self> {
+        Self::create_with_id(conn, name_provided, Uuid::new_v4().to_string())
+    }
+
+    // Create a new category with a specific UUID
+    pub fn create_with_id(
+        conn: &SqliteConnection,
+        name_provided: impl ToString,
+        id_provided: impl ToString,
+    ) -> Result<Self> {
+        use crate::schema::categories::dsl::*;
+        let category = Category::new(name_provided, id_provided);
+
+        if let Ok(0) = categories
+            .filter(id.eq(&category.id))
+            .count()
+            .get_result(conn)
+        {
+            // This means that we have to insert
+            diesel::insert_into(categories)
+                .values(&category)
+                .execute(conn)?
+        } else {
+            return Err(SailsDbError::CategoryExisted);
+        };
+        Ok(category)
+    }
+}
+
+impl CtgTrait for Category {
+    type SubCategory = Self;
+
+    fn id(&self) -> &str {
         &self.id
     }
 
-    pub fn name(&self) -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 
-    pub fn is_leaf(&self) -> bool {
+    fn is_leaf(&self) -> bool {
         self.is_leaf
     }
 
     // To insert a node between A and B, first insert the node to A, then insert B to the node.
-    pub(crate) fn insert(&mut self, parent: &mut Category) {
-        self.parent_id = Some(parent.id.clone());
-        // If previously the parent was a leaf node, we then have to change it.
-        if parent.is_leaf {
-            parent.is_leaf = false;
+    fn insert(&mut self, conn: &SqliteConnection, parent: &mut impl CtgTrait) -> Result<()> {
+        self.parent_id = Some(parent.id().to_string());
+        if parent.is_leaf() {
+            parent.set_leaf(false);
         }
+        self.update(conn)?;
+        parent.update(conn)?;
+        Ok(())
+    }
+
+    fn set_leaf(&mut self, is_leaf: bool) {
+        self.is_leaf = is_leaf;
+    }
+
+    fn update(&self, conn: &SqliteConnection) -> Result<Self> {
+        Ok(self.save_changes::<Category>(conn)?)
+    }
+
+    fn delete(self, conn: &SqliteConnection) -> Result<usize> {
+        use crate::schema::categories::dsl::*;
+        Ok(diesel::delete(categories.filter(id.eq(self.id))).execute(conn)?)
+    }
+
+    fn subcategory(&self, conn: &SqliteConnection) -> Result<Vec<Category>> {
+        use crate::schema::categories::dsl::*;
+        Ok(categories
+            .filter(parent_id.eq(&self.id))
+            .load::<Category>(conn)?)
     }
 }
 
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::Arc};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -151,7 +203,7 @@ pub enum Value {
     SubCategory(CategoryBuilderInner),
 }
 
-pub type CategoryBuilderInner = BTreeMap<String, Value>;
+pub type CategoryBuilderInner = BTreeMap<Arc<str>, Value>;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CtgBuilder {
@@ -160,10 +212,14 @@ pub struct CtgBuilder {
 }
 
 impl CtgBuilder {
+    pub fn new(inner: CategoryBuilderInner) -> Self {
+        Self { inner }
+    }
+
     pub fn build(self, conn: &SqliteConnection) -> Result<()> {
         fn walk(
             c: &diesel::SqliteConnection,
-            parent_id: Option<&str>,
+            parent: Option<Category>,
             current: &CategoryBuilderInner,
         ) -> Result<()> {
             for (name, value) in current {
@@ -171,22 +227,21 @@ impl CtgBuilder {
                     Value::Id(id) => {
                         println!("{:?}", id);
                         // Create the node
-                        Categories::create_with_id(c, name, id)?;
+                        let mut self_ctg = Category::create_with_id(c, name, id)?;
 
                         // If there is a parent, link it back
-                        if let Some(parent_id) = parent_id {
-                            Categories::insert(c, &id.to_string(), parent_id)?;
+                        if let Some(mut parent) = parent.clone() {
+                            self_ctg.insert(c, &mut parent)?;
                         } else {
                         }
                     }
                     Value::SubCategory(sub) => {
-                        println!("{:?}", sub);
-                        let self_id = Categories::create(c, name).unwrap();
-                        if let Some(parent_id) = parent_id {
-                            Categories::insert(c, &self_id.to_string(), parent_id)?;
+                        let mut self_ctg = Category::create(c, name).unwrap();
+                        if let Some(mut parent) = parent.clone() {
+                            self_ctg.insert(c, &mut parent)?;
                         } else {
                         }
-                        walk(c, Some(&self_id), sub)?
+                        walk(c, Some(self_ctg), sub)?
                     }
                 }
             }

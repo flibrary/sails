@@ -53,7 +53,7 @@ pub async fn update_book(
     let book_id = book.book_id.get_id().to_string();
     // The user is the seller, he/she is authorized
     wrap_op(
-        conn.run(move |c| book.book_id.update_owned(c, info.into_inner()))
+        conn.run(move |c| book.book_id.update_owned(c, info.into_inner().verify(c)?))
             .await,
         uri!("/market", market),
     )?;
@@ -71,16 +71,7 @@ pub async fn create_book(
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     let product_id = wrap_op(
-        conn.run(move |c| {
-            IncompleteProduct::new(
-                &info.category,
-                &info.prodname,
-                info.price,
-                &info.description,
-            )
-            .create(c, &user.id)
-        })
-        .await,
+        conn.run(move |c| info.create(c, &user.id)).await,
         uri!("/market", market),
     )?;
     Ok(Redirect::to(format!(
@@ -148,7 +139,7 @@ pub async fn post_book_error_page() -> Flash<Redirect> {
 #[template(path = "market/book_info_owned.html")]
 pub struct BookPageOwned {
     book: ProductInfo,
-    category: Category,
+    category: Option<Category>,
     desc_rendered: String,
 }
 
@@ -156,7 +147,7 @@ pub struct BookPageOwned {
 #[template(path = "market/book_info_user.html")]
 pub struct BookPageUser {
     book: ProductInfo,
-    category: Category,
+    category: Option<Category>,
     desc_rendered: String,
     seller: UserInfo,
 }
@@ -165,7 +156,7 @@ pub struct BookPageUser {
 #[template(path = "market/book_info_guest.html")]
 pub struct BookPageGuest {
     book: ProductInfo,
-    category: Category,
+    category: Option<Category>,
     desc_rendered: String,
 }
 
@@ -237,19 +228,21 @@ pub async fn categories(
     // There is a specified category name
     let ctg_cloned = ctg.clone();
     let category = wrap_op(
-        conn.run(move |c| Categories::find_by_id(c, &ctg_cloned))
-            .await,
+        conn.run(move |c| Categories::find_by_id(c, &ctg)).await,
         uri!("/market", market),
     )?;
 
     // The category is a leaf, meaning that we then have to search for books related to that
     if category.is_leaf() {
-        Ok(Err(Redirect::to(uri!("/market", all_books(Some(ctg))))))
+        Ok(Err(Redirect::to(uri!(
+            "/market",
+            all_books(Some(ctg_cloned))
+        ))))
     } else {
         // The category is not a leaf, continuing down the path
         Ok(Ok(CategoriesPage {
             categories: wrap_op(
-                conn.run(move |c| Categories::subcategory(c, &ctg)).await,
+                conn.run(move |c| category.subcategory(c)).await,
                 uri!("/market", market),
             )?,
         }))
@@ -259,7 +252,8 @@ pub async fn categories(
 #[derive(Template)]
 #[template(path = "market/all_books.html")]
 pub struct AllBooks {
-    books: Vec<(ProductInfo, Category)>,
+    // By using Option<Category>, we ensure thatthere will be no panick even if category doesn't exist
+    books: Vec<(ProductInfo, Option<Category>)>,
     inner: crate::Msg,
 }
 
@@ -271,11 +265,12 @@ pub async fn all_books(
     flash: Option<FlashMessage<'_>>,
 ) -> Result<AllBooks, Flash<Redirect>> {
     Ok(AllBooks {
-        books: conn
-            .run(
-                move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
+        books: wrap_op(
+            conn.run(
+                move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
                     let book_info = if let Some(id) = category {
-                        ProductFinder::new(c, None).category(&id).search_info()?
+                        let ctg = Categories::find_by_id(c, &id).and_then(Category::into_leaf)?;
+                        ProductFinder::new(c, None).category(&ctg).search_info()?
                     } else {
                         ProductFinder::list_info(c)?
                     };
@@ -283,14 +278,15 @@ pub async fn all_books(
                     book_info
                         .into_iter()
                         .map(|x| {
-                            let ctg = Categories::find_by_id(c, x.get_category()).unwrap();
+                            let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
                             Ok((x, ctg))
                         })
                         .collect()
                 },
             )
-            .await
-            .unwrap(),
+            .await,
+            uri!("/market", market),
+        )?,
         inner: Msg::from_flash(flash),
     })
 }

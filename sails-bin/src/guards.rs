@@ -125,7 +125,7 @@ impl<'r> FromRequest<'r> for UserInfoGuard {
 pub struct BookInfoGuard {
     pub book_info: ProductInfo,
     pub seller_info: UserInfo,
-    pub category: Category,
+    pub category: Option<Category>,
 }
 
 #[rocket::async_trait]
@@ -139,7 +139,7 @@ impl<'r> FromRequest<'r> for BookInfoGuard {
         let db = try_outcome!(request.guard::<DbConn>().await);
         db.run(move |c| -> Result<BookInfoGuard, SailsDbError> {
             let book_info = book.book_id.get_info(c)?;
-            let category = Categories::find_by_id(c, book_info.get_category())?;
+            let category = Categories::find_by_id(c, book_info.get_category_id()).ok();
             Ok(BookInfoGuard {
                 book_info,
                 seller_info: book.seller_id.get_info(c)?,

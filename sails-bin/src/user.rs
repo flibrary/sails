@@ -11,7 +11,7 @@ use rocket::{
     response::{Flash, Redirect},
 };
 use sails_db::{
-    categories::{Categories, Category},
+    categories::{Categories, Category, CtgTrait},
     error::SailsDbError,
     products::*,
     users::*,
@@ -56,6 +56,7 @@ pub async fn create_user(
     info: Form<Strict<UserFormOwned>>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    // TODO: Get rid of check email
     let res = check_email(&CheckEmailInput::new(vec![info.id.clone()])).await;
     // If the server is invalid, then the output will be `Reachable::Invalid`
     if (res.get(0).unwrap().is_reachable == Reachable::Safe)
@@ -128,7 +129,7 @@ pub async fn logout(jar: &CookieJar<'_>) -> Redirect {
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
     user: UserInfo,
-    books: Vec<(ProductInfo, Category)>,
+    books: Vec<(ProductInfo, Option<Category>)>,
     inner: Msg,
 }
 
@@ -141,23 +142,22 @@ pub async fn portal(
 ) -> Result<PortalPage, Redirect> {
     if let Some(user) = user.map(|u| u.info) {
         let uid_cloned = user.get_id().to_string();
-        // TODO: get rid of this unwrap
         let books = conn
             .run(
-                move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
+                move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
                     ProductFinder::new(c, None)
                         .seller(&uid_cloned)
                         .search_info()?
                         .into_iter()
                         .map(|x| {
-                            let ctg = Categories::find_by_id(c, x.get_category())?;
+                            let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
                             Ok((x, ctg))
                         })
                         .collect()
                 },
             )
             .await
-            .unwrap(); // No error should be tolerated here. 500 is expected
+            .unwrap(); // No error should be tolerated here (database error). 500 is expected
         Ok(PortalPage {
             user,
             books,
