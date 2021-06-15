@@ -45,47 +45,42 @@ impl Categories {
 
 // A trait governing both LeafCategory and Category
 pub trait CtgTrait: Sized {
-    type SubCategory: CtgTrait;
-
     fn id(&self) -> &str;
     fn name(&self) -> &str;
     fn is_leaf(&self) -> bool;
-    fn insert(&mut self, conn: &SqliteConnection, parent: &mut impl CtgTrait) -> Result<()>;
-    fn set_leaf(&mut self, is_leaf: bool);
+    // Leaf category should only be allowed to insert to category, otherwise type leakage may occur
+    fn insert(&mut self, conn: &SqliteConnection, parent: &mut Category) -> Result<()>;
     fn update(&self, conn: &SqliteConnection) -> Result<Self>;
     fn delete(self, conn: &SqliteConnection) -> Result<usize>;
-    fn subcategory(&self, conn: &SqliteConnection) -> Result<Vec<Self::SubCategory>>;
 }
 
 // A type-level wraper to ensuer that the category is leaf
 pub struct LeafCategory(Category);
 
+impl LeafCategory {
+    pub fn into_category(self) -> Category {
+        self.0
+    }
+}
+
 // Rustfmt tends to remove pub
 impl CtgTrait for LeafCategory {
-    type SubCategory = Category;
-
     fn id(&self) -> &str {
         CtgTrait::id(&self.0)
     }
     #[delegate(self.0)]
     fn name(&self) -> &str;
     #[delegate(self.0)]
-    fn insert(&mut self, conn: &SqliteConnection, parent: &mut impl CtgTrait) -> Result<()>;
-    #[delegate(self.0)]
-    fn is_leaf(&self) -> bool;
-    #[delegate(self.0)]
-    fn set_leaf(&mut self, is_leaf: bool);
-
+    fn insert(&mut self, conn: &SqliteConnection, parent: &mut Category) -> Result<()>;
+    fn is_leaf(&self) -> bool {
+        true
+    }
     fn update(&self, conn: &SqliteConnection) -> Result<Self> {
         Ok(LeafCategory(self.0.update(conn)?))
     }
 
     #[delegate(self.0)]
     fn delete(self, conn: &SqliteConnection) -> Result<usize>;
-
-    fn subcategory(&self, conn: &SqliteConnection) -> Result<Vec<Category>> {
-        self.0.subcategory(conn)
-    }
 }
 
 #[derive(
@@ -145,11 +140,20 @@ impl Category {
         };
         Ok(category)
     }
+
+    pub fn set_leaf(&mut self, is_leaf: bool) {
+        self.is_leaf = is_leaf;
+    }
+
+    pub fn subcategory(&self, conn: &SqliteConnection) -> Result<Vec<Category>> {
+        use crate::schema::categories::dsl::*;
+        Ok(categories
+            .filter(parent_id.eq(&self.id))
+            .load::<Category>(conn)?)
+    }
 }
 
 impl CtgTrait for Category {
-    type SubCategory = Self;
-
     fn id(&self) -> &str {
         &self.id
     }
@@ -163,18 +167,14 @@ impl CtgTrait for Category {
     }
 
     // To insert a node between A and B, first insert the node to A, then insert B to the node.
-    fn insert(&mut self, conn: &SqliteConnection, parent: &mut impl CtgTrait) -> Result<()> {
-        self.parent_id = Some(parent.id().to_string());
+    fn insert(&mut self, conn: &SqliteConnection, parent: &mut Category) -> Result<()> {
+        self.parent_id = Some(CtgTrait::id(parent).to_string());
         if parent.is_leaf() {
             parent.set_leaf(false);
         }
         self.update(conn)?;
         parent.update(conn)?;
         Ok(())
-    }
-
-    fn set_leaf(&mut self, is_leaf: bool) {
-        self.is_leaf = is_leaf;
     }
 
     fn update(&self, conn: &SqliteConnection) -> Result<Self> {
@@ -184,13 +184,6 @@ impl CtgTrait for Category {
     fn delete(self, conn: &SqliteConnection) -> Result<usize> {
         use crate::schema::categories::dsl::*;
         Ok(diesel::delete(categories.filter(id.eq(self.id))).execute(conn)?)
-    }
-
-    fn subcategory(&self, conn: &SqliteConnection) -> Result<Vec<Category>> {
-        use crate::schema::categories::dsl::*;
-        Ok(categories
-            .filter(parent_id.eq(&self.id))
-            .load::<Category>(conn)?)
     }
 }
 

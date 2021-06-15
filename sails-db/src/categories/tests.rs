@@ -29,6 +29,7 @@ fn category_builder() {
     .build(&conn).unwrap();
 
     assert_eq!(Categories::list_all(&conn).unwrap().len(), 8);
+    assert_eq!(Categories::list_top(&conn).unwrap().len(), 3);
 }
 
 #[test]
