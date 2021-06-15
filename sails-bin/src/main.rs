@@ -218,7 +218,8 @@ fn rocket() -> _ {
                 market::book_page_error,
                 market::categories_all,
                 market::delete_book,
-                market::create_book
+                market::create_book,
+                market::instruction,
             ],
         )
         .mount(

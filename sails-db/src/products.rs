@@ -20,6 +20,10 @@ pub struct ProductId {
 }
 
 impl ProductId {
+    pub fn to_uuid(&self) -> Result<Uuid> {
+        Ok(<Uuid as std::str::FromStr>::from_str(&self.id)?)
+    }
+
     pub fn get_info(&self, conn: &SqliteConnection) -> Result<ProductInfo> {
         use crate::schema::products::dsl::*;
         Ok(products

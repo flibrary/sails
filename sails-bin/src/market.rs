@@ -75,7 +75,7 @@ pub async fn create_book(
         uri!("/market", market),
     )?;
     Ok(Redirect::to(format!(
-        "/market/book_info?book_id={}",
+        "/market/instruction?book_id={}",
         product_id.get_id()
     )))
 }
@@ -133,6 +133,33 @@ pub async fn post_book_error_page() -> Flash<Redirect> {
         Redirect::to("/user"),
         "please check if you have logged in and authorized to update/create",
     )
+}
+
+#[derive(Template)]
+#[template(path = "market/instruction.html")]
+pub struct InstructionPage {
+    // Id is the first part of the UUID, written in decimal
+    id: u32,
+    full_id: String,
+}
+
+#[get("/instruction")]
+pub async fn instruction(
+    book: BookIdGuard,
+    _auth: Authorized,
+) -> Result<InstructionPage, Flash<Redirect>> {
+    Ok(InstructionPage {
+        id: book.book_id.to_uuid().map_or_else(
+            |e| {
+                Err(Flash::error(
+                    Redirect::to(uri!("/market", market)),
+                    e.to_string(),
+                ))
+            },
+            |v| Ok(v.as_fields().0),
+        )?,
+        full_id: book.book_id.get_id().to_string(),
+    })
 }
 
 #[derive(Template)]

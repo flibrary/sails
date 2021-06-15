@@ -14,6 +14,9 @@ pub enum SailsDbError {
     #[error("failed to convert to a phone number: {0}")]
     PhoneParseError(#[from] phonenumber::ParseError),
 
+    #[error("failed to parse uuid: {0}")]
+    UuidError(#[from] uuid::Error),
+
     #[error("invalid phone number or email address")]
     InvalidIdentity,
 
