@@ -19,7 +19,7 @@ pub struct SendMessage {
 #[post("/send", data = "<info>")]
 pub async fn send(
     user: UserIdGuard,
-    receiver: ReceiverIdGuard,
+    receiver: UserIdParamGuard,
     info: Form<SendMessage>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -30,7 +30,7 @@ pub async fn send(
         uri!("/messages"),
     )?;
     Ok(Redirect::to(format!(
-        "/messages/chat?receiver_id={}#draft_section",
+        "/messages/chat?user_id={}#draft_section",
         receiver_id.get_id()
     )))
 }
@@ -54,7 +54,7 @@ pub async fn chat_error() -> Flash<Redirect> {
 pub async fn chat(
     conn: DbConn,
     user: UserIdGuard,
-    receiver: ReceiverInfoGuard,
+    receiver: UserInfoParamGuard,
 ) -> Result<ChatPage, Flash<Redirect>> {
     let receiver_id = receiver.info.to_id();
     let messages = wrap_op(

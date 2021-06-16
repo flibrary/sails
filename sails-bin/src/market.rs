@@ -247,15 +247,16 @@ pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redire
 }
 
 // Category browsing
-#[get("/categories?<ctg>", rank = 1)]
+#[get("/categories?<category>", rank = 1)]
 pub async fn categories(
     conn: DbConn,
-    ctg: String,
+    category: String,
 ) -> Result<Result<CategoriesPage, Redirect>, Flash<Redirect>> {
     // There is a specified category name
-    let ctg_cloned = ctg.clone();
+    let category_cloned = category.clone();
     let category = wrap_op(
-        conn.run(move |c| Categories::find_by_id(c, &ctg)).await,
+        conn.run(move |c| Categories::find_by_id(c, &category))
+            .await,
         uri!("/market", market),
     )?;
 
@@ -263,7 +264,7 @@ pub async fn categories(
     if category.is_leaf() {
         Ok(Err(Redirect::to(uri!(
             "/market",
-            all_books(Some(ctg_cloned))
+            all_books(Some(category_cloned))
         ))))
     } else {
         // The category is not a leaf, continuing down the path

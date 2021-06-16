@@ -5,6 +5,7 @@
 // Handle general database errors by redirecting using flash message to some big pages like `/market`, `/user`. Flash message will only be used up when called.
 // All for loops in templates should be able to handle empty vec.
 
+mod admin;
 mod guards;
 mod market;
 mod messages;
@@ -31,6 +32,8 @@ use sails_db::{
 };
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
+
+use crate::admin::RootPasswd;
 
 #[macro_use]
 extern crate rocket;
@@ -174,7 +177,7 @@ struct DcompassOpts {
 }
 
 #[launch]
-fn rocket() -> _ {
+fn rocket() -> Rocket<Build> {
     let args: DcompassOpts = DcompassOpts::from_args();
 
     // This helps us manage run-time Rocket.toml easily
@@ -186,6 +189,7 @@ fn rocket() -> _ {
         .attach(DbConn::fairing())
         .attach(Shield::new())
         .attach(AdHoc::config::<CtgBuilder>())
+        .attach(AdHoc::config::<RootPasswd>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .mount("/", routes![index])
         .mount("/static", routes![get_file])
@@ -199,7 +203,8 @@ fn rocket() -> _ {
                 user::signup,
                 user::create_user,
                 user::logout,
-                user::update_user
+                user::update_user,
+                user::update_user_page
             ],
         )
         .mount(
@@ -229,6 +234,17 @@ fn rocket() -> _ {
                 messages::chat,
                 messages::chat_error,
                 messages::send
+            ],
+        )
+        .mount(
+            "/admin",
+            routes![
+                admin::root,
+                admin::unverified_root,
+                admin::validate,
+                admin::root_verify,
+                admin::promote,
+                admin::downgrade,
             ],
         )
         .register("/", catchers![page404, page422, page500])

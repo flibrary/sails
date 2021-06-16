@@ -12,38 +12,28 @@
   <br>
 
   <div class="bg-light p-5 rounded">
-    <h1>User info</h1>
-    <form action="/user/update_user" method="post">
-    <div class="form-group row">
-      <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
-      <div class="col-sm-10">
-        <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{ user.get_id() }}" name="email">
-      </div>
-    </div>
-    <br>
-    <div class="form-group row">
-      <label for="inputSchool" class="col-sm-2 col-form-label">School name</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" id="inputSchool" placeholder="School name" value="{{ user.get_school() }}" name="school">
-      </div>
-      </div>
-    <br>
-    <div class="form-group row">
-      <label for="inputPhone" class="col-sm-2 col-form-label">Phone number</label>
-      <div class="col-sm-10">
-        <input type="tel" class="form-control" id="inputPhone" placeholder="Phone number" value="{{ user.get_phone() }}" name="phone">
-      </div>
-    </div>
-    <br>
-    <div class="form-group row">
-      <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
-      <div class="col-sm-10">
-        <input type="password" class="form-control" id="inputPassword" placeholder="Password" name="password">
-      </div>
-    </div>
-    <br>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Update</button>
-  </form>
+    <h1>Your information</h1>
+    <table class="table table-hover">
+      <tbody>
+	<tr>
+	  <th scope="row">Email</th>
+	  <td><a href="mailto:{{user.get_id()}}">{{ user.get_id() }}</a></td>
+	</tr>
+	<tr>
+	  <th scope="row">Real name</th>
+	  <td>{{ user.get_name() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">School</th>
+	  <td>{{ user.get_school() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">Account status</th>
+	  <td>{{ "{:?}"|format(user.get_user_status()) }}</td>
+	</tr>
+      </tbody>
+    </table>
+    <a href="/user/update_user_page" class="btn btn-primary" role="button">Update</a>
   </div>
   <br>
   {% if books.len() > 0 %}

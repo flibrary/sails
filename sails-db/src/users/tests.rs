@@ -6,8 +6,8 @@ fn create_user() {
     let conn = establish_connection();
     UserForm::new(
         "TestUser@example.org",
+        "Kanyang Ying",
         "NFLS",
-        "+86 18353232340",
         "strongpasswd",
     )
     .to_ref()
@@ -22,8 +22,8 @@ fn create_user_existed() {
     let conn = establish_connection();
     UserForm::new(
         "TestUser@example.org",
+        "Kanyang Ying",
         "NFLS",
-        "+86 18353232340",
         "strongpasswd",
     )
     .to_ref()
@@ -32,16 +32,13 @@ fn create_user_existed() {
     .unwrap();
 
     // User already registered
-    assert!(UserForm::new(
-        "TestUser@example.org",
-        "NFLS",
-        "+86 18353232340",
-        "strongpasswd",
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .is_err());
+    assert!(
+        UserForm::new("TestUser@example.org", "Mick Zhang", "NFLS", "strongpasswd",)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .is_err()
+    );
 }
 
 #[test]
@@ -49,8 +46,8 @@ fn login_user() {
     let conn = establish_connection();
     UserForm::new(
         "TestUser@example.org",
+        "Kanyang Ying",
         "NFLS",
-        "+86 18353232340",
         "strongpasswd",
     )
     .to_ref()
@@ -66,8 +63,8 @@ fn delete_user() {
     let conn = establish_connection();
     let user = UserForm::new(
         "TestUser@example.org",
+        "Kanyang Ying",
         "NFLS",
-        "+86 18353232340",
         "strongpasswd",
     )
     .to_ref()
@@ -77,8 +74,8 @@ fn delete_user() {
 
     let another_user = UserForm::new(
         "TestUser2@example.org",
+        "Kanyang Ying",
         "NFLS",
-        "+86 18353232340",
         "strongpasswd",
     )
     .to_ref()
@@ -116,8 +113,8 @@ fn update_user() {
 
     let user_id = UserForm::new(
         "TestUser@example.org",
+        "Kanyang Ying",
         "NFLS",
-        "+86 18353232340",
         "strongpasswd",
     )
     .to_ref()
@@ -127,8 +124,8 @@ fn update_user() {
 
     let another_user = UserForm::new(
         "AnotherUser@example.org",
+        "Kanyang Ying",
         "NFLS",
-        "+86 18353232340",
         "strongpasswd",
     )
     .to_ref()
@@ -143,13 +140,15 @@ fn update_user() {
         .set_password("SomeStrongPasswd")
         .unwrap()
         .set_school("University of Cambridge")
+        .set_user_status(UserStatus::Admin)
         .update(&conn)
         .unwrap();
 
     let user_changed = user_id.get_info(&conn).unwrap();
     assert_eq!(user_changed.get_school(), "University of Cambridge");
+    assert_eq!(user_changed.get_user_status(), &UserStatus::Admin);
     // Unchanged fields should stay the same
-    assert_eq!(user_changed.get_phone(), "+86 18353232340");
+    assert_eq!(user_changed.get_name(), "Kanyang Ying");
     assert_eq!(
         user_changed.verify_passwd("SomeStrongPasswd").unwrap(),
         true,

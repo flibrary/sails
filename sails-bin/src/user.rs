@@ -126,6 +126,17 @@ pub async fn logout(jar: &CookieJar<'_>) -> Redirect {
 }
 
 #[derive(Template)]
+#[template(path = "user/update_user_page.html")]
+pub struct UpdateUserPage {
+    user: UserInfo,
+}
+
+#[get("/update_user_page")]
+pub async fn update_user_page(user: UserInfoGuard) -> UpdateUserPage {
+    UpdateUserPage { user: user.info }
+}
+
+#[derive(Template)]
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
     user: UserInfo,

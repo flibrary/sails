@@ -1,4 +1,5 @@
 use crate::{
+    enums::UserStatus,
     error::{SailsDbError, SailsDbResult as Result},
     products::Products,
     schema::users,
@@ -36,16 +37,23 @@ impl UserId {
             .id(id_provided)
             .first()
             .map_err(|_| SailsDbError::UserNotFound)?;
-        match user.get_info(conn)?.verify_passwd(passwd_provided) {
-            Ok(true) => {
-                // Successfully validated
-                Ok(user)
+        let info = user.get_info(conn)?;
+
+        // If the user is disabled, he will not be allowed to login
+        if info.get_user_status() != &UserStatus::Disabled {
+            match info.verify_passwd(passwd_provided) {
+                Ok(true) => {
+                    // Successfully validated
+                    Ok(user)
+                }
+                Ok(false) => {
+                    // User exists, but password is not right
+                    Err(SailsDbError::IncorrectPassword)
+                }
+                Err(e) => Err(e),
             }
-            Ok(false) => {
-                // User exists, but password is not right
-                Err(SailsDbError::IncorrectPassword)
-            }
-            Err(e) => Err(e),
+        } else {
+            Err(SailsDbError::DisabledUser)
         }
     }
 
@@ -122,9 +130,21 @@ impl<'a> UserFinder<'a> {
         self
     }
 
-    pub fn phone(mut self, phone_provided: &'a str) -> Self {
+    pub fn name(mut self, name_provided: &'a str) -> Self {
         use crate::schema::users::dsl::*;
-        self.query = self.query.filter(school.eq(phone_provided));
+        self.query = self.query.filter(name.eq(name_provided));
+        self
+    }
+
+    pub fn status(mut self, status: &'a UserStatus) -> Self {
+        use crate::schema::users::dsl::*;
+        self.query = self.query.filter(user_status.eq(status));
+        self
+    }
+
+    pub fn allowed(mut self) -> Self {
+        use crate::schema::users::dsl::*;
+        self.query = self.query.filter(user_status.ne(UserStatus::Disabled));
         self
     }
 }
@@ -133,9 +153,10 @@ impl<'a> UserFinder<'a> {
 #[table_name = "users"]
 pub struct UserInfo {
     id: String,
+    name: String,
     school: String,
-    phone: String,
     hashed_passwd: String,
+    user_status: UserStatus,
 }
 
 impl UserInfo {
@@ -155,11 +176,6 @@ impl UserInfo {
         &self.school
     }
 
-    /// Get a reference to the user info's phone.
-    pub fn get_phone(&self) -> &str {
-        &self.phone
-    }
-
     pub fn verify_passwd(&self, passwd: impl AsRef<[u8]>) -> Result<bool> {
         Ok(bcrypt::verify(passwd, &self.hashed_passwd)?)
     }
@@ -167,12 +183,6 @@ impl UserInfo {
     /// Set the user info's school.
     pub fn set_school(mut self, school: impl ToString) -> Self {
         self.school = school.to_string();
-        self
-    }
-
-    /// Set the user info's phone.
-    pub fn set_phone(mut self, phone: impl ToString) -> Self {
-        self.phone = phone.to_string();
         self
     }
 
@@ -184,6 +194,33 @@ impl UserInfo {
     pub fn update(self, conn: &SqliteConnection) -> Result<Self> {
         Ok(self.save_changes::<UserInfo>(conn)?)
     }
+
+    /// Get a reference to the user info's name.
+    pub fn get_name(&self) -> &str {
+        &self.name
+    }
+
+    /// Set the user info's name.
+    pub fn set_name(mut self, name: impl ToString) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    /// Get a reference to the user info's user status.
+    pub fn get_user_status(&self) -> &UserStatus {
+        &self.user_status
+    }
+
+    /// Set the user info's user status.
+    pub fn set_user_status(mut self, user_status: UserStatus) -> Self {
+        self.user_status = user_status;
+        self
+    }
+
+    /// See if the user is admin or not
+    pub fn is_admin(&self) -> bool {
+        self.user_status == UserStatus::Admin
+    }
 }
 
 // A struct used for update and insert
@@ -191,10 +228,12 @@ impl UserInfo {
 #[table_name = "users"]
 pub struct UserInfoRef<'a> {
     id: &'a str,
+    name: &'a str,
     school: &'a str,
-    phone: &'a str,
     // This is owned because we processed it
     hashed_passwd: String,
+    // This is owned because it was created when convert to UserInfoRef
+    user_status: UserStatus,
 }
 
 impl<'a> UserInfoRef<'a> {
@@ -220,18 +259,18 @@ impl<'a> UserInfoRef<'a> {
 pub struct UserFormOwned {
     #[field(name = "email")]
     pub id: String,
+    pub name: String,
     pub school: String,
-    pub phone: String,
     #[field(name = "password")]
     pub raw_passwd: String,
 }
 
 impl UserFormOwned {
-    pub fn new<T: ToString>(id: T, school: T, phone: T, raw_passwd: T) -> Self {
+    pub fn new<T: ToString>(id: T, name: T, school: T, raw_passwd: T) -> Self {
         Self {
             id: id.to_string(),
             school: school.to_string(),
-            phone: phone.to_string(),
+            name: name.to_string(),
             raw_passwd: raw_passwd.to_string(),
         }
     }
@@ -240,7 +279,7 @@ impl UserFormOwned {
         let form = UserForm {
             id: &self.id,
             school: &self.school,
-            phone: &self.phone,
+            name: &self.name,
             raw_passwd: &self.raw_passwd,
         };
         form.to_ref()
@@ -252,35 +291,33 @@ impl UserFormOwned {
 pub struct UserForm<'a> {
     #[field(name = "email")]
     pub id: &'a str,
+    pub name: &'a str,
     pub school: &'a str,
-    pub phone: &'a str,
     #[field(name = "password")]
     pub raw_passwd: &'a str,
 }
 
 impl<'a> UserForm<'a> {
-    pub fn new(id: &'a str, school: &'a str, phone: &'a str, raw_passwd: &'a str) -> Self {
+    pub fn new(id: &'a str, name: &'a str, school: &'a str, raw_passwd: &'a str) -> Self {
         Self {
             id,
+            name,
             school,
-            phone,
             raw_passwd,
         }
     }
 
     pub fn to_ref(&self) -> Result<UserInfoRef<'a>> {
-        let phone = phonenumber::parse(None, self.phone)?;
-        match (
-            phone.is_valid(),
-            check_if_email_exists::syntax::check_syntax(self.id).is_valid_syntax,
-        ) {
-            (true, true) => Ok(UserInfoRef {
+        if check_if_email_exists::syntax::check_syntax(self.id).is_valid_syntax {
+            Ok(UserInfoRef {
                 id: self.id,
                 hashed_passwd: bcrypt::hash(self.raw_passwd, bcrypt::DEFAULT_COST)?,
                 school: self.school,
-                phone: self.phone,
-            }),
-            _ => Err(SailsDbError::InvalidIdentity),
+                name: self.name,
+                user_status: UserStatus::default(),
+            })
+        } else {
+            Err(SailsDbError::InvalidIdentity)
         }
     }
 }

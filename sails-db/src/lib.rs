@@ -4,6 +4,7 @@ extern crate diesel;
 #[macro_use]
 extern crate diesel_migrations;
 
+pub mod enums;
 pub mod error;
 pub mod messages;
 pub mod products;

@@ -8,12 +8,16 @@
 	  <td><a href="mailto:{{seller.get_id()}}">{{ seller.get_id() }}</a></td>
 	</tr>
 	<tr>
-	  <th scope="row">Seller's phone number</th>
-	  <td><a href="tel:{{seller.get_phone()}}">{{ seller.get_phone() }}</td>
+	  <th scope="row">Seller's real name</th>
+	  <td>{{ seller.get_name() }}</td>
 	</tr>
 	<tr>
 	  <th scope="row">Seller's school</th>
 	  <td>{{ seller.get_school() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">Seller's account status</th>
+	  <td>{{ "{:?}"|format(seller.get_user_status()) }}</td>
 	</tr>
       </tbody>
     </table>

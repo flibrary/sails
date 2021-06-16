@@ -14,7 +14,7 @@
     <h3>Categories</h3>
     <div class="list-group">
       {% for category in categories %}
-      <a href="categories?ctg={{category.id()}}" class="list-group-item list-group-item-action">{{category.name()}}</a>
+      <a href="categories?category={{category.id()}}" class="list-group-item list-group-item-action">{{category.name()}}</a>
       {% endfor %}
     </div>
   {% else %}

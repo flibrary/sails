@@ -40,4 +40,7 @@ pub enum SailsDbError {
 
     #[error("non-leaf category is not allowed for the request")]
     NonLeafCategory,
+
+    #[error("the user has been disabled")]
+    DisabledUser,
 }

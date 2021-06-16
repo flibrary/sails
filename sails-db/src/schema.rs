@@ -29,20 +29,19 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::enums::*;
+
     users (id) {
         id -> Text,
+        name -> Text,
         school -> Text,
-        phone -> Text,
         hashed_passwd -> Text,
+        user_status -> UserStatusMapping,
     }
 }
 
 joinable!(products -> categories (category));
 joinable!(products -> users (seller_id));
 
-allow_tables_to_appear_in_same_query!(
-    categories,
-    messages,
-    products,
-    users,
-);
+allow_tables_to_appear_in_same_query!(categories, messages, products, users,);

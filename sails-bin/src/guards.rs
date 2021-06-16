@@ -31,7 +31,8 @@ impl<'r> FromRequest<'r> for UserIdGuard {
             let uid_inner = uid.clone();
             db.run(move |c| -> Result<UserIdGuard, SailsDbError> {
                 Ok(UserIdGuard {
-                    id: UserFinder::new(c, None).id(&uid_inner).first()?,
+                    // Disabled user will be treated as if he is not logged in
+                    id: UserFinder::new(c, None).id(&uid_inner).allowed().first()?,
                 })
             })
             .await
@@ -39,6 +40,26 @@ impl<'r> FromRequest<'r> for UserIdGuard {
             .or_forward(())
         } else {
             Outcome::Forward(())
+        }
+    }
+}
+
+pub struct RootGuard;
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for RootGuard {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        match request
+            .cookies()
+            .get_private("root_challenge")
+            .map(|cookie| cookie.value().to_string())
+        {
+            Some(s) if s == "ROOT" => Outcome::Success(RootGuard),
+            _ => Outcome::Forward(()),
         }
     }
 }
@@ -88,9 +109,9 @@ impl<'r> FromRequest<'r> for Authorized {
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserIdGuard>().await);
+        let user = try_outcome!(request.guard::<UserInfoGuard>().await);
         let book = try_outcome!(request.guard::<BookIdGuard>().await);
-        if book.seller_id.get_id() == user.id.get_id() {
+        if (book.seller_id.get_id() == user.info.get_id()) || user.info.is_admin() {
             Outcome::Success(Authorized)
         } else {
             Outcome::Forward(())
@@ -152,25 +173,25 @@ impl<'r> FromRequest<'r> for BookInfoGuard {
     }
 }
 
-pub struct ReceiverIdGuard {
+pub struct UserIdParamGuard {
     pub id: UserId,
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for ReceiverIdGuard {
+impl<'r> FromRequest<'r> for UserIdParamGuard {
     type Error = ();
 
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let db = try_outcome!(request.guard::<DbConn>().await);
-        let recv_id = request
-            .query_value::<String>("receiver_id")
+        let user_id = request
+            .query_value::<String>("user_id")
             .and_then(|x| x.ok());
-        if let Some(uid) = recv_id {
+        if let Some(uid) = user_id {
             let uid_inner = uid.clone();
-            db.run(move |c| -> Result<ReceiverIdGuard, SailsDbError> {
-                Ok(ReceiverIdGuard {
+            db.run(move |c| -> Result<UserIdParamGuard, SailsDbError> {
+                Ok(UserIdParamGuard {
                     id: UserFinder::new(c, None).id(&uid_inner).first()?,
                 })
             })
@@ -183,22 +204,22 @@ impl<'r> FromRequest<'r> for ReceiverIdGuard {
     }
 }
 
-pub struct ReceiverInfoGuard {
+pub struct UserInfoParamGuard {
     pub info: UserInfo,
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for ReceiverInfoGuard {
+impl<'r> FromRequest<'r> for UserInfoParamGuard {
     type Error = ();
 
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let receiver = try_outcome!(request.guard::<ReceiverIdGuard>().await);
+        let id = try_outcome!(request.guard::<UserIdParamGuard>().await);
         let db = try_outcome!(request.guard::<DbConn>().await);
-        db.run(move |c| -> Result<ReceiverInfoGuard, SailsDbError> {
-            Ok(ReceiverInfoGuard {
-                info: receiver.id.get_info(c)?,
+        db.run(move |c| -> Result<UserInfoParamGuard, SailsDbError> {
+            Ok(UserInfoParamGuard {
+                info: id.id.get_info(c)?,
             })
         })
         .await
