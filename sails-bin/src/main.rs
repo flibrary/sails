@@ -9,6 +9,7 @@ mod admin;
 mod guards;
 mod market;
 mod messages;
+mod recaptcha;
 mod user;
 
 use askama::Template;
@@ -33,7 +34,7 @@ use sails_db::{
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 
-use crate::admin::RootPasswd;
+use crate::{admin::RootPasswd, recaptcha::ReCaptcha};
 
 #[macro_use]
 extern crate rocket;
@@ -190,6 +191,7 @@ fn rocket() -> Rocket<Build> {
         .attach(Shield::new())
         .attach(AdHoc::config::<CtgBuilder>())
         .attach(AdHoc::config::<RootPasswd>())
+        .attach(AdHoc::config::<ReCaptcha>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .mount("/", routes![index])
         .mount("/static", routes![get_file])
@@ -204,7 +206,8 @@ fn rocket() -> Rocket<Build> {
                 user::create_user,
                 user::logout,
                 user::update_user,
-                user::update_user_page
+                user::update_user_page,
+                user::portal_unsigned
             ],
         )
         .mount(
@@ -240,6 +243,7 @@ fn rocket() -> Rocket<Build> {
             "/admin",
             routes![
                 admin::root,
+                admin::logout,
                 admin::unverified_root,
                 admin::validate,
                 admin::root_verify,

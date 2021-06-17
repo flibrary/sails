@@ -308,17 +308,14 @@ impl<'a> UserForm<'a> {
     }
 
     pub fn to_ref(&self) -> Result<UserInfoRef<'a>> {
-        if check_if_email_exists::syntax::check_syntax(self.id).is_valid_syntax {
-            Ok(UserInfoRef {
-                id: self.id,
-                hashed_passwd: bcrypt::hash(self.raw_passwd, bcrypt::DEFAULT_COST)?,
-                school: self.school,
-                name: self.name,
-                user_status: UserStatus::default(),
-            })
-        } else {
-            Err(SailsDbError::InvalidIdentity)
-        }
+        self.id.parse::<lettre::Address>()?;
+        Ok(UserInfoRef {
+            id: self.id,
+            hashed_passwd: bcrypt::hash(self.raw_passwd, bcrypt::DEFAULT_COST)?,
+            school: self.school,
+            name: self.name,
+            user_status: UserStatus::default(),
+        })
     }
 }
 

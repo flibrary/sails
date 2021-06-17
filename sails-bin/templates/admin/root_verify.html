@@ -4,6 +4,7 @@
     {% call super() %}
     <!-- Custom styles for sign in page -->
     <link href="/static/css/signin.css" rel="stylesheet">
+    <script src="https://www.recaptcha.net/recaptcha/api.js" async defer></script>
 {% endblock head %}
 
 {% block body %}
@@ -15,6 +16,8 @@
       <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password">
       <label for="floatingPassword">Password</label>
     </div>
+    <div class="g-recaptcha" data-sitekey="{{ recaptcha_key }}"></div>
+    <br/>
     <button class="w-100 btn btn-lg btn-primary" type="submit">Verify</button>
   </form>
   {% include "display_flash.html" %}

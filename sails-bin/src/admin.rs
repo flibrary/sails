@@ -1,5 +1,6 @@
 use crate::{
     guards::{RootGuard, UserInfoParamGuard},
+    recaptcha::ReCaptcha,
     wrap_op, DbConn, Msg,
 };
 use askama::Template;
@@ -11,7 +12,7 @@ use rocket::{
     State,
 };
 use sails_db::{
-    enums::UserStatus,
+    enums::Status,
     users::{UserFinder, UserInfo},
 };
 use serde::{Deserialize, Serialize};
@@ -33,6 +34,8 @@ impl RootPasswd {
 #[derive(FromForm)]
 pub struct Validation {
     password: String,
+    #[field(name = "g-recaptcha-response")]
+    recaptcha_token: String,
 }
 
 #[post("/validate", data = "<info>")]
@@ -40,7 +43,20 @@ pub async fn validate(
     jar: &CookieJar<'_>,
     info: Form<Validation>,
     root_passwd: &State<RootPasswd>,
+    recaptcha: &State<ReCaptcha>,
 ) -> Result<Redirect, Flash<Redirect>> {
+    if !recaptcha
+        .verify(&info.recaptcha_token)
+        .await
+        .map_err(|e| Flash::error(Redirect::to(uri!("/admin", root)), e.to_string()))?
+        .success
+    {
+        return Err(Flash::error(
+            Redirect::to(uri!("/admin", root)),
+            "reCAPTCHA was unsuccessful".to_string(),
+        ));
+    };
+
     if root_passwd.verify(&info.password) {
         let mut cookie = Cookie::new("root_challenge", "ROOT");
         cookie.set_secure(true);
@@ -59,12 +75,17 @@ pub async fn validate(
 #[template(path = "admin/root_verify.html")]
 pub struct RootVerifyPage {
     inner: Msg,
+    recaptcha_key: String,
 }
 
 #[get("/root_verify")]
-pub async fn root_verify<'a>(flash: Option<FlashMessage<'_>>) -> RootVerifyPage {
+pub async fn root_verify<'a>(
+    flash: Option<FlashMessage<'_>>,
+    recaptcha: &State<ReCaptcha>,
+) -> RootVerifyPage {
     RootVerifyPage {
         inner: Msg::from_flash(flash),
+        recaptcha_key: recaptcha.recaptcha_site_key().to_string(),
     }
 }
 
@@ -102,18 +123,9 @@ pub async fn promote(
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     wrap_op(
-        conn.run(|c| match *info.info.get_user_status() {
-            UserStatus::Disabled => info
-                .info
-                .set_user_status(UserStatus::Normal)
-                .update(c)
-                .map(|_| ()),
-            UserStatus::Normal => info
-                .info
-                .set_user_status(UserStatus::Admin)
-                .update(c)
-                .map(|_| ()),
-            UserStatus::Admin => Ok(()),
+        conn.run(|c| {
+            let upgraded = info.info.get_user_status().up();
+            info.info.set_user_status(upgraded).update(c).map(|_| ())
         })
         .await,
         uri!("/admin", root),
@@ -128,21 +140,23 @@ pub async fn downgrade(
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     wrap_op(
-        conn.run(|c| match *info.info.get_user_status() {
-            UserStatus::Disabled => Ok(()),
-            UserStatus::Normal => info
-                .info
-                .set_user_status(UserStatus::Disabled)
-                .update(c)
-                .map(|_| ()),
-            UserStatus::Admin => info
-                .info
-                .set_user_status(UserStatus::Normal)
-                .update(c)
-                .map(|_| ()),
+        conn.run(|c| {
+            let downgraded = info.info.get_user_status().down();
+            info.info.set_user_status(downgraded).update(c).map(|_| ())
         })
         .await,
         uri!("/admin", root),
     )?;
     Ok(Redirect::to(uri!("/admin", root)))
+}
+
+#[get("/root/logout")]
+pub async fn logout(jar: &CookieJar<'_>) -> Redirect {
+    if let Some(root_challenge) = jar.get_private("root_challenge") {
+        jar.remove_private(root_challenge);
+    } else {
+        // No UID specified, do nothing
+    }
+    // Redirect back to home
+    Redirect::to("/")
 }

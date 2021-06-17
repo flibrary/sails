@@ -1,14 +1,15 @@
 use crate::{
     guards::{UserIdGuard, UserInfoGuard},
+    recaptcha::ReCaptcha,
     wrap_op, DbConn, Msg,
 };
 use askama::Template;
-use check_if_email_exists::{check_email, CheckEmailInput, Reachable};
 use rocket::{
     form::{Form, Strict},
     http::{Cookie, CookieJar},
     request::FlashMessage,
     response::{Flash, Redirect},
+    State,
 };
 use sails_db::{
     categories::{Categories, Category, CtgTrait},
@@ -16,6 +17,13 @@ use sails_db::{
     products::*,
     users::*,
 };
+
+#[derive(FromForm)]
+pub struct SignUpForm {
+    user_info: UserFormOwned,
+    #[field(name = "g-recaptcha-response")]
+    recaptcha_token: String,
+}
 
 // Form used for validating an user
 #[derive(FromForm)]
@@ -42,35 +50,56 @@ pub async fn signin<'a>(flash: Option<FlashMessage<'_>>) -> SignInPage {
 #[template(path = "user/signup.html")]
 pub struct SignUpPage {
     inner: Msg,
+    recaptcha_key: String,
 }
 
 #[get("/signup")]
-pub async fn signup<'a>(flash: Option<FlashMessage<'_>>) -> SignUpPage {
+pub async fn signup<'a>(
+    flash: Option<FlashMessage<'_>>,
+    recaptcha: &State<ReCaptcha>,
+) -> SignUpPage {
     SignUpPage {
         inner: Msg::from_flash(flash),
+        recaptcha_key: recaptcha.recaptcha_site_key().to_string(),
     }
 }
 
 #[post("/create_user", data = "<info>")]
 pub async fn create_user(
-    info: Form<Strict<UserFormOwned>>,
+    info: Form<Strict<SignUpForm>>,
     conn: DbConn,
+    recaptcha: &State<ReCaptcha>,
 ) -> Result<Redirect, Flash<Redirect>> {
-    // TODO: Get rid of check email
-    let res = check_email(&CheckEmailInput::new(vec![info.id.clone()])).await;
-    // If the server is invalid, then the output will be `Reachable::Invalid`
-    if (res.get(0).unwrap().is_reachable == Reachable::Safe)
-        || (res.get(0).unwrap().is_reachable == Reachable::Unknown)
+    if !recaptcha
+        .verify(&info.recaptcha_token)
+        .await
+        .map_err(|e| Flash::error(Redirect::to(uri!("/user", portal)), e.to_string()))?
+        .success
     {
+        return Err(Flash::error(
+            Redirect::to(uri!("/user", portal)),
+            "reCAPTCHA was unsuccessful".to_string(),
+        ));
+    };
+
+    // We parse it to only allow outlook emails
+    let email: lettre::Address = wrap_op(
+        info.user_info
+            .id
+            .parse::<lettre::Address>()
+            .map_err(|e| e.into()),
+        uri!("/user", signup),
+    )?;
+    if email.domain() == "outlook.com" {
         wrap_op(
-            conn.run(move |c| info.to_ref()?.create(c)).await,
+            conn.run(move |c| info.user_info.to_ref()?.create(c)).await,
             uri!("/user", signup),
         )?;
         Ok(Redirect::to(uri!("/user", portal)))
     } else {
         Err(Flash::error(
             Redirect::to(uri!("/user", portal)),
-            "your email address is considered unreachable",
+            "please use outlook email addresses",
         ))
     }
 }
@@ -145,36 +174,37 @@ pub struct PortalPage {
 }
 
 // The flash message is required here because we may get error from update_user
-#[get("/")]
+#[get("/", rank = 1)]
 pub async fn portal(
     flash: Option<FlashMessage<'_>>,
-    user: Option<UserInfoGuard>,
+    user: UserInfoGuard,
     conn: DbConn,
 ) -> Result<PortalPage, Redirect> {
-    if let Some(user) = user.map(|u| u.info) {
-        let uid_cloned = user.get_id().to_string();
-        let books = conn
-            .run(
-                move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
-                    ProductFinder::new(c, None)
-                        .seller(&uid_cloned)
-                        .search_info()?
-                        .into_iter()
-                        .map(|x| {
-                            let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
-                            Ok((x, ctg))
-                        })
-                        .collect()
-                },
-            )
-            .await
-            .unwrap(); // No error should be tolerated here (database error). 500 is expected
-        Ok(PortalPage {
-            user,
-            books,
-            inner: Msg::from_flash(flash),
-        })
-    } else {
-        Err(Redirect::to(uri!("/user", signin)))
-    }
+    let uid_cloned = user.info.get_id().to_string();
+    let books = conn
+        .run(
+            move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
+                ProductFinder::new(c, None)
+                    .seller(&uid_cloned)
+                    .search_info()?
+                    .into_iter()
+                    .map(|x| {
+                        let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                        Ok((x, ctg))
+                    })
+                    .collect()
+            },
+        )
+        .await
+        .unwrap(); // No error should be tolerated here (database error). 500 is expected
+    Ok(PortalPage {
+        user: user.info,
+        books,
+        inner: Msg::from_flash(flash),
+    })
+}
+
+#[get("/", rank = 2)]
+pub async fn portal_unsigned() -> Redirect {
+    Redirect::to(uri!("/user", signin))
 }

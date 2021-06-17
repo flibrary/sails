@@ -5,8 +5,8 @@ fn login_user(c: &mut Criterion) {
     let conn = establish_connection();
     UserForm::new(
         "TestUser@example.org",
+        "Kanyang Ying",
         "NFLS",
-        "+86 18353232340",
         "strongpasswd",
     )
     .to_ref()
@@ -24,8 +24,8 @@ fn products(c: &mut Criterion) {
     // our seller
     let user_id = UserForm::new(
         "TestUser@example.org",
+        "Kanyang Ying",
         "NFLS",
-        "+86 18353232340",
         "strongpasswd",
     )
     .to_ref()
@@ -96,7 +96,7 @@ fn products(c: &mut Criterion) {
         b.iter(|| {
             ProductFinder::new(&conn, None)
                 .prodname("Krugman's Economics 2nd Edition")
-                .price(550, sails_db::Cmp::GreaterThan)
+                .price(550, sails_db::Cmp::LessThan)
                 .search()
                 .unwrap()
         })

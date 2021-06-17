@@ -218,7 +218,6 @@ impl CtgBuilder {
             for (name, value) in current {
                 match value {
                     Value::Id(id) => {
-                        println!("{:?}", id);
                         // Create the node
                         let mut self_ctg = Category::create_with_id(c, name, id)?;
 

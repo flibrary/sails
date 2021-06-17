@@ -17,8 +17,8 @@ pub enum SailsDbError {
     #[error("failed to parse uuid: {0}")]
     UuidError(#[from] uuid::Error),
 
-    #[error("invalid phone number or email address")]
-    InvalidIdentity,
+    #[error("invalid email address: {0}")]
+    InvalidIdentity(#[from] lettre::address::AddressError),
 
     #[error("email has already been registered")]
     UserRegistered,
