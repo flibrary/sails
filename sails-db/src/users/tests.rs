@@ -32,8 +32,9 @@ fn create_user_existed() {
     .unwrap();
 
     // User already registered
+    // Comparison should be case-insensitive
     assert!(
-        UserForm::new("TestUser@example.org", "Mick Zhang", "NFLS", "strongpasswd",)
+        UserForm::new("testUser@example.org", "Mick Zhang", "NFLS", "strongpasswd",)
             .to_ref()
             .unwrap()
             .create(&conn)

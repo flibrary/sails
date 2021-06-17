@@ -44,4 +44,9 @@ table! {
 joinable!(products -> categories (category));
 joinable!(products -> users (seller_id));
 
-allow_tables_to_appear_in_same_query!(categories, messages, products, users,);
+allow_tables_to_appear_in_same_query!(
+    categories,
+    messages,
+    products,
+    users,
+);

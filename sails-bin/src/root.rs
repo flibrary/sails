@@ -1,5 +1,5 @@
 use crate::{
-    guards::{RootGuard, UserInfoParamGuard},
+    guards::{RootGuard, UserIdParamGuard, UserInfoParamGuard},
     recaptcha::ReCaptcha,
     wrap_op, DbConn, Msg,
 };
@@ -48,11 +48,11 @@ pub async fn validate(
     if !recaptcha
         .verify(&info.recaptcha_token)
         .await
-        .map_err(|e| Flash::error(Redirect::to(uri!("/admin", root)), e.to_string()))?
+        .map_err(|e| Flash::error(Redirect::to(uri!("/root", root)), e.to_string()))?
         .success
     {
         return Err(Flash::error(
-            Redirect::to(uri!("/admin", root)),
+            Redirect::to(uri!("/root", root)),
             "reCAPTCHA was unsuccessful".to_string(),
         ));
     };
@@ -62,17 +62,17 @@ pub async fn validate(
         cookie.set_secure(true);
         // Successfully validated, set private cookie.
         jar.add_private(cookie);
-        Ok(Redirect::to(uri!("/admin", root)))
+        Ok(Redirect::to(uri!("/root", root)))
     } else {
         Err(Flash::error(
-            Redirect::to(uri!("/admin", root)),
+            Redirect::to(uri!("/root", root)),
             "Incorrect password",
         ))
     }
 }
 
 #[derive(Template)]
-#[template(path = "admin/root_verify.html")]
+#[template(path = "root/root_verify.html")]
 pub struct RootVerifyPage {
     inner: Msg,
     recaptcha_key: String,
@@ -90,14 +90,14 @@ pub async fn root_verify<'a>(
 }
 
 #[derive(Template)]
-#[template(path = "admin/root.html")]
+#[template(path = "root/root.html")]
 pub struct RootPage {
     inner: Msg,
     users: Vec<UserInfo>,
 }
 
 // If the user has already been verified, show him the root dashboard
-#[get("/root", rank = 1)]
+#[get("/", rank = 1)]
 pub async fn root(
     flash: Option<FlashMessage<'_>>,
     _guard: RootGuard,
@@ -111,9 +111,9 @@ pub async fn root(
 }
 
 // If the visitor has not yet been verified, redirect them to verification page
-#[get("/root", rank = 2)]
+#[get("/", rank = 2)]
 pub async fn unverified_root() -> Redirect {
-    Redirect::to(uri!("/admin", root_verify))
+    Redirect::to(uri!("/root", root_verify))
 }
 
 #[get("/promote_user")]
@@ -128,9 +128,9 @@ pub async fn promote(
             info.info.set_user_status(upgraded).update(c).map(|_| ())
         })
         .await,
-        uri!("/admin", root),
+        uri!("/root", root),
     )?;
-    Ok(Redirect::to(uri!("/admin", root)))
+    Ok(Redirect::to(uri!("/root", root)))
 }
 
 #[get("/downgrade_user")]
@@ -145,12 +145,22 @@ pub async fn downgrade(
             info.info.set_user_status(downgraded).update(c).map(|_| ())
         })
         .await,
-        uri!("/admin", root),
+        uri!("/root", root),
     )?;
-    Ok(Redirect::to(uri!("/admin", root)))
+    Ok(Redirect::to(uri!("/root", root)))
 }
 
-#[get("/root/logout")]
+#[get("/delete_user")]
+pub async fn delete_user(
+    _guard: RootGuard,
+    id: UserIdParamGuard,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    wrap_op(conn.run(|c| id.id.delete(c)).await, uri!("/root", root))?;
+    Ok(Redirect::to(uri!("/root", root)))
+}
+
+#[get("/logout")]
 pub async fn logout(jar: &CookieJar<'_>) -> Redirect {
     if let Some(root_challenge) = jar.get_private("root_challenge") {
         jar.remove_private(root_challenge);

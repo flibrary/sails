@@ -5,11 +5,11 @@
 // Handle general database errors by redirecting using flash message to some big pages like `/market`, `/user`. Flash message will only be used up when called.
 // All for loops in templates should be able to handle empty vec.
 
-mod admin;
 mod guards;
 mod market;
 mod messages;
 mod recaptcha;
+mod root;
 mod user;
 
 use askama::Template;
@@ -34,7 +34,7 @@ use sails_db::{
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 
-use crate::{admin::RootPasswd, recaptcha::ReCaptcha};
+use crate::{recaptcha::ReCaptcha, root::RootPasswd};
 
 #[macro_use]
 extern crate rocket;
@@ -240,15 +240,16 @@ fn rocket() -> Rocket<Build> {
             ],
         )
         .mount(
-            "/admin",
+            "/root",
             routes![
-                admin::root,
-                admin::logout,
-                admin::unverified_root,
-                admin::validate,
-                admin::root_verify,
-                admin::promote,
-                admin::downgrade,
+                root::root,
+                root::logout,
+                root::unverified_root,
+                root::validate,
+                root::root_verify,
+                root::promote,
+                root::downgrade,
+                root::delete_user,
             ],
         )
         .register("/", catchers![page404, page422, page500])
