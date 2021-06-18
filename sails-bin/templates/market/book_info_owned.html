@@ -24,6 +24,7 @@
 </table>
 {% endblock seller %}
 
+{% block actions %}
 <br>
 
 <div class="bg-light p-5 rounded">
@@ -32,3 +33,4 @@
 <a href="instruction?book_id={{book.get_id()}}" class="btn btn-warning" role="button">Instruction</a>
 <a href="delete?book_id={{book.get_id()}}" class="btn btn-danger" role="button">Delete</a>
 </div>
+{% endblock actions %}
