@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS users (
   school VARCHAR(100) NOT NULL,
   hashed_passwd VARCHAR(60) NOT NULL,
   validated BOOLEAN NOT NULL DEFAULT FALSE,
+  description VARCHAR(400),
   user_status TEXT CHECK(user_status IN ('normal', 'admin', 'disabled')) NOT NULL
 );

@@ -39,3 +39,14 @@ impl Status for UserStatus {
         }
     }
 }
+
+#[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum ProductStatus {
+    // The product has already been sold
+    Sold,
+    Normal,
+    // The product is already in warehouse and verified
+    Verified,
+    // The product is considered harzard, and it has been disabled
+    Disabled,
+}

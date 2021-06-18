@@ -167,6 +167,7 @@ pub struct UserInfo {
     school: String,
     hashed_passwd: String,
     validated: bool,
+    description: Option<String>,
     user_status: UserStatus,
 }
 
@@ -243,6 +244,17 @@ impl UserInfo {
         self.validated = validated;
         self
     }
+
+    /// Get a reference to the user info's description.
+    pub fn get_description(&self) -> Option<&String> {
+        self.description.as_ref()
+    }
+
+    /// Set the user info's description.
+    pub fn set_description(mut self, description: String) -> Self {
+        self.description = Some(description);
+        self
+    }
 }
 
 // A struct used for update and insert
@@ -255,6 +267,7 @@ pub struct UserInfoRef<'a> {
     // This is owned because we processed it
     hashed_passwd: String,
     validated: bool,
+    description: Option<String>,
     // This is owned because it was created when convert to UserInfoRef
     user_status: UserStatus,
 }
@@ -338,6 +351,7 @@ impl<'a> UserForm<'a> {
             school: self.school,
             name: self.name,
             validated: false,
+            description: None,
             user_status: UserStatus::default(),
         })
     }

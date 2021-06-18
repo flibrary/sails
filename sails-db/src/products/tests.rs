@@ -195,3 +195,48 @@ fn delete_product() {
     id.delete(&conn).unwrap();
     assert_eq!(ProductFinder::list(&conn).unwrap().len(), 0);
 }
+
+#[test]
+fn product_status() {
+    let conn = establish_connection();
+    // our seller
+    let user_id = UserForm::new(
+        "TestUser@example.org",
+        "NFLS",
+        "+86 18353232340",
+        "strongpasswd",
+    )
+    .to_ref()
+    .unwrap()
+    .create(&conn)
+    .unwrap();
+
+    // The book category
+    let econ = Category::create(&conn, "Economics Books")
+        .and_then(Category::into_leaf)
+        .unwrap();
+    let id = IncompleteProduct::new(
+        &econ,
+        "Krugman's Economics 2nd Edition",
+        600,
+        "That is a bad book though",
+    )
+    .create(&conn, &user_id)
+    .unwrap();
+
+    id.get_info(&conn)
+        .unwrap()
+        .set_product_status(ProductStatus::Disabled)
+        .update(&conn)
+        .unwrap();
+
+    assert_eq!(ProductFinder::list(&conn).unwrap().len(), 1);
+    assert_eq!(
+        ProductFinder::new(&conn, None)
+            .allowed()
+            .search()
+            .unwrap()
+            .len(),
+        0
+    );
+}

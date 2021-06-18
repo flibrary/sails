@@ -8,7 +8,7 @@
       <h4>Step 1</h4>
       Write down the following information on a sticky note and put it on the book:
       <ol class="list-group list-group-numbered">
-	<li class="list-group-item">your book ID: <code>{{ id }}</code></li>
+	<li class="list-group-item">your book ID: <code>{{ info.get_shortid() }}</code></li>
 	<li class="list-group-item">your real name</li>
       </ol>
       <br>
@@ -17,7 +17,7 @@
       <br>
       <hr>
       <h4>Finished?</h4>
-      <a href="book_info?book_id={{ full_id }}" class="btn btn-primary" role="button">Go to the book page</a>
+      <a href="book_info?book_id={{ info.get_id() }}" class="btn btn-primary" role="button">Go to the book page</a>
     </div>
     <br>
 </main>

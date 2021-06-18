@@ -225,6 +225,7 @@ fn rocket() -> Rocket<Build> {
             routes![
                 market::market,
                 market::all_books,
+                market::all_books_category,
                 market::categories,
                 market::post_book_page,
                 market::update_book_page,

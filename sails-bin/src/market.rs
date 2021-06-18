@@ -99,7 +99,7 @@ pub async fn update_book_page(
         categories: conn
             .run(move |c| Categories::list_leaves(c))
             .await
-            .into_flash(uri!("/market", all_books(_)))?,
+            .into_flash(uri!("/market", all_books))?,
         book: book.book_info,
     })
 }
@@ -120,7 +120,7 @@ pub async fn post_book_page(conn: DbConn, _user: UserIdGuard) -> Result<PostBook
         categories: conn
             .run(move |c| Categories::list_leaves(c))
             .await
-            .into_flash(uri!("/market", all_books(_)))?,
+            .into_flash(uri!("/market", all_books))?,
     })
 }
 
@@ -136,26 +136,16 @@ pub async fn post_book_error_page() -> Flash<Redirect> {
 #[template(path = "market/instruction.html")]
 pub struct InstructionPage {
     // Id is the first part of the UUID, written in decimal
-    id: u32,
-    full_id: String,
+    info: ProductInfo,
 }
 
 #[get("/instruction")]
 pub async fn instruction(
-    book: BookIdGuard,
+    book: BookInfoGuard,
     _auth: Authorized,
 ) -> Result<InstructionPage, Flash<Redirect>> {
     Ok(InstructionPage {
-        id: book.book_id.to_uuid().map_or_else(
-            |e| {
-                Err(Flash::error(
-                    Redirect::to(uri!("/market", market)),
-                    e.to_string(),
-                ))
-            },
-            |v| Ok(v.as_fields().0),
-        )?,
-        full_id: book.book_id.get_id().to_string(),
+        info: book.book_info,
     })
 }
 
@@ -261,7 +251,7 @@ pub async fn categories(
     if category.is_leaf() {
         Ok(Err(Redirect::to(uri!(
             "/market",
-            all_books(Some(category_cloned))
+            all_books_category(category_cloned)
         ))))
     } else {
         // The category is not a leaf, continuing down the path
@@ -283,24 +273,24 @@ pub struct AllBooks {
 }
 
 // List all products
-#[get("/all_books?<category>")]
-pub async fn all_books(
+#[get("/all_books?<category>", rank = 1)]
+pub async fn all_books_category(
     conn: DbConn,
-    category: Option<String>,
+    category: String,
     flash: Option<FlashMessage<'_>>,
 ) -> Result<AllBooks, Flash<Redirect>> {
     Ok(AllBooks {
         books: conn
             .run(
                 move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
-                    let book_info = if let Some(id) = category {
-                        let ctg = Categories::find_by_id(c, &id).and_then(Category::into_leaf)?;
-                        ProductFinder::new(c, None).category(&ctg).search_info()?
-                    } else {
-                        ProductFinder::list_info(c)?
-                    };
+                    let ctg = Categories::find_by_id(c, &category).and_then(Category::into_leaf)?;
+                    // We only display allowed books
+                    let books_info = ProductFinder::new(c, None)
+                        .category(&ctg)
+                        .allowed()
+                        .search_info()?;
 
-                    book_info
+                    books_info
                         .into_iter()
                         .map(|x| {
                             let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
@@ -310,12 +300,40 @@ pub async fn all_books(
                 },
             )
             .await
-            .into_flash(uri!("/market", market))?,
+            // We have to redirect errors all the way back to the index page, otherwise a deadlock is formed
+            .into_flash(uri!("/"))?,
+        inner: Msg::from_flash(flash),
+    })
+}
+
+#[get("/all_books", rank = 2)]
+pub async fn all_books(
+    conn: DbConn,
+    flash: Option<FlashMessage<'_>>,
+) -> Result<AllBooks, Flash<Redirect>> {
+    Ok(AllBooks {
+        books: conn
+            .run(
+                move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
+                    // We only display allowed books
+                    let books_info = ProductFinder::new(c, None).allowed().search_info()?;
+
+                    books_info
+                        .into_iter()
+                        .map(|x| {
+                            let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                            Ok((x, ctg))
+                        })
+                        .collect()
+                },
+            )
+            .await
+            .into_flash(uri!("/"))?,
         inner: Msg::from_flash(flash),
     })
 }
 
 #[get("/")]
 pub async fn market() -> Redirect {
-    Redirect::to(uri!("/market", all_books(_)))
+    Redirect::to(uri!("/market", all_books))
 }

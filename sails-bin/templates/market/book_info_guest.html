@@ -39,6 +39,10 @@
 	<td>Not categorized</td>
         {% endmatch %}
     </tr>
+    <tr>
+      <th scope="row">Status</th>
+      <td>{{ "{:?}"|format(book.get_product_status()) }}</td>
+    </tr>
     </tbody>
     </table>
     {% endblock %}

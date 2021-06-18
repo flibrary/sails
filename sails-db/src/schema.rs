@@ -18,13 +18,18 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::enums::*;
+
     products (id) {
         id -> Text,
+        shortid -> Text,
         seller_id -> Text,
         category -> Text,
         prodname -> Text,
         price -> BigInt,
         description -> Text,
+        product_status -> ProductStatusMapping,
     }
 }
 
@@ -38,6 +43,7 @@ table! {
         school -> Text,
         hashed_passwd -> Text,
         validated -> Bool,
+        description -> Nullable<Text>,
         user_status -> UserStatusMapping,
     }
 }

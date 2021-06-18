@@ -3,6 +3,7 @@
 
 use crate::{
     categories::{Categories, CtgTrait, LeafCategory},
+    enums::ProductStatus,
     error::{SailsDbError, SailsDbResult as Result},
     schema::products,
     users::UserId,
@@ -164,6 +165,20 @@ impl<'a> ProductFinder<'a> {
         }
         self
     }
+
+    pub fn status(mut self, status: ProductStatus) -> Self {
+        use crate::schema::products::dsl::*;
+        self.query = self.query.filter(product_status.eq(status));
+        self
+    }
+
+    pub fn allowed(mut self) -> Self {
+        use crate::schema::products::dsl::*;
+        self.query = self
+            .query
+            .filter(product_status.ne(ProductStatus::Disabled));
+        self
+    }
 }
 
 pub trait ToSafe<T> {
@@ -262,14 +277,18 @@ impl<'a> ToSafe<SafeIncompleteProduct<'a>> for IncompleteProduct<'a> {
 impl<'a> SafeIncompleteProduct<'a> {
     pub fn create(self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
         use crate::schema::products::dsl::*;
-        let id_cloned = Uuid::new_v4().to_string();
+        let id_cloned = Uuid::new_v4();
+        let shortid_str = id_cloned.as_fields().0.to_string();
+        let id_cloned = id_cloned.to_string();
         let value = (
             id.eq(&id_cloned),
+            shortid.eq(&shortid_str),
             seller_id.eq(seller.get_id()),
             category.eq(self.category),
             prodname.eq(self.prodname),
             price.eq(self.price),
             description.eq(self.description),
+            product_status.eq(ProductStatus::Normal),
         );
         diesel::insert_into(products).values(value).execute(conn)?;
         Ok(ProductId { id: id_cloned })
@@ -311,11 +330,13 @@ impl<'a> IncompleteProduct<'a> {
 #[table_name = "products"]
 pub struct ProductInfo {
     id: String,
+    shortid: String,
     seller_id: String,
     category: String,
     prodname: String,
     price: i64,
     description: String,
+    product_status: ProductStatus,
 }
 
 impl ProductInfo {
@@ -374,6 +395,22 @@ impl ProductInfo {
     /// Set the product info's description.
     pub fn set_description(mut self, description: impl ToString) -> Self {
         self.description = description.to_string();
+        self
+    }
+
+    /// Get a reference to the product info's shortid.
+    pub fn get_shortid(&self) -> &str {
+        &self.shortid
+    }
+
+    /// Get a reference to the product info's product status.
+    pub fn get_product_status(&self) -> &ProductStatus {
+        &self.product_status
+    }
+
+    /// Set the product info's product status.
+    pub fn set_product_status(mut self, product_status: ProductStatus) -> Self {
+        self.product_status = product_status;
         self
     }
 }
