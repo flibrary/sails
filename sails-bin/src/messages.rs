@@ -1,4 +1,4 @@
-use crate::{guards::*, wrap_op, DbConn, Msg};
+use crate::{guards::*, DbConn, IntoFlash, Msg};
 use askama::Template;
 use rocket::{
     form::Form,
@@ -24,11 +24,9 @@ pub async fn send(
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     let receiver_id = receiver.id.clone();
-    wrap_op(
-        conn.run(move |c| Messages::send(c, &user.id, &receiver.id, &info.body))
-            .await,
-        uri!("/messages"),
-    )?;
+    conn.run(move |c| Messages::send(c, &user.id, &receiver.id, &info.body))
+        .await
+        .into_flash(uri!("/messages"))?;
     Ok(Redirect::to(format!(
         "/messages/chat?user_id={}#draft_section",
         receiver_id.get_id()
@@ -57,11 +55,10 @@ pub async fn chat(
     receiver: UserInfoParamGuard,
 ) -> Result<ChatPage, Flash<Redirect>> {
     let receiver_id = receiver.info.to_id();
-    let messages = wrap_op(
-        conn.run(move |c| Messages::get_conv(c, &user.id, &receiver_id))
-            .await,
-        uri!("/"),
-    )?;
+    let messages = conn
+        .run(move |c| Messages::get_conv(c, &user.id, &receiver_id))
+        .await
+        .into_flash(uri!("/"))?;
     Ok(ChatPage {
         messages,
         receiver: receiver.info,
@@ -82,10 +79,10 @@ pub async fn portal(
     conn: DbConn,
 ) -> Result<PortalPage, Flash<Redirect>> {
     if let Some(user) = user.map(|u| u.id) {
-        let message_list = wrap_op(
-            conn.run(move |c| Messages::get_list(c, &user)).await,
-            uri!("/"),
-        )?;
+        let message_list = conn
+            .run(move |c| Messages::get_list(c, &user))
+            .await
+            .into_flash(uri!("/"))?;
         Ok(PortalPage {
             message_list,
             inner: Msg::from_flash(flash),

@@ -45,7 +45,7 @@ fn create_user_existed() {
 #[test]
 fn login_user() {
     let conn = establish_connection();
-    UserForm::new(
+    let user_id = UserForm::new(
         "TestUser@example.org",
         "Kanyang Ying",
         "NFLS",
@@ -55,6 +55,15 @@ fn login_user() {
     .unwrap()
     .create(&conn)
     .unwrap();
+
+    assert!(UserId::login(&conn, "TestUser@example.org", "strongpasswd").is_err());
+
+    user_id
+        .get_info(&conn)
+        .unwrap()
+        .set_validated(true)
+        .update(&conn)
+        .unwrap();
 
     assert!(UserId::login(&conn, "TestUser@example.org", "strongpasswd").is_ok());
 }

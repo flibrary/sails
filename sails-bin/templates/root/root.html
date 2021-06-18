@@ -20,6 +20,7 @@
 	  <th data-field="id" data-sortable="true" scope="col">Email</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="school" data-sortable="true" scope="col">School</th>
+	  <th data-field="activated" data-sortable="true" scope="col">Activated</th>
 	  <th data-field="status" data-sortable="true" scope="col">Status</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	  <th data-field="delete" scope="col">Dangerous</th>
@@ -31,8 +32,9 @@
 	  <th scope="row">{{user.get_id()}}</th>
 	  <td>{{user.get_name()}}</td>
 	  <td>{{user.get_school()}}</td>
+	  <td>{{ "{:?}"|format(user.get_validated()) }}</td>
 	  <td>{{ "{:?}"|format(user.get_user_status()) }}</td>
-	  <td><a href="/root/downgrade_user?user_id={{user.get_id()}}" class="btn btn-warning" role="button">Down</a> <a href="/root/promote_user?user_id={{user.get_id()}}" class="btn btn-primary" role="button">Up</a></td>
+	  <td><a href="/root/activate_user?user_id={{user.get_id()}}" class="btn btn-warning" role="button">Activate</a> <a href="/root/downgrade_user?user_id={{user.get_id()}}" class="btn btn-warning" role="button">Down</a> <a href="/root/promote_user?user_id={{user.get_id()}}" class="btn btn-primary" role="button">Up</a></td>
 	  <td><a href="/root/delete_user?user_id={{user.get_id()}}" class="btn btn-danger" role="button">Delete</a>
 	</tr>
 	{% endfor %}

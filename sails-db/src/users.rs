@@ -41,16 +41,20 @@ impl UserId {
 
         // If the user is disabled, he will not be allowed to login
         if info.get_user_status() != &UserStatus::Disabled {
-            match info.verify_passwd(passwd_provided) {
-                Ok(true) => {
-                    // Successfully validated
-                    Ok(user)
+            if info.get_validated() {
+                match info.verify_passwd(passwd_provided) {
+                    Ok(true) => {
+                        // Successfully validated
+                        Ok(user)
+                    }
+                    Ok(false) => {
+                        // User exists, but password is not right
+                        Err(SailsDbError::IncorrectPassword)
+                    }
+                    Err(e) => Err(e),
                 }
-                Ok(false) => {
-                    // User exists, but password is not right
-                    Err(SailsDbError::IncorrectPassword)
-                }
-                Err(e) => Err(e),
+            } else {
+                Err(SailsDbError::NotValidatedEmail)
             }
         } else {
             Err(SailsDbError::DisabledUser)
@@ -147,6 +151,12 @@ impl<'a> UserFinder<'a> {
         self.query = self.query.filter(user_status.ne(UserStatus::Disabled));
         self
     }
+
+    pub fn validated(mut self, val: bool) -> Self {
+        use crate::schema::users::dsl::*;
+        self.query = self.query.filter(validated.eq(val));
+        self
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Queryable, AsChangeset, Identifiable, Clone)]
@@ -156,6 +166,7 @@ pub struct UserInfo {
     name: String,
     school: String,
     hashed_passwd: String,
+    validated: bool,
     user_status: UserStatus,
 }
 
@@ -221,6 +232,17 @@ impl UserInfo {
     pub fn is_admin(&self) -> bool {
         self.user_status == UserStatus::Admin
     }
+
+    /// Get a reference to the user info's validated.
+    pub fn get_validated(&self) -> bool {
+        self.validated
+    }
+
+    /// Set the user info's validated.
+    pub fn set_validated(mut self, validated: bool) -> Self {
+        self.validated = validated;
+        self
+    }
 }
 
 // A struct used for update and insert
@@ -232,6 +254,7 @@ pub struct UserInfoRef<'a> {
     school: &'a str,
     // This is owned because we processed it
     hashed_passwd: String,
+    validated: bool,
     // This is owned because it was created when convert to UserInfoRef
     user_status: UserStatus,
 }
@@ -314,6 +337,7 @@ impl<'a> UserForm<'a> {
             hashed_passwd: bcrypt::hash(self.raw_passwd, bcrypt::DEFAULT_COST)?,
             school: self.school,
             name: self.name,
+            validated: false,
             user_status: UserStatus::default(),
         })
     }

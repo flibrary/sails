@@ -43,4 +43,7 @@ pub enum SailsDbError {
 
     #[error("the user has been disabled")]
     DisabledUser,
+
+    #[error("the user's was not verified. Please check your mailbox and junk folder to verify.")]
+    NotValidatedEmail,
 }

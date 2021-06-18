@@ -8,7 +8,7 @@ use rocket::{
 };
 use sails_db::{categories::*, error::SailsDbError, products::*, users::*};
 
-use crate::{guards::*, wrap_op, DbConn, Msg};
+use crate::{guards::*, DbConn, IntoFlash, Msg};
 
 // Comrak options. We selectively enabled a few GFM standards.
 static COMRAK_OPT: Lazy<ComrakOptions> = Lazy::new(|| {
@@ -28,10 +28,9 @@ pub async fn delete_book(
     book: BookIdGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    wrap_op(
-        conn.run(move |c| book.book_id.delete(c)).await,
-        uri!("/market", market),
-    )?;
+    conn.run(move |c| book.book_id.delete(c))
+        .await
+        .into_flash(uri!("/market", market))?;
     Ok(Redirect::to(uri!("/market", market)))
 }
 
@@ -52,11 +51,9 @@ pub async fn update_book(
 ) -> Result<Redirect, Flash<Redirect>> {
     let book_id = book.book_id.get_id().to_string();
     // The user is the seller, he/she is authorized
-    wrap_op(
-        conn.run(move |c| book.book_id.update_owned(c, info.into_inner().verify(c)?))
-            .await,
-        uri!("/market", market),
-    )?;
+    conn.run(move |c| book.book_id.update_owned(c, info.into_inner().verify(c)?))
+        .await
+        .into_flash(uri!("/market", market))?;
     Ok(Redirect::to(format!(
         "/market/book_info?book_id={}",
         book_id,
@@ -70,10 +67,10 @@ pub async fn create_book(
     info: Form<IncompleteProductOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let product_id = wrap_op(
-        conn.run(move |c| info.create(c, &user.id)).await,
-        uri!("/market", market),
-    )?;
+    let product_id = conn
+        .run(move |c| info.create(c, &user.id))
+        .await
+        .into_flash(uri!("/market", market))?;
     Ok(Redirect::to(format!(
         "/market/instruction?book_id={}",
         product_id.get_id()
@@ -99,10 +96,10 @@ pub async fn update_book_page(
     Ok(UpdateBook {
         // If there is no leaves, user cannot create any books, a message should be displayed inside the template
         // TODO: categories should only be fetched once
-        categories: wrap_op(
-            conn.run(move |c| Categories::list_leaves(c)).await,
-            uri!("/market", all_books(_)),
-        )?,
+        categories: conn
+            .run(move |c| Categories::list_leaves(c))
+            .await
+            .into_flash(uri!("/market", all_books(_)))?,
         book: book.book_info,
     })
 }
@@ -120,10 +117,10 @@ pub async fn post_book_page(conn: DbConn, _user: UserIdGuard) -> Result<PostBook
     Ok(PostBook {
         // If there is no leaves, user cannot create any books, a message should be displayed inside the template
         // TODO: categories should only be fetched once
-        categories: wrap_op(
-            conn.run(move |c| Categories::list_leaves(c)).await,
-            uri!("/market", all_books(_)),
-        )?,
+        categories: conn
+            .run(move |c| Categories::list_leaves(c))
+            .await
+            .into_flash(uri!("/market", all_books(_)))?,
     })
 }
 
@@ -239,11 +236,10 @@ pub struct CategoriesPage {
 // If there is no category specified, we simply go for the top categories
 #[get("/categories", rank = 2)]
 pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redirect>> {
-    wrap_op(
-        conn.run(move |c| Categories::list_top(c)).await,
-        uri!("/market", market),
-    )
-    .map(|v| CategoriesPage { categories: v })
+    conn.run(move |c| Categories::list_top(c))
+        .await
+        .into_flash(uri!("/market", market))
+        .map(|v| CategoriesPage { categories: v })
 }
 
 // Category browsing
@@ -254,11 +250,10 @@ pub async fn categories(
 ) -> Result<Result<CategoriesPage, Redirect>, Flash<Redirect>> {
     // There is a specified category name
     let category_cloned = category.clone();
-    let category = wrap_op(
-        conn.run(move |c| Categories::find_by_id(c, &category))
-            .await,
-        uri!("/market", market),
-    )?;
+    let category = conn
+        .run(move |c| Categories::find_by_id(c, &category))
+        .await
+        .into_flash(uri!("/market", market))?;
 
     // The category is a leaf, meaning that we then have to search for books related to that
     if category.is_leaf() {
@@ -269,10 +264,10 @@ pub async fn categories(
     } else {
         // The category is not a leaf, continuing down the path
         Ok(Ok(CategoriesPage {
-            categories: wrap_op(
-                conn.run(move |c| category.subcategory(c)).await,
-                uri!("/market", market),
-            )?,
+            categories: conn
+                .run(move |c| category.subcategory(c))
+                .await
+                .into_flash(uri!("/market", market))?,
         }))
     }
 }
@@ -293,8 +288,8 @@ pub async fn all_books(
     flash: Option<FlashMessage<'_>>,
 ) -> Result<AllBooks, Flash<Redirect>> {
     Ok(AllBooks {
-        books: wrap_op(
-            conn.run(
+        books: conn
+            .run(
                 move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
                     let book_info = if let Some(id) = category {
                         let ctg = Categories::find_by_id(c, &id).and_then(Category::into_leaf)?;
@@ -312,9 +307,8 @@ pub async fn all_books(
                         .collect()
                 },
             )
-            .await,
-            uri!("/market", market),
-        )?,
+            .await
+            .into_flash(uri!("/market", market))?,
         inner: Msg::from_flash(flash),
     })
 }

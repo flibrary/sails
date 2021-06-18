@@ -1,7 +1,8 @@
-use crate::DbConn;
+use crate::{aead::AeadKey, DbConn};
 use rocket::{
     outcome::{try_outcome, IntoOutcome, Outcome},
     request::FromRequest,
+    State,
 };
 use sails_db::{
     categories::{Categories, Category},
@@ -225,5 +226,46 @@ impl<'r> FromRequest<'r> for UserInfoParamGuard {
         .await
         .ok()
         .or_forward(())
+    }
+}
+
+pub struct AeadUserInfo {
+    pub info: UserInfo,
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for AeadUserInfo {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let aead = try_outcome!(request.guard::<&State<AeadKey>>().await);
+        let db = try_outcome!(request.guard::<DbConn>().await);
+
+        let key = request
+            .query_value::<String>("activation_key")
+            .and_then(|x| x.ok());
+        if let Some(key) = key {
+            let decode_fn = || -> Result<String, anyhow::Error> {
+                let decoded = base64::decode_config(&key, base64::URL_SAFE)?;
+                Ok(String::from_utf8(aead.decrypt(&decoded).map_err(
+                    |_| anyhow::anyhow!("mailaddress encryption failed"),
+                )?)?)
+            };
+
+            let uid = decode_fn();
+
+            db.run(move |c| -> Result<AeadUserInfo, anyhow::Error> {
+                Ok(AeadUserInfo {
+                    info: UserFinder::new(c, None).id(&uid?).first_info()?,
+                })
+            })
+            .await
+            .ok()
+            .or_forward(())
+        } else {
+            Outcome::Forward(())
+        }
     }
 }

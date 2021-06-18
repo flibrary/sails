@@ -1,7 +1,7 @@
 use crate::{
     guards::{RootGuard, UserIdParamGuard, UserInfoParamGuard},
     recaptcha::ReCaptcha,
-    wrap_op, DbConn, Msg,
+    DbConn, IntoFlash, Msg,
 };
 use askama::Template;
 use rocket::{
@@ -122,14 +122,12 @@ pub async fn promote(
     info: UserInfoParamGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    wrap_op(
-        conn.run(|c| {
-            let upgraded = info.info.get_user_status().up();
-            info.info.set_user_status(upgraded).update(c).map(|_| ())
-        })
-        .await,
-        uri!("/root", root),
-    )?;
+    conn.run(|c| {
+        let upgraded = info.info.get_user_status().up();
+        info.info.set_user_status(upgraded).update(c).map(|_| ())
+    })
+    .await
+    .into_flash(uri!("/root", root))?;
     Ok(Redirect::to(uri!("/root", root)))
 }
 
@@ -139,14 +137,12 @@ pub async fn downgrade(
     info: UserInfoParamGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    wrap_op(
-        conn.run(|c| {
-            let downgraded = info.info.get_user_status().down();
-            info.info.set_user_status(downgraded).update(c).map(|_| ())
-        })
-        .await,
-        uri!("/root", root),
-    )?;
+    conn.run(|c| {
+        let downgraded = info.info.get_user_status().down();
+        info.info.set_user_status(downgraded).update(c).map(|_| ())
+    })
+    .await
+    .into_flash(uri!("/root", root))?;
     Ok(Redirect::to(uri!("/root", root)))
 }
 
@@ -156,7 +152,21 @@ pub async fn delete_user(
     id: UserIdParamGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    wrap_op(conn.run(|c| id.id.delete(c)).await, uri!("/root", root))?;
+    conn.run(|c| id.id.delete(c))
+        .await
+        .into_flash(uri!("/root", root))?;
+    Ok(Redirect::to(uri!("/root", root)))
+}
+
+#[get("/activate_user")]
+pub async fn activate_user(
+    _guard: RootGuard,
+    info: UserInfoParamGuard,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    conn.run(|c| info.info.set_validated(true).update(c))
+        .await
+        .into_flash(uri!("/root", root))?;
     Ok(Redirect::to(uri!("/root", root)))
 }
 

@@ -1,9 +1,15 @@
 use crate::{
-    guards::{UserIdGuard, UserInfoGuard},
+    aead::AeadKey,
+    guards::{AeadUserInfo, UserIdGuard, UserInfoGuard},
     recaptcha::ReCaptcha,
-    wrap_op, DbConn, Msg,
+    smtp::SmtpCreds,
+    DbConn, IntoFlash, Msg,
 };
 use askama::Template;
+use lettre::{
+    transport::smtp::authentication::Credentials, AsyncSmtpTransport, AsyncTransport, Message,
+    Tokio1Executor,
+};
 use rocket::{
     form::{Form, Strict},
     http::{Cookie, CookieJar},
@@ -17,6 +23,38 @@ use sails_db::{
     products::*,
     users::*,
 };
+
+async fn send_verification_email(
+    dst: &str,
+    aead: &AeadKey,
+    smtp: &SmtpCreds,
+) -> anyhow::Result<()> {
+    let uri = format!(
+        "Your activation link: https://flibrary.info/user/activate?activation_key={}",
+        base64::encode_config(
+            aead.encrypt(dst.as_bytes())
+                .map_err(|_| anyhow::anyhow!("mailaddress encryption failed"))?,
+            base64::URL_SAFE
+        )
+    );
+
+    let email = Message::builder()
+        .from(smtp.smtp_username.parse()?)
+        // We have already checked it once
+        .to(dst.parse().unwrap())
+        .subject("FLibrary registration verification link")
+        .body(uri)?;
+
+    let creds = Credentials::new(smtp.smtp_username.clone(), smtp.smtp_password.clone());
+
+    let mailer: AsyncSmtpTransport<Tokio1Executor> =
+        AsyncSmtpTransport::<Tokio1Executor>::starttls_relay(&smtp.smtp_server)?
+            .credentials(creds)
+            .build();
+
+    mailer.send(email).await?;
+    Ok(())
+}
 
 #[derive(FromForm)]
 pub struct SignUpForm {
@@ -69,6 +107,8 @@ pub async fn create_user(
     info: Form<Strict<SignUpForm>>,
     conn: DbConn,
     recaptcha: &State<ReCaptcha>,
+    aead: &State<AeadKey>,
+    smtp: &State<SmtpCreds>,
 ) -> Result<Redirect, Flash<Redirect>> {
     if !recaptcha
         .verify(&info.recaptcha_token)
@@ -83,18 +123,18 @@ pub async fn create_user(
     };
 
     // We parse it to only allow outlook emails
-    let email: lettre::Address = wrap_op(
-        info.user_info
-            .id
-            .parse::<lettre::Address>()
-            .map_err(|e| e.into()),
-        uri!("/user", signup),
-    )?;
+    let email: lettre::Address = info
+        .user_info
+        .id
+        .parse::<lettre::Address>()
+        .into_flash(uri!("/user", signup))?;
     if email.domain() == "outlook.com" {
-        wrap_op(
-            conn.run(move |c| info.user_info.to_ref()?.create(c)).await,
-            uri!("/user", signup),
-        )?;
+        send_verification_email(&info.user_info.id, &aead, &smtp)
+            .await
+            .into_flash(uri!("/user", signup))?;
+        conn.run(move |c| info.user_info.to_ref()?.create(c))
+            .await
+            .into_flash(uri!("/user", signup))?;
         Ok(Redirect::to(uri!("/user", portal)))
     } else {
         Err(Flash::error(
@@ -111,10 +151,9 @@ pub async fn update_user(
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     if user.id.get_id() == info.id {
-        wrap_op(
-            conn.run(move |c| info.to_ref()?.update(c)).await,
-            uri!("/user", portal),
-        )?;
+        conn.run(move |c| info.to_ref()?.update(c))
+            .await
+            .into_flash(uri!("/user", portal))?;
 
         Ok(Redirect::to(uri!("/user", portal)))
     } else {
@@ -125,17 +164,24 @@ pub async fn update_user(
     }
 }
 
+#[get("/activate")]
+pub async fn activate_user(info: AeadUserInfo, conn: DbConn) -> Result<Redirect, Flash<Redirect>> {
+    conn.run(move |c| info.info.set_validated(true).update(c))
+        .await
+        .into_flash(uri!("/user", portal))?;
+    Ok(Redirect::to(uri!("/user", portal)))
+}
+
 #[post("/validate", data = "<info>")]
 pub async fn validate(
     jar: &CookieJar<'_>,
     info: Form<Validation>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let user = wrap_op(
-        conn.run(move |c| UserId::login(c, &info.email, &info.password))
-            .await,
-        uri!("/user", portal),
-    )?;
+    let user = conn
+        .run(move |c| UserId::login(c, &info.email, &info.password))
+        .await
+        .into_flash(uri!("/user", portal))?;
     let mut cookie = Cookie::new("uid", user.get_id().to_string());
     cookie.set_secure(true);
     // Successfully validated, set private cookie.

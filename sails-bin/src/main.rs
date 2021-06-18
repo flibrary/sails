@@ -5,13 +5,16 @@
 // Handle general database errors by redirecting using flash message to some big pages like `/market`, `/user`. Flash message will only be used up when called.
 // All for loops in templates should be able to handle empty vec.
 
+mod aead;
 mod guards;
 mod market;
 mod messages;
 mod recaptcha;
 mod root;
+mod smtp;
 mod user;
 
+use aead::AeadKey;
 use askama::Template;
 use diesel::connection::SimpleConnection;
 use rocket::{
@@ -27,14 +30,11 @@ use rocket::{
     Build, Rocket,
 };
 use rust_embed::RustEmbed;
-use sails_db::{
-    categories::{Categories, CtgBuilder},
-    error::SailsDbError,
-};
+use sails_db::categories::{Categories, CtgBuilder};
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 
-use crate::{recaptcha::ReCaptcha, root::RootPasswd};
+use crate::{recaptcha::ReCaptcha, root::RootPasswd, smtp::SmtpCreds};
 
 #[macro_use]
 extern crate rocket;
@@ -43,12 +43,17 @@ extern crate diesel_migrations;
 #[macro_use]
 extern crate rocket_sync_db_pools;
 
-// Wraps around the db operation
-pub fn wrap_op<T>(
-    x: Result<T, SailsDbError>,
-    uri: impl TryInto<Reference<'static>>,
-) -> Result<T, Flash<Redirect>> {
-    x.map_err(|e| Flash::error(Redirect::to(uri), e.to_string()))
+pub trait IntoFlash<T> {
+    fn into_flash(self, uri: impl TryInto<Reference<'static>>) -> Result<T, Flash<Redirect>>;
+}
+
+impl<T, E> IntoFlash<T> for Result<T, E>
+where
+    E: std::fmt::Display,
+{
+    fn into_flash(self, uri: impl TryInto<Reference<'static>>) -> Result<T, Flash<Redirect>> {
+        self.map_err(|e| Flash::error(Redirect::to(uri), e.to_string()))
+    }
 }
 
 #[database("flibrary")]
@@ -192,6 +197,8 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<CtgBuilder>())
         .attach(AdHoc::config::<RootPasswd>())
         .attach(AdHoc::config::<ReCaptcha>())
+        .attach(AdHoc::config::<SmtpCreds>())
+        .attach(AdHoc::config::<AeadKey>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .mount("/", routes![index])
         .mount("/static", routes![get_file])
@@ -207,7 +214,8 @@ fn rocket() -> Rocket<Build> {
                 user::logout,
                 user::update_user,
                 user::update_user_page,
-                user::portal_unsigned
+                user::portal_unsigned,
+                user::activate_user,
             ],
         )
         .mount(
@@ -250,6 +258,7 @@ fn rocket() -> Rocket<Build> {
                 root::promote,
                 root::downgrade,
                 root::delete_user,
+                root::activate_user,
             ],
         )
         .register("/", catchers![page404, page422, page500])
