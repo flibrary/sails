@@ -41,7 +41,7 @@ async fn send_verification_email(
     let email = Message::builder()
         .from(smtp.smtp_username.parse()?)
         // We have already checked it once
-        .to(dst.parse().unwrap())
+        .to(dst.parse()?)
         .subject("FLibrary registration verification link")
         .body(uri)?;
 

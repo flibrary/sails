@@ -101,7 +101,9 @@ impl<'r> FromRequest<'r> for BookIdGuard {
 }
 
 // This guard matches only if the user is authorized. It implies also that Book is present and User is present
-pub struct Authorized;
+pub struct Authorized {
+    pub info: UserInfo,
+}
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Authorized {
@@ -113,7 +115,7 @@ impl<'r> FromRequest<'r> for Authorized {
         let user = try_outcome!(request.guard::<UserInfoGuard>().await);
         let book = try_outcome!(request.guard::<BookIdGuard>().await);
         if (book.seller_id.get_id() == user.info.get_id()) || user.info.is_admin() {
-            Outcome::Success(Authorized)
+            Outcome::Success(Authorized { info: user.info })
         } else {
             Outcome::Forward(())
         }

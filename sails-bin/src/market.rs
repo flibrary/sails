@@ -165,6 +165,7 @@ pub struct BookPageOwned {
     book: ProductInfo,
     category: Option<Category>,
     desc_rendered: String,
+    seller: UserInfo,
 }
 
 #[derive(Template)]
@@ -186,12 +187,13 @@ pub struct BookPageGuest {
 
 // If the seller is the user, buttons like update and delete are displayed
 #[get("/book_info", rank = 1)]
-pub async fn book_page_owned(book: BookInfoGuard, _auth: Authorized) -> BookPageOwned {
+pub async fn book_page_owned(book: BookInfoGuard, auth: Authorized) -> BookPageOwned {
     let rendered = markdown_to_html(book.book_info.get_description(), &COMRAK_OPT);
     BookPageOwned {
         book: book.book_info,
         category: book.category,
         desc_rendered: rendered,
+        seller: auth.info,
     }
 }
 
