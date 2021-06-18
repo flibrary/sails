@@ -216,6 +216,8 @@ fn rocket() -> Rocket<Build> {
                 user::update_user_page,
                 user::portal_unsigned,
                 user::activate_user,
+                user::signup_instruction,
+                user::email_verified,
             ],
         )
         .mount(

@@ -24,9 +24,11 @@
 </table>
 {% endblock seller %}
 
-{% block actions %}
+<br>
+
+<div class="bg-light p-5 rounded">
 <h1>Actions</h1>
 <a href="post_book?book_id={{book.get_id()}}" class="btn btn-primary" role="button">Update</a>
 <a href="instruction?book_id={{book.get_id()}}" class="btn btn-warning" role="button">Instruction</a>
 <a href="delete?book_id={{book.get_id()}}" class="btn btn-danger" role="button">Delete</a>
-{% endblock actions %}
+</div>

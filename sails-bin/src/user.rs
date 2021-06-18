@@ -131,17 +131,26 @@ pub async fn create_user(
     if email.domain() == "outlook.com" {
         send_verification_email(&info.user_info.id, &aead, &smtp)
             .await
-            .into_flash(uri!("/user", signup))?;
+            .into_flash(uri!("/user", portal))?;
         conn.run(move |c| info.user_info.to_ref()?.create(c))
             .await
-            .into_flash(uri!("/user", signup))?;
-        Ok(Redirect::to(uri!("/user", portal)))
+            .into_flash(uri!("/user", portal))?;
+        Ok(Redirect::to(uri!("/user", signup_instruction)))
     } else {
         Err(Flash::error(
             Redirect::to(uri!("/user", portal)),
             "please use outlook email addresses",
         ))
     }
+}
+
+#[derive(Template)]
+#[template(path = "user/signup_instruction.html")]
+pub struct SignUpInstruction;
+
+#[get("/signup_instruction")]
+pub async fn signup_instruction() -> SignUpInstruction {
+    SignUpInstruction
 }
 
 #[post("/update_user", data = "<info>")]
@@ -164,12 +173,21 @@ pub async fn update_user(
     }
 }
 
+#[derive(Template)]
+#[template(path = "user/email_verified.html")]
+pub struct EmailVerified;
+
+#[get("/email_verified")]
+pub async fn email_verified() -> EmailVerified {
+    EmailVerified
+}
+
 #[get("/activate")]
 pub async fn activate_user(info: AeadUserInfo, conn: DbConn) -> Result<Redirect, Flash<Redirect>> {
     conn.run(move |c| info.info.set_validated(true).update(c))
         .await
         .into_flash(uri!("/user", portal))?;
-    Ok(Redirect::to(uri!("/user", portal)))
+    Ok(Redirect::to(uri!("/user", email_verified)))
 }
 
 #[post("/validate", data = "<info>")]
