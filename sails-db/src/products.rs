@@ -153,6 +153,8 @@ impl<'a> ProductFinder<'a> {
             Cmp::LessThan => self.query = self.query.filter(price.lt(price_provided)),
             Cmp::GreaterEqual => self.query = self.query.filter(price.ge(price_provided)),
             Cmp::LessEqual => self.query = self.query.filter(price.le(price_provided)),
+            Cmp::NotEqual => self.query = self.query.filter(price.ne(price_provided)),
+            Cmp::Equal => self.query = self.query.filter(price.eq(price_provided)),
         }
         self
     }
@@ -166,9 +168,14 @@ impl<'a> ProductFinder<'a> {
         self
     }
 
-    pub fn status(mut self, status: ProductStatus) -> Self {
+    pub fn status(mut self, status: ProductStatus, cmp: Cmp) -> Self {
         use crate::schema::products::dsl::*;
-        self.query = self.query.filter(product_status.eq(status));
+        match cmp {
+            Cmp::Equal => self.query = self.query.filter(product_status.eq(status)),
+            Cmp::NotEqual => self.query = self.query.filter(product_status.ne(status)),
+            // Currently it makes no sense for us to do so
+            _ => unimplemented!(),
+        }
         self
     }
 

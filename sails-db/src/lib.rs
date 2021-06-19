@@ -32,4 +32,8 @@ pub enum Cmp {
     GreaterEqual,
     /// Less than or equal to
     LessEqual,
+    /// Not equal to
+    NotEqual,
+    /// Equal to
+    Equal,
 }

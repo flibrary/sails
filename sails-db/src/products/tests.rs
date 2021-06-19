@@ -10,6 +10,7 @@ fn create_product() {
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
@@ -40,6 +41,7 @@ fn search_products() {
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
@@ -172,6 +174,7 @@ fn delete_product() {
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
@@ -205,6 +208,7 @@ fn product_status() {
         "NFLS",
         "+86 18353232340",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()

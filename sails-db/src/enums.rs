@@ -50,3 +50,29 @@ pub enum ProductStatus {
     // The product is considered harzard, and it has been disabled
     Disabled,
 }
+
+impl Default for ProductStatus {
+    fn default() -> Self {
+        Self::Normal
+    }
+}
+
+impl Status for ProductStatus {
+    fn up(&self) -> Self {
+        match *self {
+            Self::Disabled => Self::Normal,
+            Self::Normal => Self::Verified,
+            Self::Verified => Self::Sold,
+            Self::Sold => Self::Sold,
+        }
+    }
+
+    fn down(&self) -> Self {
+        match *self {
+            Self::Disabled => Self::Disabled,
+            Self::Normal => Self::Disabled,
+            Self::Verified => Self::Normal,
+            Self::Sold => Self::Verified,
+        }
+    }
+}

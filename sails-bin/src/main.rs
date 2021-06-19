@@ -5,6 +5,7 @@
 // Handle general database errors by redirecting using flash message to some big pages like `/market`, `/user`. Flash message will only be used up when called.
 // All for loops in templates should be able to handle empty vec.
 
+mod admin;
 mod aead;
 mod guards;
 mod market;
@@ -16,7 +17,9 @@ mod user;
 
 use aead::AeadKey;
 use askama::Template;
+use comrak::ComrakOptions;
 use diesel::connection::SimpleConnection;
+use once_cell::sync::Lazy;
 use rocket::{
     fairing::AdHoc,
     figment::{
@@ -42,6 +45,17 @@ extern crate rocket;
 extern crate diesel_migrations;
 #[macro_use]
 extern crate rocket_sync_db_pools;
+
+// Comrak options. We selectively enabled a few GFM standards.
+static COMRAK_OPT: Lazy<ComrakOptions> = Lazy::new(|| {
+    let mut opts = ComrakOptions::default();
+    opts.extension.table = true;
+    opts.extension.tasklist = true;
+    opts.extension.strikethrough = true;
+    opts.extension.autolink = true;
+    opts.extension.footnotes = true;
+    opts
+});
 
 pub trait IntoFlash<T> {
     fn into_flash(self, uri: impl TryInto<Reference<'static>>) -> Result<T, Flash<Redirect>>;
@@ -207,6 +221,7 @@ fn rocket() -> Rocket<Build> {
             "/user",
             routes![
                 user::portal,
+                user::portal_guest,
                 user::signin,
                 user::validate,
                 user::signup,
@@ -262,6 +277,15 @@ fn rocket() -> Rocket<Build> {
                 root::downgrade,
                 root::delete_user,
                 root::activate_user,
+            ],
+        )
+        .mount(
+            "/admin",
+            routes![
+                admin::admin,
+                admin::verify_book,
+                admin::disable_book,
+                admin::normalize_book
             ],
         )
         .register("/", catchers![page404, page422, page500])

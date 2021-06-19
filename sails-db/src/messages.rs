@@ -118,6 +118,7 @@ mod tests {
             "NFLS",
             "+86 18353232340",
             "strongpasswd",
+            None,
         )
         .to_ref()
         .unwrap()
@@ -129,17 +130,24 @@ mod tests {
             "NFLS",
             "+86 18353232340",
             "strongpasswd",
+            None,
         )
         .to_ref()
         .unwrap()
         .create(&conn)
         .unwrap();
 
-        let receiver = UserForm::new("Him@example.org", "NFLS", "+86 18353232340", "strongpasswd")
-            .to_ref()
-            .unwrap()
-            .create(&conn)
-            .unwrap();
+        let receiver = UserForm::new(
+            "Him@example.org",
+            "NFLS",
+            "+86 18353232340",
+            "strongpasswd",
+            None,
+        )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
         Messages::send(&conn, &sender, &receiver, "Hello").unwrap();
         Messages::send(&conn, &sender, &receiver, "Are you there?").unwrap();
@@ -169,6 +177,7 @@ mod tests {
             "NFLS",
             "+86 18353232340",
             "strongpasswd",
+            None,
         )
         .to_ref()
         .unwrap()
@@ -180,17 +189,24 @@ mod tests {
             "NFLS",
             "+86 18353232340",
             "strongpasswd",
+            None,
         )
         .to_ref()
         .unwrap()
         .create(&conn)
         .unwrap();
 
-        let receiver = UserForm::new("Him@example.org", "NFLS", "+86 18353232340", "strongpasswd")
-            .to_ref()
-            .unwrap()
-            .create(&conn)
-            .unwrap();
+        let receiver = UserForm::new(
+            "Him@example.org",
+            "NFLS",
+            "+86 18353232340",
+            "strongpasswd",
+            None,
+        )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
         Messages::send(&conn, &receiver, &receiver, "Self-message").unwrap();
 

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock title %}
+
+{% block content %}
+<main class="container">
+  {% include "display_flash.html" %}
+  <div class="bg-light p-5 rounded">
+    <h1>You are now at the admin dashboard</h1>
+    <p class="lead">Please make sure every action you make has been well-thought.</p>
+  </div>
+  <br>
+
+  {% if normal_books.len() > 0 %}
+  <div class="bg-light p-5 rounded border border-5 border-warning">
+    <h3>Pending Books</h3>
+    <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+      <thead>
+	<tr>
+	  <th data-field="id" data-sortable="true" scope="col">ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
+	  <th data-field="email" data-sortable="true" scope="col">Seller's email</th>
+	  <th data-field="actions" scope="col">Actions</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for book in normal_books %}
+	<tr>
+	  <th scope="row">{{book.get_shortid()}}</th>
+	  <td>{{book.get_prodname()}}</td>
+	  <td>{{book.get_price()}}</td>
+	  <td>{{book.get_seller_id()}}</td>
+	  <td><a href="/admin/disable_book?book_id={{book.get_id()}}" class="btn btn-warning" role="button">Disable</a> <a href="/admin/verify_book?book_id={{book.get_id()}}" class="btn btn-success" role="button">Verify</a></td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <br>
+  {% else %}
+    <div class="bg-light p-5 rounded">
+      <h3>No books awaiting actions</h3>
+    </div>
+    <br>
+  {% endif %}
+
+
+  {% if disabled_books.len() > 0 %}
+  <div class="bg-light p-5 rounded border border-5 border-warning">
+    <h3>Disabled Books</h3>
+    <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+      <thead>
+	<tr>
+	  <th data-field="id" data-sortable="true" scope="col">ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
+	  <th data-field="email" data-sortable="true" scope="col">Seller's email</th>
+	  <th data-field="actions" scope="col">Actions</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for book in disabled_books %}
+	<tr>
+	  <th scope="row">{{book.get_shortid()}}</th>
+	  <td>{{book.get_prodname()}}</td>
+	  <td>{{book.get_price()}}</td>
+	  <td>{{book.get_seller_id()}}</td>
+	  <td><a href="/admin/normalize_book?book_id={{book.get_id()}}" class="btn btn-primary" role="button">Revert</a></td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <br>
+  {% else %}
+    <div class="bg-light p-5 rounded">
+      <h3>No disabled books</h3>
+    </div>
+    <br>
+    {% endif %}
+
+
+  {% if verified_books.len() > 0 %}
+  <div class="bg-light p-5 rounded border border-5 border-warning">
+    <h3>Verified Books</h3>
+    <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+      <thead>
+	<tr>
+	  <th data-field="id" data-sortable="true" scope="col">ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
+	  <th data-field="email" data-sortable="true" scope="col">Seller's email</th>
+	  <th data-field="actions" scope="col">Actions</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for book in verified_books %}
+	<tr>
+	  <th scope="row">{{book.get_shortid()}}</th>
+	  <td>{{book.get_prodname()}}</td>
+	  <td>{{book.get_price()}}</td>
+	  <td>{{book.get_seller_id()}}</td>
+	  <td><a href="/admin/normalize_book?book_id={{book.get_id()}}" class="btn btn-warning" role="button">Revert</a></td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <br>
+  {% else %}
+    <div class="bg-light p-5 rounded">
+      <h3>No verified books</h3>
+    </div>
+    <br>
+  {% endif %}
+</main>
+{% endblock content %}

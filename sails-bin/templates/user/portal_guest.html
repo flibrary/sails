@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{user.get_name()}}'s Portal{% endblock title %}
+{% block navbutton %}<li class="nav-item"><a href="/user/logout" class="btn btn-warning" role="button">Log out</a></li>{% endblock navbutton %}
+
+{% block content %}
+<main class="container">
+  {% include "display_flash.html" %}
+  <div class="bg-light p-5 rounded">
+    <h1>Welcome to {{ user.get_name() }}'s portal</h1>
+    <p class="lead">{% block intro %}This page helps you to find more out about {{ user.get_name() }}.{% endblock intro %}</p>
+  </div>
+  <br>
+
+  <div class="bg-light p-5 rounded">
+    <h1>Information</h1>
+    <table class="table table-hover">
+      <tbody>
+	<tr>
+	  <th scope="row">Email</th>
+	  <td><a href="mailto:{{user.get_id()}}">{{ user.get_id() }}</a></td>
+	</tr>
+	<tr>
+	  <th scope="row">Real name</th>
+	  <td>{{ user.get_name() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">School</th>
+	  <td>{{ user.get_school() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">Account status</th>
+	  <td>{{ "{:?}"|format(user.get_user_status()) }}</td>
+	</tr>
+      </tbody>
+    </table>
+    {% block update_button %}{% endblock update_button %}
+  </div>
+  <br>
+
+  <div class="bg-light p-5 rounded markdown-body">
+    {% match desc_rendered %}
+    {% when Some with (desc) %}
+    {{desc|safe}}
+    {% when None %}
+    <h3>No description</h3>
+    {% endmatch %}
+  </div>
+  <br>
+
+  {% if books.len() > 0 %}
+  {% include "book_list.html" %}
+  {% else %}
+    <div class="bg-light p-5 rounded">
+      <h3>No books posted on the market</h3>
+      {% block postbook_button %}{% endblock postbook_button %}
+    </div>
+    <br>
+  {% endif %}
+
+</main>
+{% endblock content %}

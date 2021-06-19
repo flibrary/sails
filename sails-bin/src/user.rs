@@ -1,11 +1,12 @@
 use crate::{
     aead::AeadKey,
-    guards::{AeadUserInfo, UserIdGuard, UserInfoGuard},
+    guards::{AeadUserInfo, UserIdGuard, UserInfoGuard, UserInfoParamGuard},
     recaptcha::ReCaptcha,
     smtp::SmtpCreds,
-    DbConn, IntoFlash, Msg,
+    DbConn, IntoFlash, Msg, COMRAK_OPT,
 };
 use askama::Template;
+use comrak::markdown_to_html;
 use lettre::{
     transport::smtp::authentication::Credentials, AsyncSmtpTransport, AsyncTransport, Message,
     Tokio1Executor,
@@ -230,15 +231,60 @@ pub async fn update_user_page(user: UserInfoGuard) -> UpdateUserPage {
 }
 
 #[derive(Template)]
-#[template(path = "user/portal.html")]
-pub struct PortalPage {
+#[template(path = "user/portal_guest.html")]
+pub struct PortalGuestPage {
     user: UserInfo,
+    desc_rendered: Option<String>,
     books: Vec<(ProductInfo, Option<Category>)>,
     inner: Msg,
 }
 
-// The flash message is required here because we may get error from update_user
+#[derive(Template)]
+#[template(path = "user/portal.html")]
+pub struct PortalPage {
+    user: UserInfo,
+    desc_rendered: Option<String>,
+    books: Vec<(ProductInfo, Option<Category>)>,
+    inner: Msg,
+}
+
 #[get("/", rank = 1)]
+pub async fn portal_guest(
+    flash: Option<FlashMessage<'_>>,
+    _signedin: UserIdGuard,
+    user: UserInfoParamGuard,
+    conn: DbConn,
+) -> Result<PortalGuestPage, Redirect> {
+    let uid_cloned = user.info.get_id().to_string();
+    let books = conn
+        .run(
+            move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
+                ProductFinder::new(c, None)
+                    .seller(&uid_cloned)
+                    .search_info()?
+                    .into_iter()
+                    .map(|x| {
+                        let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                        Ok((x, ctg))
+                    })
+                    .collect()
+            },
+        )
+        .await
+        .unwrap(); // No error should be tolerated here (database error). 500 is expected
+    Ok(PortalGuestPage {
+        desc_rendered: user
+            .info
+            .get_description()
+            .map(|x| markdown_to_html(x, &COMRAK_OPT)),
+        user: user.info,
+        books,
+        inner: Msg::from_flash(flash),
+    })
+}
+
+// The flash message is required here because we may get error from update_user
+#[get("/", rank = 2)]
 pub async fn portal(
     flash: Option<FlashMessage<'_>>,
     user: UserInfoGuard,
@@ -262,13 +308,17 @@ pub async fn portal(
         .await
         .unwrap(); // No error should be tolerated here (database error). 500 is expected
     Ok(PortalPage {
+        desc_rendered: user
+            .info
+            .get_description()
+            .map(|x| markdown_to_html(x, &COMRAK_OPT)),
         user: user.info,
         books,
         inner: Msg::from_flash(flash),
     })
 }
 
-#[get("/", rank = 2)]
+#[get("/", rank = 3)]
 pub async fn portal_unsigned() -> Redirect {
     Redirect::to(uri!("/user", signin))
 }

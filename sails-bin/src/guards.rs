@@ -120,6 +120,24 @@ impl<'r> FromRequest<'r> for Authorized {
     }
 }
 
+pub struct AdminGuard;
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for AdminGuard {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard>().await);
+        if user.info.is_admin() {
+            Outcome::Success(AdminGuard)
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
 pub struct UserInfoGuard {
     pub info: UserInfo,
 }

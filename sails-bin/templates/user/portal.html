@@ -1,49 +1,6 @@
-{% extends "base.html" %}
+{% extends "portal_guest.html" %}
 {% block title %}Portal{% endblock title %}
-{% block navbutton %}<li class="nav-item"><a href="/user/logout" class="btn btn-warning" role="button">Log out</a></li>{% endblock navbutton %}
 
-{% block content %}
-<main class="container">
-  {% include "display_flash.html" %}
-  <div class="bg-light p-5 rounded">
-    <h1>Welcome to the user portal</h1>
-    <p class="lead">This page helps you to manage your books posted in the market and your basic account information.</p>
-  </div>
-  <br>
-
-  <div class="bg-light p-5 rounded">
-    <h1>Your information</h1>
-    <table class="table table-hover">
-      <tbody>
-	<tr>
-	  <th scope="row">Email</th>
-	  <td><a href="mailto:{{user.get_id()}}">{{ user.get_id() }}</a></td>
-	</tr>
-	<tr>
-	  <th scope="row">Real name</th>
-	  <td>{{ user.get_name() }}</td>
-	</tr>
-	<tr>
-	  <th scope="row">School</th>
-	  <td>{{ user.get_school() }}</td>
-	</tr>
-	<tr>
-	  <th scope="row">Account status</th>
-	  <td>{{ "{:?}"|format(user.get_user_status()) }}</td>
-	</tr>
-      </tbody>
-    </table>
-    <a href="/user/update_user_page" class="btn btn-primary" role="button">Update</a>
-  </div>
-  <br>
-  {% if books.len() > 0 %}
-  {% include "book_list.html" %}
-  {% else %}
-    <div class="bg-light p-5 rounded">
-      <h3>No books posted on the market</h3>
-      <a href="/market/post_book" class="btn btn-primary" role="button">Post a book</a>
-    </div>
-    <br>
-  {% endif %}
-</main>
-{% endblock content %}
+{% block intro %}This page helps you to manage your books posted in the market and your basic account information.{% endblock intro %}
+{% block update_button %}<a href="/user/update_user_page" class="btn btn-primary" role="button">Update</a>{% endblock update_button %}
+{% block postbook_button %}<a href="/market/post_book" class="btn btn-primary" role="button">Post a book</a>{% endblock postbook_button %}

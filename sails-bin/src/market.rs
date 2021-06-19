@@ -1,6 +1,5 @@
 use askama::Template;
-use comrak::{markdown_to_html, ComrakOptions};
-use once_cell::sync::Lazy;
+use comrak::markdown_to_html;
 use rocket::{
     form::Form,
     request::FlashMessage,
@@ -8,18 +7,7 @@ use rocket::{
 };
 use sails_db::{categories::*, error::SailsDbError, products::*, users::*};
 
-use crate::{guards::*, DbConn, IntoFlash, Msg};
-
-// Comrak options. We selectively enabled a few GFM standards.
-static COMRAK_OPT: Lazy<ComrakOptions> = Lazy::new(|| {
-    let mut opts = ComrakOptions::default();
-    opts.extension.table = true;
-    opts.extension.tasklist = true;
-    opts.extension.strikethrough = true;
-    opts.extension.autolink = true;
-    opts.extension.footnotes = true;
-    opts
-});
+use crate::{guards::*, DbConn, IntoFlash, Msg, COMRAK_OPT};
 
 // Delete can happen if and only if the user is authorized and the product is specified
 #[get("/delete")]

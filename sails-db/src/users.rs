@@ -3,6 +3,7 @@ use crate::{
     error::{SailsDbError, SailsDbResult as Result},
     products::Products,
     schema::users,
+    Cmp,
 };
 use diesel::{prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
@@ -140,9 +141,14 @@ impl<'a> UserFinder<'a> {
         self
     }
 
-    pub fn status(mut self, status: &'a UserStatus) -> Self {
+    pub fn status(mut self, status: &'a UserStatus, cmp: Cmp) -> Self {
         use crate::schema::users::dsl::*;
-        self.query = self.query.filter(user_status.eq(status));
+        match cmp {
+            Cmp::Equal => self.query = self.query.filter(user_status.eq(status)),
+            Cmp::NotEqual => self.query = self.query.filter(user_status.ne(status)),
+            // Currently it makes no sense for us to do so
+            _ => unimplemented!(),
+        }
         self
     }
 
@@ -246,8 +252,8 @@ impl UserInfo {
     }
 
     /// Get a reference to the user info's description.
-    pub fn get_description(&self) -> Option<&String> {
-        self.description.as_ref()
+    pub fn get_description(&self) -> Option<&str> {
+        self.description.as_deref()
     }
 
     /// Set the user info's description.
@@ -267,7 +273,7 @@ pub struct UserInfoRef<'a> {
     // This is owned because we processed it
     hashed_passwd: String,
     validated: bool,
-    description: Option<String>,
+    description: Option<&'a str>,
     // This is owned because it was created when convert to UserInfoRef
     user_status: UserStatus,
 }
@@ -297,17 +303,25 @@ pub struct UserFormOwned {
     pub id: String,
     pub name: String,
     pub school: String,
+    pub description: Option<String>,
     #[field(name = "password")]
     pub raw_passwd: String,
 }
 
 impl UserFormOwned {
-    pub fn new<T: ToString>(id: T, name: T, school: T, raw_passwd: T) -> Self {
+    pub fn new<T: ToString>(
+        id: T,
+        name: T,
+        school: T,
+        raw_passwd: T,
+        description: Option<T>,
+    ) -> Self {
         Self {
             id: id.to_string(),
             school: school.to_string(),
             name: name.to_string(),
             raw_passwd: raw_passwd.to_string(),
+            description: description.map(|x| x.to_string()),
         }
     }
 
@@ -316,6 +330,7 @@ impl UserFormOwned {
             id: &self.id,
             school: &self.school,
             name: &self.name,
+            description: self.description.as_deref(),
             raw_passwd: &self.raw_passwd,
         };
         form.to_ref()
@@ -329,16 +344,24 @@ pub struct UserForm<'a> {
     pub id: &'a str,
     pub name: &'a str,
     pub school: &'a str,
+    pub description: Option<&'a str>,
     #[field(name = "password")]
     pub raw_passwd: &'a str,
 }
 
 impl<'a> UserForm<'a> {
-    pub fn new(id: &'a str, name: &'a str, school: &'a str, raw_passwd: &'a str) -> Self {
+    pub fn new(
+        id: &'a str,
+        name: &'a str,
+        school: &'a str,
+        raw_passwd: &'a str,
+        description: Option<&'a str>,
+    ) -> Self {
         Self {
             id,
             name,
             school,
+            description,
             raw_passwd,
         }
     }
@@ -351,7 +374,7 @@ impl<'a> UserForm<'a> {
             school: self.school,
             name: self.name,
             validated: false,
-            description: None,
+            description: self.description,
             user_status: UserStatus::default(),
         })
     }

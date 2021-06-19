@@ -34,7 +34,7 @@
 	  <td>{{user.get_school()}}</td>
 	  <td>{{ "{:?}"|format(user.get_validated()) }}</td>
 	  <td>{{ "{:?}"|format(user.get_user_status()) }}</td>
-	  <td><a href="/root/activate_user?user_id={{user.get_id()}}" class="btn btn-warning" role="button">Activate</a> <a href="/root/downgrade_user?user_id={{user.get_id()}}" class="btn btn-warning" role="button">Down</a> <a href="/root/promote_user?user_id={{user.get_id()}}" class="btn btn-primary" role="button">Up</a></td>
+	  <td><a href="/root/activate_user?user_id={{user.get_id()}}" class="btn btn-success" role="button">🔑</a> <a href="/root/downgrade_user?user_id={{user.get_id()}}" class="btn btn-warning" role="button">▼</a> <a href="/root/promote_user?user_id={{user.get_id()}}" class="btn btn-primary" role="button">▲</a></td>
 	  <td><a href="/root/delete_user?user_id={{user.get_id()}}" class="btn btn-danger" role="button">Delete</a>
 	</tr>
 	{% endfor %}

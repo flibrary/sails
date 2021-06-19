@@ -8,6 +8,7 @@ fn login_user(c: &mut Criterion) {
         "Kanyang Ying",
         "NFLS",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
@@ -27,6 +28,7 @@ fn products(c: &mut Criterion) {
         "Kanyang Ying",
         "NFLS",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()

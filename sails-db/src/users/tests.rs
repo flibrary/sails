@@ -9,6 +9,7 @@ fn create_user() {
         "Kanyang Ying",
         "NFLS",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
@@ -25,6 +26,7 @@ fn create_user_existed() {
         "Kanyang Ying",
         "NFLS",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
@@ -33,13 +35,17 @@ fn create_user_existed() {
 
     // User already registered
     // Comparison should be case-insensitive
-    assert!(
-        UserForm::new("testUser@example.org", "Mick Zhang", "NFLS", "strongpasswd",)
-            .to_ref()
-            .unwrap()
-            .create(&conn)
-            .is_err()
-    );
+    assert!(UserForm::new(
+        "testUser@example.org",
+        "Mick Zhang",
+        "NFLS",
+        "strongpasswd",
+        None,
+    )
+    .to_ref()
+    .unwrap()
+    .create(&conn)
+    .is_err());
 }
 
 #[test]
@@ -50,6 +56,7 @@ fn login_user() {
         "Kanyang Ying",
         "NFLS",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
@@ -76,6 +83,7 @@ fn delete_user() {
         "Kanyang Ying",
         "NFLS",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
@@ -87,6 +95,7 @@ fn delete_user() {
         "Kanyang Ying",
         "NFLS",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
@@ -126,6 +135,7 @@ fn update_user() {
         "Kanyang Ying",
         "NFLS",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
@@ -137,6 +147,7 @@ fn update_user() {
         "Kanyang Ying",
         "NFLS",
         "strongpasswd",
+        None,
     )
     .to_ref()
     .unwrap()
