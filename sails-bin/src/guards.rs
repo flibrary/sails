@@ -6,6 +6,7 @@ use rocket::{
 };
 use sails_db::{
     categories::{Categories, Category},
+    enums::ProductStatus,
     error::SailsDbError,
     products::*,
     users::*,
@@ -159,6 +160,26 @@ impl<'r> FromRequest<'r> for UserInfoGuard {
         .await
         .ok()
         .or_forward(())
+    }
+}
+
+pub struct NonSoldBookInfoGuard {
+    pub inner: BookInfoGuard,
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for NonSoldBookInfoGuard {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let book = try_outcome!(request.guard::<BookInfoGuard>().await);
+        if book.book_info.get_product_status() != &ProductStatus::Sold {
+            Outcome::Success(Self { inner: book })
+        } else {
+            Outcome::Forward(())
+        }
     }
 }
 

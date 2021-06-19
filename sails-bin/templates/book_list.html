@@ -12,7 +12,7 @@
     <tbody>
       {% for book in books %}
       <tr>
-	<th scope="row"><a href="book_info?book_id={{ book.0.get_id() }}">{{book.0.get_shortid()}}</a></th>
+	<th scope="row"><a href="/market/book_info?book_id={{ book.0.get_id() }}">{{book.0.get_shortid()}}</a></th>
 	<td><a href="/market/book_info?book_id={{ book.0.get_id() }}">{{book.0.get_prodname()}}</a></td>
 	{% match book.1 %}
 	{% when Some with (ctg) %}

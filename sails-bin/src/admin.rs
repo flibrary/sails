@@ -1,5 +1,5 @@
 use crate::{
-    guards::{AdminGuard, BookInfoGuard},
+    guards::{AdminGuard, NonSoldBookInfoGuard},
     DbConn, IntoFlash, Msg,
 };
 use askama::Template;
@@ -67,11 +67,12 @@ pub async fn admin(
 #[get("/verify_book")]
 pub async fn verify_book(
     _guard: AdminGuard,
-    info: BookInfoGuard,
+    info: NonSoldBookInfoGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| {
-        info.book_info
+        info.inner
+            .book_info
             .set_product_status(ProductStatus::Verified)
             .update(c)
     })
@@ -83,11 +84,12 @@ pub async fn verify_book(
 #[get("/disable_book")]
 pub async fn disable_book(
     _guard: AdminGuard,
-    info: BookInfoGuard,
+    info: NonSoldBookInfoGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| {
-        info.book_info
+        info.inner
+            .book_info
             .set_product_status(ProductStatus::Disabled)
             .update(c)
     })
@@ -99,11 +101,12 @@ pub async fn disable_book(
 #[get("/normalize_book")]
 pub async fn normalize_book(
     _guard: AdminGuard,
-    info: BookInfoGuard,
+    info: NonSoldBookInfoGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| {
-        info.book_info
+        info.inner
+            .book_info
             .set_product_status(ProductStatus::Normal)
             .update(c)
     })
