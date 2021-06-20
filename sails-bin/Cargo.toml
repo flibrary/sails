@@ -24,10 +24,9 @@ anyhow = "^1"
 lettre = { version = "0.10.0-rc.3", features = ["tokio1-rustls-tls", "builder", "smtp-transport", "r2d2", "tokio1"] }
 reqwest = { version = "0.11", features = ["json"]}
 chacha20poly1305 = "^0.8"
-# We need askama as the backend template engine because it is type safe, however, it doesn't work with rocket 0.5 yet.
-# See also: https://github.com/djc/askama/pull/412
+# We need askama as the backend template engine because it is type safe.
 askama = { version = "^0.10", features = ["with-rocket", "mime", "mime_guess"]}
-askama_rocket = "^0.10"
+askama_rocket = "^0.11.0-rc.1"
 
 [dependencies.rocket_sync_db_pools]
 version = "0.1.0-rc.1"

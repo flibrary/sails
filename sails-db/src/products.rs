@@ -43,7 +43,7 @@ impl ProductId {
         Ok(())
     }
 
-    // This is safe to update
+    // This is safe to update because creation and update has been seperated and it will not fallback to default.
     pub fn update_owned(
         &self,
         conn: &SqliteConnection,
