@@ -1,4 +1,22 @@
 {% extends "base.html" %}
+{% block head %}
+{% call super() %}
+<link href="/static/css/markdown.css" rel="stylesheet">
+<style>
+	.markdown-body {
+		box-sizing: border-box;
+		min-width: 200px;
+		margin: 0 auto;
+		padding: 45px;
+	}
+
+	@media (max-width: 767px) {
+		.markdown-body {
+			padding: 15px;
+		}
+	}
+</style>
+{% endblock head %}
 {% block title %}{{user.get_name()}}'s Portal{% endblock title %}
 {% block navbutton %}<li class="nav-item"><a href="/user/logout" class="btn btn-warning" role="button">Log out</a></li>{% endblock navbutton %}
 

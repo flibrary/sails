@@ -1,5 +1,4 @@
 use askama::Template;
-use comrak::markdown_to_html;
 use rocket::{
     form::Form,
     request::FlashMessage,
@@ -7,7 +6,7 @@ use rocket::{
 };
 use sails_db::{categories::*, error::SailsDbError, products::*, users::*};
 
-use crate::{guards::*, DbConn, IntoFlash, Msg, COMRAK_OPT};
+use crate::{guards::*, md_to_html, DbConn, IntoFlash, Msg};
 
 // Delete can happen if and only if the user is authorized and the product is specified
 #[get("/delete")]
@@ -166,7 +165,7 @@ pub struct BookPageGuest {
 // If the seller is the user, buttons like update and delete are displayed
 #[get("/book_info", rank = 1)]
 pub async fn book_page_owned(book: BookInfoGuard, _auth: Authorized) -> BookPageOwned {
-    let rendered = markdown_to_html(book.book_info.get_description(), &COMRAK_OPT);
+    let rendered = md_to_html(book.book_info.get_description());
     BookPageOwned {
         book: book.book_info,
         category: book.category,
@@ -178,7 +177,7 @@ pub async fn book_page_owned(book: BookInfoGuard, _auth: Authorized) -> BookPage
 // If the user is signed in but not authorized, book information and seller information will be displayed
 #[get("/book_info", rank = 2)]
 pub async fn book_page_user(book: BookInfoGuard, _user: UserIdGuard) -> BookPageUser {
-    let rendered = markdown_to_html(book.book_info.get_description(), &COMRAK_OPT);
+    let rendered = md_to_html(book.book_info.get_description());
     BookPageUser {
         book: book.book_info,
         category: book.category,
@@ -190,7 +189,7 @@ pub async fn book_page_user(book: BookInfoGuard, _user: UserIdGuard) -> BookPage
 // If the user is not signed in, only book information will be displayed
 #[get("/book_info", rank = 3)]
 pub async fn book_page_guest(book: BookInfoGuard) -> BookPageGuest {
-    let rendered = markdown_to_html(book.book_info.get_description(), &COMRAK_OPT);
+    let rendered = md_to_html(book.book_info.get_description());
     BookPageGuest {
         book: book.book_info,
         category: book.category,

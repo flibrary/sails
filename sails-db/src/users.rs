@@ -257,8 +257,8 @@ impl UserInfo {
     }
 
     /// Set the user info's description.
-    pub fn set_description(mut self, description: String) -> Self {
-        self.description = Some(description);
+    pub fn set_description(mut self, description: Option<String>) -> Self {
+        self.description = description;
         self
     }
 }
@@ -366,6 +366,8 @@ impl<'a> UserForm<'a> {
         }
     }
 
+    // Warning: this should not be used to update user!
+    // Otherwise the validation and account role gets cleaned up to default.
     pub fn to_ref(&self) -> Result<UserInfoRef<'a>> {
         self.id.parse::<lettre::Address>()?;
         Ok(UserInfoRef {

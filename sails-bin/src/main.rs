@@ -17,9 +17,9 @@ mod user;
 
 use aead::AeadKey;
 use askama::Template;
-use comrak::ComrakOptions;
 use diesel::connection::SimpleConnection;
 use once_cell::sync::Lazy;
+use pulldown_cmark::{Options, Parser};
 use rocket::{
     fairing::AdHoc,
     figment::{
@@ -46,15 +46,26 @@ extern crate diesel_migrations;
 #[macro_use]
 extern crate rocket_sync_db_pools;
 
+pub fn md_to_html(md: &str) -> String {
+    use ammonia::clean;
+    use pulldown_cmark::html::push_html;
+
+    let md_parser = Parser::new_ext(md, *MARK_OPTS);
+
+    let mut unsafe_html = String::new();
+    push_html(&mut unsafe_html, md_parser);
+
+    clean(&*unsafe_html)
+}
+
 // Comrak options. We selectively enabled a few GFM standards.
-static COMRAK_OPT: Lazy<ComrakOptions> = Lazy::new(|| {
-    let mut opts = ComrakOptions::default();
-    opts.extension.table = true;
-    opts.extension.tasklist = true;
-    opts.extension.strikethrough = true;
-    opts.extension.autolink = true;
-    opts.extension.footnotes = true;
-    opts
+static MARK_OPTS: Lazy<Options> = Lazy::new(|| {
+    let mut options = Options::empty();
+    options.insert(Options::ENABLE_STRIKETHROUGH);
+    options.insert(Options::ENABLE_FOOTNOTES);
+    options.insert(Options::ENABLE_TABLES);
+    options.insert(Options::ENABLE_TASKLISTS);
+    options
 });
 
 pub trait IntoFlash<T> {
@@ -222,6 +233,8 @@ fn rocket() -> Rocket<Build> {
             routes![
                 user::portal,
                 user::portal_guest,
+                user::change_passwd_page,
+                user::change_passwd_post,
                 user::signin,
                 user::validate,
                 user::signup,

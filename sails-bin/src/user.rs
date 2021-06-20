@@ -1,12 +1,12 @@
 use crate::{
     aead::AeadKey,
     guards::{AeadUserInfo, UserIdGuard, UserInfoGuard, UserInfoParamGuard},
+    md_to_html,
     recaptcha::ReCaptcha,
     smtp::SmtpCreds,
-    DbConn, IntoFlash, Msg, COMRAK_OPT,
+    DbConn, IntoFlash, Msg,
 };
 use askama::Template;
-use comrak::markdown_to_html;
 use lettre::{
     transport::smtp::authentication::Credentials, AsyncSmtpTransport, AsyncTransport, Message,
     Tokio1Executor,
@@ -154,24 +154,53 @@ pub async fn signup_instruction() -> SignUpInstruction {
     SignUpInstruction
 }
 
+#[derive(Debug, FromForm, Clone)]
+pub struct PartialUserFormOwned {
+    pub name: String,
+    pub school: String,
+    pub description: Option<String>,
+}
+
 #[post("/update_user", data = "<info>")]
 pub async fn update_user(
-    user: UserIdGuard,
-    info: Form<UserFormOwned>,
+    user: UserInfoGuard,
+    info: Form<PartialUserFormOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    if user.id.get_id() == info.id {
-        conn.run(move |c| info.to_ref()?.update(c))
-            .await
-            .into_flash(uri!("/user", portal))?;
+    let info = info.into_inner();
+    conn.run(move |c| {
+        user.info
+            .set_description(info.description)
+            .set_name(info.name)
+            .set_school(info.school)
+            .update(c)
+    })
+    .await
+    .into_flash(uri!("/user", portal))?;
 
-        Ok(Redirect::to(uri!("/user", portal)))
-    } else {
-        Err(Flash::error(
-            Redirect::to(uri!("/user", portal)),
-            "not authorized to update",
-        ))
-    }
+    Ok(Redirect::to(uri!("/user", portal)))
+}
+
+#[derive(Template)]
+#[template(path = "user/change_passwd.html")]
+pub struct ChangePassword;
+
+#[get("/change_passwd")]
+pub async fn change_passwd_page() -> ChangePassword {
+    ChangePassword
+}
+
+#[post("/change_passwd", data = "<password>")]
+pub async fn change_passwd_post(
+    user: UserInfoGuard,
+    password: Form<String>,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    conn.run(move |c| user.info.set_password(password.into_inner())?.update(c))
+        .await
+        .into_flash(uri!("/user", portal))?;
+
+    Ok(Redirect::to(uri!("/user", portal)))
 }
 
 #[derive(Template)]
@@ -273,10 +302,7 @@ pub async fn portal_guest(
         .await
         .unwrap(); // No error should be tolerated here (database error). 500 is expected
     Ok(PortalGuestPage {
-        desc_rendered: user
-            .info
-            .get_description()
-            .map(|x| markdown_to_html(x, &COMRAK_OPT)),
+        desc_rendered: user.info.get_description().map(|x| md_to_html(x)),
         user: user.info,
         books,
         inner: Msg::from_flash(flash),
@@ -308,10 +334,7 @@ pub async fn portal(
         .await
         .unwrap(); // No error should be tolerated here (database error). 500 is expected
     Ok(PortalPage {
-        desc_rendered: user
-            .info
-            .get_description()
-            .map(|x| markdown_to_html(x, &COMRAK_OPT)),
+        desc_rendered: user.info.get_description().map(|x| md_to_html(x)),
         user: user.info,
         books,
         inner: Msg::from_flash(flash),

@@ -43,6 +43,7 @@ impl ProductId {
         Ok(())
     }
 
+    // This is safe to update
     pub fn update_owned(
         &self,
         conn: &SqliteConnection,

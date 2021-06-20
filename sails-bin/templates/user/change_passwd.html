@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Change your password{% endblock title %}
+{% block head %}
+    {% call super() %}
+    <!-- Custom styles for sign in page -->
+    <link href="/static/css/signin.css" rel="stylesheet">
+{% endblock head %}
+
+{% block body %}
+<main class="form-signin text-center">
+  <form action="change_passwd" method="post">
+    <h1 class="h3 mb-3 fw-normal">New password</h1>
+
+    <div class="form-floating">
+      <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password">
+      <label for="floatingPassword">Password</label>
+    </div>
+    <button class="w-100 btn btn-lg btn-warning" type="submit">Submit</button>
+  </form>
+</main>
+{% endblock body %}
