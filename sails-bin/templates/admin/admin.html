@@ -26,10 +26,10 @@
       <tbody>
 	{% for book in normal_books %}
 	<tr>
-	  <th scope="row">{{book.get_shortid()}}</th>
+	  <th scope="row"><a href="/market/book_info?book_id={{ book.get_id() }}">{{book.get_shortid()}}</a></th>
 	  <td>{{book.get_prodname()}}</td>
 	  <td>{{book.get_price()}}</td>
-	  <td>{{book.get_seller_id()}}</td>
+	  <td><a href="/user?user_id={{book.get_seller_id()}}">{{book.get_seller_id()}}</a></td>
 	  <td><a href="/admin/disable_book?book_id={{book.get_id()}}" class="btn btn-warning" role="button">Disable</a> <a href="/admin/verify_book?book_id={{book.get_id()}}" class="btn btn-success" role="button">Verify</a></td>
 	</tr>
 	{% endfor %}
@@ -61,7 +61,7 @@
       <tbody>
 	{% for book in disabled_books %}
 	<tr>
-	  <th scope="row">{{book.get_shortid()}}</th>
+	  <th scope="row"><a href="/market/book_info?book_id={{ book.get_id() }}">{{book.get_shortid()}}</a></th>
 	  <td>{{book.get_prodname()}}</td>
 	  <td>{{book.get_price()}}</td>
 	  <td>{{book.get_seller_id()}}</td>

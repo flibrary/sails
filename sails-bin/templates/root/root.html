@@ -29,7 +29,7 @@
       <tbody>
 	{% for user in users %}
 	<tr>
-	  <th scope="row">{{user.get_id()}}</th>
+	  <th scope="row"><a href="/user?user_id={{user.get_id()}}">{{ user.get_id() }}</a></th>
 	  <td>{{user.get_name()}}</td>
 	  <td>{{user.get_school()}}</td>
 	  <td>{{ "{:?}"|format(user.get_validated()) }}</td>
