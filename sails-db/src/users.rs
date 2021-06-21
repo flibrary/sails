@@ -1,6 +1,7 @@
 use crate::{
     enums::UserStatus,
     error::{SailsDbError, SailsDbResult as Result},
+    messages::Messages,
     products::Products,
     schema::users,
     Cmp,
@@ -25,6 +26,7 @@ impl UserId {
     pub fn delete(self, conn: &SqliteConnection) -> Result<()> {
         use crate::schema::users::dsl::*;
         Products::delete_by_seller(conn, &self)?;
+        Messages::delete_msg_with_user(conn, &self)?;
         diesel::delete(users.filter(id.eq(&self.id))).execute(conn)?;
         Ok(())
     }

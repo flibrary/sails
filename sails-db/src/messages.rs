@@ -14,7 +14,7 @@ impl Messages {
         participant_b: &UserId,
     ) -> Result<Vec<Message>> {
         use crate::schema::messages::dsl::*;
-        // ((send == A) && (recv == B)) && ((send == B) && (recv A))
+        // ((send == A) && (recv == B)) || ((send == B) && (recv == A))
         Ok(messages
             .filter(
                 (send
@@ -49,6 +49,15 @@ impl Messages {
         let msg = Message::new(sender, receiver, body_provided);
         diesel::insert_into(messages).values(msg).execute(conn)?;
         Ok(())
+    }
+
+    pub fn delete_msg_with_user(conn: &SqliteConnection, user: &UserId) -> Result<usize> {
+        use crate::schema::messages::dsl::*;
+
+        Ok(
+            diesel::delete(messages.filter((send.eq(user.get_id())).or(recv.eq(user.get_id()))))
+                .execute(conn)?,
+        )
     }
 }
 
@@ -230,6 +239,86 @@ mod tests {
 
         // There should be no message between these two
         // There should also be no self-message be disclosed
+        assert_eq!(
+            Messages::get_conv(&conn, &sender2, &receiver)
+                .unwrap()
+                .len(),
+            0
+        );
+    }
+
+    #[test]
+    fn delete_msg() {
+        let conn = establish_connection();
+        // Our sender
+        let sender = UserForm::new(
+            "TestUser@example.org",
+            "NFLS",
+            "+86 18353232340",
+            "strongpasswd",
+            None,
+        )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
+
+        let sender2 = UserForm::new(
+            "AnotherSender@example.org",
+            "NFLS",
+            "+86 18353232340",
+            "strongpasswd",
+            None,
+        )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
+
+        let receiver = UserForm::new(
+            "Him@example.org",
+            "NFLS",
+            "+86 18353232340",
+            "strongpasswd",
+            None,
+        )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
+
+        Messages::send(&conn, &receiver, &receiver, "Self-message").unwrap();
+
+        Messages::send(&conn, &sender, &receiver, "Hello").unwrap();
+        Messages::send(&conn, &sender, &receiver, "Are you there?").unwrap();
+        Messages::send(&conn, &receiver, &sender, "Yes!").unwrap();
+        Messages::send(&conn, &sender, &receiver, "Do you have that book?").unwrap();
+        Messages::send(
+            &conn,
+            &receiver,
+            &sender,
+            "Sure, it is in pretty good condition",
+        )
+        .unwrap();
+        Messages::send(&conn, &sender2, &receiver, "Hello?").unwrap();
+
+        // THis tests the select statement
+        assert!(Messages::get_conv(&conn, &sender, &receiver).unwrap().len() > 0,);
+        assert!(
+            Messages::get_conv(&conn, &sender2, &receiver)
+                .unwrap()
+                .len()
+                > 0,
+        );
+
+        // After deleting the messages of the receiver.
+        Messages::delete_msg_with_user(&conn, &receiver).unwrap();
+
+        // There should be no conversation referencing any
+        assert_eq!(
+            Messages::get_conv(&conn, &sender, &receiver).unwrap().len(),
+            0
+        );
         assert_eq!(
             Messages::get_conv(&conn, &sender2, &receiver)
                 .unwrap()
