@@ -111,7 +111,7 @@ checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
 [[package]]
 name = "askama"
 version = "0.10.6"
-source = "git+https://github.com/djc/askama?branch=main#b318d7cbcded2c6dfc66bbe19687f1246a9a9eab"
+source = "git+https://github.com/djc/askama?branch=main#49252d2457f280026c020d0df46733578eb959a5"
 dependencies = [
  "askama_derive",
  "askama_escape",
@@ -123,7 +123,7 @@ dependencies = [
 [[package]]
 name = "askama_derive"
 version = "0.10.5"
-source = "git+https://github.com/djc/askama?branch=main#b318d7cbcded2c6dfc66bbe19687f1246a9a9eab"
+source = "git+https://github.com/djc/askama?branch=main#49252d2457f280026c020d0df46733578eb959a5"
 dependencies = [
  "askama_shared",
  "proc-macro2",
@@ -133,12 +133,12 @@ dependencies = [
 [[package]]
 name = "askama_escape"
 version = "0.10.1"
-source = "git+https://github.com/djc/askama?branch=main#b318d7cbcded2c6dfc66bbe19687f1246a9a9eab"
+source = "git+https://github.com/djc/askama?branch=main#49252d2457f280026c020d0df46733578eb959a5"
 
 [[package]]
 name = "askama_rocket"
 version = "0.11.0-rc.1"
-source = "git+https://github.com/djc/askama?branch=main#b318d7cbcded2c6dfc66bbe19687f1246a9a9eab"
+source = "git+https://github.com/djc/askama?branch=main#49252d2457f280026c020d0df46733578eb959a5"
 dependencies = [
  "askama",
  "rocket",
@@ -147,7 +147,7 @@ dependencies = [
 [[package]]
 name = "askama_shared"
 version = "0.11.2"
-source = "git+https://github.com/djc/askama?branch=main#b318d7cbcded2c6dfc66bbe19687f1246a9a9eab"
+source = "git+https://github.com/djc/askama?branch=main#49252d2457f280026c020d0df46733578eb959a5"
 dependencies = [
  "askama_escape",
  "funty",
@@ -482,9 +482,9 @@ checksum = "ea221b5284a47e40033bf9b66f35f984ec0ea2931eb03505246cd27a963f981b"
 
 [[package]]
 name = "cpufeatures"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed00c67cb5d0a7d64a44f6ad2668db7e7530311dd53ea79bcd4fb022c64911c8"
+checksum = "66c99696f6c9dd7f35d486b9d04d7e6e202aa3e8c40d553f2fdf5e7e0c6a71ef"
 dependencies = [
  "libc",
 ]
