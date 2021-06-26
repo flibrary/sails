@@ -111,7 +111,7 @@ checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
 [[package]]
 name = "askama"
 version = "0.10.6"
-source = "git+https://github.com/djc/askama?branch=main#49252d2457f280026c020d0df46733578eb959a5"
+source = "git+https://github.com/djc/askama?branch=main#017b5901fb27f12c0a51738ec5f0a992e0316d8c"
 dependencies = [
  "askama_derive",
  "askama_escape",
@@ -123,7 +123,7 @@ dependencies = [
 [[package]]
 name = "askama_derive"
 version = "0.10.5"
-source = "git+https://github.com/djc/askama?branch=main#49252d2457f280026c020d0df46733578eb959a5"
+source = "git+https://github.com/djc/askama?branch=main#017b5901fb27f12c0a51738ec5f0a992e0316d8c"
 dependencies = [
  "askama_shared",
  "proc-macro2",
@@ -133,12 +133,12 @@ dependencies = [
 [[package]]
 name = "askama_escape"
 version = "0.10.1"
-source = "git+https://github.com/djc/askama?branch=main#49252d2457f280026c020d0df46733578eb959a5"
+source = "git+https://github.com/djc/askama?branch=main#017b5901fb27f12c0a51738ec5f0a992e0316d8c"
 
 [[package]]
 name = "askama_rocket"
 version = "0.11.0-rc.1"
-source = "git+https://github.com/djc/askama?branch=main#49252d2457f280026c020d0df46733578eb959a5"
+source = "git+https://github.com/djc/askama?branch=main#017b5901fb27f12c0a51738ec5f0a992e0316d8c"
 dependencies = [
  "askama",
  "rocket",
@@ -147,7 +147,7 @@ dependencies = [
 [[package]]
 name = "askama_shared"
 version = "0.11.2"
-source = "git+https://github.com/djc/askama?branch=main#49252d2457f280026c020d0df46733578eb959a5"
+source = "git+https://github.com/djc/askama?branch=main#017b5901fb27f12c0a51738ec5f0a992e0316d8c"
 dependencies = [
  "askama_escape",
  "funty",
@@ -760,9 +760,9 @@ dependencies = [
 
 [[package]]
 name = "figment"
-version = "0.10.5"
+version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ca029e813a72b7526d28273d25f3e4a2f365d1b7a1018a6f93ec9053a119763"
+checksum = "790b4292c72618abbab50f787a477014fe15634f96291de45672ce46afe122df"
 dependencies = [
  "atomic",
  "pear",
@@ -1025,9 +1025,9 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
-version = "0.1.18"
+version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "322f4de77956e22ed0e5032c359a0f1273f1f7f0d79bfa3b8ffbc730d7fbcc5c"
+checksum = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33"
 dependencies = [
  "libc",
 ]

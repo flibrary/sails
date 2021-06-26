@@ -52,6 +52,12 @@ pub fn md_to_html(md: &str) -> String {
 
     let md_parser = Parser::new_ext(md, *MARK_OPTS);
 
+    // Make single line break possible
+    let md_parser = md_parser.map(|event| match event {
+        pulldown_cmark::Event::SoftBreak => pulldown_cmark::Event::HardBreak,
+        _ => event,
+    });
+
     let mut unsafe_html = String::new();
     push_html(&mut unsafe_html, md_parser);
 

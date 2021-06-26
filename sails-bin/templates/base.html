@@ -11,7 +11,9 @@
   <!-- Bootstrap core CSS -->
   <link href="/static/css/bootstrap.min.css" rel="stylesheet">
   <link href="/static/css/main.css" rel="stylesheet">
+
   <link href="/static/css/bootstrap-table.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
   {% endblock head %}
 </head>
 {% block body %}
@@ -40,23 +42,24 @@
    {% block content %}{% endblock content %}
 
    </div>
+   {% block script %}
   <script src="/static/js/jquery.min.js"></script>
   <script src="/static/js/popper.min.js"></script>
   <script src="/static/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
   <script src="/static/js//bootstrap-table.min.js"></script>
-
-  <br>
-  <footer id="footer" class="footer mt-auto py-3 bg-light text-muted">
-    <div class="container">
-      <span>Copyright © 2021, FLibrary Development Taskforce<br>Licensed under MIT License.<br>Made with ❤ using NixOS, Rust, and Bootstrap.</span>
-    </div>
-  </footer>
 
   <script>
     $('.navbar-collapse a').click(() => {
         $(".navbar-collapse").collapse('hide');
     });
   </script>
+  {% endblock script %}
+  <br>
+  <footer id="footer" class="footer mt-auto py-3 bg-light text-muted">
+    <div class="container">
+      <span>Copyright © 2021, FLibrary Development Taskforce<br>Licensed under MIT License.<br>Made with ❤ using NixOS, Rust, and Bootstrap.</span>
+    </div>
+  </footer>
   </div>
 </body>
 {% endblock body %}

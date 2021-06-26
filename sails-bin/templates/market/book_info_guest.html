@@ -31,6 +31,10 @@
       <td>CN¥ {{ book.get_price() }}</td>
     </tr>
     <tr>
+      <th scope="row">ID</th>
+      <td>{{ book.get_shortid() }}</td>
+    </tr>
+    <tr>
       <th scope="row">Category</th>
       	{% match category %}
 	{% when Some with (ctg) %}
