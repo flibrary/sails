@@ -26,11 +26,15 @@ impl<'r> FromFormField<'r> for Image {
             return Err(ErrorKind::Unexpected.into());
         }
 
-        let limit = field.request.limits().get("image").unwrap_or(1.mebibytes());
+        let limit = field
+            .request
+            .limits()
+            .get("image")
+            .unwrap_or_else(|| 1.mebibytes());
 
         let bytes = field.data.open(limit).into_bytes().await?;
         if !bytes.is_complete() {
-            Err((None, Some(limit)))?;
+            return Err((None, Some(limit)).into());
         }
         let bytes = bytes.into_inner();
         Ok(Self {
