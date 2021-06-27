@@ -1,8 +1,8 @@
 use crate::{
     aead::AeadKey,
     guards::{AeadUserInfo, UserIdGuard, UserInfoGuard, UserInfoParamGuard},
-    md_to_html,
     recaptcha::ReCaptcha,
+    sanitize_html,
     smtp::SmtpCreds,
     DbConn, IntoFlash, Msg,
 };
@@ -302,7 +302,7 @@ pub async fn portal_guest(
         .await
         .unwrap(); // No error should be tolerated here (database error). 500 is expected
     Ok(PortalGuestPage {
-        desc_rendered: user.info.get_description().map(|x| md_to_html(x)),
+        desc_rendered: user.info.get_description().map(|x| sanitize_html(x)),
         user: user.info,
         books,
         inner: Msg::from_flash(flash),
@@ -334,7 +334,7 @@ pub async fn portal(
         .await
         .unwrap(); // No error should be tolerated here (database error). 500 is expected
     Ok(PortalPage {
-        desc_rendered: user.info.get_description().map(|x| md_to_html(x)),
+        desc_rendered: user.info.get_description().map(|x| sanitize_html(x)),
         user: user.info,
         books,
         inner: Msg::from_flash(flash),

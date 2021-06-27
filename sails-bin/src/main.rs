@@ -8,6 +8,7 @@
 mod admin;
 mod aead;
 mod guards;
+mod images;
 mod market;
 mod messages;
 mod recaptcha;
@@ -16,10 +17,10 @@ mod smtp;
 mod user;
 
 use aead::AeadKey;
+use ammonia::Builder;
 use askama::Template;
 use diesel::connection::SimpleConnection;
 use once_cell::sync::Lazy;
-use pulldown_cmark::{Options, Parser};
 use rocket::{
     fairing::AdHoc,
     figment::{
@@ -37,7 +38,7 @@ use sails_db::categories::{Categories, CtgBuilder};
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 
-use crate::{recaptcha::ReCaptcha, root::RootPasswd, smtp::SmtpCreds};
+use crate::{images::ImageHosting, recaptcha::ReCaptcha, root::RootPasswd, smtp::SmtpCreds};
 
 #[macro_use]
 extern crate rocket;
@@ -46,32 +47,17 @@ extern crate diesel_migrations;
 #[macro_use]
 extern crate rocket_sync_db_pools;
 
-pub fn md_to_html(md: &str) -> String {
-    use ammonia::clean;
-    use pulldown_cmark::html::push_html;
-
-    let md_parser = Parser::new_ext(md, *MARK_OPTS);
-
-    // Make single line break possible
-    let md_parser = md_parser.map(|event| match event {
-        pulldown_cmark::Event::SoftBreak => pulldown_cmark::Event::HardBreak,
-        _ => event,
-    });
-
-    let mut unsafe_html = String::new();
-    push_html(&mut unsafe_html, md_parser);
-
-    clean(&*unsafe_html)
+pub fn sanitize_html(html: &str) -> String {
+    SANITIZER.clean(html).to_string()
 }
 
 // Comrak options. We selectively enabled a few GFM standards.
-static MARK_OPTS: Lazy<Options> = Lazy::new(|| {
-    let mut options = Options::empty();
-    options.insert(Options::ENABLE_STRIKETHROUGH);
-    options.insert(Options::ENABLE_FOOTNOTES);
-    options.insert(Options::ENABLE_TABLES);
-    options.insert(Options::ENABLE_TASKLISTS);
-    options
+static SANITIZER: Lazy<Builder> = Lazy::new(|| {
+    let mut builder = ammonia::Builder::default();
+    builder
+        .add_tag_attributes("img", &["style"])
+        .add_tag_attributes("p", &["align"]);
+    builder
 });
 
 pub trait IntoFlash<T> {
@@ -230,6 +216,7 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<ReCaptcha>())
         .attach(AdHoc::config::<SmtpCreds>())
         .attach(AdHoc::config::<AeadKey>())
+        .attach(AdHoc::config::<ImageHosting>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .mount("/", routes![index])
         .mount("/static", routes![get_file])
@@ -306,6 +293,10 @@ fn rocket() -> Rocket<Build> {
                 admin::disable_book,
                 admin::normalize_book
             ],
+        )
+        .mount(
+            "/images",
+            routes![images::upload, images::get, images::get_default],
         )
         .register("/", catchers![page404, page422, page500])
 }
