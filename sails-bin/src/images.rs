@@ -1,4 +1,5 @@
 use crate::guards::UserIdGuard;
+use reqwest::header::ACCEPT;
 use rocket::{
     data::ToByteUnit,
     form::{self, error::ErrorKind, DataField, Form, FromFormField},
@@ -47,7 +48,7 @@ impl<'r> FromFormField<'r> for Image {
 #[get("/get/<hash>/<ext>/<size>", rank = 1)]
 pub async fn get(hash: &str, ext: &str, size: &str) -> Redirect {
     Redirect::to(format!(
-        "https://raw.githubusercontent.com/flibrary/images/main/{}/{}.{}",
+        "https://flibrary.lexugeyky.workers.dev/https://raw.githubusercontent.com/flibrary/images/main/{}/{}.{}",
         hash, size, ext
     ))
 }
@@ -55,7 +56,7 @@ pub async fn get(hash: &str, ext: &str, size: &str) -> Redirect {
 #[get("/get/<hash>/<ext>", rank = 2)]
 pub async fn get_default(hash: &str, ext: &str) -> Redirect {
     Redirect::to(format!(
-        "https://raw.githubusercontent.com/flibrary/images/main/{}/orig.{}",
+        "https://flibrary.lexugeyky.workers.dev/https://raw.githubusercontent.com/flibrary/images/main/{}/orig.{}",
         hash, ext
     ))
 }
@@ -88,6 +89,7 @@ pub async fn upload(
             "https://api.github.com/repos/flibrary/images/contents/{:x}/",
             hash,
         ))
+        .header(ACCEPT, "application/vnd.github.v3+json")
         // If we don't auth, probably we will get limited further
         .bearer_auth(&hosting.gh_token)
         .send()
@@ -106,6 +108,7 @@ pub async fn upload(
                 "https://api.github.com/repos/flibrary/images/contents/{:x}/orig.{}",
                 hash, ext
             ))
+            .header(ACCEPT, "application/vnd.github.v3+json")
             .bearer_auth(&hosting.gh_token)
             .json(&params)
             .send()
