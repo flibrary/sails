@@ -56,7 +56,7 @@
   <br>
 
   <div class="bg-light p-5 rounded markdown-body">
-    {% match desc_rendered %}
+    {% match user.get_description() %}
     {% when Some with (desc) %}
     {{desc|safe}}
     {% when None %}

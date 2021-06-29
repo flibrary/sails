@@ -54,9 +54,13 @@ pub fn sanitize_html(html: &str) -> String {
 // Comrak options. We selectively enabled a few GFM standards.
 static SANITIZER: Lazy<Builder> = Lazy::new(|| {
     let mut builder = ammonia::Builder::default();
+    // DANGEROUS: Style attributes are dangerous
     builder
         .add_tag_attributes("img", &["style"])
-        .add_tag_attributes("p", &["align"]);
+        .add_tag_attributes("span", &["style"])
+        .add_tags(&["font"])
+        .add_tag_attributes("font", &["color"])
+        .add_generic_attributes(&["align"]);
     builder
 });
 

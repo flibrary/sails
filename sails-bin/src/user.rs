@@ -105,7 +105,7 @@ pub async fn signup<'a>(
 
 #[post("/create_user", data = "<info>")]
 pub async fn create_user(
-    info: Form<Strict<SignUpForm>>,
+    mut info: Form<Strict<SignUpForm>>,
     conn: DbConn,
     recaptcha: &State<ReCaptcha>,
     aead: &State<AeadKey>,
@@ -133,6 +133,12 @@ pub async fn create_user(
         send_verification_email(&info.user_info.id, &aead, &smtp)
             .await
             .into_flash(uri!("/user", portal))?;
+        // Sanitize the html
+        info.user_info.description = info
+            .user_info
+            .description
+            .as_ref()
+            .map(|d| sanitize_html(d));
         conn.run(move |c| info.user_info.to_ref()?.create(c))
             .await
             .into_flash(uri!("/user", portal))?;
@@ -167,7 +173,8 @@ pub async fn update_user(
     info: Form<PartialUserFormOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let info = info.into_inner();
+    let mut info = info.into_inner();
+    info.description = info.description.map(|d| sanitize_html(&d));
     conn.run(move |c| {
         user.info
             .set_description(info.description)
@@ -263,7 +270,6 @@ pub async fn update_user_page(user: UserInfoGuard) -> UpdateUserPage {
 #[template(path = "user/portal_guest.html")]
 pub struct PortalGuestPage {
     user: UserInfo,
-    desc_rendered: Option<String>,
     books: Vec<(ProductInfo, Option<Category>)>,
     inner: Msg,
 }
@@ -272,7 +278,6 @@ pub struct PortalGuestPage {
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
     user: UserInfo,
-    desc_rendered: Option<String>,
     books: Vec<(ProductInfo, Option<Category>)>,
     inner: Msg,
 }
@@ -302,7 +307,6 @@ pub async fn portal_guest(
         .await
         .unwrap(); // No error should be tolerated here (database error). 500 is expected
     Ok(PortalGuestPage {
-        desc_rendered: user.info.get_description().map(|x| sanitize_html(x)),
         user: user.info,
         books,
         inner: Msg::from_flash(flash),
@@ -334,7 +338,6 @@ pub async fn portal(
         .await
         .unwrap(); // No error should be tolerated here (database error). 500 is expected
     Ok(PortalPage {
-        desc_rendered: user.info.get_description().map(|x| sanitize_html(x)),
         user: user.info,
         books,
         inner: Msg::from_flash(flash),

@@ -1,4 +1,12 @@
 {% extends "book_info_guest.html" %}
+{% block seller_desc %}
+    {% match seller.get_description() %}
+    {% when Some with (desc) %}
+    {{ desc|safe }}
+    {% when None %}
+    <h3>{{ seller.get_name() }} has no profile</h3>
+    {% endmatch %}
+{% endblock seller_desc %}
 {% block seller %}
     <h1>Seller's contact info</h1>
     <table class="table table-hover">

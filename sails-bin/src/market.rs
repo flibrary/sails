@@ -33,9 +33,10 @@ pub async fn update_book(
     book: BookIdGuard,
     _user: UserIdGuard,
     _auth: Authorized,
-    info: Form<IncompleteProductOwned>,
+    mut info: Form<IncompleteProductOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    info.description = sanitize_html(&info.description);
     let book_id = book.book_id.get_id().to_string();
     // The user is the seller, he/she is authorized
     conn.run(move |c| book.book_id.update_owned(c, info.into_inner().verify(c)?))
@@ -51,9 +52,10 @@ pub async fn update_book(
 #[post("/cow_book", data = "<info>", rank = 2)]
 pub async fn create_book(
     user: UserIdGuard,
-    info: Form<IncompleteProductOwned>,
+    mut info: Form<IncompleteProductOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    info.description = sanitize_html(&info.description);
     let product_id = conn
         .run(move |c| info.create(c, &user.id))
         .await
@@ -141,7 +143,6 @@ pub async fn instruction(
 pub struct BookPageOwned {
     book: ProductInfo,
     category: Option<Category>,
-    desc_rendered: String,
     seller: UserInfo,
 }
 
@@ -150,7 +151,6 @@ pub struct BookPageOwned {
 pub struct BookPageUser {
     book: ProductInfo,
     category: Option<Category>,
-    desc_rendered: String,
     seller: UserInfo,
 }
 
@@ -159,17 +159,14 @@ pub struct BookPageUser {
 pub struct BookPageGuest {
     book: ProductInfo,
     category: Option<Category>,
-    desc_rendered: String,
 }
 
 // If the seller is the user, buttons like update and delete are displayed
 #[get("/book_info", rank = 1)]
 pub async fn book_page_owned(book: BookInfoGuard, _auth: Authorized) -> BookPageOwned {
-    let rendered = sanitize_html(book.book_info.get_description());
     BookPageOwned {
         book: book.book_info,
         category: book.category,
-        desc_rendered: rendered,
         seller: book.seller_info,
     }
 }
@@ -177,11 +174,9 @@ pub async fn book_page_owned(book: BookInfoGuard, _auth: Authorized) -> BookPage
 // If the user is signed in but not authorized, book information and seller information will be displayed
 #[get("/book_info", rank = 2)]
 pub async fn book_page_user(book: BookInfoGuard, _user: UserIdGuard) -> BookPageUser {
-    let rendered = sanitize_html(book.book_info.get_description());
     BookPageUser {
         book: book.book_info,
         category: book.category,
-        desc_rendered: rendered,
         seller: book.seller_info,
     }
 }
@@ -189,11 +184,9 @@ pub async fn book_page_user(book: BookInfoGuard, _user: UserIdGuard) -> BookPage
 // If the user is not signed in, only book information will be displayed
 #[get("/book_info", rank = 3)]
 pub async fn book_page_guest(book: BookInfoGuard) -> BookPageGuest {
-    let rendered = sanitize_html(book.book_info.get_description());
     BookPageGuest {
         book: book.book_info,
         category: book.category,
-        desc_rendered: rendered,
     }
 }
 
