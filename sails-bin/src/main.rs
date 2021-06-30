@@ -177,6 +177,11 @@ async fn get_file(path: PathBuf) -> StaticFile {
     StaticFile(path)
 }
 
+#[get("/favicon.ico")]
+async fn get_icon() -> Redirect {
+    Redirect::to(uri!("/static/favicon.ico"))
+}
+
 #[catch(404)]
 async fn page404<'a>() -> Redirect {
     Redirect::to("/static/404.html")
@@ -222,7 +227,7 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<AeadKey>())
         .attach(AdHoc::config::<ImageHosting>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
-        .mount("/", routes![index])
+        .mount("/", routes![index, get_icon])
         .mount("/static", routes![get_file])
         // Mount user namespace
         .mount(
