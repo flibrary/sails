@@ -37,6 +37,21 @@ table! {
     use diesel::sql_types::*;
     use crate::enums::*;
 
+    transactions (id) {
+        id -> Text,
+        shortid -> Text,
+        seller -> Text,
+        product -> Text,
+        buyer -> Text,
+        time_sent -> Timestamp,
+        transaction_status -> TransactionStatusMapping,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::enums::*;
+
     users (id) {
         id -> Text,
         name -> Text,
@@ -50,5 +65,6 @@ table! {
 
 joinable!(products -> categories (category));
 joinable!(products -> users (seller_id));
+joinable!(transactions -> products (product));
 
-allow_tables_to_appear_in_same_query!(categories, messages, products, users,);
+allow_tables_to_appear_in_same_query!(categories, messages, products, transactions, users,);

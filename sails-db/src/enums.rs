@@ -76,3 +76,41 @@ impl Status for ProductStatus {
         }
     }
 }
+
+#[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum TransactionStatus {
+    // The product has already been sold
+    Refunded,
+    // The order/transaction has been placed
+    Placed,
+    // Buyer has paid the price
+    Paid,
+    // The transaction has been finished (product is delivered and price has been paid)
+    Finished,
+}
+
+impl Default for TransactionStatus {
+    fn default() -> Self {
+        Self::Placed
+    }
+}
+
+impl Status for TransactionStatus {
+    fn up(&self) -> Self {
+        match *self {
+            Self::Refunded => Self::Placed,
+            Self::Placed => Self::Paid,
+            Self::Paid => Self::Finished,
+            Self::Finished => Self::Finished,
+        }
+    }
+
+    fn down(&self) -> Self {
+        match *self {
+            Self::Refunded => Self::Refunded,
+            Self::Placed => Self::Refunded,
+            Self::Paid => Self::Placed,
+            Self::Finished => Self::Paid,
+        }
+    }
+}

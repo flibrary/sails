@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Order Details{% endblock title %}
+{% block content %}
+<main class="container">
+  <div class="bg-light p-5 rounded">
+    <h1>Details of order #{{ order.get_shortid() }}</h1>
+      <table class="table table-hover">
+    <tbody>
+    <tr>
+      <th scope="row">Price</th>
+      <td>CN¥ {{ book.get_price() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Seller</th>
+      <td>{{ book.get_seller_id() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Book ID</th>
+      <td>{{ book.get_shortid() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Buyer</th>
+      <td>{{ order.get_buyer() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Timestamp</th>
+      <td>{{ order.get_time_sent() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Status</th>
+      <td>{{ "{:?}"|format(order.get_transaction_status()) }}</td>
+    </tr>
+    </tbody>
+    </table>
+  </div>
+</main>
+{% endblock content %}

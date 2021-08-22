@@ -19,7 +19,7 @@
           # Otherwise Nix tries to use `/bin/sails-bin-git`
           passthru.exePath = "/bin/sails-bin";
           nativeBuildInputs = with import nixpkgs { system = "${system}"; }; [
-            # used by check_email
+            # used by email
             openssl
             pkgconfig
             # Used by diesel
@@ -64,7 +64,7 @@
             })
             rust-analyzer
 
-            # used by check_email
+            # used by email
             openssl
             pkgconfig
             # Used by diesel

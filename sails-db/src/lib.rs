@@ -12,6 +12,7 @@ pub mod products;
 mod schema;
 pub mod categories;
 pub mod test_utils;
+pub mod transactions;
 pub mod users;
 
 /// Enum representing order

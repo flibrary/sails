@@ -32,25 +32,50 @@ impl ProductId {
             .first::<ProductInfo>(conn)?)
     }
 
+    // Deletion would not be allowed if the product is referenced in the transaction due to the foreign key constraints
     pub fn delete(self, conn: &SqliteConnection) -> Result<()> {
         use crate::schema::products::dsl::*;
         diesel::delete(products.filter(id.eq(&self.id))).execute(conn)?;
         Ok(())
     }
 
+    // IncompleteProduct update should only be allowed if the book is not sold (frozen)
     pub fn update(&self, conn: &SqliteConnection, info: SafeIncompleteProduct) -> Result<()> {
-        diesel::update(self).set(info).execute(conn)?;
-        Ok(())
+        use crate::schema::products::dsl::*;
+
+        let status = products
+            .filter(id.eq(&self.id))
+            .first::<ProductInfo>(conn)?
+            .get_product_status()
+            .clone();
+        if (status == ProductStatus::Normal) || (status == ProductStatus::Verified) {
+            diesel::update(self).set(info).execute(conn)?;
+            Ok(())
+        } else {
+            Err(SailsDbError::ChangeOnSoldProduct)
+        }
     }
 
+    // IncompleteProduct update should only be allowed if the book is not sold (frozen)
     // This is safe to update because creation and update has been seperated and it will not fallback to default.
     pub fn update_owned(
         &self,
         conn: &SqliteConnection,
         info: SafeIncompleteProductOwned,
     ) -> Result<()> {
-        diesel::update(self).set(info).execute(conn)?;
-        Ok(())
+        use crate::schema::products::dsl::*;
+
+        let status = products
+            .filter(id.eq(&self.id))
+            .first::<ProductInfo>(conn)?
+            .get_product_status()
+            .clone();
+        if (status == ProductStatus::Normal) || (status == ProductStatus::Verified) {
+            diesel::update(self).set(info).execute(conn)?;
+            Ok(())
+        } else {
+            Err(SailsDbError::ChangeOnSoldProduct)
+        }
     }
 
     pub fn get_id(&self) -> &str {
@@ -331,12 +356,12 @@ impl<'a> IncompleteProduct<'a> {
     }
 }
 
-/// A single product info entry, corresponding to a row in the table `products`
+/// A single product info entry, corresponding to a row in the table `products`. This is unsoled.
 #[derive(
     Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
 )]
 #[table_name = "products"]
-pub struct ProductInfo {
+pub struct MutableProductInfo {
     id: String,
     shortid: String,
     seller_id: String,
@@ -347,9 +372,9 @@ pub struct ProductInfo {
     product_status: ProductStatus,
 }
 
-impl ProductInfo {
+impl MutableProductInfo {
     pub fn update(self, conn: &SqliteConnection) -> Result<Self> {
-        Ok(self.save_changes::<ProductInfo>(conn)?)
+        Ok(self.save_changes::<MutableProductInfo>(conn)?)
     }
 
     pub fn get_id(&self) -> &str {
@@ -417,8 +442,98 @@ impl ProductInfo {
     }
 
     /// Set the product info's product status.
+    // extern crate are not allowed to manually set the product status to sold. Otherwise, the transactions and the products are not gonna agree.
     pub fn set_product_status(mut self, product_status: ProductStatus) -> Self {
-        self.product_status = product_status;
+        if product_status != ProductStatus::Sold {
+            self.product_status = product_status;
+        }
+        self
+    }
+
+    pub(crate) fn set_sold(mut self) -> Self {
+        self.product_status = ProductStatus::Sold;
+        self
+    }
+}
+
+impl ToSafe<MutableProductInfo> for ProductInfo {
+    fn verify(self, _conn: &SqliteConnection) -> Result<MutableProductInfo> {
+        if self.product_status != ProductStatus::Sold {
+            Ok(MutableProductInfo {
+                id: self.id,
+                shortid: self.shortid,
+                seller_id: self.seller_id,
+                category: self.category,
+                prodname: self.prodname,
+                price: self.price,
+                description: self.description,
+                product_status: self.product_status,
+            })
+        } else {
+            Err(SailsDbError::ChangeOnSoldProduct)
+        }
+    }
+}
+
+/// A single product info entry, corresponding to a row in the table `products`
+#[derive(
+    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
+)]
+#[table_name = "products"]
+pub struct ProductInfo {
+    id: String,
+    shortid: String,
+    seller_id: String,
+    category: String,
+    prodname: String,
+    price: i64,
+    description: String,
+    product_status: ProductStatus,
+}
+
+impl ProductInfo {
+    pub fn update(self, conn: &SqliteConnection) -> Result<Self> {
+        Ok(self.save_changes::<ProductInfo>(conn)?)
+    }
+
+    pub fn get_id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn get_seller_id(&self) -> &str {
+        &self.seller_id
+    }
+
+    pub fn get_description(&self) -> &str {
+        &self.description
+    }
+
+    pub fn get_category_id(&self) -> &str {
+        &self.category
+    }
+
+    pub fn get_prodname(&self) -> &str {
+        &self.prodname
+    }
+
+    pub fn get_price(&self) -> i64 {
+        self.price
+    }
+
+    /// Get a reference to the product info's shortid.
+    pub fn get_shortid(&self) -> &str {
+        &self.shortid
+    }
+
+    /// Get a reference to the product info's product status.
+    pub fn get_product_status(&self) -> &ProductStatus {
+        &self.product_status
+    }
+
+    // For immutable product info, we only allow sold status being set, because it can be either sold or in other satuses.
+    // For sold, it should be only allowed to transfer back to verified; for others, they can be converted into mutable info.
+    pub(crate) fn set_verified(mut self) -> Self {
+        self.product_status = ProductStatus::Verified;
         self
     }
 }

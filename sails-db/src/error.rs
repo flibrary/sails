@@ -41,6 +41,12 @@ pub enum SailsDbError {
     #[error("non-leaf category is not allowed for the request")]
     NonLeafCategory,
 
+    #[error("sold products are not subjected to changes")]
+    ChangeOnSoldProduct,
+
+    #[error("purchasing unverified products")]
+    OrderOnUnverified,
+
     #[error("the user has been disabled")]
     DisabledUser,
 

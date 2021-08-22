@@ -4,3 +4,60 @@
 {% block intro %}This page helps you to manage your books posted in the market and your basic account information.{% endblock intro %}
 {% block update_button %}<a href="/user/update_user_page" class="btn btn-primary" role="button">Update</a> <a href="/user/change_passwd" class="btn btn-warning" role="button">Change password</a>{% endblock update_button %}
 {% block postbook_button %}<a href="/market/post_book" class="btn btn-primary" role="button">Post a book</a>{% endblock postbook_button %}
+{% block orders_placed %}
+<div class="bg-light p-5 rounded">
+  <h3>Orders Placed</h3>
+  <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+    <thead>
+      <tr>
+	<th data-field="id" data-sortable="true" scope="col">ID</th>
+	<th data-field="name" data-sortable="true" scope="col">Book name</th>
+	<th data-field="price" data-sortable="true" scope="col">Price</th>
+	<th data-field="seller" data-sortable="true" scope="col">Seller</th>
+	<th data-field="status" data-sortable="true" scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders_placed %}
+      <tr>
+	<th scope="row"><a href="/orders/order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
+	<td><a href="/market/book_info?book_id={{ order.0.get_id() }}">{{order.0.get_prodname()}}</a></td>
+	<td>{{order.0.get_price()}}</td>
+	<td>{{order.0.get_seller_id()}}</td>
+	<td>{{ "{:?}"|format(order.1.get_transaction_status()) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<br>
+{% endblock orders_placed %}
+
+{% block orders_received %}
+<div class="bg-light p-5 rounded">
+  <h3>Orders Received</h3>
+  <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+    <thead>
+      <tr>
+	<th data-field="id" data-sortable="true" scope="col">ID</th>
+	<th data-field="name" data-sortable="true" scope="col">Book name</th>
+	<th data-field="price" data-sortable="true" scope="col">Price</th>
+	<th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
+	<th data-field="status" data-sortable="true" scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders_received %}
+      <tr>
+	<th scope="row"><a href="/orders/order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
+	<td><a href="/market/book_info?book_id={{ order.0.get_id() }}">{{order.0.get_prodname()}}</a></td>
+	<td>{{order.0.get_price()}}</td>
+	<td>{{order.1.get_buyer()}}</td>
+	<td>{{ "{:?}"|format(order.1.get_transaction_status()) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<br>
+{% endblock orders_received %}

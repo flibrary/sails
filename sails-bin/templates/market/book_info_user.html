@@ -31,3 +31,7 @@
     </table>
     <a href="/messages/chat?user_id={{seller.get_id()}}" class="btn btn-primary" role="button">Send a message</a>
 {% endblock seller %}
+
+{% block actions %}
+<a href="/orders/purchase?book_id={{book.get_id()}}" class="btn btn-primary" role="button">Purchase</a>
+{% endblock actions %}

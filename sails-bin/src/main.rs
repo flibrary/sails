@@ -11,6 +11,7 @@ mod guards;
 mod images;
 mod market;
 mod messages;
+mod orders;
 mod recaptcha;
 mod root;
 mod smtp;
@@ -300,7 +301,21 @@ fn rocket() -> Rocket<Build> {
                 admin::admin,
                 admin::verify_book,
                 admin::disable_book,
-                admin::normalize_book
+                admin::normalize_book,
+                admin::admin_tx,
+                admin::refund_order,
+                admin::finish_order,
+                admin::confirm_order
+            ],
+        )
+        .mount(
+            "/orders",
+            routes![
+                orders::purchase,
+                orders::order_info_buyer,
+                orders::order_info_seller,
+                orders::confirm,
+                orders::admin_order_info
             ],
         )
         .mount(

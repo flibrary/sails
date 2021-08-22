@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Order Details{% endblock title %}
+{% block content %}
+<main class="container">
+    <div class="bg-light p-5 rounded">
+      <h1>Details of order #{{ order.get_shortid() }}</h1>
+      <br>
+      {% match order.get_transaction_status() %}
+      {% when sails_db::enums::TransactionStatus::Refunded %}
+      <div class="progress">
+	<div class="progress-bar bg-secondary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+      </div>
+      <br>
+      <h3>Order refunded (canceled)</h3>
+      The customer has refunded or canceled his/her order.
+
+      {% when sails_db::enums::TransactionStatus::Placed %}
+      <div class="progress">
+	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" style="width: 33%"></div>
+      </div>
+      <br>
+      <h3>Order successfully placed</h3>
+      Please confirm if you have received <b>CN¥ {{ book.get_price() }}</b> with reference order ID <code>{{ order.get_shortid() }}</code>.<br>
+      <a href="/orders/confirm?order_id={{order.get_id()}}" class="btn btn-primary" role="button">Confirm the payment</a>
+
+      {% when sails_db::enums::TransactionStatus::Paid %}
+      <div class="progress">
+	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" style="width: 66%"></div>
+      </div>
+      <br>
+      <h3>Order successfully paid</h3>
+      Customer is now guided to get his/her book from the warehouse. There is nothing left to do for you.
+
+      {% when sails_db::enums::TransactionStatus::Finished %}
+      <div class="progress">
+	<div class="progress-bar bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+      </div>
+      <br>
+      <h3>Order successfully finished!</h2>
+      Customer has successfully gotten the book from the warehouse. There is nothing left to do for you.
+      {% endmatch %}
+    </div>
+<br>
+<div class="bg-light p-5 rounded">
+      <table class="table table-hover">
+    <tbody>
+    <tr>
+      <th scope="row">Price</th>
+      <td>CN¥ {{ book.get_price() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Seller</th>
+      <td>{{ book.get_seller_id() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Book ID</th>
+      <td>{{ book.get_shortid() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Buyer</th>
+      <td>{{ order.get_buyer() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Timestamp</th>
+      <td>{{ order.get_time_sent() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Status</th>
+      <td>{{ "{:?}"|format(order.get_transaction_status()) }}</td>
+    </tr>
+    </tbody>
+    </table>
+  </div>
+</main>
+{% endblock content %}

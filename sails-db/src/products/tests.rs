@@ -230,6 +230,8 @@ fn product_status() {
 
     id.get_info(&conn)
         .unwrap()
+        .verify(&conn)
+        .unwrap()
         .set_product_status(ProductStatus::Disabled)
         .update(&conn)
         .unwrap();

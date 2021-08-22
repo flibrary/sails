@@ -4,7 +4,7 @@ use rocket::{
     request::FlashMessage,
     response::{Flash, Redirect},
 };
-use sails_db::{categories::*, error::SailsDbError, products::*, users::*};
+use sails_db::{categories::*, error::SailsDbError, products::*, users::*, Cmp};
 
 use crate::{guards::*, sanitize_html, DbConn, IntoFlash, Msg};
 
@@ -267,7 +267,7 @@ pub async fn all_books_category(
                     // We only display allowed books
                     let books_info = ProductFinder::new(c, None)
                         .category(&ctg)
-                        .allowed()
+                        .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
                         .search_info()?;
 
                     books_info
@@ -296,7 +296,9 @@ pub async fn all_books(
             .run(
                 move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
                     // We only display allowed books
-                    let books_info = ProductFinder::new(c, None).allowed().search_info()?;
+                    let books_info = ProductFinder::new(c, None)
+                        .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
+                        .search_info()?;
 
                     books_info
                         .into_iter()

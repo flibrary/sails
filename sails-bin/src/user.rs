@@ -22,6 +22,7 @@ use sails_db::{
     categories::{Categories, Category, CtgTrait},
     error::SailsDbError,
     products::*,
+    transactions::*,
     users::*,
 };
 
@@ -279,6 +280,8 @@ pub struct PortalGuestPage {
 pub struct PortalPage {
     user: UserInfo,
     books: Vec<(ProductInfo, Option<Category>)>,
+    orders_placed: Vec<(ProductInfo, TransactionInfo)>,
+    orders_received: Vec<(ProductInfo, TransactionInfo)>,
     inner: Msg,
 }
 
@@ -289,7 +292,9 @@ pub async fn portal_guest(
     user: UserInfoParamGuard,
     conn: DbConn,
 ) -> Result<PortalGuestPage, Redirect> {
-    let uid_cloned = user.info.get_id().to_string();
+    let uid = user.info.get_id().to_string();
+
+    let uid_cloned = uid.clone();
     let books = conn
         .run(
             move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
@@ -320,7 +325,9 @@ pub async fn portal(
     user: UserInfoGuard,
     conn: DbConn,
 ) -> Result<PortalPage, Redirect> {
-    let uid_cloned = user.info.get_id().to_string();
+    let uid = user.info.get_id().to_string();
+
+    let uid_cloned = uid.clone();
     let books = conn
         .run(
             move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
@@ -337,8 +344,51 @@ pub async fn portal(
         )
         .await
         .unwrap(); // No error should be tolerated here (database error). 500 is expected
+
+    let uid_cloned = uid.clone();
+    let orders_placed = conn
+        .run(
+            move |c| -> Result<Vec<(ProductInfo, TransactionInfo)>, SailsDbError> {
+                TransactionFinder::new(c, None)
+                    .buyer(&uid_cloned)
+                    .search_info()?
+                    .into_iter()
+                    .map(|x| {
+                        let product = ProductFinder::new(c, None)
+                            .id(x.get_product())
+                            .first_info()
+                            .unwrap();
+                        Ok((product, x))
+                    })
+                    .collect()
+            },
+        )
+        .await
+        .unwrap(); // No error should be tolerated here (database error). 500 is expected
+
+    let orders_received = conn
+        .run(
+            move |c| -> Result<Vec<(ProductInfo, TransactionInfo)>, SailsDbError> {
+                TransactionFinder::new(c, None)
+                    .seller(&uid)
+                    .search_info()?
+                    .into_iter()
+                    .map(|x| {
+                        let product = ProductFinder::new(c, None)
+                            .id(x.get_product())
+                            .first_info()
+                            .unwrap();
+                        Ok((product, x))
+                    })
+                    .collect()
+            },
+        )
+        .await
+        .unwrap(); // No error should be tolerated here (database error). 500 is expected
     Ok(PortalPage {
         user: user.info,
+        orders_placed,
+        orders_received,
         books,
         inner: Msg::from_flash(flash),
     })

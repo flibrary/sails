@@ -6,9 +6,9 @@ use rocket::{
 };
 use sails_db::{
     categories::{Categories, Category},
-    enums::ProductStatus,
     error::SailsDbError,
     products::*,
+    transactions::*,
     users::*,
 };
 
@@ -101,6 +101,110 @@ impl<'r> FromRequest<'r> for BookIdGuard {
     }
 }
 
+// This guard matches only if the user is the seller of the order;
+pub struct OrderSeller;
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for OrderSeller {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard>().await);
+        let order = try_outcome!(request.guard::<OrderInfoGuard>().await);
+        if order.book_info.get_seller_id() == user.info.get_id() {
+            Outcome::Success(OrderSeller)
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+// This guard matches only if the user is the buyer of the order;
+pub struct OrderBuyer;
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for OrderBuyer {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard>().await);
+        let order = try_outcome!(request.guard::<OrderInfoGuard>().await);
+        if order.order_info.get_buyer() == user.info.get_id() {
+            Outcome::Success(OrderBuyer)
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+pub struct OrderInfoGuard {
+    pub order_info: TransactionInfo,
+    pub book_info: ProductInfo,
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for OrderInfoGuard {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let order = try_outcome!(request.guard::<OrderIdGuard>().await);
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        db.run(move |c| -> Result<OrderInfoGuard, SailsDbError> {
+            let order_info = order.id.get_info(c)?;
+            let book_info = ProductFinder::new(c, None)
+                .id(order_info.get_product())
+                .first_info()?;
+            Ok(OrderInfoGuard {
+                order_info,
+                book_info,
+            })
+        })
+        .await
+        .ok()
+        .or_forward(())
+    }
+}
+
+// This request guard explicitly requires a valid transaction ID
+pub struct OrderIdGuard {
+    pub id: TransactionId,
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for OrderIdGuard {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let order_id = request
+            .query_value::<String>("order_id")
+            .and_then(|x| x.ok());
+        if let Some(order_id) = order_id {
+            let order_id_inner = order_id.clone();
+            db.run(move |c| -> Result<OrderIdGuard, SailsDbError> {
+                Ok(OrderIdGuard {
+                    id: TransactionFinder::new(c, None)
+                        .id(&order_id_inner)
+                        .first()?,
+                })
+            })
+            .await
+            .ok()
+            .or_forward(())
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
 // This guard matches only if the user is authorized. It implies also that Book is present and User is present
 pub struct Authorized;
 
@@ -163,23 +267,27 @@ impl<'r> FromRequest<'r> for UserInfoGuard {
     }
 }
 
-pub struct NonSoldBookInfoGuard {
-    pub inner: BookInfoGuard,
+pub struct MutableBookInfoGuard {
+    pub info: MutableProductInfo,
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for NonSoldBookInfoGuard {
+impl<'r> FromRequest<'r> for MutableBookInfoGuard {
     type Error = ();
 
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let book = try_outcome!(request.guard::<BookInfoGuard>().await);
-        if book.book_info.get_product_status() != &ProductStatus::Sold {
-            Outcome::Success(Self { inner: book })
-        } else {
-            Outcome::Forward(())
-        }
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        db.run(|c| -> Result<Self, SailsDbError> {
+            Ok(Self {
+                info: book.book_info.verify(c)?,
+            })
+        })
+        .await
+        .ok()
+        .or_forward(())
     }
 }
 
