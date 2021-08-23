@@ -26,7 +26,15 @@
             sqlite
           ];
         };
-    in (utils.lib.eachSystem (utils.lib.defaultSystems) (system: rec {
+      # We customizely define the default system because ghc is broken on aarch64-darwin
+      defaultSystems = [
+        "aarch64-linux"
+        # "aarch64-darwin"
+        "i686-linux"
+        "x86_64-darwin"
+        "x86_64-linux"
+      ];
+    in (utils.lib.eachSystem (defaultSystems) (system: rec {
       # `nix build`
       packages = {
         # We have to do it like `nix develop .#commit` because libraries don't play well with `makeBinPath` or `makeLibraryPath`.

@@ -293,7 +293,7 @@ pub struct SafeIncompleteProduct<'a> {
 
 impl<'a> ToSafe<SafeIncompleteProduct<'a>> for IncompleteProduct<'a> {
     fn verify(self, conn: &SqliteConnection) -> Result<SafeIncompleteProduct<'a>> {
-        let ctg = Categories::find_by_id(conn, &self.category)?;
+        let ctg = Categories::find_by_id(conn, self.category)?;
         if ctg.is_leaf() {
             Ok(SafeIncompleteProduct {
                 category: self.category,

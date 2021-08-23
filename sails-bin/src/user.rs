@@ -131,7 +131,7 @@ pub async fn create_user(
         .parse::<lettre::Address>()
         .into_flash(uri!("/user", signup))?;
     if email.domain() == "outlook.com" {
-        send_verification_email(&info.user_info.id, &aead, &smtp)
+        send_verification_email(&info.user_info.id, aead, smtp)
             .await
             .into_flash(uri!("/user", portal))?;
         // Sanitize the html
