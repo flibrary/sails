@@ -21,7 +21,7 @@
       <br>
       <h3>Order successfully placed</h3>
       Please confirm if you have received <b>CN¥ {{ book.get_price() }}</b> with reference order ID <code>{{ order.get_shortid() }}</code>.<br>
-      <a href="/orders/confirm?order_id={{order.get_id()}}" class="btn btn-primary" role="button">Confirm the payment</a>
+      <a href="/orders/confirm?order_id={{order.get_id()}}" class="btn btn-primary" role="button" onclick="return confirm('Please make sure you have already got the payment');">Confirm the payment</a>
 
       {% when sails_db::enums::TransactionStatus::Paid %}
       <div class="progress">

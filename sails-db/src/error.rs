@@ -47,6 +47,12 @@ pub enum SailsDbError {
     #[error("purchasing unverified products")]
     OrderOnUnverified,
 
+    #[error("seller cannot purchase his/her own products")]
+    SelfPurchaseNotAllowed,
+
+    #[error("failed to change product status on purchase")]
+    FailedAlterProductStatus,
+
     #[error("the user has been disabled")]
     DisabledUser,
 

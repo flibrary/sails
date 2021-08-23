@@ -33,5 +33,5 @@
 {% endblock seller %}
 
 {% block actions %}
-<a href="/orders/purchase?book_id={{book.get_id()}}" class="btn btn-primary" role="button">Purchase</a>
+<a href="/orders/purchase?book_id={{book.get_id()}}" class="btn btn-primary" role="button" onclick="return confirm('Do you really want to purchase it?');">Purchase</a>
 {% endblock actions %}

@@ -24,6 +24,10 @@ impl Transactions {
 
         let product_info = product_p.get_info(conn)?;
 
+        if product_info.get_seller_id() == buyer_p.get_id() {
+            return Err(SailsDbError::SelfPurchaseNotAllowed);
+        }
+
         if product_info.get_product_status() == &ProductStatus::Verified {
             let id_cloned = Uuid::new_v4();
             let shortid_str = id_cloned.as_fields().0.to_string();
@@ -41,12 +45,20 @@ impl Transactions {
             diesel::insert_into(transactions).values(tx).execute(conn)?;
 
             // Change the product status to sold
-            product_info.verify(conn)?.set_sold().update(conn)?;
-
-            // Return the transaction ID
-            Ok(TransactionId {
-                id: id_cloned.to_string(),
-            })
+            if product_info
+                .verify(conn)
+                .and_then(|i| i.set_sold().update(conn))
+                .is_ok()
+            {
+                // Return the transaction ID
+                Ok(TransactionId {
+                    id: id_cloned.to_string(),
+                })
+            } else {
+                // There are some issues changing the status of the book, and we shall delete the transaction
+                diesel::delete(transactions.filter(id.eq(&id_cloned.to_string()))).execute(conn)?;
+                Err(SailsDbError::FailedAlterProductStatus)
+            }
         } else {
             Err(SailsDbError::OrderOnUnverified)
         }

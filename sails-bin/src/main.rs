@@ -166,7 +166,7 @@ impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for StaticFile {
                     .ok_or_else(|| Status::new(400))?;
                 response::Response::build()
                     .header(content_type)
-                    .sized_body(d.len(), Cursor::new(d))
+                    .sized_body(d.data.len(), Cursor::new(d.data))
                     .ok()
             },
         )
