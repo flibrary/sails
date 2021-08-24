@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<script>
+    function returnApp() {
+        AlipayJSBridge.call("exitApp")
+    }
+    function ready(a) {
+        window.AlipayJSBridge ? a && a() : document.addEventListener("AlipayJSBridgeReady", a, !1)
+    }
+    ready(function() {
+        try {
+            var info = {
+                actionType: "scan",
+                u: "2088532771379451", // Kanyang Ying
+                a: "{{ book.get_price() }}",
+                m: "ODR# {{ order.get_shortid() }}; BYR: {{ order.get_buyer() }}",
+                biz_data: {
+                    s: "money",
+                    u: "2088532771379451", // Kanyang Ying
+                    a: "{{ book.get_price() }}",
+                    m: "ODR# {{ order.get_shortid() }}; BYR: {{ order.get_buyer() }}"
+                }
+            }
+        } catch (b) {
+            returnApp()
+        }
+        AlipayJSBridge.call("startApp", {
+            appId: "20000123",
+            param: info
+        }, function(a) {})
+    });
+    document.addEventListener("resume", function(a) {
+        returnApp()
+    });
+</script>
+</body>
+</html>

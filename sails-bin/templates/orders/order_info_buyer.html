@@ -20,12 +20,10 @@
       </div>
       <br>
       <h3>Order successfully placed</h3>
-      Please pay the seller <b>CN¥ {{ book.get_price() }}</b> with reference to the following information:
-      <ol class="list-group list-group-numbered">
-	<li class="list-group-item">The order ID: <code>{{ order.get_shortid() }}</code></li>
-	<li class="list-group-item">Your email: <code>{{ buyer.get_id() }}</code></li>
-      </ol>
-      Then you should await the seller to confirm the payment.
+      Scan the QR code or click the button to pay to proceed, then you should await the seller to confirm the payment.<br>
+      <br>
+      <div id="qrcode"></div><br>
+      <a href="alipays://platformapi/startapp?appId=20000067&url=https%3A%2F%2Fflibrary.info%2Forders%2Falipay%3Forder_id%3D{{order.get_id()}}" class="btn btn-primary" role="button">Pay via AliPay</a><br>
 
       {% when sails_db::enums::TransactionStatus::Paid %}
       <div class="progress">
@@ -77,3 +75,11 @@
   </div>
 </main>
 {% endblock content %}
+
+{% block script %}
+  {% call super()%}
+  <script type="text/javascript">
+    var qrcode = new QRCode("qrcode");
+    qrcode.makeCode("alipays://platformapi/startapp?appId=20000067&url=https%3A%2F%2Fflibrary.info%2Forders%2Falipay%3Forder_id%3D{{order.get_id()}}");
+  </script>
+{% endblock script %}

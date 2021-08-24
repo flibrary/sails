@@ -1,8 +1,23 @@
 use askama::Template;
 use rocket::response::{Flash, Redirect};
-use sails_db::{enums::TransactionStatus, products::*, transactions::*, users::*};
+use sails_db::{enums::TransactionStatus, products::*, transactions::*};
 
 use crate::{guards::*, DbConn, IntoFlash};
+
+#[derive(Template)]
+#[template(path = "orders/alipay_process.html")]
+pub struct AlipayProcess {
+    book: ProductInfo,
+    order: TransactionInfo,
+}
+
+#[get("/alipay")]
+pub async fn alipay_order_process(order: OrderInfoGuard) -> AlipayProcess {
+    AlipayProcess {
+        book: order.book_info,
+        order: order.order_info,
+    }
+}
 
 #[derive(Template)]
 #[template(path = "orders/admin_order_info.html")]
@@ -24,19 +39,13 @@ pub async fn admin_order_info(_buyer: OrderBuyer, order: OrderInfoGuard) -> Admi
 pub struct OrderInfoBuyer {
     book: ProductInfo,
     order: TransactionInfo,
-    buyer: UserInfo,
 }
 
 #[get("/order_info", rank = 2)]
-pub async fn order_info_buyer(
-    _buyer: OrderBuyer,
-    order: OrderInfoGuard,
-    user: UserInfoGuard,
-) -> OrderInfoBuyer {
+pub async fn order_info_buyer(_buyer: OrderBuyer, order: OrderInfoGuard) -> OrderInfoBuyer {
     OrderInfoBuyer {
         book: order.book_info,
         order: order.order_info,
-        buyer: user.info,
     }
 }
 

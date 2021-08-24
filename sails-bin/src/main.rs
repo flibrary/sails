@@ -315,7 +315,8 @@ fn rocket() -> Rocket<Build> {
                 orders::order_info_buyer,
                 orders::order_info_seller,
                 orders::confirm,
-                orders::admin_order_info
+                orders::admin_order_info,
+                orders::alipay_order_process,
             ],
         )
         .mount(
