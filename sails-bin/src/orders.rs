@@ -27,7 +27,7 @@ pub struct AdminOrderInfo {
 }
 
 #[get("/admin_order_info")]
-pub async fn admin_order_info(_buyer: OrderBuyer, order: OrderInfoGuard) -> AdminOrderInfo {
+pub async fn admin_order_info(_guard: AdminGuard, order: OrderInfoGuard) -> AdminOrderInfo {
     AdminOrderInfo {
         book: order.book_info,
         order: order.order_info,
