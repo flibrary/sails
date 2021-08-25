@@ -45,7 +45,7 @@ impl<'r> FromFormField<'r> for Image {
     }
 }
 
-#[get("/get/<hash>/<ext>/<size>", rank = 1)]
+#[get("/get/<hash>/<ext>?<size>", rank = 1)]
 pub async fn get(hash: &str, ext: &str, size: &str) -> Redirect {
     Redirect::to(format!(
         "https://flibrary.lexugeyky.workers.dev/https://raw.githubusercontent.com/flibrary/images/main/{}/{}.{}",
@@ -55,10 +55,7 @@ pub async fn get(hash: &str, ext: &str, size: &str) -> Redirect {
 
 #[get("/get/<hash>/<ext>", rank = 2)]
 pub async fn get_default(hash: &str, ext: &str) -> Redirect {
-    Redirect::to(format!(
-        "https://flibrary.lexugeyky.workers.dev/https://raw.githubusercontent.com/flibrary/images/main/{}/orig.{}",
-        hash, ext
-    ))
+    get(hash, ext, "orig").await
 }
 
 // We only allow signed in users to upload images

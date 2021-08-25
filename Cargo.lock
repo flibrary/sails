@@ -113,7 +113,7 @@ checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
 [[package]]
 name = "askama"
 version = "0.11.0-beta.1"
-source = "git+https://github.com/djc/askama?branch=main#81429636eb295ec03ef35cf77648d1626970fd4e"
+source = "git+https://github.com/djc/askama?branch=main#ed2e640dbdff88fe118d943fa0ea9ae00eb11555"
 dependencies = [
  "askama_derive",
  "askama_escape",
@@ -125,7 +125,7 @@ dependencies = [
 [[package]]
 name = "askama_derive"
 version = "0.11.0-beta.1"
-source = "git+https://github.com/djc/askama?branch=main#81429636eb295ec03ef35cf77648d1626970fd4e"
+source = "git+https://github.com/djc/askama?branch=main#ed2e640dbdff88fe118d943fa0ea9ae00eb11555"
 dependencies = [
  "askama_shared",
  "proc-macro2",
@@ -135,12 +135,12 @@ dependencies = [
 [[package]]
 name = "askama_escape"
 version = "0.10.2"
-source = "git+https://github.com/djc/askama?branch=main#81429636eb295ec03ef35cf77648d1626970fd4e"
+source = "git+https://github.com/djc/askama?branch=main#ed2e640dbdff88fe118d943fa0ea9ae00eb11555"
 
 [[package]]
 name = "askama_rocket"
 version = "0.11.0-rc.2"
-source = "git+https://github.com/djc/askama?branch=main#81429636eb295ec03ef35cf77648d1626970fd4e"
+source = "git+https://github.com/djc/askama?branch=main#ed2e640dbdff88fe118d943fa0ea9ae00eb11555"
 dependencies = [
  "askama",
  "rocket",
@@ -149,7 +149,7 @@ dependencies = [
 [[package]]
 name = "askama_shared"
 version = "0.12.0-beta.1"
-source = "git+https://github.com/djc/askama?branch=main#81429636eb295ec03ef35cf77648d1626970fd4e"
+source = "git+https://github.com/djc/askama?branch=main#ed2e640dbdff88fe118d943fa0ea9ae00eb11555"
 dependencies = [
  "askama_escape",
  "humansize",
@@ -260,6 +260,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "bit-set"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e11e16035ea35e4e5997b393eacbf6f63983188f7a2ad25bfb13465f5ad59de"
+dependencies = [
+ "bit-vec",
+]
+
+[[package]]
+name = "bit-vec"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "349f9b6a179ed607305526ca489b34ad0a41aed5f7980fa90eb03160b69598fb"
+
+[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -323,9 +338,9 @@ checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 
 [[package]]
 name = "bytes"
-version = "1.0.1"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
+checksum = "c4872d67bab6358e59559027aa3b9157c53d9358c51423c17554809a8858e0f8"
 
 [[package]]
 name = "cast"
@@ -2332,6 +2347,7 @@ dependencies = [
  "rocket_sync_db_pools",
  "rust-embed",
  "sails-db",
+ "select",
  "serde",
  "serde_json",
  "sha2",
@@ -2431,6 +2447,17 @@ checksum = "7e4effb91b4b8b6fb7732e670b6cee160278ff8e6bf485c7805d9e319d76e284"
 dependencies = [
  "core-foundation-sys",
  "libc",
+]
+
+[[package]]
+name = "select"
+version = "0.6.0-alpha.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b51951aa2af52d64920acfe8b0df8d8f4071811a9e575db56a037dd5ee3b894"
+dependencies = [
+ "bit-set",
+ "html5ever",
+ "markup5ever_rcdom",
 ]
 
 [[package]]

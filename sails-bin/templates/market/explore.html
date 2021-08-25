@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Market{% endblock title %}
+{% block navbutton %}<li class="nav-item"><a href="/market/post_book" class="btn btn-warning" role="button">Post a book</a></li>{% endblock navbutton %}
+
+{% block content %}
+<main class="container">
+  <div class="bg-light p-5 rounded">
+    <h1>Welcome to the market</h1>
+    <p class="lead">Here you can see what books are on sale and post your own books.</p>
+    <a href="categories" class="btn btn-primary" role="button">Browse by categories</a>
+    {% match ctg %}
+    {% when Some with (ctg) %}
+    <a href="all_books?category={{ctg}}" class="btn btn-success" role="button">Table View</a>
+    {% when None %}
+    <a href="all_books" class="btn btn-success" role="button">Table View</a>
+    {% endmatch %}
+  </div>
+  <br>
+
+  {% if books.len() > 0 %}
+  <div class="bg-light p-5 rounded">
+    <div class="row grid">
+	{% for book in books %}
+	<div class="col-sm-6 col-lg-4 mb-4 grid-item">
+	  <div class="card">
+	    {% match book.1 %}
+	    {% when Some with (img) %}
+	    <img src="{{img}}?size=thumbnail" loading="lazy" class="card-img-top">
+            {% when None %}
+            {% endmatch %}
+            <div class="card-body">
+              <h5 class="card-title"><a href="/market/book_info?book_id={{ book.0.get_id() }}">{{book.0.get_prodname()}}</a></h5>
+              <p class="card-text">Price: {{book.0.get_price()}}</p>
+            </div>
+	  </div>
+	</div>
+	{% endfor %}
+
+      </div>
+    </div>
+    <br>
+  {% else %}
+    <div class="bg-light p-5 rounded">
+      <h3>No books under your request</h3>
+    </div>
+    <br>
+  {% endif %}
+</main>
+{% endblock content %}
+
+{% block script %}
+  {% call super()%}
+  <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/imagesloaded@4.1.4/imagesloaded.min.js"></script>
+  <script>
+    // init Masonry
+    var grid = document.querySelector('.grid');
+
+    var msnry = new Masonry( grid, {
+	itemSelector: '.grid-item',
+	percentPosition: true
+    });
+
+    imagesLoaded( grid ).on( 'progress', function() {
+	// layout Masonry after each image loads
+	msnry.layout();
+    });
+  </script>
+{% endblock script %}

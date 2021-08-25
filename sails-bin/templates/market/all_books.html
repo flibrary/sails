@@ -10,6 +10,12 @@
     <h1>Welcome to the market</h1>
     <p class="lead">Here you can see what books are on sale and post your own books.</p>
     <a href="categories" class="btn btn-primary" role="button">Browse by categories</a>
+    {% match ctg %}
+    {% when Some with (ctg) %}
+    <a href="explore?category={{ctg}}" class="btn btn-success" role="button">Card View</a>
+    {% when None %}
+    <a href="explore" class="btn btn-success" role="button">Card View</a>
+    {% endmatch %}
   </div>
   <br>
 
