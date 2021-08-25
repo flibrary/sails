@@ -1,4 +1,5 @@
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/WangYuLue/image-conversion/build/conversion.js"></script>
 <script>
   $('#summernote').summernote({
       placeholder: 'Write your description here',
@@ -23,22 +24,24 @@
   });
 
   function uploadImage(image) {
-      var data = new FormData();
-      data.append("image", image);
-      $.ajax({
-          url: '/images/upload',
-          cache: false,
-          contentType: false,
-          processData: false,
-          data: data,
-          type: "post",
-          success: function(url) {
-	      var image = $('<img>').attr('src', url);
-	      $('#summernote').summernote("insertNode", image[0]);
-          },
-          error: function(data) {
-	      console.log(data);
-          }
-      });
+      imageConversion.compressAccurately(image, 500).then(res=>{
+	  var data = new FormData();
+	  data.append("image", res);
+	  $.ajax({
+              url: '/images/upload',
+              cache: false,
+              contentType: false,
+              processData: false,
+              data: data,
+              type: "post",
+              success: function(url) {
+		  var image = $('<img>').attr('src', url);
+		  $('#summernote').summernote("insertNode", image[0]);
+              },
+              error: function(data) {
+		  console.log(data);
+              }
+	  });
+      })
   }
   </script>
