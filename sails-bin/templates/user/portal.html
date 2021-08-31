@@ -21,7 +21,7 @@
       {% for order in orders_placed %}
       <tr>
 	<th scope="row"><a href="/orders/order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
-	<td><a href="/market/book_info?book_id={{ order.0.get_id() }}">{{order.0.get_prodname()}}</a></td>
+	<td>{{order.0.get_prodname()}}</td>
 	<td>{{order.0.get_price()}}</td>
 	<td>{{order.0.get_seller_id()}}</td>
 	<td>{{ "{:?}"|format(order.1.get_transaction_status()) }}</td>
@@ -50,7 +50,7 @@
       {% for order in orders_received %}
       <tr>
 	<th scope="row"><a href="/orders/order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
-	<td><a href="/market/book_info?book_id={{ order.0.get_id() }}">{{order.0.get_prodname()}}</a></td>
+	<td>{{order.0.get_prodname()}}</td>
 	<td>{{order.0.get_price()}}</td>
 	<td>{{order.1.get_buyer()}}</td>
 	<td>{{ "{:?}"|format(order.1.get_transaction_status()) }}</td>
