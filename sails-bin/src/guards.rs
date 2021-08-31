@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use crate::{aead::AeadKey, DbConn};
 use rocket::{
     outcome::{try_outcome, IntoOutcome, Outcome},
@@ -12,13 +14,20 @@ use sails_db::{
     users::*,
 };
 
+pub struct Param;
+
+pub struct Cookie;
+
+pub struct Aead;
+
 // This request guard gets us an user if the user ID is specified and validated
-pub struct UserIdGuard {
+pub struct UserIdGuard<T> {
     pub id: UserId,
+    plhdr: PhantomData<T>,
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for UserIdGuard {
+impl<'r> FromRequest<'r> for UserIdGuard<Cookie> {
     type Error = ();
 
     async fn from_request(
@@ -31,10 +40,11 @@ impl<'r> FromRequest<'r> for UserIdGuard {
             .map(|cookie| cookie.value().to_string());
         if let Some(uid) = uid {
             let uid_inner = uid.clone();
-            db.run(move |c| -> Result<UserIdGuard, SailsDbError> {
+            db.run(move |c| -> Result<UserIdGuard<_>, SailsDbError> {
                 Ok(UserIdGuard {
                     // Disabled user will be treated as if he is not logged in
                     id: UserFinder::new(c, None).id(&uid_inner).allowed().first()?,
+                    plhdr: PhantomData,
                 })
             })
             .await
@@ -46,10 +56,22 @@ impl<'r> FromRequest<'r> for UserIdGuard {
     }
 }
 
-pub struct RootGuard;
+pub struct Root;
+
+pub struct Admin;
+
+pub struct BookAuthorized;
+
+pub struct Buyer;
+
+pub struct Seller;
+
+pub struct Role<T> {
+    plhdr: PhantomData<T>,
+}
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for RootGuard {
+impl<'r> FromRequest<'r> for Role<Root> {
     type Error = ();
 
     async fn from_request(
@@ -60,7 +82,7 @@ impl<'r> FromRequest<'r> for RootGuard {
             .get_private("root_challenge")
             .map(|cookie| cookie.value().to_string())
         {
-            Some(s) if s == "ROOT" => Outcome::Success(RootGuard),
+            Some(s) if s == "ROOT" => Outcome::Success(Role { plhdr: PhantomData }),
             _ => Outcome::Forward(()),
         }
     }
@@ -101,40 +123,34 @@ impl<'r> FromRequest<'r> for BookIdGuard {
     }
 }
 
-// This guard matches only if the user is the seller of the order;
-pub struct OrderSeller;
-
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for OrderSeller {
+impl<'r> FromRequest<'r> for Role<Seller> {
     type Error = ();
 
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard>().await);
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
         let order = try_outcome!(request.guard::<OrderInfoGuard>().await);
         if order.book_info.get_seller_id() == user.info.get_id() {
-            Outcome::Success(OrderSeller)
+            Outcome::Success(Role { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
         }
     }
 }
 
-// This guard matches only if the user is the buyer of the order;
-pub struct OrderBuyer;
-
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for OrderBuyer {
+impl<'r> FromRequest<'r> for Role<Buyer> {
     type Error = ();
 
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard>().await);
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
         let order = try_outcome!(request.guard::<OrderInfoGuard>().await);
         if order.order_info.get_buyer() == user.info.get_id() {
-            Outcome::Success(OrderBuyer)
+            Outcome::Success(Role { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
         }
@@ -205,60 +221,57 @@ impl<'r> FromRequest<'r> for OrderIdGuard {
     }
 }
 
-// This guard matches only if the user is authorized. It implies also that Book is present and User is present
-pub struct Authorized;
-
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for Authorized {
+impl<'r> FromRequest<'r> for Role<BookAuthorized> {
     type Error = ();
 
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard>().await);
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
         let book = try_outcome!(request.guard::<BookIdGuard>().await);
         if (book.seller_id.get_id() == user.info.get_id()) || user.info.is_admin() {
-            Outcome::Success(Authorized)
+            Outcome::Success(Role { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
         }
     }
 }
 
-pub struct AdminGuard;
-
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for AdminGuard {
+impl<'r> FromRequest<'r> for Role<Admin> {
     type Error = ();
 
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard>().await);
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
         if user.info.is_admin() {
-            Outcome::Success(AdminGuard)
+            Outcome::Success(Role { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
         }
     }
 }
 
-pub struct UserInfoGuard {
+pub struct UserInfoGuard<T> {
     pub info: UserInfo,
+    plhdr: PhantomData<T>,
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for UserInfoGuard {
+impl<'r> FromRequest<'r> for UserInfoGuard<Cookie> {
     type Error = ();
 
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserIdGuard>().await);
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
         let db = try_outcome!(request.guard::<DbConn>().await);
-        db.run(move |c| -> Result<UserInfoGuard, SailsDbError> {
+        db.run(move |c| -> Result<UserInfoGuard<Cookie>, SailsDbError> {
             Ok(UserInfoGuard {
                 info: user.id.get_info(c)?,
+                plhdr: PhantomData,
             })
         })
         .await
@@ -267,22 +280,22 @@ impl<'r> FromRequest<'r> for UserInfoGuard {
     }
 }
 
-pub struct MutableBookInfoGuard {
-    pub info: MutableProductInfo,
-}
-
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for MutableBookInfoGuard {
+impl<'r> FromRequest<'r> for BookInfoGuard<MutableProductInfo> {
     type Error = ();
 
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let book = try_outcome!(request.guard::<BookInfoGuard>().await);
+        let book = try_outcome!(request.guard::<BookIdGuard>().await);
         let db = try_outcome!(request.guard::<DbConn>().await);
-        db.run(|c| -> Result<Self, SailsDbError> {
-            Ok(Self {
-                info: book.book_info.verify(c)?,
+        db.run(move |c| -> Result<BookInfoGuard<_>, SailsDbError> {
+            let book_info = book.book_id.get_info(c)?.verify(c)?;
+            let category = Categories::find_by_id(c, book_info.get_category_id()).ok();
+            Ok(BookInfoGuard {
+                book_info,
+                seller_info: book.seller_id.get_info(c)?,
+                category,
             })
         })
         .await
@@ -291,14 +304,14 @@ impl<'r> FromRequest<'r> for MutableBookInfoGuard {
     }
 }
 
-pub struct BookInfoGuard {
-    pub book_info: ProductInfo,
+pub struct BookInfoGuard<T> {
+    pub book_info: T,
     pub seller_info: UserInfo,
     pub category: Option<Category>,
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for BookInfoGuard {
+impl<'r> FromRequest<'r> for BookInfoGuard<ProductInfo> {
     type Error = ();
 
     async fn from_request(
@@ -306,7 +319,7 @@ impl<'r> FromRequest<'r> for BookInfoGuard {
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let book = try_outcome!(request.guard::<BookIdGuard>().await);
         let db = try_outcome!(request.guard::<DbConn>().await);
-        db.run(move |c| -> Result<BookInfoGuard, SailsDbError> {
+        db.run(move |c| -> Result<BookInfoGuard<_>, SailsDbError> {
             let book_info = book.book_id.get_info(c)?;
             let category = Categories::find_by_id(c, book_info.get_category_id()).ok();
             Ok(BookInfoGuard {
@@ -321,12 +334,8 @@ impl<'r> FromRequest<'r> for BookInfoGuard {
     }
 }
 
-pub struct UserIdParamGuard {
-    pub id: UserId,
-}
-
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for UserIdParamGuard {
+impl<'r> FromRequest<'r> for UserIdGuard<Param> {
     type Error = ();
 
     async fn from_request(
@@ -338,9 +347,10 @@ impl<'r> FromRequest<'r> for UserIdParamGuard {
             .and_then(|x| x.ok());
         if let Some(uid) = user_id {
             let uid_inner = uid.clone();
-            db.run(move |c| -> Result<UserIdParamGuard, SailsDbError> {
-                Ok(UserIdParamGuard {
+            db.run(move |c| -> Result<UserIdGuard<Param>, SailsDbError> {
+                Ok(UserIdGuard {
                     id: UserFinder::new(c, None).id(&uid_inner).first()?,
+                    plhdr: PhantomData,
                 })
             })
             .await
@@ -352,22 +362,19 @@ impl<'r> FromRequest<'r> for UserIdParamGuard {
     }
 }
 
-pub struct UserInfoParamGuard {
-    pub info: UserInfo,
-}
-
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for UserInfoParamGuard {
+impl<'r> FromRequest<'r> for UserInfoGuard<Param> {
     type Error = ();
 
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let id = try_outcome!(request.guard::<UserIdParamGuard>().await);
+        let id = try_outcome!(request.guard::<UserIdGuard<Param>>().await);
         let db = try_outcome!(request.guard::<DbConn>().await);
-        db.run(move |c| -> Result<UserInfoParamGuard, SailsDbError> {
-            Ok(UserInfoParamGuard {
+        db.run(move |c| -> Result<UserInfoGuard<Param>, SailsDbError> {
+            Ok(UserInfoGuard {
                 info: id.id.get_info(c)?,
+                plhdr: PhantomData,
             })
         })
         .await
@@ -376,12 +383,8 @@ impl<'r> FromRequest<'r> for UserInfoParamGuard {
     }
 }
 
-pub struct AeadUserInfo {
-    pub info: UserInfo,
-}
-
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for AeadUserInfo {
+impl<'r> FromRequest<'r> for UserInfoGuard<Aead> {
     type Error = ();
 
     async fn from_request(
@@ -391,21 +394,22 @@ impl<'r> FromRequest<'r> for AeadUserInfo {
         let db = try_outcome!(request.guard::<DbConn>().await);
 
         let key = request
-            .query_value::<String>("activation_key")
+            .query_value::<String>("enc_user_id")
             .and_then(|x| x.ok());
         if let Some(key) = key {
             let decode_fn = || -> Result<String, anyhow::Error> {
                 let decoded = base64::decode_config(&key, base64::URL_SAFE)?;
                 Ok(String::from_utf8(aead.decrypt(&decoded).map_err(
-                    |_| anyhow::anyhow!("mailaddress encryption failed"),
+                    |_| anyhow::anyhow!("mailaddress decryption failed"),
                 )?)?)
             };
 
             let uid = decode_fn();
 
-            db.run(move |c| -> Result<AeadUserInfo, anyhow::Error> {
-                Ok(AeadUserInfo {
+            db.run(move |c| -> Result<UserInfoGuard<Aead>, anyhow::Error> {
+                Ok(UserInfoGuard {
                     info: UserFinder::new(c, None).id(&uid?).first_info()?,
+                    plhdr: PhantomData,
                 })
             })
             .await

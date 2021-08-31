@@ -1,5 +1,5 @@
 use crate::{
-    guards::{RootGuard, UserIdParamGuard, UserInfoParamGuard},
+    guards::{Param, Role, Root, UserIdGuard, UserInfoGuard},
     recaptcha::ReCaptcha,
     DbConn, IntoFlash, Msg,
 };
@@ -100,7 +100,7 @@ pub struct RootPage {
 #[get("/", rank = 1)]
 pub async fn root(
     flash: Option<FlashMessage<'_>>,
-    _guard: RootGuard,
+    _guard: Role<Root>,
     conn: DbConn,
 ) -> Result<RootPage, Redirect> {
     let users = conn.run(|c| UserFinder::list_info(c)).await.unwrap(); // No error should be tolerated here (database error). 500 is expected
@@ -118,8 +118,8 @@ pub async fn unverified_root() -> Redirect {
 
 #[get("/promote_user")]
 pub async fn promote(
-    _guard: RootGuard,
-    info: UserInfoParamGuard,
+    _guard: Role<Root>,
+    info: UserInfoGuard<Param>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| {
@@ -133,8 +133,8 @@ pub async fn promote(
 
 #[get("/downgrade_user")]
 pub async fn downgrade(
-    _guard: RootGuard,
-    info: UserInfoParamGuard,
+    _guard: Role<Root>,
+    info: UserInfoGuard<Param>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| {
@@ -148,8 +148,8 @@ pub async fn downgrade(
 
 #[get("/delete_user")]
 pub async fn delete_user(
-    _guard: RootGuard,
-    id: UserIdParamGuard,
+    _guard: Role<Root>,
+    id: UserIdGuard<Param>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| id.id.delete(c))
@@ -160,8 +160,8 @@ pub async fn delete_user(
 
 #[get("/activate_user")]
 pub async fn activate_user(
-    _guard: RootGuard,
-    info: UserInfoParamGuard,
+    _guard: Role<Root>,
+    info: UserInfoGuard<Param>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| info.info.set_validated(true).update(c))

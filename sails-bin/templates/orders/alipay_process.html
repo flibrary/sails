@@ -12,12 +12,12 @@
         try {
             var info = {
                 actionType: "scan",
-                u: "2088532771379451", // Kanyang Ying
+                u: "{{ alipay_id }}",
                 a: "{{ book.get_price() }}",
                 m: "ODR# {{ order.get_shortid() }}; BYR: {{ order.get_buyer() }}",
                 biz_data: {
                     s: "money",
-                    u: "2088532771379451", // Kanyang Ying
+                    u: "{{ alipay_id }}",
                     a: "{{ book.get_price() }}",
                     m: "ODR# {{ order.get_shortid() }}; BYR: {{ order.get_buyer() }}"
                 }

@@ -1,6 +1,6 @@
 use crate::{
     aead::AeadKey,
-    guards::{AeadUserInfo, UserIdGuard, UserInfoGuard, UserInfoParamGuard},
+    guards::{Aead, Cookie, Param, UserIdGuard, UserInfoGuard},
     recaptcha::ReCaptcha,
     sanitize_html,
     smtp::SmtpCreds,
@@ -13,7 +13,7 @@ use lettre::{
 };
 use rocket::{
     form::{Form, Strict},
-    http::{Cookie, CookieJar},
+    http::{Cookie as HttpCookie, CookieJar},
     request::FlashMessage,
     response::{Flash, Redirect},
     State,
@@ -32,7 +32,7 @@ async fn send_verification_email(
     smtp: &SmtpCreds,
 ) -> anyhow::Result<()> {
     let uri = format!(
-        "Your activation link: https://flibrary.info/user/activate?activation_key={}",
+        "Your activation link: https://flibrary.info/user/activate?enc_user_id={}",
         base64::encode_config(
             aead.encrypt(dst.as_bytes())
                 .map_err(|_| anyhow::anyhow!("mailaddress encryption failed"))?,
@@ -170,7 +170,7 @@ pub struct PartialUserFormOwned {
 
 #[post("/update_user", data = "<info>")]
 pub async fn update_user(
-    user: UserInfoGuard,
+    user: UserInfoGuard<Cookie>,
     info: Form<PartialUserFormOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -200,7 +200,7 @@ pub async fn change_passwd_page() -> ChangePassword {
 
 #[post("/change_passwd", data = "<password>")]
 pub async fn change_passwd_post(
-    user: UserInfoGuard,
+    user: UserInfoGuard<Cookie>,
     password: Form<String>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -221,7 +221,10 @@ pub async fn email_verified() -> EmailVerified {
 }
 
 #[get("/activate")]
-pub async fn activate_user(info: AeadUserInfo, conn: DbConn) -> Result<Redirect, Flash<Redirect>> {
+pub async fn activate_user(
+    info: UserInfoGuard<Aead>,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
     conn.run(move |c| info.info.set_validated(true).update(c))
         .await
         .into_flash(uri!("/user", portal))?;
@@ -238,7 +241,7 @@ pub async fn validate(
         .run(move |c| UserId::login(c, &info.email, &info.password))
         .await
         .into_flash(uri!("/user", portal))?;
-    let mut cookie = Cookie::new("uid", user.get_id().to_string());
+    let mut cookie = HttpCookie::new("uid", user.get_id().to_string());
     cookie.set_secure(true);
     // Successfully validated, set private cookie.
     jar.add_private(cookie);
@@ -263,7 +266,7 @@ pub struct UpdateUserPage {
 }
 
 #[get("/update_user_page")]
-pub async fn update_user_page(user: UserInfoGuard) -> UpdateUserPage {
+pub async fn update_user_page(user: UserInfoGuard<Cookie>) -> UpdateUserPage {
     UpdateUserPage { user: user.info }
 }
 
@@ -288,8 +291,8 @@ pub struct PortalPage {
 #[get("/", rank = 1)]
 pub async fn portal_guest(
     flash: Option<FlashMessage<'_>>,
-    _signedin: UserIdGuard,
-    user: UserInfoParamGuard,
+    _signedin: UserIdGuard<Cookie>,
+    user: UserInfoGuard<Param>,
     conn: DbConn,
 ) -> Result<PortalGuestPage, Redirect> {
     let uid = user.info.get_id().to_string();
@@ -322,7 +325,7 @@ pub async fn portal_guest(
 #[get("/", rank = 2)]
 pub async fn portal(
     flash: Option<FlashMessage<'_>>,
-    user: UserInfoGuard,
+    user: UserInfoGuard<Cookie>,
     conn: DbConn,
 ) -> Result<PortalPage, Redirect> {
     let uid = user.info.get_id().to_string();

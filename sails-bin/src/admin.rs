@@ -1,5 +1,5 @@
 use crate::{
-    guards::{AdminGuard, MutableBookInfoGuard, OrderIdGuard, OrderInfoGuard},
+    guards::{Admin, BookInfoGuard, OrderIdGuard, OrderInfoGuard, Role},
     DbConn, IntoFlash, Msg,
 };
 use askama::Template;
@@ -10,14 +10,14 @@ use rocket::{
 use sails_db::{
     enums::{ProductStatus, TransactionStatus},
     error::SailsDbError,
-    products::{ProductFinder, ProductInfo},
+    products::{MutableProductInfo, ProductFinder, ProductInfo},
     transactions::*,
     Cmp,
 };
 
 #[derive(Template)]
-#[template(path = "admin/tx.html")]
-pub struct AdminTxPage {
+#[template(path = "admin/orders.html")]
+pub struct AdminOrdersPage {
     inner: Msg,
     paid_tx: Vec<(ProductInfo, TransactionInfo)>,
     placed_tx: Vec<(ProductInfo, TransactionInfo)>,
@@ -26,12 +26,12 @@ pub struct AdminTxPage {
 }
 
 // If the user has already been verified, show him the root dashboard
-#[get("/tx")]
-pub async fn admin_tx(
+#[get("/orders")]
+pub async fn admin_orders(
     flash: Option<FlashMessage<'_>>,
-    _guard: AdminGuard,
+    _guard: Role<Admin>,
     conn: DbConn,
-) -> Result<AdminTxPage, Flash<Redirect>> {
+) -> Result<AdminOrdersPage, Flash<Redirect>> {
     let paid_tx = conn
         .run(
             |c| -> Result<Vec<(ProductInfo, TransactionInfo)>, SailsDbError> {
@@ -120,7 +120,7 @@ pub async fn admin_tx(
         .await
         .into_flash(uri!("/"))?;
 
-    Ok(AdminTxPage {
+    Ok(AdminOrdersPage {
         inner: Msg::from_flash(flash),
         paid_tx,
         placed_tx,
@@ -142,7 +142,7 @@ pub struct AdminPage {
 #[get("/books")]
 pub async fn admin(
     flash: Option<FlashMessage<'_>>,
-    _guard: AdminGuard,
+    _guard: Role<Admin>,
     conn: DbConn,
 ) -> Result<AdminPage, Flash<Redirect>> {
     let normal_books = conn
@@ -182,12 +182,12 @@ pub async fn admin(
 
 #[get("/verify_book")]
 pub async fn verify_book(
-    _guard: AdminGuard,
-    info: MutableBookInfoGuard,
+    _guard: Role<Admin>,
+    info: BookInfoGuard<MutableProductInfo>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| {
-        info.info
+        info.book_info
             .set_product_status(ProductStatus::Verified)
             .update(c)
     })
@@ -198,12 +198,12 @@ pub async fn verify_book(
 
 #[get("/disable_book")]
 pub async fn disable_book(
-    _guard: AdminGuard,
-    info: MutableBookInfoGuard,
+    _guard: Role<Admin>,
+    info: BookInfoGuard<MutableProductInfo>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| {
-        info.info
+        info.book_info
             .set_product_status(ProductStatus::Disabled)
             .update(c)
     })
@@ -214,12 +214,12 @@ pub async fn disable_book(
 
 #[get("/normalize_book")]
 pub async fn normalize_book(
-    _guard: AdminGuard,
-    info: MutableBookInfoGuard,
+    _guard: Role<Admin>,
+    info: BookInfoGuard<MutableProductInfo>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| {
-        info.info
+        info.book_info
             .set_product_status(ProductStatus::Normal)
             .update(c)
     })
@@ -230,19 +230,19 @@ pub async fn normalize_book(
 
 #[get("/refund_order")]
 pub async fn refund_order(
-    _guard: AdminGuard,
+    _guard: Role<Admin>,
     id: OrderIdGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(move |c| id.id.refund(c))
         .await
-        .into_flash(uri!("/admin", admin_tx))?;
-    Ok(Redirect::to(uri!("/admin", admin_tx)))
+        .into_flash(uri!("/admin", admin_orders))?;
+    Ok(Redirect::to(uri!("/admin", admin_orders)))
 }
 
 #[get("/finish_order")]
 pub async fn finish_order(
-    _guard: AdminGuard,
+    _guard: Role<Admin>,
     info: OrderInfoGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -252,13 +252,13 @@ pub async fn finish_order(
             .update(c)
     })
     .await
-    .into_flash(uri!("/admin", admin_tx))?;
-    Ok(Redirect::to(uri!("/admin", admin_tx)))
+    .into_flash(uri!("/admin", admin_orders))?;
+    Ok(Redirect::to(uri!("/admin", admin_orders)))
 }
 
 #[get("/confirm_order")]
 pub async fn confirm_order(
-    _guard: AdminGuard,
+    _guard: Role<Admin>,
     info: OrderInfoGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -268,6 +268,6 @@ pub async fn confirm_order(
             .update(c)
     })
     .await
-    .into_flash(uri!("/admin", admin_tx))?;
-    Ok(Redirect::to(uri!("/admin", admin_tx)))
+    .into_flash(uri!("/admin", admin_orders))?;
+    Ok(Redirect::to(uri!("/admin", admin_orders)))
 }

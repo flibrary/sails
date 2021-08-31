@@ -1,4 +1,4 @@
-use crate::guards::UserIdGuard;
+use crate::guards::{Cookie, UserIdGuard};
 use reqwest::header::ACCEPT;
 use rocket::{
     data::ToByteUnit,
@@ -61,7 +61,7 @@ pub async fn get_default(hash: &str, ext: &str) -> Redirect {
 // We only allow signed in users to upload images
 #[post("/upload", data = "<img>")]
 pub async fn upload(
-    _user: UserIdGuard,
+    _user: UserIdGuard<Cookie>,
     hosting: &State<ImageHosting>,
     img: Form<Image>,
 ) -> Result<String, Status> {

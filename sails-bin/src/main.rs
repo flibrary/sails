@@ -39,7 +39,9 @@ use sails_db::categories::{Categories, CtgBuilder};
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 
-use crate::{images::ImageHosting, recaptcha::ReCaptcha, root::RootPasswd, smtp::SmtpCreds};
+use crate::{
+    images::ImageHosting, orders::AlipayId, recaptcha::ReCaptcha, root::RootPasswd, smtp::SmtpCreds,
+};
 
 #[macro_use]
 extern crate rocket;
@@ -227,6 +229,7 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<SmtpCreds>())
         .attach(AdHoc::config::<AeadKey>())
         .attach(AdHoc::config::<ImageHosting>())
+        .attach(AdHoc::config::<AlipayId>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .mount("/", routes![index, get_icon])
         .mount("/static", routes![get_file])
@@ -304,7 +307,7 @@ fn rocket() -> Rocket<Build> {
                 admin::verify_book,
                 admin::disable_book,
                 admin::normalize_book,
-                admin::admin_tx,
+                admin::admin_orders,
                 admin::refund_order,
                 admin::finish_order,
                 admin::confirm_order

@@ -11,17 +11,39 @@
 
   outputs = { nixpkgs, rust-overlay, utils, naersk, ... }:
     let
+      pkgsWithRust = system:
+        import nixpkgs {
+          system = "${system}";
+          overlays = [ rust-overlay.overlay ];
+        };
       pkgWith = system:
-        naersk.lib."${system}".buildPackage {
+        with (pkgsWithRust system);
+        (makeRustPlatform {
+          cargo = rust-bin.stable.latest.default;
+          rustc = rust-bin.stable.latest.default;
+        }).buildRustPackage {
           name = "sails-bin";
           version = "git";
-          root = ./.;
-          # Otherwise Nix tries to use `/bin/sails-bin-git`
-          passthru.exePath = "/bin/sails-bin";
-          nativeBuildInputs = with import nixpkgs { system = "${system}"; }; [
+          src = ./.;
+          cargoLock = {
+            lockFile = ./Cargo.lock;
+            outputHashes = {
+              "askama-0.11.0-beta.1" =
+                "sha256-ttUCzGL/lMfPhpKbiOiPCYVpYXobCaneSb0xpvde10A=";
+              "askama_derive-0.11.0-beta.1" =
+                "sha256-ttUCzGL/lMfPhpKbiOiPCYVpYXobCaneSb0xpvde10A=";
+              "askama_rocket-0.11.0-rc.2" =
+                "sha256-ttUCzGL/lMfPhpKbiOiPCYVpYXobCaneSb0xpvde10A=";
+              "askama_escape-0.10.2" =
+                "sha256-ttUCzGL/lMfPhpKbiOiPCYVpYXobCaneSb0xpvde10A=";
+              "askama_shared-0.12.0-beta.1" =
+                "sha256-ttUCzGL/lMfPhpKbiOiPCYVpYXobCaneSb0xpvde10A=";
+            };
+          };
+          nativeBuildInputs = [ pkgconfig ];
+          buildInputs = [
             # used by email
             openssl
-            pkgconfig
             # Used by diesel
             sqlite
           ];

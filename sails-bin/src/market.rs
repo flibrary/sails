@@ -11,7 +11,7 @@ use crate::{guards::*, sanitize_html, DbConn, IntoFlash, Msg};
 // Delete can happen if and only if the user is authorized and the product is specified
 #[get("/delete")]
 pub async fn delete_book(
-    _auth: Authorized,
+    _auth: Role<BookAuthorized>,
     book: BookIdGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -31,8 +31,8 @@ pub async fn delete_book(
 #[post("/cow_book", data = "<info>", rank = 1)]
 pub async fn update_book(
     book: BookIdGuard,
-    _user: UserIdGuard,
-    _auth: Authorized,
+    _user: UserIdGuard<Cookie>,
+    _auth: Role<BookAuthorized>,
     mut info: Form<IncompleteProductOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -51,7 +51,7 @@ pub async fn update_book(
 // User is logged in, creating the book.
 #[post("/cow_book", data = "<info>", rank = 2)]
 pub async fn create_book(
-    user: UserIdGuard,
+    user: UserIdGuard<Cookie>,
     mut info: Form<IncompleteProductOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -78,9 +78,9 @@ pub struct UpdateBook {
 pub async fn update_book_page(
     conn: DbConn,
     // Can we remove this guard
-    _user: UserIdGuard,
-    _auth: Authorized,
-    book: BookInfoGuard,
+    // _user: UserIdGuard<Cookie>,
+    _auth: Role<BookAuthorized>,
+    book: BookInfoGuard<ProductInfo>,
 ) -> Result<UpdateBook, Flash<Redirect>> {
     Ok(UpdateBook {
         // If there is no leaves, user cannot create any books, a message should be displayed inside the template
@@ -102,7 +102,10 @@ pub struct PostBook {
 // post_book page
 // If there is a book specified, we then use the default value of that specified book for update
 #[get("/post_book", rank = 2)]
-pub async fn post_book_page(conn: DbConn, _user: UserIdGuard) -> Result<PostBook, Flash<Redirect>> {
+pub async fn post_book_page(
+    conn: DbConn,
+    _user: UserIdGuard<Cookie>,
+) -> Result<PostBook, Flash<Redirect>> {
     Ok(PostBook {
         // If there is no leaves, user cannot create any books, a message should be displayed inside the template
         // TODO: categories should only be fetched once
@@ -130,8 +133,8 @@ pub struct InstructionPage {
 
 #[get("/instruction")]
 pub async fn instruction(
-    book: BookInfoGuard,
-    _auth: Authorized,
+    book: BookInfoGuard<ProductInfo>,
+    _auth: Role<BookAuthorized>,
 ) -> Result<InstructionPage, Flash<Redirect>> {
     Ok(InstructionPage {
         info: book.book_info,
@@ -163,7 +166,10 @@ pub struct BookPageGuest {
 
 // If the seller is the user, buttons like update and delete are displayed
 #[get("/book_info", rank = 1)]
-pub async fn book_page_owned(book: BookInfoGuard, _auth: Authorized) -> BookPageOwned {
+pub async fn book_page_owned(
+    book: BookInfoGuard<ProductInfo>,
+    _auth: Role<BookAuthorized>,
+) -> BookPageOwned {
     BookPageOwned {
         book: book.book_info,
         category: book.category,
@@ -173,7 +179,10 @@ pub async fn book_page_owned(book: BookInfoGuard, _auth: Authorized) -> BookPage
 
 // If the user is signed in but not authorized, book information and seller information will be displayed
 #[get("/book_info", rank = 2)]
-pub async fn book_page_user(book: BookInfoGuard, _user: UserIdGuard) -> BookPageUser {
+pub async fn book_page_user(
+    book: BookInfoGuard<ProductInfo>,
+    _user: UserIdGuard<Cookie>,
+) -> BookPageUser {
     BookPageUser {
         book: book.book_info,
         category: book.category,
@@ -183,7 +192,7 @@ pub async fn book_page_user(book: BookInfoGuard, _user: UserIdGuard) -> BookPage
 
 // If the user is not signed in, only book information will be displayed
 #[get("/book_info", rank = 3)]
-pub async fn book_page_guest(book: BookInfoGuard) -> BookPageGuest {
+pub async fn book_page_guest(book: BookInfoGuard<ProductInfo>) -> BookPageGuest {
     BookPageGuest {
         book: book.book_info,
         category: book.category,

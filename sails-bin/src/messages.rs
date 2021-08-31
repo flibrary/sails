@@ -18,8 +18,8 @@ pub struct SendMessage {
 
 #[post("/send", data = "<info>")]
 pub async fn send(
-    user: UserIdGuard,
-    receiver: UserIdParamGuard,
+    user: UserIdGuard<Cookie>,
+    receiver: UserIdGuard<Param>,
     info: Form<SendMessage>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -51,8 +51,8 @@ pub async fn chat_error() -> Flash<Redirect> {
 #[get("/chat", rank = 1)]
 pub async fn chat(
     conn: DbConn,
-    user: UserIdGuard,
-    receiver: UserInfoParamGuard,
+    user: UserIdGuard<Cookie>,
+    receiver: UserInfoGuard<Param>,
 ) -> Result<ChatPage, Flash<Redirect>> {
     let receiver_id = receiver.info.to_id();
     let messages = conn
@@ -75,7 +75,7 @@ pub struct PortalPage {
 #[get("/")]
 pub async fn portal(
     flash: Option<FlashMessage<'_>>,
-    user: Option<UserIdGuard>,
+    user: Option<UserIdGuard<Cookie>>,
     conn: DbConn,
 ) -> Result<PortalPage, Flash<Redirect>> {
     if let Some(user) = user.map(|u| u.id) {

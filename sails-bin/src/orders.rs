@@ -1,21 +1,34 @@
-use askama::Template;
-use rocket::response::{Flash, Redirect};
-use sails_db::{enums::TransactionStatus, products::*, transactions::*};
-
 use crate::{guards::*, DbConn, IntoFlash};
+use askama::Template;
+use rocket::{
+    response::{Flash, Redirect},
+    State,
+};
+use sails_db::{enums::TransactionStatus, products::*, transactions::*};
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct AlipayId {
+    alipay_id: String,
+}
 
 #[derive(Template)]
 #[template(path = "orders/alipay_process.html")]
 pub struct AlipayProcess {
     book: ProductInfo,
     order: TransactionInfo,
+    alipay_id: String,
 }
 
 #[get("/alipay")]
-pub async fn alipay_order_process(order: OrderInfoGuard) -> AlipayProcess {
+pub async fn alipay_order_process(
+    order: OrderInfoGuard,
+    alipay_id: &State<AlipayId>,
+) -> AlipayProcess {
     AlipayProcess {
         book: order.book_info,
         order: order.order_info,
+        alipay_id: alipay_id.alipay_id.to_string(),
     }
 }
 
@@ -27,7 +40,7 @@ pub struct AdminOrderInfo {
 }
 
 #[get("/admin_order_info")]
-pub async fn admin_order_info(_guard: AdminGuard, order: OrderInfoGuard) -> AdminOrderInfo {
+pub async fn admin_order_info(_guard: Role<Admin>, order: OrderInfoGuard) -> AdminOrderInfo {
     AdminOrderInfo {
         book: order.book_info,
         order: order.order_info,
@@ -42,7 +55,7 @@ pub struct OrderInfoBuyer {
 }
 
 #[get("/order_info", rank = 2)]
-pub async fn order_info_buyer(_buyer: OrderBuyer, order: OrderInfoGuard) -> OrderInfoBuyer {
+pub async fn order_info_buyer(_buyer: Role<Buyer>, order: OrderInfoGuard) -> OrderInfoBuyer {
     OrderInfoBuyer {
         book: order.book_info,
         order: order.order_info,
@@ -57,7 +70,7 @@ pub struct OrderInfoSeller {
 }
 
 #[get("/order_info", rank = 1)]
-pub async fn order_info_seller(_seller: OrderSeller, order: OrderInfoGuard) -> OrderInfoSeller {
+pub async fn order_info_seller(_seller: Role<Seller>, order: OrderInfoGuard) -> OrderInfoSeller {
     OrderInfoSeller {
         book: order.book_info,
         order: order.order_info,
@@ -66,7 +79,7 @@ pub async fn order_info_seller(_seller: OrderSeller, order: OrderInfoGuard) -> O
 
 #[get("/confirm")]
 pub async fn confirm(
-    _seller: OrderSeller,
+    _seller: Role<Seller>,
     order: OrderInfoGuard,
     db: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -90,7 +103,7 @@ pub async fn confirm(
 pub async fn purchase(
     db: DbConn,
     book: BookIdGuard,
-    user: UserIdGuard,
+    user: UserIdGuard<Cookie>,
 ) -> Result<Redirect, Flash<Redirect>> {
     let id = db
         .run(move |c| Transactions::buy(c, &book.book_id, &user.id))
