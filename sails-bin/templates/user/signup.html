@@ -5,6 +5,11 @@
     <!-- Custom styles for sign in page -->
     <link href="/static/css/signin.css" rel="stylesheet">
     <script src="https://www.recaptcha.net/recaptcha/api.js" async defer></script>
+    <script>
+    function enableBtn(){
+      document.getElementById("signup-submit").disabled = false;
+    }
+    </script>
 {% endblock head %}
 
 {% block body %}
@@ -28,9 +33,9 @@
       <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="user_info[password]">
       <label for="floatingPassword">Password</label>
     </div>
-    <div class="g-recaptcha" data-sitekey="{{ recaptcha_key }}"></div>
+    <div class="g-recaptcha" data-sitekey="{{ recaptcha_key }}" data-callback="enableBtn"></div>
     <br/>
-    <button class="w-100 btn btn-lg btn-primary" type="submit" id="signup-submit" onclick="onSubmit()">Sign up</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit" id="signup-submit" onclick="onSubmit()" disabled="disabled">Sign up</button>
   </form>
   {% include "display_flash.html" %}
 </main>
