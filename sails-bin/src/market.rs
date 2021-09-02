@@ -334,6 +334,7 @@ pub struct ExplorePage {
     // By using Option<Category>, we ensure thatthere will be no panick even if category doesn't exist
     books: Vec<(ProductInfo, Option<String>)>,
     ctg: Option<String>,
+    inner: crate::Msg,
 }
 
 fn find_first_image(fragment: &str) -> Option<String> {
@@ -353,6 +354,7 @@ fn find_first_image(fragment: &str) -> Option<String> {
 pub async fn explore_page_ctg(
     conn: DbConn,
     category: String,
+    flash: Option<FlashMessage<'_>>,
 ) -> Result<ExplorePage, Flash<Redirect>> {
     let ctg = category.clone();
     Ok(ExplorePage {
@@ -378,11 +380,15 @@ pub async fn explore_page_ctg(
             .await
             .into_flash(uri!("/"))?,
         ctg: Some(ctg),
+        inner: Msg::from_flash(flash),
     })
 }
 
 #[get("/explore", rank = 2)]
-pub async fn explore_page(conn: DbConn) -> Result<ExplorePage, Flash<Redirect>> {
+pub async fn explore_page(
+    conn: DbConn,
+    flash: Option<FlashMessage<'_>>,
+) -> Result<ExplorePage, Flash<Redirect>> {
     Ok(ExplorePage {
         books: conn
             .run(
@@ -404,6 +410,7 @@ pub async fn explore_page(conn: DbConn) -> Result<ExplorePage, Flash<Redirect>> 
             .await
             .into_flash(uri!("/"))?,
         ctg: None,
+        inner: Msg::from_flash(flash),
     })
 }
 
