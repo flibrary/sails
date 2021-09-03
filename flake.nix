@@ -5,11 +5,9 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
     utils.url = "github:numtide/flake-utils";
-    # This is required for recursive dependency
-    naersk.url = "github:nmattia/naersk/pull/167/head";
   };
 
-  outputs = { nixpkgs, rust-overlay, utils, naersk, ... }:
+  outputs = { nixpkgs, rust-overlay, utils, ... }:
     let
       pkgsWithRust = system:
         import nixpkgs {
