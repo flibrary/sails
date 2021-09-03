@@ -14,12 +14,12 @@
                 actionType: "scan",
                 u: "{{ alipay_id }}",
                 a: "{{ book.get_price() }}",
-                m: "ODR# {{ order.get_shortid() }}; BYR: {{ order.get_buyer() }}",
+                m: "ODR#{{ order.get_shortid() }}",
                 biz_data: {
                     s: "money",
                     u: "{{ alipay_id }}",
                     a: "{{ book.get_price() }}",
-                    m: "ODR# {{ order.get_shortid() }}; BYR: {{ order.get_buyer() }}"
+                    m: "ODR#{{ order.get_shortid() }}"
                 }
             }
         } catch (b) {

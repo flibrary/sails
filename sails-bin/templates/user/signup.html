@@ -9,15 +9,12 @@
     function enableBtn(){
       document.getElementById("signup-submit").disabled = false;
     }
-    function disableBtn(){
-      document.getElementById("signup-submit").disabled = true;
-    }
     </script>
 {% endblock head %}
 
 {% block body %}
 <main class="form-signin text-center">
-  <form action="create_user" method="post" id="signup-form">
+  <form action="create_user" method="post" class="submit-once" id="signup-form">
     <h1 class="h3 mb-3 fw-normal">Please enter information</h1>
 
     <div class="form-floating">
@@ -42,5 +39,18 @@
   </form>
   {% include "display_flash.html" %}
 </main>
+
+{% block script %}
+  {% call super()%}
+  <script type="text/javascript">
+  $('form.submit-once').submit(function(e){
+    if( $(this).hasClass('form-submitted') ){
+        e.preventDefault();
+        return;
+    }
+    $(this).addClass('form-submitted');
+  });
+  </script>
+{% endblock script %}
 
 {% endblock body %}
