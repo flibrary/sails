@@ -287,6 +287,8 @@ pub async fn all_books_category(
                             let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
                             Ok((x, ctg))
                         })
+                        // Reverse the book order
+                        .rev()
                         .collect()
                 },
             )
@@ -318,6 +320,8 @@ pub async fn all_books(
                             let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
                             Ok((x, ctg))
                         })
+                        // Reverse the book order
+                        .rev()
                         .collect()
                 },
             )
@@ -374,6 +378,8 @@ pub async fn explore_page_ctg(
                             let image = find_first_image(x.get_description());
                             Ok((x, image))
                         })
+                        // Reverse the book order
+                        .rev()
                         .collect()
                 },
             )
@@ -404,6 +410,8 @@ pub async fn explore_page(
                             let image = find_first_image(x.get_description());
                             Ok((x, image))
                         })
+                        // Reverse the book order
+                        .rev()
                         .collect()
                 },
             )
