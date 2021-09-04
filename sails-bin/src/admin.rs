@@ -16,6 +16,25 @@ use sails_db::{
 };
 
 #[derive(Template)]
+#[template(path = "admin/metrics.html")]
+pub struct AdminMetricsPage {
+    pub metrics: TxStats,
+}
+
+#[get("/metrics")]
+pub async fn admin_metrics(
+    _guard: Role<Admin>,
+    conn: DbConn,
+) -> Result<AdminMetricsPage, Flash<Redirect>> {
+    Ok(AdminMetricsPage {
+        metrics: conn
+            .run(|c| TransactionFinder::stats(c, None))
+            .await
+            .into_flash(uri!("/"))?,
+    })
+}
+
+#[derive(Template)]
 #[template(path = "admin/orders.html")]
 pub struct AdminOrdersPage {
     inner: Msg,
@@ -140,7 +159,7 @@ pub struct AdminPage {
 
 // If the user has already been verified, show him the root dashboard
 #[get("/books")]
-pub async fn admin(
+pub async fn admin_books(
     flash: Option<FlashMessage<'_>>,
     _guard: Role<Admin>,
     conn: DbConn,
@@ -270,4 +289,9 @@ pub async fn confirm_order(
     .await
     .into_flash(uri!("/admin", admin_orders))?;
     Ok(Redirect::to(uri!("/admin", admin_orders)))
+}
+
+#[get("/")]
+pub async fn admin(_guard: Role<Admin>) -> Redirect {
+    Redirect::to(uri!("/admin", admin_metrics))
 }

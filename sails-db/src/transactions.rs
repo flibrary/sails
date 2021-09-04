@@ -7,7 +7,7 @@ use crate::{
     Cmp, Order,
 };
 use chrono::naive::NaiveDateTime;
-use diesel::{prelude::*, sqlite::Sqlite};
+use diesel::{dsl::count, prelude::*, sqlite::Sqlite};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -180,6 +180,20 @@ pub struct TransactionFinder<'a> {
     query: BoxedQuery<'a>,
 }
 
+#[derive(Eq, PartialEq, Debug)]
+pub struct TxStats {
+    pub placed_subtotal: usize,
+    pub paid_subtotal: usize,
+    pub finished_subtotal: usize,
+    pub refunded_subtotal: usize,
+    pub total: usize, // including placed, paid, and finished
+    pub placed: usize,
+    pub paid: usize,
+    pub refunded: usize,
+    pub finished: usize,
+    pub total_num: usize,
+}
+
 impl<'a> TransactionFinder<'a> {
     pub fn list_info(conn: &'a SqliteConnection) -> Result<Vec<TransactionInfo>> {
         Self::new(conn, None).search_info()
@@ -187,6 +201,86 @@ impl<'a> TransactionFinder<'a> {
 
     pub fn list(conn: &'a SqliteConnection) -> Result<Vec<TransactionId>> {
         Self::new(conn, None).search()
+    }
+
+    pub fn count(self) -> Result<usize> {
+        use crate::schema::transactions::dsl::*;
+        Ok(self.query.select(count(id)).first::<i64>(self.conn)? as usize)
+    }
+
+    pub fn stats(conn: &'a SqliteConnection, user: Option<&'a str>) -> Result<TxStats> {
+        // TODO: we should write SQL instead
+        fn get_total(finder: TransactionFinder, conn: &SqliteConnection) -> Result<usize> {
+            Ok(finder
+                .search_info()?
+                .iter()
+                .map(|x| {
+                    ProductFinder::new(conn, None)
+                        .id(&x.product)
+                        .first_info()
+                        // Foreign key constraint ensures that we are safe here.
+                        .unwrap()
+                        .get_price() as usize
+                })
+                .sum())
+        }
+
+        fn selection<'a>(
+            user: &Option<&'a str>,
+            conn: &'a SqliteConnection,
+        ) -> TransactionFinder<'a> {
+            if let Some(user) = user {
+                TransactionFinder::new(conn, None).seller(user)
+            } else {
+                TransactionFinder::new(conn, None)
+            }
+        }
+
+        let placed_subtotal = get_total(
+            selection(&user, conn).status(TransactionStatus::Placed, Cmp::Equal),
+            conn,
+        )?;
+
+        let paid_subtotal = get_total(
+            selection(&user, conn).status(TransactionStatus::Paid, Cmp::Equal),
+            conn,
+        )?;
+
+        let refunded_subtotal = get_total(
+            selection(&user, conn).status(TransactionStatus::Refunded, Cmp::Equal),
+            conn,
+        )?;
+
+        let finished_subtotal = get_total(
+            selection(&user, conn).status(TransactionStatus::Finished, Cmp::Equal),
+            conn,
+        )?;
+
+        let refunded = selection(&user, conn)
+            .status(TransactionStatus::Refunded, Cmp::Equal)
+            .count()?;
+        let placed = selection(&user, conn)
+            .status(TransactionStatus::Placed, Cmp::Equal)
+            .count()?;
+        let paid = selection(&user, conn)
+            .status(TransactionStatus::Paid, Cmp::Equal)
+            .count()?;
+        let finished = selection(&user, conn)
+            .status(TransactionStatus::Finished, Cmp::Equal)
+            .count()?;
+
+        Ok(TxStats {
+            placed_subtotal,
+            paid_subtotal,
+            refunded_subtotal,
+            finished_subtotal,
+            total: placed_subtotal + paid_subtotal + finished_subtotal,
+            placed,
+            paid,
+            refunded,
+            finished,
+            total_num: placed + paid + finished,
+        })
     }
 
     pub fn new(conn: &'a SqliteConnection, query: Option<BoxedQuery<'a>>) -> Self {
@@ -407,5 +501,179 @@ mod tests {
                 .unwrap()
             )
             .is_ok());
+    }
+
+    #[test]
+    fn txstats() {
+        let conn = establish_connection();
+        // our seller
+        let seller = UserForm::new(
+            "TestUser@example.org",
+            "NFLS",
+            "+86 18353232340",
+            "strongpasswd",
+            None,
+        )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
+
+        let buyer = UserForm::new(
+            "AtypicalBuyer@example.org",
+            "NFLS",
+            "+86 18353232340",
+            "strongpasswd",
+            None,
+        )
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
+
+        // The book category
+        let econ = Category::create(&conn, "Economics Books")
+            .and_then(Category::into_leaf)
+            .unwrap();
+
+        // Placed
+        let book_1_id = IncompleteProduct::new(
+            &econ,
+            "Krugman's Economics 2nd Edition",
+            400,
+            "A very great book on the subject of Economics",
+        )
+        .create(&conn, &seller)
+        .unwrap();
+
+        // Placed
+        let book_2_id = IncompleteProduct::new(
+            &econ,
+            "Krugman's Economics 2nd Edition",
+            300,
+            "A very great book on the subject of Economics",
+        )
+        .create(&conn, &seller)
+        .unwrap();
+
+        // Paid
+        let book_3_id = IncompleteProduct::new(
+            &econ,
+            "Krugman's Economics 2nd Edition",
+            350,
+            "A very great book on the subject of Economics",
+        )
+        .create(&conn, &seller)
+        .unwrap();
+
+        // Finished
+        let book_4_id = IncompleteProduct::new(
+            &econ,
+            "Krugman's Economics 2nd Edition",
+            700,
+            "A very great book on the subject of Economics",
+        )
+        .create(&conn, &seller)
+        .unwrap();
+
+        // Refunded
+        let book_5_id = IncompleteProduct::new(
+            &econ,
+            "Krugman's Economics 2nd Edition",
+            1000,
+            "A very great book on the subject of Economics",
+        )
+        .create(&conn, &seller)
+        .unwrap();
+
+        // Verify the books
+        book_1_id
+            .get_info(&conn)
+            .unwrap()
+            .verify(&conn)
+            .unwrap()
+            .set_product_status(ProductStatus::Verified)
+            .update(&conn)
+            .unwrap();
+
+        book_2_id
+            .get_info(&conn)
+            .unwrap()
+            .verify(&conn)
+            .unwrap()
+            .set_product_status(ProductStatus::Verified)
+            .update(&conn)
+            .unwrap();
+
+        book_3_id
+            .get_info(&conn)
+            .unwrap()
+            .verify(&conn)
+            .unwrap()
+            .set_product_status(ProductStatus::Verified)
+            .update(&conn)
+            .unwrap();
+
+        book_4_id
+            .get_info(&conn)
+            .unwrap()
+            .verify(&conn)
+            .unwrap()
+            .set_product_status(ProductStatus::Verified)
+            .update(&conn)
+            .unwrap();
+
+        book_5_id
+            .get_info(&conn)
+            .unwrap()
+            .verify(&conn)
+            .unwrap()
+            .set_product_status(ProductStatus::Verified)
+            .update(&conn)
+            .unwrap();
+
+        // Purchase it
+        Transactions::buy(&conn, &book_1_id, &buyer).unwrap();
+        Transactions::buy(&conn, &book_2_id, &buyer).unwrap();
+        let tx_3_id = Transactions::buy(&conn, &book_3_id, &buyer).unwrap();
+        let tx_4_id = Transactions::buy(&conn, &book_4_id, &buyer).unwrap();
+        let tx_5_id = Transactions::buy(&conn, &book_5_id, &buyer).unwrap();
+
+        tx_3_id
+            .get_info(&conn)
+            .unwrap()
+            .set_transaction_status(TransactionStatus::Paid)
+            .update(&conn)
+            .unwrap();
+        tx_4_id
+            .get_info(&conn)
+            .unwrap()
+            .set_transaction_status(TransactionStatus::Finished)
+            .update(&conn)
+            .unwrap();
+        tx_5_id.refund(&conn).unwrap();
+
+        let expected_stats = TxStats {
+            placed_subtotal: 700,
+            paid_subtotal: 350,
+            finished_subtotal: 700,
+            refunded_subtotal: 1000,
+            total: 1750,
+            placed: 2,
+            paid: 1,
+            refunded: 1,
+            finished: 1,
+            total_num: 4,
+        };
+
+        assert_eq!(
+            TransactionFinder::stats(&conn, None).unwrap(),
+            expected_stats
+        );
+
+        assert_eq!(
+            TransactionFinder::stats(&conn, Some(seller.get_id())).unwrap(),
+            expected_stats
+        );
     }
 }

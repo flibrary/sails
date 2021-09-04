@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Metrics{% endblock title %}
+{% block content %}
+<main class="container">
+  <div class="bg-light p-5 rounded">
+    <h1>Metrics and Statistics</h1>
+    <table class="table table-hover">
+    <tbody>
+    <tr>
+      <th scope="row">Subtotal of effective orders</th>
+      <td>CN¥ {{ metrics.total }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Subtotal of orders placed</th>
+      <td>CN¥ {{ metrics.placed_subtotal }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Subtotal of orders paid</th>
+      <td>CN¥ {{ metrics.paid_subtotal }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Subtotal of orders finished</th>
+      <td>CN¥ {{ metrics.finished_subtotal }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Subtotal of orders refunded</th>
+      <td>CN¥ {{ metrics.refunded_subtotal }}</td>
+    </tr>
+    <tr>
+      <th scope="row"># of effective orders</th>
+      <td>{{ metrics.total_num }}</td>
+    </tr>
+    <tr>
+      <th scope="row"># of orders placed</th>
+      <td>{{ metrics.placed }}</td>
+    </tr>
+    <tr>
+      <th scope="row"># of orders paid</th>
+      <td>{{ metrics.paid }}</td>
+    </tr>
+    <tr>
+      <th scope="row"># of orders finished</th>
+      <td>{{ metrics.finished }}</td>
+    </tr>
+    <tr>
+      <th scope="row"># of orders refunded</th>
+      <td>{{ metrics.refunded }}</td>
+    </tr>
+    </tbody>
+    </table>
+  </div>
+</main>
+{% endblock content %}

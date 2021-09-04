@@ -304,6 +304,8 @@ fn rocket() -> Rocket<Build> {
             "/admin",
             routes![
                 admin::admin,
+                admin::admin_books,
+                admin::admin_metrics,
                 admin::verify_book,
                 admin::disable_book,
                 admin::normalize_book,
