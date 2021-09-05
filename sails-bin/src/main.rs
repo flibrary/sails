@@ -35,7 +35,11 @@ use rocket::{
     Build, Rocket,
 };
 use rust_embed::RustEmbed;
-use sails_db::categories::{Categories, CtgBuilder};
+use sails_db::{
+    categories::{Categories, CtgBuilder},
+    transactions::{TransactionFinder, TxStats},
+    users::{UserFinder, UserStats},
+};
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 
@@ -137,12 +141,19 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
 #[template(path = "index.html")]
 struct Index {
     inner: Msg,
+    order: TxStats,
+    user: UserStats,
 }
 
 #[get("/")]
-async fn index<'a>(flash: Option<FlashMessage<'_>>) -> Index {
+async fn index<'a>(flash: Option<FlashMessage<'_>>, conn: DbConn) -> Index {
     Index {
         inner: Msg::from_flash(flash),
+        order: conn
+            .run(|c| TransactionFinder::stats(c, None))
+            .await
+            .unwrap(),
+        user: conn.run(|c| UserFinder::stats(c)).await.unwrap(),
     }
 }
 

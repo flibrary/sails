@@ -4,13 +4,28 @@
 <main class="container">
     {% include "display_flash.html" %}
 
-    <div class="px-4 pt-5 my-5 text-center">
+    <div class="p-5 text-center">
     <h1 class="display-4 fw-bold">FLibrary</h1>
     <div class="col-lg-6 mx-auto">
       <p class="lead mb-4">Where Knowledge Values</p>
       <a href="/user" class="btn btn-primary" role="button">Start</a>
       <a href="https://flibrary.lexugeyky.workers.dev/https://raw.githubusercontent.com/flibrary/flibrary.github.io/main/FLibrary%20Guide.pdf" class="btn btn-secondary" role="button">Learn More</a>
     </div>
+    </div>
+
+    <br>
+    <div class="p-5 rounded shadow">
+      <h1>{{ user.total }} Active Users</h1>
+      <p class="lead">FLibrary enjoys the popularity among juniors and seniors for its simplicity and efficiency. From your newgrader's textbook to highly-demanding university-level coursebooks, we cover it all, in a right way.</p>
+    </div>
+
+    <br>
+    <div class="p-5 rounded shadow">
+      <h1>CN¥ {{ order.total }} Trading Volume</h1>
+      <p class="lead">
+	Empowered by our unique process, our users find empowering books at beloved prices without a hassle.
+	Don't listen to us only, trading volume tells you all!
+      </p>
     </div>
 </main>
 {% endblock content %}

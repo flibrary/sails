@@ -12,13 +12,15 @@ use sails_db::{
     error::SailsDbError,
     products::{MutableProductInfo, ProductFinder, ProductInfo},
     transactions::*,
+    users::{UserFinder, UserStats},
     Cmp,
 };
 
 #[derive(Template)]
 #[template(path = "admin/metrics.html")]
 pub struct AdminMetricsPage {
-    pub metrics: TxStats,
+    pub order: TxStats,
+    pub user: UserStats,
 }
 
 #[get("/metrics")]
@@ -27,8 +29,12 @@ pub async fn admin_metrics(
     conn: DbConn,
 ) -> Result<AdminMetricsPage, Flash<Redirect>> {
     Ok(AdminMetricsPage {
-        metrics: conn
+        order: conn
             .run(|c| TransactionFinder::stats(c, None))
+            .await
+            .into_flash(uri!("/"))?,
+        user: conn
+            .run(|c| UserFinder::stats(c))
             .await
             .into_flash(uri!("/"))?,
     })

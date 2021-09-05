@@ -4,47 +4,78 @@
 <main class="container">
   <div class="bg-light p-5 rounded">
     <h1>Metrics and Statistics</h1>
+    <p class="lead">Don't confide confidential information to anyone.</p>
+  </div>
+  <br>
+
+  <div class="bg-light p-5 rounded">
+    <h1>Orders</h1>
     <table class="table table-hover">
     <tbody>
     <tr>
       <th scope="row">Subtotal of effective orders</th>
-      <td>CN¥ {{ metrics.total }}</td>
+      <td>CN¥ {{ order.total }}</td>
     </tr>
     <tr>
       <th scope="row">Subtotal of orders placed</th>
-      <td>CN¥ {{ metrics.placed_subtotal }}</td>
+      <td>CN¥ {{ order.placed_subtotal }}</td>
     </tr>
     <tr>
       <th scope="row">Subtotal of orders paid</th>
-      <td>CN¥ {{ metrics.paid_subtotal }}</td>
+      <td>CN¥ {{ order.paid_subtotal }}</td>
     </tr>
     <tr>
       <th scope="row">Subtotal of orders finished</th>
-      <td>CN¥ {{ metrics.finished_subtotal }}</td>
+      <td>CN¥ {{ order.finished_subtotal }}</td>
     </tr>
     <tr>
       <th scope="row">Subtotal of orders refunded</th>
-      <td>CN¥ {{ metrics.refunded_subtotal }}</td>
+      <td>CN¥ {{ order.refunded_subtotal }}</td>
     </tr>
     <tr>
       <th scope="row"># of effective orders</th>
-      <td>{{ metrics.total_num }}</td>
+      <td>{{ order.total_num }}</td>
     </tr>
     <tr>
       <th scope="row"># of orders placed</th>
-      <td>{{ metrics.placed }}</td>
+      <td>{{ order.placed }}</td>
     </tr>
     <tr>
       <th scope="row"># of orders paid</th>
-      <td>{{ metrics.paid }}</td>
+      <td>{{ order.paid }}</td>
     </tr>
     <tr>
       <th scope="row"># of orders finished</th>
-      <td>{{ metrics.finished }}</td>
+      <td>{{ order.finished }}</td>
     </tr>
     <tr>
       <th scope="row"># of orders refunded</th>
-      <td>{{ metrics.refunded }}</td>
+      <td>{{ order.refunded }}</td>
+    </tr>
+    </tbody>
+    </table>
+  </div>
+  <br>
+
+  <div class="bg-light p-5 rounded">
+    <h1>Users</h1>
+    <table class="table table-hover">
+    <tbody>
+    <tr>
+      <th scope="row"># of effective users</th>
+      <td>{{ user.total }}</td>
+    </tr>
+    <tr>
+      <th scope="row"># of normal users</th>
+      <td>{{ user.normal }}</td>
+    </tr>
+    <tr>
+      <th scope="row"># of admin</th>
+      <td>{{ user.admin }}</td>
+    </tr>
+    <tr>
+      <th scope="row"># of disabled users</th>
+      <td>{{ user.disabled }}</td>
     </tr>
     </tbody>
     </table>

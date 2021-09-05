@@ -6,7 +6,7 @@ use crate::{
     schema::users,
     Cmp,
 };
-use diesel::{prelude::*, sqlite::Sqlite};
+use diesel::{dsl::count, prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
 
@@ -78,6 +78,13 @@ pub struct UserFinder<'a> {
     query: BoxedQuery<'a>,
 }
 
+pub struct UserStats {
+    pub total: usize,
+    pub disabled: usize,
+    pub normal: usize,
+    pub admin: usize,
+}
+
 impl<'a> UserFinder<'a> {
     pub fn list(conn: &'a SqliteConnection) -> Result<Vec<UserId>> {
         Self::new(conn, None).search()
@@ -85,6 +92,30 @@ impl<'a> UserFinder<'a> {
 
     pub fn list_info(conn: &'a SqliteConnection) -> Result<Vec<UserInfo>> {
         Self::new(conn, None).search_info()
+    }
+
+    pub fn count(self) -> Result<usize> {
+        use crate::schema::users::dsl::*;
+        Ok(self.query.select(count(id)).first::<i64>(self.conn)? as usize)
+    }
+
+    pub fn stats(conn: &'a SqliteConnection) -> Result<UserStats> {
+        let disabled = Self::new(conn, None)
+            .status(&UserStatus::Disabled, Cmp::Equal)
+            .count()?;
+        let normal = Self::new(conn, None)
+            .status(&UserStatus::Normal, Cmp::Equal)
+            .count()?;
+        let admin = Self::new(conn, None)
+            .status(&UserStatus::Admin, Cmp::Equal)
+            .count()?;
+
+        Ok(UserStats {
+            total: normal + admin,
+            disabled,
+            normal,
+            admin,
+        })
     }
 
     pub fn new(conn: &'a SqliteConnection, query: Option<BoxedQuery<'a>>) -> Self {
