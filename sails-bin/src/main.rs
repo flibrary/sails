@@ -152,8 +152,8 @@ async fn index<'a>(flash: Option<FlashMessage<'_>>, conn: DbConn) -> Index {
         order: conn
             .run(|c| TransactionFinder::stats(c, None))
             .await
-            .unwrap(),
-        user: conn.run(|c| UserFinder::stats(c)).await.unwrap(),
+            .unwrap_or_default(),
+        user: conn.run(|c| UserFinder::stats(c)).await.unwrap_or_default(),
     }
 }
 

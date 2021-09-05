@@ -217,8 +217,8 @@ pub async fn verify_book(
             .update(c)
     })
     .await
-    .into_flash(uri!("/admin", admin))?;
-    Ok(Redirect::to(uri!("/admin", admin)))
+    .into_flash(uri!("/admin", admin_books))?;
+    Ok(Redirect::to(uri!("/admin", admin_books)))
 }
 
 #[get("/disable_book")]
@@ -233,8 +233,8 @@ pub async fn disable_book(
             .update(c)
     })
     .await
-    .into_flash(uri!("/admin", admin))?;
-    Ok(Redirect::to(uri!("/admin", admin)))
+    .into_flash(uri!("/admin", admin_books))?;
+    Ok(Redirect::to(uri!("/admin", admin_books)))
 }
 
 #[get("/normalize_book")]
@@ -249,8 +249,8 @@ pub async fn normalize_book(
             .update(c)
     })
     .await
-    .into_flash(uri!("/admin", admin))?;
-    Ok(Redirect::to(uri!("/admin", admin)))
+    .into_flash(uri!("/admin", admin_books))?;
+    Ok(Redirect::to(uri!("/admin", admin_books)))
 }
 
 #[get("/refund_order")]

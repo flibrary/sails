@@ -78,6 +78,7 @@ pub struct UserFinder<'a> {
     query: BoxedQuery<'a>,
 }
 
+#[derive(Eq, PartialEq, Debug, Default)]
 pub struct UserStats {
     pub total: usize,
     pub disabled: usize,

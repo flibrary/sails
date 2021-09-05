@@ -180,7 +180,7 @@ pub struct TransactionFinder<'a> {
     query: BoxedQuery<'a>,
 }
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Default)]
 pub struct TxStats {
     pub placed_subtotal: usize,
     pub paid_subtotal: usize,
