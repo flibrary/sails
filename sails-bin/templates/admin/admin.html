@@ -4,14 +4,14 @@
 {% block content %}
 <main class="container">
   {% include "display_flash.html" %}
-  <div class="bg-light p-5 rounded">
+  <div class="p-5 rounded shadow">
     <h1>You are now at the admin dashboard</h1>
     <p class="lead">Please make sure every action you make has been well-thought.</p>
   </div>
   <br>
 
   {% if normal_books.len() > 0 %}
-  <div class="bg-light p-5 rounded border border-5 border-warning">
+  <div class="shadow p-5 rounded border border-5 border-warning">
     <h3>Pending Books</h3>
     <table class="table" data-toggle="table" data-pagination="true" data-search="true">
       <thead>
@@ -38,7 +38,7 @@
   </div>
   <br>
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>No books awaiting actions</h3>
     </div>
     <br>
@@ -46,7 +46,7 @@
 
 
   {% if disabled_books.len() > 0 %}
-  <div class="bg-light p-5 rounded border border-5 border-warning">
+  <div class="shadow p-5 rounded border border-5 border-warning">
     <h3>Disabled Books</h3>
     <table class="table" data-toggle="table" data-pagination="true" data-search="true">
       <thead>
@@ -73,7 +73,7 @@
   </div>
   <br>
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>No disabled books</h3>
     </div>
     <br>
@@ -81,7 +81,7 @@
 
 
   {% if verified_books.len() > 0 %}
-  <div class="bg-light p-5 rounded border border-5 border-warning">
+  <div class="shadow p-5 rounded border border-5 border-warning">
     <h3>Verified Books</h3>
     <table class="table" data-toggle="table" data-pagination="true" data-search="true">
       <thead>
@@ -108,7 +108,7 @@
   </div>
   <br>
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>No verified books</h3>
     </div>
     <br>

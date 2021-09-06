@@ -18,7 +18,7 @@
 
 {% block content %}
 <main class="container">
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
     {% block book %}
     <h1>{{ book.get_prodname() }}</h1>
     <table class="table table-hover">
@@ -51,12 +51,12 @@
     </div>
     <br>
 
-    <div class="bg-light p-5 rounded html-body">
+    <div class="shadow p-5 rounded html-body">
       {{ book.get_description()|safe }}
     </div>
     <br>
 
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
     {% block seller %}
     <h1>Seller's contact info</h1>
     <a href="/user" class="btn btn-primary" role="button">Sign in to contact the seller</a>
@@ -64,7 +64,7 @@
     </div>
     <br>
 
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       {% block seller_desc %}
           <h1>Seller's  profile</h1>
 	  <a href="/user" class="btn btn-primary" role="button">Sign in to view seller's profile</a>

@@ -6,7 +6,7 @@
 <main class="container">
   {% include "display_flash.html" %}
 
-  <div class="bg-light p-5 rounded">
+  <div class="p-5 rounded shadow">
     <h1>Welcome to the market</h1>
     <p class="lead">Here you can see what books are on sale and post your own books.</p>
     <a href="categories" class="btn btn-primary" role="button">Browse by categories</a>
@@ -20,7 +20,7 @@
   <br>
 
   {% if books.len() > 0 %}
-  <div class="bg-light p-5 rounded">
+  <div class="p-5 rounded shadow">
     <div class="row grid">
 	{% for book in books %}
 	<div class="col-sm-6 col-lg-4 mb-4 grid-item">
@@ -42,7 +42,7 @@
     </div>
     <br>
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>No books under your request</h3>
     </div>
     <br>

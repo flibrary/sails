@@ -5,14 +5,14 @@
 {% block content %}
 <main class="container">
   {% include "display_flash.html" %}
-  <div class="bg-light p-5 rounded">
+  <div class="p-5 rounded shadow">
     <h1>You are now at the root dashboard</h1>
     <p class="lead">Please leave unless you fully understand what you are doing.</p>
   </div>
   <br>
 
   {% if users.len() > 0 %}
-  <div class="bg-light p-5 rounded border border-5 border-danger">
+  <div class="shadow p-5 rounded border border-5 border-danger">
     <h3>Users</h3>
     <table class="table" data-toggle="table" data-pagination="true" data-search="true">
       <thead>
@@ -43,7 +43,7 @@
   </div>
   <br>
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>No users</h3>
     </div>
     <br>

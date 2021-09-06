@@ -2,7 +2,7 @@
 {% block title %}Order Details{% endblock title %}
 {% block content %}
 <main class="container">
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h1>Details of your order #{{ order.get_shortid() }}</h1>
       <br>
       {% match order.get_transaction_status() %}
@@ -46,7 +46,7 @@
       {% endmatch %}
     </div>
 <br>
-<div class="bg-light p-5 rounded">
+<div class="p-5 rounded shadow">
       <table class="table table-hover">
     <tbody>
     <tr>

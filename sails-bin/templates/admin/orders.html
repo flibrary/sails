@@ -4,14 +4,14 @@
 {% block content %}
 <main class="container">
   {% include "display_flash.html" %}
-  <div class="bg-light p-5 rounded">
+  <div class="p-5 rounded shadow">
     <h1>You are now at the admin order dashboard</h1>
     <p class="lead">Please make sure every action you make has been well-thought.</p>
   </div>
   <br>
 
   {% if paid_tx.len() > 0 %}
-  <div class="bg-light p-5 rounded border border-5 border-warning">
+  <div class="shadow p-5 rounded border border-5 border-warning">
     <h3>Paid Orders</h3>
     <table class="table" data-toggle="table" data-pagination="true" data-search="true">
       <thead>
@@ -36,14 +36,14 @@
   </div>
   <br>
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>No orders awaiting actions</h3>
     </div>
     <br>
     {% endif %}
 
       {% if placed_tx.len() > 0 %}
-  <div class="bg-light p-5 rounded border border-5 border-warning">
+  <div class="shadow p-5 rounded border border-5 border-warning">
     <h3>Placed Orders</h3>
     <table class="table" data-toggle="table" data-pagination="true" data-search="true">
       <thead>
@@ -68,14 +68,14 @@
   </div>
   <br>
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>No orders placed</h3>
     </div>
     <br>
   {% endif %}
 
   {% if refunded_tx.len() > 0 %}
-  <div class="bg-light p-5 rounded border border-5 border-warning">
+  <div class="shadow p-5 rounded border border-5 border-warning">
     <h3>Refunded Orders</h3>
     <table class="table" data-toggle="table" data-pagination="true" data-search="true">
       <thead>
@@ -98,7 +98,7 @@
   </div>
   <br>
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>No refunded orders</h3>
     </div>
     <br>
@@ -106,7 +106,7 @@
 
 
   {% if finished_tx.len() > 0 %}
-  <div class="bg-light p-5 rounded border border-5 border-warning">
+  <div class="shadow p-5 rounded border border-5 border-warning">
     <h3>Finished Orders</h3>
     <table class="table" data-toggle="table" data-pagination="true" data-search="true">
       <thead>
@@ -114,6 +114,7 @@
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Book ID</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
+	  <th data-field="actions" scope="col">Actions</th>
 	</tr>
       </thead>
       <tbody>
@@ -122,6 +123,7 @@
 	  <th scope="row"><a href="/orders/admin_order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="/market/book_info?book_id={{ order.1.get_product() }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.1.get_buyer()}}</td>
+	  <td><a href="/admin/refund_order?order_id={{order.1.get_id()}}" class="btn btn-warning" role="button">Cancel</a></td>
 	</tr>
 	{% endfor %}
       </tbody>
@@ -129,7 +131,7 @@
   </div>
   <br>
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>No finished orders</h3>
     </div>
     <br>

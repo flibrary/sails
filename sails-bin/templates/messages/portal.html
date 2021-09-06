@@ -4,14 +4,14 @@
 <main class="container">
   {% include "display_flash.html" %}
 
-  <div class="bg-light p-5 rounded">
+  <div class="p-5 rounded shadow">
     <h1>Messages</h1>
     <p class="lead">Below is a list of recent messages sent to you.</p>
   </div>
   <br>
 
   {% if message_list.len() > 0 %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>Recent messages</h3>
       <table class="table" data-toggle="table" data-pagination="true" data-search="true">
         <thead>
@@ -34,7 +34,7 @@
     </div>
     <br>
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>You have not received any message</h3>
     </div>
     <br>

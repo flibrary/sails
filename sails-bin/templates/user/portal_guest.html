@@ -20,13 +20,13 @@
 {% block content %}
 <main class="container">
   {% include "display_flash.html" %}
-  <div class="bg-light p-5 rounded">
+  <div class="p-5 rounded shadow">
     <h1>Welcome to {{ user.get_name() }}'s portal</h1>
     <p class="lead">{% block intro %}This page helps you to find more out about {{ user.get_name() }}.{% endblock intro %}</p>
   </div>
   <br>
 
-  <div class="bg-light p-5 rounded">
+  <div class="p-5 rounded shadow">
     <h1>Information</h1>
     <table class="table table-hover">
       <tbody>
@@ -52,7 +52,7 @@
   </div>
   <br>
 
-  <div class="bg-light p-5 rounded html-body">
+  <div class="shadow p-5 rounded html-body">
     {% match user.get_description() %}
     {% when Some with (desc) %}
     {{desc|safe}}
@@ -65,7 +65,7 @@
   {% if books.len() > 0 %}
   {% include "book_list.html" %}
   {% else %}
-    <div class="bg-light p-5 rounded">
+    <div class="p-5 rounded shadow">
       <h3>No books posted on the market</h3>
       {% block postbook_button %}{% endblock postbook_button %}
     </div>

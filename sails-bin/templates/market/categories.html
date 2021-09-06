@@ -2,14 +2,14 @@
 {% block title %}Categories{% endblock title %}
 {% block content %}
 <main class="container">
-  <div class="bg-light p-5 rounded">
+  <div class="p-5 rounded shadow">
     <h1>Welcome to the market</h1>
     <p class="lead">Here you can see what books are on sale and post your own books.</p>
     <a href="all_books" class="btn btn-primary" role="button">Browse all books</a>
   </div>
   <br>
 
-  <div class="bg-light p-5 rounded">
+  <div class="p-5 rounded shadow">
   {% if categories.len() > 0 %}
     <h3>Categories</h3>
     <div class="list-group">

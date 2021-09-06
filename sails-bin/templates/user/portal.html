@@ -5,7 +5,7 @@
 {% block update_button %}<a href="/user/update_user_page" class="btn btn-primary" role="button">Update</a> <a href="/user/change_passwd" class="btn btn-warning" role="button">Change password</a>{% endblock update_button %}
 {% block postbook_button %}<a href="/market/post_book" class="btn btn-primary" role="button">Post a book</a>{% endblock postbook_button %}
 {% block orders_placed %}
-<div class="bg-light p-5 rounded">
+<div class="p-5 rounded shadow">
   <h3>Orders Placed</h3>
   <table class="table" data-toggle="table" data-pagination="true" data-search="true">
     <thead>
@@ -34,7 +34,7 @@
 {% endblock orders_placed %}
 
 {% block orders_received %}
-<div class="bg-light p-5 rounded">
+<div class="p-5 rounded shadow">
   <h3>Orders Received</h3>
   <table class="table" data-toggle="table" data-pagination="true" data-search="true">
     <thead>
