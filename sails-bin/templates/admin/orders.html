@@ -17,7 +17,8 @@
       <thead>
 	<tr>
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
-	  <th data-field="name" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	</tr>
@@ -27,6 +28,7 @@
 	<tr>
 	  <th scope="row"><a href="/orders/admin_order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="/market/book_info?book_id={{ order.1.get_product() }}">{{order.0.get_shortid()}}</a></td>
+	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
 	  <td><a href="/admin/refund_order?order_id={{order.1.get_id()}}" class="btn btn-warning" role="button">Refund</a> <a href="/admin/finish_order?order_id={{order.1.get_id()}}" class="btn btn-success" role="button">Finish</a></td>
 	</tr>
@@ -49,7 +51,8 @@
       <thead>
 	<tr>
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
-	  <th data-field="name" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	</tr>
@@ -59,6 +62,7 @@
 	<tr>
 	  <th scope="row"><a href="/orders/admin_order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="/market/book_info?book_id={{ order.1.get_product() }}">{{order.0.get_shortid()}}</a></td>
+	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
 	  <td><a href="/admin/refund_order?order_id={{order.1.get_id()}}" class="btn btn-warning" role="button">Cancel</a> <a href="/admin/confirm_order?order_id={{order.1.get_id()}}" class="btn btn-success" role="button">Confirm</a></td>
 	</tr>
@@ -81,7 +85,8 @@
       <thead>
 	<tr>
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
-	  <th data-field="name" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
 	</tr>
       </thead>
@@ -90,6 +95,7 @@
 	<tr>
 	  <th scope="row"><a href="/orders/admin_order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="/market/book_info?book_id={{ order.1.get_product() }}">{{order.0.get_shortid()}}</a></td>
+	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
 	</tr>
 	{% endfor %}
@@ -112,7 +118,8 @@
       <thead>
 	<tr>
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
-	  <th data-field="name" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	</tr>
@@ -122,6 +129,7 @@
 	<tr>
 	  <th scope="row"><a href="/orders/admin_order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="/market/book_info?book_id={{ order.1.get_product() }}">{{order.0.get_shortid()}}</a></td>
+	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
 	  <td><a href="/admin/refund_order?order_id={{order.1.get_id()}}" class="btn btn-warning" role="button">Cancel</a></td>
 	</tr>
