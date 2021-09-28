@@ -48,11 +48,13 @@ in {
 
     users.users.sails = {
       description = "Sails server daemon user";
+      group = "sails";
       home = cfg.dataDir;
       createHome = true;
       # seems like this UID has not been used yet https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/misc/ids.nix
       uid = 400;
     };
+    users.groups.sails = {};
 
     systemd.services.sails = {
       description = "Sails Server Service";
