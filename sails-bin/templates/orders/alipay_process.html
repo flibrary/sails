@@ -37,7 +37,9 @@
         }, function(a) {
 	    if (a.errorCode > 0) {
                 alert(JSON.stringify(a));
-            }
+            } else {
+		alert(JSON.stringify(a));
+	    }
 	})
     });
     document.addEventListener("resume", function(a) {
