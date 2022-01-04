@@ -20,15 +20,18 @@ sails-db = { path = "../sails-db" }
 rust-embed="^6.0"
 select = "0.6.0-alpha.1"
 structopt = "^0.3"
+urlencoding = "^2"
+rsa = {version = "^0.5", features = ["alloc"]}
+sha2 = "^0.10"
 base64 = "^0.13"
+chrono = "^0.4"
 anyhow = "^1"
 lettre = { version = "0.10.0-rc.3", features = ["tokio1-rustls-tls", "builder", "smtp-transport", "r2d2", "tokio1"] }
-reqwest = { version = "0.11", features = ["json"]}
+reqwest = { version = "0.11", features = ["json", "blocking"]}
 chacha20poly1305 = "^0.8"
 # We need askama as the backend template engine because it is type safe.
-askama = { version = "0.11.0-beta.1", features = ["with-rocket", "mime", "mime_guess"]}
-askama_rocket = "^0.11.0-rc.2"
-sha2 = "0.9"
+askama = { version = "=0.11.0-beta.1", features = ["with-rocket", "mime", "mime_guess"]}
+askama_rocket = "=0.11.0-rc.2"
 
 [dependencies.rocket_sync_db_pools]
 version = "0.1.0-rc.1"

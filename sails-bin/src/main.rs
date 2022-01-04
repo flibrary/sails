@@ -7,6 +7,7 @@
 
 mod admin;
 mod aead;
+mod alipay;
 mod guards;
 mod images;
 mod market;
@@ -44,7 +45,11 @@ use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 
 use crate::{
-    images::ImageHosting, orders::AlipayId, recaptcha::ReCaptcha, root::RootPasswd, smtp::SmtpCreds,
+    alipay::{AlipayAppPrivKey, AlipayClient},
+    images::ImageHosting,
+    recaptcha::ReCaptcha,
+    root::RootPasswd,
+    smtp::SmtpCreds,
 };
 
 #[macro_use]
@@ -240,7 +245,8 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<SmtpCreds>())
         .attach(AdHoc::config::<AeadKey>())
         .attach(AdHoc::config::<ImageHosting>())
-        .attach(AdHoc::config::<AlipayId>())
+        .attach(AdHoc::config::<AlipayAppPrivKey>())
+        .attach(AdHoc::config::<AlipayClient>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .mount("/", routes![index, get_icon])
         .mount("/static", routes![get_file])
@@ -328,14 +334,7 @@ fn rocket() -> Rocket<Build> {
         )
         .mount(
             "/orders",
-            routes![
-                orders::purchase,
-                orders::order_info_buyer,
-                orders::order_info_seller,
-                orders::confirm,
-                orders::admin_order_info,
-                orders::alipay_order_process,
-            ],
+            routes![orders::purchase, orders::confirm, orders::order_info,],
         )
         .mount(
             "/images",

@@ -3,7 +3,7 @@
 {% block content %}
 <main class="container">
     <div class="p-5 rounded shadow">
-      <h1>Details of order #{{ order.get_shortid() }}</h1>
+      <h1>Details of your order #{{ order.get_shortid() }}</h1>
       <br>
       {% match order.get_transaction_status() %}
       {% when sails_db::enums::TransactionStatus::Refunded %}
@@ -12,16 +12,22 @@
       </div>
       <br>
       <h3>Order refunded (canceled)</h3>
-      The customer has refunded or canceled his/her order.
+      There is nothing left to do.
 
       {% when sails_db::enums::TransactionStatus::Placed %}
+      <div class="alert alert-warning" role="alert">
+	注意：<b>请在扫码后三小时内付款。</b>如出现错误提示请联系客服
+      </div>
       <div class="progress">
 	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" style="width: 33%"></div>
       </div>
       <br>
       <h3>Order successfully placed</h3>
-      Please confirm if you have received <b>CN¥ {{ book.get_price() }}</b> with reference order ID <code>{{ order.get_shortid() }}</code>.<br>
-      <a href="/orders/confirm?order_id={{order.get_id()}}" class="btn btn-primary" role="button" onclick="return confirm('Please make sure you have already got the payment');">Confirm the payment</a>
+      Scan the QR code or click the button to pay to proceed, then you should await the seller to confirm the payment.<br>
+      <br>
+      <div id="qrcode"></div><br>
+      <a href="alipays://platformapi/startapp?appId=20000067&url={{urlencoding::encode(qr_code)}}" class="btn btn-primary" role="button">Pay via AliPay</a> <a href="/orders/confirm?order_id={{order.get_id()}}" class="btn btn-success" role="button">Next</a>
+
 
       {% when sails_db::enums::TransactionStatus::Paid %}
       <div class="progress">
@@ -29,15 +35,15 @@
       </div>
       <br>
       <h3>Order successfully paid</h3>
-      Customer is now guided to get his/her book from the warehouse. There is nothing left to do for you.
+      The last step to complete this order is to come to the warehouse to get your book! Do remember to bring the order ID: <code>{{ order.get_shortid() }}</code>.
 
       {% when sails_db::enums::TransactionStatus::Finished %}
       <div class="progress">
 	<div class="progress-bar bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
       </div>
       <br>
-      <h3>Order successfully finished!</h2>
-      Customer has successfully gotten the book from the warehouse. There is nothing left to do for you.
+      <h3>Congratulations, order has been successfully finished!</h2>
+      There is nothing left to do. Enjoy your book!
       {% endmatch %}
     </div>
 <br>
@@ -73,3 +79,12 @@
   </div>
 </main>
 {% endblock content %}
+
+{% block script %}
+  {% call super()%}
+  <script type="text/javascript">
+    var qrcode = new QRCode("qrcode");
+    qrcode.makeCode("{{qr_code}}");
+  </script>
+  <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="9a9d77d4-fad3-4ab1-9022-e0f6856ab746";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
+{% endblock script %}
