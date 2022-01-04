@@ -15,9 +15,6 @@
       There is nothing left to do.
 
       {% when sails_db::enums::TransactionStatus::Placed %}
-      <div class="alert alert-warning" role="alert">
-	注意：<b>请在扫码后三小时内付款。</b>如出现错误提示请联系客服
-      </div>
       <div class="progress">
 	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" style="width: 33%"></div>
       </div>
@@ -25,8 +22,20 @@
       <h3>Order successfully placed</h3>
       Scan the QR code or click the button to pay to proceed, then you should await the seller to confirm the payment.<br>
       <br>
+
+      {% match resp.as_ref().unwrap() %}
+      {% when Ok with (resp) %}
+      <div class="alert alert-warning" role="alert">
+	注意：<b>请在扫码后三小时内付款。</b>
+      </div>
       <div id="qrcode"></div><br>
-      <a href="alipays://platformapi/startapp?appId=20000067&url={{urlencoding::encode(qr_code)}}" class="btn btn-primary" role="button">Pay via AliPay</a> <a href="/orders/confirm?order_id={{order.get_id()}}" class="btn btn-success" role="button">Next</a>
+      <a href="alipays://platformapi/startapp?appId=20000067&url={{urlencoding::encode(resp.qr_code)}}" class="btn btn-primary" role="button">Pay via AliPay</a>
+      {% when Err with (err) %}
+      <div class="alert alert-warning" role="alert">
+	<b>创建交易错误，请联系客服</b>: {{ err }}
+      </div>
+      {% endmatch %}
+      <a href="/orders/confirm?order_id={{order.get_id()}}" class="btn btn-success" role="button">Next</a>
 
 
       {% when sails_db::enums::TransactionStatus::Paid %}
@@ -81,10 +90,14 @@
 {% endblock content %}
 
 {% block script %}
-  {% call super()%}
+{% call super()%}
+  {% if resp.is_some() %}
+  {% if resp.as_ref().unwrap().is_ok() %}
   <script type="text/javascript">
     var qrcode = new QRCode("qrcode");
-    qrcode.makeCode("{{qr_code}}");
+    qrcode.makeCode("{{resp.as_ref().unwrap().as_ref().unwrap().qr_code}}");
   </script>
+  {% endif %}
+  {% endif %}
   <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="9a9d77d4-fad3-4ab1-9022-e0f6856ab746";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
 {% endblock script %}

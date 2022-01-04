@@ -168,7 +168,8 @@ impl<T> Display for SignedResponse<T> {
 }
 
 impl<'a, B: BizContent> Request<'a, B> {
-    // On success, it returns the URL to the QR code. On failure, it returns the full response for debug
+    // On success, it returns the customized response. On failure, it returns the full response for debug
+    // It the outer result is a failure, then something unrelated to the API requests went wrong (e.g. network is switched off)
     pub async fn send<T: DeserializeOwned>(&self) -> anyhow::Result<Result<T, SignedResponse<T>>> {
         let client = reqwest::Client::new();
         let res = client
@@ -308,8 +309,6 @@ mod tests {
         let mut req = client
             .request(&priv_key, Precreate::new("12345", "AP PreCalculus", 100))
             .unwrap();
-
-        // println!("{}", req);
 
         // Seperate the signature from text
         let sig = req.sign.unwrap();

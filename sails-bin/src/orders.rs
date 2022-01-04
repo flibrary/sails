@@ -1,6 +1,7 @@
 use crate::{
     alipay::{
-        AlipayAppPrivKey, AlipayClient, Precreate, PrecreateResp, TradeQuery, TradeQueryResp,
+        AlipayAppPrivKey, AlipayClient, Precreate, PrecreateResp, SignedResponse, TradeQuery,
+        TradeQueryResp,
     },
     guards::*,
     DbConn, IntoFlash,
@@ -17,7 +18,8 @@ use sails_db::{enums::TransactionStatus, products::*, transactions::*};
 pub struct OrderInfo {
     book: ProductInfo,
     order: TransactionInfo,
-    qr_code: String,
+    // Alipay precreate API response
+    resp: Option<Result<PrecreateResp, SignedResponse<PrecreateResp>>>,
 }
 
 #[get("/order_info")]
@@ -28,6 +30,9 @@ pub async fn order_info(
     client: &State<AlipayClient>,
 ) -> Result<OrderInfo, Flash<Redirect>> {
     if order.order_info.get_transaction_status() == &TransactionStatus::Placed {
+        // It seems like we could request precreation even if the user has already paid the bill or the trade has already been created.
+        // If, in the future, this behavior changes, we have to come up with a better mechanism.
+        // Currently, if anything goes wrong, we would have the message for debug, and the confirm button would still be available.
         let resp = client
             .request(
                 priv_key,
@@ -41,18 +46,17 @@ pub async fn order_info(
             .into_flash(uri!("/user", crate::user::portal))?
             .send::<PrecreateResp>()
             .await
-            .into_flash(uri!("/user", crate::user::portal))?
             .into_flash(uri!("/user", crate::user::portal))?;
         Ok(OrderInfo {
             book: order.book_info,
             order: order.order_info,
-            qr_code: resp.qr_code,
+            resp: Some(resp),
         })
     } else {
         Ok(OrderInfo {
             book: order.book_info,
             order: order.order_info,
-            qr_code: "".to_string(),
+            resp: None,
         })
     }
 }
@@ -75,7 +79,9 @@ pub async fn confirm(
         .into_flash(uri!("/user", crate::user::portal))?
         .into_flash(uri!("/user", crate::user::portal))?;
 
-    if resp.trade_status == "TRADE_SUCCESS" {
+    // Both of these indicate that we have successfully finished the transaction.
+    // TRADE_FINISHED indicates it has been well pass the refunding deadline.
+    if (resp.trade_status == "TRADE_SUCCESS") || (resp.trade_status == "TRADE_FINISHED") {
         // We only allow confirmation on placed products
         if order.order_info.get_transaction_status() == &TransactionStatus::Placed {
             db.run(move |c| {
