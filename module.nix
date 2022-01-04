@@ -54,7 +54,7 @@ in {
       # seems like this UID has not been used yet https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/misc/ids.nix
       uid = 400;
     };
-    users.groups.sails = {};
+    users.groups.sails = { };
 
     systemd.services.sails = {
       description = "Sails Server Service";

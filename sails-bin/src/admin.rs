@@ -23,6 +23,7 @@ pub struct AdminMetricsPage {
     pub user: UserStats,
 }
 
+// To prevent deadlock, redirect all errors back to index as this is the default route for `/admin`
 #[get("/metrics")]
 pub async fn admin_metrics(
     _guard: Role<Admin>,

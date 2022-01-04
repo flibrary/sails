@@ -1,101 +1,93 @@
-use crate::{guards::*, DbConn, IntoFlash};
+use crate::{
+    alipay::{
+        AlipayAppPrivKey, AlipayClient, Precreate, PrecreateResp, TradeQuery, TradeQueryResp,
+    },
+    guards::*,
+    DbConn, IntoFlash,
+};
 use askama::Template;
 use rocket::{
     response::{Flash, Redirect},
     State,
 };
 use sails_db::{enums::TransactionStatus, products::*, transactions::*};
-use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct AlipayId {
-    alipay_id: String,
-}
 
 #[derive(Template)]
-#[template(path = "orders/alipay_process.html")]
-pub struct AlipayProcess {
+#[template(path = "orders/order_info.html")]
+pub struct OrderInfo {
     book: ProductInfo,
     order: TransactionInfo,
-    alipay_id: String,
+    qr_code: String,
 }
 
-#[get("/alipay")]
-pub async fn alipay_order_process(
+#[get("/order_info")]
+pub async fn order_info(
+    _buyer: Role<Buyer>,
     order: OrderInfoGuard,
-    alipay_id: &State<AlipayId>,
-) -> AlipayProcess {
-    AlipayProcess {
-        book: order.book_info,
-        order: order.order_info,
-        alipay_id: alipay_id.alipay_id.to_string(),
-    }
-}
-
-#[derive(Template)]
-#[template(path = "orders/admin_order_info.html")]
-pub struct AdminOrderInfo {
-    book: ProductInfo,
-    order: TransactionInfo,
-}
-
-#[get("/admin_order_info")]
-pub async fn admin_order_info(_guard: Role<Admin>, order: OrderInfoGuard) -> AdminOrderInfo {
-    AdminOrderInfo {
-        book: order.book_info,
-        order: order.order_info,
-    }
-}
-
-#[derive(Template)]
-#[template(path = "orders/order_info_buyer.html")]
-pub struct OrderInfoBuyer {
-    book: ProductInfo,
-    order: TransactionInfo,
-}
-
-#[get("/order_info", rank = 2)]
-pub async fn order_info_buyer(_buyer: Role<Buyer>, order: OrderInfoGuard) -> OrderInfoBuyer {
-    OrderInfoBuyer {
-        book: order.book_info,
-        order: order.order_info,
-    }
-}
-
-#[derive(Template)]
-#[template(path = "orders/order_info_seller.html")]
-pub struct OrderInfoSeller {
-    book: ProductInfo,
-    order: TransactionInfo,
-}
-
-#[get("/order_info", rank = 1)]
-pub async fn order_info_seller(_seller: Role<Seller>, order: OrderInfoGuard) -> OrderInfoSeller {
-    OrderInfoSeller {
-        book: order.book_info,
-        order: order.order_info,
+    priv_key: &State<AlipayAppPrivKey>,
+    client: &State<AlipayClient>,
+) -> Result<OrderInfo, Flash<Redirect>> {
+    if order.order_info.get_transaction_status() == &TransactionStatus::Placed {
+        let resp = client
+            .request(
+                priv_key,
+                Precreate::new(
+                    order.order_info.get_id(),
+                    // Alipay doesn't play well with UTF-8
+                    order.book_info.get_prodname(),
+                    order.book_info.get_price(),
+                ),
+            )
+            .into_flash(uri!("/user", crate::user::portal))?
+            .send::<PrecreateResp>()
+            .await
+            .into_flash(uri!("/user", crate::user::portal))?
+            .into_flash(uri!("/user", crate::user::portal))?;
+        Ok(OrderInfo {
+            book: order.book_info,
+            order: order.order_info,
+            qr_code: resp.qr_code,
+        })
+    } else {
+        Ok(OrderInfo {
+            book: order.book_info,
+            order: order.order_info,
+            qr_code: "".to_string(),
+        })
     }
 }
 
 #[get("/confirm")]
 pub async fn confirm(
-    _seller: Role<Seller>,
+    _role: Role<Buyer>,
     order: OrderInfoGuard,
     db: DbConn,
+    priv_key: &State<AlipayAppPrivKey>,
+    client: &State<AlipayClient>,
 ) -> Result<Redirect, Flash<Redirect>> {
     let id = order.order_info.get_id().to_string();
-    // We only allow confirmation on placed products
-    if order.order_info.get_transaction_status() == &TransactionStatus::Placed {
-        db.run(move |c| {
-            order
-                .order_info
-                .set_transaction_status(TransactionStatus::Paid)
-                .update(c)
-        })
-        .await
-        .into_flash(uri!("/market", crate::market::market))?;
-    }
 
+    let resp = client
+        .request(priv_key, TradeQuery::new(order.order_info.get_id()))
+        .into_flash(uri!("/user", crate::user::portal))?
+        .send::<TradeQueryResp>()
+        .await
+        .into_flash(uri!("/user", crate::user::portal))?
+        .into_flash(uri!("/user", crate::user::portal))?;
+
+    if resp.trade_status == "TRADE_SUCCESS" {
+        // We only allow confirmation on placed products
+        if order.order_info.get_transaction_status() == &TransactionStatus::Placed {
+            db.run(move |c| {
+                order
+                    .order_info
+                    .set_transaction_status(TransactionStatus::Paid)
+                    .update(c)
+            })
+            .await
+            .into_flash(uri!("/user", crate::user::portal))?;
+        }
+    }
     Ok(Redirect::to(format!("/orders/order_info?order_id={}", id)))
 }
 
@@ -108,7 +100,7 @@ pub async fn purchase(
     let id = db
         .run(move |c| Transactions::buy(c, &book.book_id, &user.id))
         .await
-        .into_flash(uri!("/market", crate::market::market))?;
+        .into_flash(uri!("/user", crate::user::portal))?;
 
     Ok(Redirect::to(format!(
         "/orders/order_info?order_id={}",
