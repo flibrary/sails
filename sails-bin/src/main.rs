@@ -105,7 +105,7 @@ impl Msg {
         }
     }
 
-    pub fn msg(payload: impl ToString) -> Self {
+    pub fn new(payload: impl ToString) -> Self {
         Self {
             flash: Some(payload.to_string()),
         }
