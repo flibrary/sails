@@ -61,7 +61,7 @@ pub async fn order_info_buyer(
     if order.order_info.get_transaction_status() == &TransactionStatus::Placed {
         // It seems like we could request precreation even if the user has already paid the bill or the trade has already been created.
         // If, in the future, this behavior changes, we have to come up with a better mechanism.
-        // Currently, if anything goes wrong, we would have the message for debug, and the confirm button would still be available.
+        // Currently, if anything goes wrong, we would have the message for debug, and the next button would still be available.
         let resp = client
             .request(
                 priv_key,
@@ -90,8 +90,9 @@ pub async fn order_info_buyer(
     }
 }
 
-#[get("/confirm")]
-pub async fn confirm(
+// Basically, we syncronize our trade status with that in alipay
+#[get("/progress")]
+pub async fn progress(
     _role: Role<Buyer>,
     order: OrderInfoGuard,
     db: DbConn,
@@ -108,25 +109,25 @@ pub async fn confirm(
         .into_flash(uri!("/"))?
         .into_flash(uri!("/"))?;
 
-    // Both of these indicate that we have successfully finished the transaction.
-    // TRADE_FINISHED indicates it has been well pass the refunding deadline.
-    if (resp.trade_status == "TRADE_SUCCESS") || (resp.trade_status == "TRADE_FINISHED") {
-        // We only allow confirmation on placed products
-        if order.order_info.get_transaction_status() == &TransactionStatus::Placed {
-            db.run(move |c| {
-                order
-                    .order_info
-                    .set_transaction_status(TransactionStatus::Paid)
-                    .update(c)
-            })
-            .await
-            .into_flash(uri!("/"))?;
+    let status = match resp.trade_status.as_str() {
+        // Both of these indicate that we have successfully finished the transaction.
+        // TRADE_FINISHED indicates it has been well pass the refunding deadline.
+        "TRADE_SUCCESS" | "TRADE_FINISHED" => TransactionStatus::Paid,
+        // Trade has been closed,
+        "TRADE_CLOSED" => TransactionStatus::Refunded,
+        "WAIT_BUYER_PAY" => TransactionStatus::Placed,
+        // This should NEVER happen
+        other_status => {
+            return Err(Flash::error(
+                Redirect::to(uri!("/")),
+                format!("unexpected alipay trade_status: {}", other_status),
+            ))
         }
-        Ok(Redirect::to(format!("/orders/order_info?order_id={}", id)))
-    } else {
-        // trade_status indicates trade in progress or closed.
-        Err(Flash::error(Redirect::to(uri!("/")), resp.trade_status))
-    }
+    };
+    db.run(move |c| order.order_info.set_transaction_status(status).update(c))
+        .await
+        .into_flash(uri!("/"))?;
+    Ok(Redirect::to(format!("/orders/order_info?order_id={}", id)))
 }
 
 #[get("/purchase")]

@@ -12,7 +12,8 @@
       </div>
       <br>
       <h3>Order refunded (canceled)</h3>
-      There is nothing left to do.
+      If you believe the order info is wrong, click on the refresh button below.
+      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-success" role="button">Refresh</a>
 
       {% when sails_db::enums::TransactionStatus::Placed %}
       <div class="progress">
@@ -20,7 +21,7 @@
       </div>
       <br>
       <h3>Order successfully placed</h3>
-      Scan the QR code or click the button to pay to proceed, then you should await the seller to confirm the payment.<br>
+      Scan the QR code or click the button to pay. Then press "next" to proceed after you paid.<br>
       <br>
 
       {% match resp.as_ref().unwrap() %}
@@ -35,7 +36,7 @@
 	<b>创建交易错误，请联系客服</b>: {{ err }}
       </div>
       {% endmatch %}
-      <a href="/orders/confirm?order_id={{order.get_id()}}" class="btn btn-success" role="button">Next</a>
+      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-success" role="button">Next</a>
 
 
       {% when sails_db::enums::TransactionStatus::Paid %}

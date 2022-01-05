@@ -336,7 +336,7 @@ fn rocket() -> Rocket<Build> {
             "/orders",
             routes![
                 orders::purchase,
-                orders::confirm,
+                orders::progress,
                 orders::order_info_buyer,
                 orders::order_info_seller,
                 orders::order_info_admin
