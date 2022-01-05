@@ -122,8 +122,11 @@ pub async fn confirm(
             .await
             .into_flash(uri!("/"))?;
         }
+        Ok(Redirect::to(format!("/orders/order_info?order_id={}", id)))
+    } else {
+        // trade_status indicates trade in progress or closed.
+        Err(Flash::error(Redirect::to(uri!("/")), resp.trade_status))
     }
-    Ok(Redirect::to(format!("/orders/order_info?order_id={}", id)))
 }
 
 #[get("/purchase")]
