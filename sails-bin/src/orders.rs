@@ -91,7 +91,7 @@ pub async fn order_info_buyer(
 }
 
 // Basically, we syncronize our trade status with that in alipay
-#[get("/progress")]
+#[get("/progress", rank = 1)]
 pub async fn progress(
     _role: Role<Buyer>,
     order: OrderInfoGuard,

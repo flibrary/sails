@@ -1,9 +1,13 @@
 use crate::{
+    alipay::{AlipayAppPrivKey, AlipayClient, CancelTrade, CancelTradeResp},
     guards::{Admin, BookInfoGuard, OrderIdGuard, OrderInfoGuard, Role},
     DbConn, IntoFlash,
 };
 use askama::Template;
-use rocket::response::{Flash, Redirect};
+use rocket::{
+    response::{Flash, Redirect},
+    State,
+};
 use sails_db::{
     enums::{ProductStatus, TransactionStatus},
     error::SailsDbError,
@@ -250,7 +254,22 @@ pub async fn refund_order(
     _guard: Role<Admin>,
     id: OrderIdGuard,
     conn: DbConn,
+    priv_key: &State<AlipayAppPrivKey>,
+    client: &State<AlipayClient>,
 ) -> Result<Redirect, Flash<Redirect>> {
+    loop {
+        let resp = client
+            .request(priv_key, CancelTrade::new(id.id.get_id()))
+            .into_flash(uri!("/"))?
+            .send::<CancelTradeResp>()
+            .await
+            .into_flash(uri!("/"))?
+            .into_flash(uri!("/"))?;
+        if resp.retry_flag == "N" {
+            break;
+        }
+    }
+
     conn.run(move |c| id.id.refund(c))
         .await
         .into_flash(uri!("/admin", admin_orders))?;
@@ -266,22 +285,6 @@ pub async fn finish_order(
     conn.run(|c| {
         info.order_info
             .set_transaction_status(TransactionStatus::Finished)
-            .update(c)
-    })
-    .await
-    .into_flash(uri!("/"))?;
-    Ok(Redirect::to(uri!("/admin", admin_orders)))
-}
-
-#[get("/confirm_order")]
-pub async fn confirm_order(
-    _guard: Role<Admin>,
-    info: OrderInfoGuard,
-    conn: DbConn,
-) -> Result<Redirect, Flash<Redirect>> {
-    conn.run(|c| {
-        info.order_info
-            .set_transaction_status(TransactionStatus::Paid)
             .update(c)
     })
     .await

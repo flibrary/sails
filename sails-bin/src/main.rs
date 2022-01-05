@@ -329,7 +329,6 @@ fn rocket() -> Rocket<Build> {
                 admin::admin_orders,
                 admin::refund_order,
                 admin::finish_order,
-                admin::confirm_order
             ],
         )
         .mount(

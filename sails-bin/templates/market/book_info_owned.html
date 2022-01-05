@@ -28,4 +28,5 @@
 <a href="post_book?book_id={{book.get_id()}}" class="btn btn-primary" role="button">Update</a>
 <a href="instruction?book_id={{book.get_id()}}" class="btn btn-warning" role="button">Instruction</a>
 <a href="delete?book_id={{book.get_id()}}" class="btn btn-danger" role="button" onclick="return confirm('Please confirm your action');">Delete</a>
+<a href="/orders/purchase?book_id={{book.get_id()}}" class="btn btn-primary" role="button" onclick="return confirm('Do you really want to purchase it?');"><i class="bi bi-credit-card"></i> Purchase</a>
 {% endblock actions %}

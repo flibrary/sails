@@ -150,7 +150,8 @@ pub struct Response<T> {
 pub struct SignedResponse<T> {
     #[serde(
         alias = "alipay_trade_query_response",
-        alias = "alipay_trade_precreate_response"
+        alias = "alipay_trade_precreate_response",
+        alias = "alipay_trade_cancel_response"
     )]
     response: Response<T>,
     #[allow(unused)]
@@ -263,6 +264,23 @@ impl<'a> BizContent for TradeQuery<'a> {
     }
 }
 
+#[derive(Serialize, Clone, Debug)]
+pub struct CancelTrade<'a> {
+    out_trade_no: &'a str,
+}
+
+impl<'a> CancelTrade<'a> {
+    pub fn new(out_trade_no: &'a str) -> Self {
+        Self { out_trade_no }
+    }
+}
+
+impl<'a> BizContent for CancelTrade<'a> {
+    fn method(&self) -> &'static str {
+        "alipay.trade.cancel"
+    }
+}
+
 #[derive(Deserialize, Clone, Debug)]
 pub struct PrecreateResp {
     pub qr_code: String,
@@ -271,6 +289,11 @@ pub struct PrecreateResp {
 #[derive(Deserialize, Clone, Debug)]
 pub struct TradeQueryResp {
     pub trade_status: String,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct CancelTradeResp {
+    pub retry_flag: String,
 }
 
 #[cfg(test)]

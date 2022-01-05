@@ -12,8 +12,8 @@
       </div>
       <br>
       <h3>Order refunded (canceled)</h3>
-      If you believe the order info is wrong, click on the refresh button below.
-      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-success" role="button">Refresh</a>
+      If you believe the order status is wrong, click on the refresh button below.<br>
+      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-primary" role="button">Refresh</a>
 
       {% when sails_db::enums::TransactionStatus::Placed %}
       <div class="progress">

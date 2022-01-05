@@ -63,7 +63,7 @@
 	  <td><a href="/market/book_info?book_id={{ order.1.get_product() }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
-	  <td><a href="/admin/refund_order?order_id={{order.1.get_id()}}" class="btn btn-warning" role="button">Cancel</a> <a href="/admin/confirm_order?order_id={{order.1.get_id()}}" class="btn btn-success" role="button">Confirm</a></td>
+	  <td><a href="/admin/refund_order?order_id={{order.1.get_id()}}" class="btn btn-warning" role="button">Cancel</a></td>
 	</tr>
 	{% endfor %}
       </tbody>
