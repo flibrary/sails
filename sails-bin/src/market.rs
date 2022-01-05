@@ -1,12 +1,11 @@
 use askama::Template;
 use rocket::{
     form::Form,
-    request::FlashMessage,
     response::{Flash, Redirect},
 };
 use sails_db::{categories::*, error::SailsDbError, products::*, users::*, Cmp};
 
-use crate::{guards::*, sanitize_html, DbConn, IntoFlash, Msg};
+use crate::{guards::*, sanitize_html, DbConn, IntoFlash};
 
 // Delete can happen if and only if the user is authorized and the product is specified
 #[get("/delete")]
@@ -17,7 +16,7 @@ pub async fn delete_book(
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(move |c| book.book_id.delete(c))
         .await
-        .into_flash(uri!("/market", market))?;
+        .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/market", market)))
 }
 
@@ -41,7 +40,7 @@ pub async fn update_book(
     // The user is the seller, he/she is authorized
     conn.run(move |c| book.book_id.update_owned(c, info.into_inner().verify(c)?))
         .await
-        .into_flash(uri!("/market", market))?;
+        .into_flash(uri!("/"))?;
     Ok(Redirect::to(format!(
         "/market/book_info?book_id={}",
         book_id,
@@ -59,7 +58,7 @@ pub async fn create_book(
     let product_id = conn
         .run(move |c| info.create(c, &user.id))
         .await
-        .into_flash(uri!("/market", market))?;
+        .into_flash(uri!("/"))?;
     Ok(Redirect::to(format!(
         "/market/instruction?book_id={}",
         product_id.get_id()
@@ -88,7 +87,7 @@ pub async fn update_book_page(
         categories: conn
             .run(move |c| Categories::list_leaves(c))
             .await
-            .into_flash(uri!("/market", all_books))?,
+            .into_flash(uri!("/"))?,
         book: book.book_info,
     })
 }
@@ -112,14 +111,14 @@ pub async fn post_book_page(
         categories: conn
             .run(move |c| Categories::list_leaves(c))
             .await
-            .into_flash(uri!("/market", all_books))?,
+            .into_flash(uri!("/"))?,
     })
 }
 
 #[get("/post_book", rank = 3)]
 pub async fn post_book_error_page() -> Flash<Redirect> {
     Flash::error(
-        Redirect::to("/user"),
+        Redirect::to(uri!("/")),
         "please check if you have logged in and authorized to update/create",
     )
 }
@@ -203,7 +202,7 @@ pub async fn book_page_guest(book: BookInfoGuard<ProductInfo>) -> BookPageGuest 
 #[get("/book_info", rank = 4)]
 pub async fn book_page_error() -> Flash<Redirect> {
     Flash::error(
-        Redirect::to(uri!("/market", market)),
+        Redirect::to(uri!("/")),
         "no book found with the given book ID",
     )
 }
@@ -219,7 +218,7 @@ pub struct CategoriesPage {
 pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redirect>> {
     conn.run(move |c| Categories::list_top(c))
         .await
-        .into_flash(uri!("/market", market))
+        .into_flash(uri!("/"))
         .map(|v| CategoriesPage { categories: v })
 }
 
@@ -234,7 +233,7 @@ pub async fn categories(
     let category = conn
         .run(move |c| Categories::find_by_id(c, &category))
         .await
-        .into_flash(uri!("/market", market))?;
+        .into_flash(uri!("/"))?;
 
     // The category is a leaf, meaning that we then have to search for books related to that
     if category.is_leaf() {
@@ -248,7 +247,7 @@ pub async fn categories(
             categories: conn
                 .run(move |c| category.subcategory(c))
                 .await
-                .into_flash(uri!("/market", market))?,
+                .into_flash(uri!("/"))?,
         }))
     }
 }
@@ -259,7 +258,6 @@ pub struct AllBooks {
     // By using Option<Category>, we ensure thatthere will be no panick even if category doesn't exist
     books: Vec<(ProductInfo, Option<Category>)>,
     ctg: Option<String>,
-    inner: crate::Msg,
 }
 
 // List all products
@@ -267,7 +265,6 @@ pub struct AllBooks {
 pub async fn all_books_category(
     conn: DbConn,
     category: String,
-    flash: Option<FlashMessage<'_>>,
 ) -> Result<AllBooks, Flash<Redirect>> {
     let ctg = category.clone();
     Ok(AllBooks {
@@ -295,16 +292,12 @@ pub async fn all_books_category(
             .await
             // We have to redirect errors all the way back to the index page, otherwise a deadlock is formed
             .into_flash(uri!("/"))?,
-        inner: Msg::from_flash(flash),
         ctg: Some(ctg),
     })
 }
 
 #[get("/all_books", rank = 2)]
-pub async fn all_books(
-    conn: DbConn,
-    flash: Option<FlashMessage<'_>>,
-) -> Result<AllBooks, Flash<Redirect>> {
+pub async fn all_books(conn: DbConn) -> Result<AllBooks, Flash<Redirect>> {
     Ok(AllBooks {
         books: conn
             .run(
@@ -327,7 +320,6 @@ pub async fn all_books(
             )
             .await
             .into_flash(uri!("/"))?,
-        inner: Msg::from_flash(flash),
         ctg: None,
     })
 }
@@ -338,7 +330,6 @@ pub struct ExplorePage {
     // By using Option<Category>, we ensure thatthere will be no panick even if category doesn't exist
     books: Vec<(ProductInfo, Option<String>)>,
     ctg: Option<String>,
-    inner: crate::Msg,
 }
 
 fn find_first_image(fragment: &str) -> Option<String> {
@@ -358,7 +349,6 @@ fn find_first_image(fragment: &str) -> Option<String> {
 pub async fn explore_page_ctg(
     conn: DbConn,
     category: String,
-    flash: Option<FlashMessage<'_>>,
 ) -> Result<ExplorePage, Flash<Redirect>> {
     let ctg = category.clone();
     Ok(ExplorePage {
@@ -386,15 +376,11 @@ pub async fn explore_page_ctg(
             .await
             .into_flash(uri!("/"))?,
         ctg: Some(ctg),
-        inner: Msg::from_flash(flash),
     })
 }
 
 #[get("/explore", rank = 2)]
-pub async fn explore_page(
-    conn: DbConn,
-    flash: Option<FlashMessage<'_>>,
-) -> Result<ExplorePage, Flash<Redirect>> {
+pub async fn explore_page(conn: DbConn) -> Result<ExplorePage, Flash<Redirect>> {
     Ok(ExplorePage {
         books: conn
             .run(
@@ -418,7 +404,6 @@ pub async fn explore_page(
             .await
             .into_flash(uri!("/"))?,
         ctg: None,
-        inner: Msg::from_flash(flash),
     })
 }
 

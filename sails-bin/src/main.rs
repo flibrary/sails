@@ -334,7 +334,13 @@ fn rocket() -> Rocket<Build> {
         )
         .mount(
             "/orders",
-            routes![orders::purchase, orders::confirm, orders::order_info,],
+            routes![
+                orders::purchase,
+                orders::confirm,
+                orders::order_info_buyer,
+                orders::order_info_seller,
+                orders::order_info_admin
+            ],
         )
         .mount(
             "/images",

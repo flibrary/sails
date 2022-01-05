@@ -1,12 +1,9 @@
 use crate::{
     guards::{Admin, BookInfoGuard, OrderIdGuard, OrderInfoGuard, Role},
-    DbConn, IntoFlash, Msg,
+    DbConn, IntoFlash,
 };
 use askama::Template;
-use rocket::{
-    request::FlashMessage,
-    response::{Flash, Redirect},
-};
+use rocket::response::{Flash, Redirect};
 use sails_db::{
     enums::{ProductStatus, TransactionStatus},
     error::SailsDbError,
@@ -44,7 +41,6 @@ pub async fn admin_metrics(
 #[derive(Template)]
 #[template(path = "admin/orders.html")]
 pub struct AdminOrdersPage {
-    inner: Msg,
     paid_tx: Vec<(ProductInfo, TransactionInfo)>,
     placed_tx: Vec<(ProductInfo, TransactionInfo)>,
     refunded_tx: Vec<(ProductInfo, TransactionInfo)>,
@@ -54,7 +50,6 @@ pub struct AdminOrdersPage {
 // If the user has already been verified, show him the root dashboard
 #[get("/orders")]
 pub async fn admin_orders(
-    flash: Option<FlashMessage<'_>>,
     _guard: Role<Admin>,
     conn: DbConn,
 ) -> Result<AdminOrdersPage, Flash<Redirect>> {
@@ -147,7 +142,6 @@ pub async fn admin_orders(
         .into_flash(uri!("/"))?;
 
     Ok(AdminOrdersPage {
-        inner: Msg::from_flash(flash),
         paid_tx,
         placed_tx,
         refunded_tx,
@@ -156,9 +150,8 @@ pub async fn admin_orders(
 }
 
 #[derive(Template)]
-#[template(path = "admin/admin.html")]
-pub struct AdminPage {
-    inner: Msg,
+#[template(path = "admin/books.html")]
+pub struct AdminBooksPage {
     normal_books: Vec<ProductInfo>,
     verified_books: Vec<ProductInfo>,
     disabled_books: Vec<ProductInfo>,
@@ -167,10 +160,9 @@ pub struct AdminPage {
 // If the user has already been verified, show him the root dashboard
 #[get("/books")]
 pub async fn admin_books(
-    flash: Option<FlashMessage<'_>>,
     _guard: Role<Admin>,
     conn: DbConn,
-) -> Result<AdminPage, Flash<Redirect>> {
+) -> Result<AdminBooksPage, Flash<Redirect>> {
     let normal_books = conn
         .run(|c| {
             ProductFinder::new(c, None)
@@ -198,11 +190,10 @@ pub async fn admin_books(
         .await
         .into_flash(uri!("/"))?;
 
-    Ok(AdminPage {
+    Ok(AdminBooksPage {
         normal_books,
         disabled_books,
         verified_books,
-        inner: Msg::from_flash(flash),
     })
 }
 
@@ -218,7 +209,7 @@ pub async fn verify_book(
             .update(c)
     })
     .await
-    .into_flash(uri!("/admin", admin_books))?;
+    .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/admin", admin_books)))
 }
 
@@ -250,7 +241,7 @@ pub async fn normalize_book(
             .update(c)
     })
     .await
-    .into_flash(uri!("/admin", admin_books))?;
+    .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/admin", admin_books)))
 }
 
@@ -278,7 +269,7 @@ pub async fn finish_order(
             .update(c)
     })
     .await
-    .into_flash(uri!("/admin", admin_orders))?;
+    .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/admin", admin_orders)))
 }
 
@@ -294,7 +285,7 @@ pub async fn confirm_order(
             .update(c)
     })
     .await
-    .into_flash(uri!("/admin", admin_orders))?;
+    .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/admin", admin_orders)))
 }
 

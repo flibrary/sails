@@ -1,13 +1,12 @@
 use crate::{
     guards::{Param, Role, Root, UserIdGuard, UserInfoGuard},
     recaptcha::ReCaptcha,
-    DbConn, IntoFlash, Msg,
+    DbConn, IntoFlash,
 };
 use askama::Template;
 use rocket::{
     form::Form,
     http::{Cookie, CookieJar},
-    request::FlashMessage,
     response::{Flash, Redirect},
     State,
 };
@@ -48,11 +47,11 @@ pub async fn validate(
     if !recaptcha
         .verify(&info.recaptcha_token)
         .await
-        .map_err(|e| Flash::error(Redirect::to(uri!("/root", root)), e.to_string()))?
+        .into_flash(uri!("/"))?
         .success
     {
         return Err(Flash::error(
-            Redirect::to(uri!("/root", root)),
+            Redirect::to(uri!("/")),
             "reCAPTCHA was unsuccessful".to_string(),
         ));
     };
@@ -64,27 +63,19 @@ pub async fn validate(
         jar.add_private(cookie);
         Ok(Redirect::to(uri!("/root", root)))
     } else {
-        Err(Flash::error(
-            Redirect::to(uri!("/root", root)),
-            "Incorrect password",
-        ))
+        Err(Flash::error(Redirect::to(uri!("/")), "Incorrect password"))
     }
 }
 
 #[derive(Template)]
 #[template(path = "root/root_verify.html")]
 pub struct RootVerifyPage {
-    inner: Msg,
     recaptcha_key: String,
 }
 
 #[get("/root_verify")]
-pub async fn root_verify<'a>(
-    flash: Option<FlashMessage<'_>>,
-    recaptcha: &State<ReCaptcha>,
-) -> RootVerifyPage {
+pub async fn root_verify<'a>(recaptcha: &State<ReCaptcha>) -> RootVerifyPage {
     RootVerifyPage {
-        inner: Msg::from_flash(flash),
         recaptcha_key: recaptcha.recaptcha_site_key().to_string(),
     }
 }
@@ -92,22 +83,14 @@ pub async fn root_verify<'a>(
 #[derive(Template)]
 #[template(path = "root/root.html")]
 pub struct RootPage {
-    inner: Msg,
     users: Vec<UserInfo>,
 }
 
 // If the user has already been verified, show him the root dashboard
 #[get("/", rank = 1)]
-pub async fn root(
-    flash: Option<FlashMessage<'_>>,
-    _guard: Role<Root>,
-    conn: DbConn,
-) -> Result<RootPage, Redirect> {
+pub async fn root(_guard: Role<Root>, conn: DbConn) -> Result<RootPage, Redirect> {
     let users = conn.run(|c| UserFinder::list_info(c)).await.unwrap(); // No error should be tolerated here (database error). 500 is expected
-    Ok(RootPage {
-        users,
-        inner: Msg::from_flash(flash),
-    })
+    Ok(RootPage { users })
 }
 
 // If the visitor has not yet been verified, redirect them to verification page
@@ -127,7 +110,7 @@ pub async fn promote(
         info.info.set_user_status(upgraded).update(c).map(|_| ())
     })
     .await
-    .into_flash(uri!("/root", root))?;
+    .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/root", root)))
 }
 
@@ -142,7 +125,7 @@ pub async fn downgrade(
         info.info.set_user_status(downgraded).update(c).map(|_| ())
     })
     .await
-    .into_flash(uri!("/root", root))?;
+    .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/root", root)))
 }
 
@@ -152,9 +135,7 @@ pub async fn delete_user(
     id: UserIdGuard<Param>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    conn.run(|c| id.id.delete(c))
-        .await
-        .into_flash(uri!("/root", root))?;
+    conn.run(|c| id.id.delete(c)).await.into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/root", root)))
 }
 
@@ -166,7 +147,7 @@ pub async fn activate_user(
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(|c| info.info.set_validated(true).update(c))
         .await
-        .into_flash(uri!("/root", root))?;
+        .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/root", root)))
 }
 
@@ -178,5 +159,5 @@ pub async fn logout(jar: &CookieJar<'_>) -> Redirect {
         // No UID specified, do nothing
     }
     // Redirect back to home
-    Redirect::to("/")
+    Redirect::to(uri!("/"))
 }

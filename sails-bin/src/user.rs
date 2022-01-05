@@ -4,17 +4,12 @@ use crate::{
     recaptcha::ReCaptcha,
     sanitize_html,
     smtp::SmtpCreds,
-    DbConn, IntoFlash, Msg,
+    DbConn, IntoFlash,
 };
 use askama::Template;
-use lettre::{
-    transport::smtp::authentication::Credentials, AsyncSmtpTransport, AsyncTransport, Message,
-    Tokio1Executor,
-};
 use rocket::{
     form::{Form, Strict},
     http::{Cookie as HttpCookie, CookieJar},
-    request::FlashMessage,
     response::{Flash, Redirect},
     State,
 };
@@ -26,36 +21,15 @@ use sails_db::{
     users::*,
 };
 
-async fn send_verification_email(
-    dst: &str,
-    aead: &AeadKey,
-    smtp: &SmtpCreds,
-) -> anyhow::Result<()> {
-    let uri = format!(
-        "Your activation link: https://flibrary.info/user/activate?enc_user_id={}",
+fn generate_verification_link(dst: &str, aead: &AeadKey) -> anyhow::Result<String> {
+    Ok(format!(
+        "https://flibrary.info/user/activate?enc_user_id={}",
         base64::encode_config(
             aead.encrypt(dst.as_bytes())
                 .map_err(|_| anyhow::anyhow!("mailaddress encryption failed"))?,
             base64::URL_SAFE
         )
-    );
-
-    let email = Message::builder()
-        .from(smtp.smtp_username.parse()?)
-        // We have already checked it once
-        .to(dst.parse()?)
-        .subject("FLibrary registration verification link")
-        .body(uri)?;
-
-    let creds = Credentials::new(smtp.smtp_username.clone(), smtp.smtp_password.clone());
-
-    let mailer: AsyncSmtpTransport<Tokio1Executor> =
-        AsyncSmtpTransport::<Tokio1Executor>::starttls_relay(&smtp.smtp_server)?
-            .credentials(creds)
-            .build();
-
-    mailer.send(email).await?;
-    Ok(())
+    ))
 }
 
 #[derive(FromForm)]
@@ -74,32 +48,23 @@ pub struct Validation {
 
 #[derive(Template)]
 #[template(path = "user/signin.html")]
-pub struct SignInPage {
-    inner: Msg,
-}
+pub struct SignInPage;
 
 // This would be mounted under namespace `user` and eventually become `/user/signin`
 #[get("/signin")]
-pub async fn signin<'a>(flash: Option<FlashMessage<'_>>) -> SignInPage {
-    SignInPage {
-        inner: Msg::from_flash(flash),
-    }
+pub async fn signin<'a>() -> SignInPage {
+    SignInPage
 }
 
 #[derive(Template)]
 #[template(path = "user/signup.html")]
 pub struct SignUpPage {
-    inner: Msg,
     recaptcha_key: String,
 }
 
 #[get("/signup")]
-pub async fn signup<'a>(
-    flash: Option<FlashMessage<'_>>,
-    recaptcha: &State<ReCaptcha>,
-) -> SignUpPage {
+pub async fn signup<'a>(recaptcha: &State<ReCaptcha>) -> SignUpPage {
     SignUpPage {
-        inner: Msg::from_flash(flash),
         recaptcha_key: recaptcha.recaptcha_site_key().to_string(),
     }
 }
@@ -115,11 +80,11 @@ pub async fn create_user(
     if !recaptcha
         .verify(&info.recaptcha_token)
         .await
-        .map_err(|e| Flash::error(Redirect::to(uri!("/user", portal)), e.to_string()))?
+        .into_flash(uri!("/"))?
         .success
     {
         return Err(Flash::error(
-            Redirect::to(uri!("/user", portal)),
+            Redirect::to(uri!("/")),
             "reCAPTCHA was unsuccessful".to_string(),
         ));
     };
@@ -129,12 +94,18 @@ pub async fn create_user(
         .user_info
         .id
         .parse::<lettre::Address>()
-        .into_flash(uri!("/user", signup))?;
+        .into_flash(uri!("/"))?;
     if email.domain() == "outlook.com" {
-        send_verification_email(&info.user_info.id, aead, smtp)
-            .await
-            .into_flash(uri!("/user", portal))?;
+        smtp.send(
+            &info.user_info.id,
+            "Your FLibrary verification email",
+            generate_verification_link(&info.user_info.id, aead).into_flash(uri!("/"))?,
+        )
+        .await
+        .into_flash(uri!("/"))?;
         // Sanitize the html
+        // Even though we didn't give user a chance to type in description,
+        // malicious users can still manually post the form to us.
         info.user_info.description = info
             .user_info
             .description
@@ -142,11 +113,11 @@ pub async fn create_user(
             .map(|d| sanitize_html(d));
         conn.run(move |c| info.user_info.to_ref()?.create(c))
             .await
-            .into_flash(uri!("/user", portal))?;
+            .into_flash(uri!("/"))?;
         Ok(Redirect::to(uri!("/user", signup_instruction)))
     } else {
         Err(Flash::error(
-            Redirect::to(uri!("/user", portal)),
+            Redirect::to(uri!("/")),
             "please use outlook email addresses",
         ))
     }
@@ -184,7 +155,7 @@ pub async fn update_user(
             .update(c)
     })
     .await
-    .into_flash(uri!("/user", portal))?;
+    .into_flash(uri!("/"))?;
 
     Ok(Redirect::to(uri!("/user", portal)))
 }
@@ -206,7 +177,7 @@ pub async fn change_passwd_post(
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(move |c| user.info.set_password(password.into_inner())?.update(c))
         .await
-        .into_flash(uri!("/user", portal))?;
+        .into_flash(uri!("/"))?;
 
     Ok(Redirect::to(uri!("/user", portal)))
 }
@@ -227,7 +198,7 @@ pub async fn activate_user(
 ) -> Result<Redirect, Flash<Redirect>> {
     conn.run(move |c| info.info.set_validated(true).update(c))
         .await
-        .into_flash(uri!("/user", portal))?;
+        .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/user", email_verified)))
 }
 
@@ -240,7 +211,7 @@ pub async fn validate(
     let user = conn
         .run(move |c| UserId::login(c, &info.email, &info.password))
         .await
-        .into_flash(uri!("/user", portal))?;
+        .into_flash(uri!("/"))?;
     let mut cookie = HttpCookie::new("uid", user.get_id().to_string());
     cookie.set_secure(true);
     // Successfully validated, set private cookie.
@@ -256,7 +227,7 @@ pub async fn logout(jar: &CookieJar<'_>) -> Redirect {
         // No UID specified, do nothing
     }
     // Redirect back to home
-    Redirect::to("/")
+    Redirect::to(uri!("/"))
 }
 
 #[derive(Template)]
@@ -275,7 +246,6 @@ pub async fn update_user_page(user: UserInfoGuard<Cookie>) -> UpdateUserPage {
 pub struct PortalGuestPage {
     user: UserInfo,
     books: Vec<(ProductInfo, Option<Category>)>,
-    inner: Msg,
 }
 
 #[derive(Template)]
@@ -285,12 +255,10 @@ pub struct PortalPage {
     books: Vec<(ProductInfo, Option<Category>)>,
     orders_placed: Vec<(ProductInfo, TransactionInfo)>,
     orders_received: Vec<(ProductInfo, TransactionInfo)>,
-    inner: Msg,
 }
 
 #[get("/", rank = 1)]
 pub async fn portal_guest(
-    flash: Option<FlashMessage<'_>>,
     _signedin: UserIdGuard<Cookie>,
     user: UserInfoGuard<Param>,
     conn: DbConn,
@@ -317,17 +285,12 @@ pub async fn portal_guest(
     Ok(PortalGuestPage {
         user: user.info,
         books,
-        inner: Msg::from_flash(flash),
     })
 }
 
 // The flash message is required here because we may get error from update_user
 #[get("/", rank = 2)]
-pub async fn portal(
-    flash: Option<FlashMessage<'_>>,
-    user: UserInfoGuard<Cookie>,
-    conn: DbConn,
-) -> Result<PortalPage, Redirect> {
+pub async fn portal(user: UserInfoGuard<Cookie>, conn: DbConn) -> Result<PortalPage, Redirect> {
     let uid = user.info.get_id().to_string();
 
     let uid_cloned = uid.clone();
@@ -393,7 +356,6 @@ pub async fn portal(
         orders_placed,
         orders_received,
         books,
-        inner: Msg::from_flash(flash),
     })
 }
 

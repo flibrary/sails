@@ -3,7 +3,6 @@
 
 {% block content %}
 <main class="container">
-  {% include "display_flash.html" %}
   <div class="p-5 rounded shadow">
     <h1>You are now at the admin order dashboard</h1>
     <p class="lead">Please make sure every action you make has been well-thought.</p>
@@ -26,7 +25,7 @@
       <tbody>
 	{% for order in paid_tx %}
 	<tr>
-	  <th scope="row"><a href="/orders/admin_order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
+	  <th scope="row"><a href="/orders/order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="/market/book_info?book_id={{ order.1.get_product() }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
@@ -60,7 +59,7 @@
       <tbody>
 	{% for order in placed_tx %}
 	<tr>
-	  <th scope="row"><a href="/orders/admin_order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
+	  <th scope="row"><a href="/orders/order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="/market/book_info?book_id={{ order.1.get_product() }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
@@ -93,7 +92,7 @@
       <tbody>
 	{% for order in refunded_tx %}
 	<tr>
-	  <th scope="row"><a href="/orders/admin_order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
+	  <th scope="row"><a href="/orders/order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="/market/book_info?book_id={{ order.1.get_product() }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
@@ -127,7 +126,7 @@
       <tbody>
 	{% for order in finished_tx %}
 	<tr>
-	  <th scope="row"><a href="/orders/admin_order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
+	  <th scope="row"><a href="/orders/order_info?order_id={{ order.1.get_id() }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="/market/book_info?book_id={{ order.1.get_product() }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>

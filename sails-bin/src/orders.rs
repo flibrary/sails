@@ -14,21 +14,50 @@ use rocket::{
 use sails_db::{enums::TransactionStatus, products::*, transactions::*};
 
 #[derive(Template)]
+#[template(path = "orders/order_info_seller_or_admin.html")]
+pub struct OrderInfoSellerOrAdmin {
+    book: ProductInfo,
+    order: TransactionInfo,
+}
+
+#[get("/order_info", rank = 3)]
+pub async fn order_info_admin(
+    _buyer: Role<Admin>,
+    order: OrderInfoGuard,
+) -> OrderInfoSellerOrAdmin {
+    OrderInfoSellerOrAdmin {
+        book: order.book_info,
+        order: order.order_info,
+    }
+}
+
+#[get("/order_info", rank = 2)]
+pub async fn order_info_seller(
+    _buyer: Role<Seller>,
+    order: OrderInfoGuard,
+) -> OrderInfoSellerOrAdmin {
+    OrderInfoSellerOrAdmin {
+        book: order.book_info,
+        order: order.order_info,
+    }
+}
+
+#[derive(Template)]
 #[template(path = "orders/order_info.html")]
-pub struct OrderInfo {
+pub struct OrderInfoBuyer {
     book: ProductInfo,
     order: TransactionInfo,
     // Alipay precreate API response
     resp: Option<Result<PrecreateResp, SignedResponse<PrecreateResp>>>,
 }
 
-#[get("/order_info")]
-pub async fn order_info(
+#[get("/order_info", rank = 1)]
+pub async fn order_info_buyer(
     _buyer: Role<Buyer>,
     order: OrderInfoGuard,
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
-) -> Result<OrderInfo, Flash<Redirect>> {
+) -> Result<OrderInfoBuyer, Flash<Redirect>> {
     if order.order_info.get_transaction_status() == &TransactionStatus::Placed {
         // It seems like we could request precreation even if the user has already paid the bill or the trade has already been created.
         // If, in the future, this behavior changes, we have to come up with a better mechanism.
@@ -43,17 +72,17 @@ pub async fn order_info(
                     order.book_info.get_price(),
                 ),
             )
-            .into_flash(uri!("/user", crate::user::portal))?
+            .into_flash(uri!("/"))?
             .send::<PrecreateResp>()
             .await
-            .into_flash(uri!("/user", crate::user::portal))?;
-        Ok(OrderInfo {
+            .into_flash(uri!("/"))?;
+        Ok(OrderInfoBuyer {
             book: order.book_info,
             order: order.order_info,
             resp: Some(resp),
         })
     } else {
-        Ok(OrderInfo {
+        Ok(OrderInfoBuyer {
             book: order.book_info,
             order: order.order_info,
             resp: None,
@@ -73,11 +102,11 @@ pub async fn confirm(
 
     let resp = client
         .request(priv_key, TradeQuery::new(order.order_info.get_id()))
-        .into_flash(uri!("/user", crate::user::portal))?
+        .into_flash(uri!("/"))?
         .send::<TradeQueryResp>()
         .await
-        .into_flash(uri!("/user", crate::user::portal))?
-        .into_flash(uri!("/user", crate::user::portal))?;
+        .into_flash(uri!("/"))?
+        .into_flash(uri!("/"))?;
 
     // Both of these indicate that we have successfully finished the transaction.
     // TRADE_FINISHED indicates it has been well pass the refunding deadline.
@@ -91,7 +120,7 @@ pub async fn confirm(
                     .update(c)
             })
             .await
-            .into_flash(uri!("/user", crate::user::portal))?;
+            .into_flash(uri!("/"))?;
         }
     }
     Ok(Redirect::to(format!("/orders/order_info?order_id={}", id)))
@@ -106,7 +135,7 @@ pub async fn purchase(
     let id = db
         .run(move |c| Transactions::buy(c, &book.book_id, &user.id))
         .await
-        .into_flash(uri!("/user", crate::user::portal))?;
+        .into_flash(uri!("/"))?;
 
     Ok(Redirect::to(format!(
         "/orders/order_info?order_id={}",

@@ -1,8 +1,7 @@
-use crate::{guards::*, DbConn, IntoFlash, Msg};
+use crate::{guards::*, DbConn, IntoFlash};
 use askama::Template;
 use rocket::{
     form::Form,
-    request::FlashMessage,
     response::{Flash, Redirect},
 };
 use sails_db::{
@@ -26,7 +25,7 @@ pub async fn send(
     let receiver_id = receiver.id.clone();
     conn.run(move |c| Messages::send(c, &user.id, &receiver.id, &info.body))
         .await
-        .into_flash(uri!("/messages"))?;
+        .into_flash(uri!("/"))?;
     Ok(Redirect::to(format!(
         "/messages/chat?user_id={}#draft_section",
         receiver_id.get_id()
@@ -69,12 +68,10 @@ pub async fn chat(
 #[template(path = "messages/portal.html")]
 pub struct PortalPage {
     message_list: Vec<Message>,
-    inner: Msg,
 }
 
 #[get("/")]
 pub async fn portal(
-    flash: Option<FlashMessage<'_>>,
     user: Option<UserIdGuard<Cookie>>,
     conn: DbConn,
 ) -> Result<PortalPage, Flash<Redirect>> {
@@ -83,13 +80,10 @@ pub async fn portal(
             .run(move |c| Messages::get_list(c, &user))
             .await
             .into_flash(uri!("/"))?;
-        Ok(PortalPage {
-            message_list,
-            inner: Msg::from_flash(flash),
-        })
+        Ok(PortalPage { message_list })
     } else {
         Err(Flash::error(
-            Redirect::to(uri!("/user", crate::user::signin)),
+            Redirect::to(uri!("/")),
             "sign in to view messages",
         ))
     }

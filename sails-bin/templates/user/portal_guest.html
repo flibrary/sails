@@ -15,11 +15,10 @@
 </style>
 {% endblock head %}
 {% block title %}{{user.get_name()}}'s Portal{% endblock title %}
-{% block navbutton %}<li class="nav-item"><a href="/user/logout" class="btn btn-warning" role="button">Log out</a></li>{% endblock navbutton %}
+{% block navbutton %}<li class="nav-item"><a href="/user/logout" class="btn btn-warning" role="button"><i class="bi bi-box-arrow-left"></i> Log out</a></li>{% endblock navbutton %}
 
 {% block content %}
 <main class="container">
-  {% include "display_flash.html" %}
   <div class="p-5 rounded shadow">
     <h1>Welcome to {{ user.get_name() }}'s portal</h1>
     <p class="lead">{% block intro %}This page helps you to find more out about {{ user.get_name() }}.{% endblock intro %}</p>
