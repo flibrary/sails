@@ -1,10 +1,6 @@
 use crate::{
-    aead::AeadKey,
-    guards::{Aead, Cookie, Param, UserIdGuard, UserInfoGuard},
-    recaptcha::ReCaptcha,
-    sanitize_html,
-    smtp::SmtpCreds,
-    DbConn, IntoFlash,
+    aead::AeadKey, guards::*, recaptcha::ReCaptcha, sanitize_html, smtp::SmtpCreds, DbConn,
+    IntoFlash,
 };
 use askama::Template;
 use rocket::{

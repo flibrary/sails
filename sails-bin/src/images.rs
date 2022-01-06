@@ -1,4 +1,4 @@
-use crate::guards::{Cookie, UserIdGuard};
+use crate::guards::*;
 use reqwest::header::ACCEPT;
 use rocket::{
     data::ToByteUnit,

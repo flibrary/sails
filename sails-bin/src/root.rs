@@ -1,8 +1,4 @@
-use crate::{
-    guards::{Param, Role, Root, UserIdGuard, UserInfoGuard},
-    recaptcha::ReCaptcha,
-    DbConn, IntoFlash,
-};
+use crate::{guards::*, recaptcha::ReCaptcha, DbConn, IntoFlash};
 use askama::Template;
 use rocket::{
     form::Form,

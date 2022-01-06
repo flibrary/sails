@@ -1,6 +1,6 @@
 use crate::{
     alipay::{AlipayAppPrivKey, AlipayClient, CancelTrade, CancelTradeResp},
-    guards::{Admin, BookInfoGuard, OrderIdGuard, OrderInfoGuard, Role},
+    guards::*,
     DbConn, IntoFlash,
 };
 use askama::Template;
