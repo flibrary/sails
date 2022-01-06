@@ -10,7 +10,7 @@ use crate::{guards::*, sanitize_html, DbConn, IntoFlash};
 // Delete can happen if and only if the user is authorized and the product is specified
 #[get("/delete")]
 pub async fn delete_book(
-    _auth: Role<BookAuthorized>,
+    _auth: Auth<BookRemovable>,
     book: BookIdGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -30,8 +30,7 @@ pub async fn delete_book(
 #[post("/cow_book", data = "<info>", rank = 1)]
 pub async fn update_book(
     book: BookIdGuard,
-    _user: UserIdGuard<Cookie>,
-    _auth: Role<BookAuthorized>,
+    _auth: Auth<BookWritable>,
     mut info: Form<IncompleteProductOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -56,7 +55,7 @@ pub async fn create_book(
 ) -> Result<Redirect, Flash<Redirect>> {
     info.description = sanitize_html(&info.description);
     let product_id = conn
-        .run(move |c| info.create(c, &user.id))
+        .run(move |c| info.create(c, &user.id, &user.id))
         .await
         .into_flash(uri!("/"))?;
     Ok(Redirect::to(format!(
@@ -76,9 +75,7 @@ pub struct UpdateBook {
 #[get("/post_book", rank = 1)]
 pub async fn update_book_page(
     conn: DbConn,
-    // Can we remove this guard
-    // _user: UserIdGuard<Cookie>,
-    _auth: Role<BookAuthorized>,
+    _auth: Auth<BookWritable>,
     book: BookInfoGuard<ProductInfo>,
 ) -> Result<UpdateBook, Flash<Redirect>> {
     Ok(UpdateBook {
@@ -133,7 +130,7 @@ pub struct InstructionPage {
 #[get("/instruction")]
 pub async fn instruction(
     book: BookInfoGuard<ProductInfo>,
-    _auth: Role<BookAuthorized>,
+    _auth: Auth<BookWritable>,
 ) -> Result<InstructionPage, Flash<Redirect>> {
     Ok(InstructionPage {
         info: book.book_info,
@@ -167,7 +164,7 @@ pub struct BookPageGuest {
 #[get("/book_info", rank = 1)]
 pub async fn book_page_owned(
     book: BookInfoGuard<ProductInfo>,
-    _auth: Role<BookAuthorized>,
+    _auth: Auth<BookWritable>,
 ) -> BookPageOwned {
     BookPageOwned {
         book: book.book_info,
@@ -180,7 +177,7 @@ pub async fn book_page_owned(
 #[get("/book_info", rank = 2)]
 pub async fn book_page_user(
     book: BookInfoGuard<ProductInfo>,
-    _user: UserIdGuard<Cookie>,
+    _auth: Auth<BookReadable>,
 ) -> BookPageUser {
     BookPageUser {
         book: book.book_info,

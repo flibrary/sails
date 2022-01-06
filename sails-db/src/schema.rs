@@ -25,6 +25,7 @@ table! {
         id -> Text,
         shortid -> Text,
         seller_id -> Text,
+        operator_id -> Text,
         category -> Text,
         prodname -> Text,
         price -> BigInt,
@@ -49,9 +50,6 @@ table! {
 }
 
 table! {
-    use diesel::sql_types::*;
-    use crate::enums::*;
-
     users (id) {
         id -> Text,
         name -> Text,
@@ -59,12 +57,11 @@ table! {
         hashed_passwd -> Text,
         validated -> Bool,
         description -> Nullable<Text>,
-        user_status -> UserStatusMapping,
+        user_status -> BigInt,
     }
 }
 
 joinable!(products -> categories (category));
-joinable!(products -> users (seller_id));
 joinable!(transactions -> products (product));
 
 allow_tables_to_appear_in_same_query!(categories, messages, products, transactions, users,);

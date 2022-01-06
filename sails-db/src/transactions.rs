@@ -167,8 +167,8 @@ impl TransactionInfo {
     }
 
     /// Get a reference to the transaction info's seller.
-    pub fn seller(&self) -> &String {
-        &self.seller
+    pub fn get_seller(&self) -> &str {
+        self.seller.as_str()
     }
 }
 
@@ -425,7 +425,7 @@ mod tests {
             700,
             "A very great book on the subject of Economics",
         )
-        .create(&conn, &seller)
+        .create(&conn, &seller, &seller)
         .unwrap();
 
         // Unverified products are not subjected to purchases.
@@ -543,7 +543,7 @@ mod tests {
             400,
             "A very great book on the subject of Economics",
         )
-        .create(&conn, &seller)
+        .create(&conn, &seller, &seller)
         .unwrap();
 
         // Placed
@@ -553,7 +553,7 @@ mod tests {
             300,
             "A very great book on the subject of Economics",
         )
-        .create(&conn, &seller)
+        .create(&conn, &seller, &seller)
         .unwrap();
 
         // Paid
@@ -563,7 +563,7 @@ mod tests {
             350,
             "A very great book on the subject of Economics",
         )
-        .create(&conn, &seller)
+        .create(&conn, &seller, &seller)
         .unwrap();
 
         // Finished
@@ -573,7 +573,7 @@ mod tests {
             700,
             "A very great book on the subject of Economics",
         )
-        .create(&conn, &seller)
+        .create(&conn, &seller, &seller)
         .unwrap();
 
         // Refunded
@@ -583,7 +583,7 @@ mod tests {
             1000,
             "A very great book on the subject of Economics",
         )
-        .create(&conn, &seller)
+        .create(&conn, &seller, &seller)
         .unwrap();
 
         // Verify the books

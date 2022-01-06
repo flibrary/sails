@@ -7,7 +7,7 @@ use rocket::{
     State,
 };
 use sails_db::{
-    enums::Status,
+    enums::UserStatus,
     users::{UserFinder, UserInfo},
 };
 use serde::{Deserialize, Serialize};
@@ -95,34 +95,42 @@ pub async fn unverified_root() -> Redirect {
     Redirect::to(uri!("/root", root_verify))
 }
 
-#[get("/promote_user")]
-pub async fn promote(
-    _guard: Role<Root>,
-    info: UserInfoGuard<Param>,
-    conn: DbConn,
-) -> Result<Redirect, Flash<Redirect>> {
-    conn.run(|c| {
-        let upgraded = info.info.get_user_status().up();
-        info.info.set_user_status(upgraded).update(c).map(|_| ())
-    })
-    .await
-    .into_flash(uri!("/"))?;
-    Ok(Redirect::to(uri!("/root", root)))
+#[derive(Template)]
+#[template(path = "root/user_status.html")]
+pub struct UserStatusPage {
+    user: UserInfo,
 }
 
-#[get("/downgrade_user")]
-pub async fn downgrade(
+#[get("/user_status")]
+pub async fn user_status(
     _guard: Role<Root>,
-    info: UserInfoGuard<Param>,
+    user: UserInfoGuard<Param>,
+) -> Result<UserStatusPage, Redirect> {
+    Ok(UserStatusPage { user: user.info })
+}
+
+#[derive(Debug, FromForm, Clone)]
+pub struct UserStatusForm {
+    pub status: u32,
+}
+
+#[post("/user_status", data = "<info>")]
+pub async fn update_user_status(
+    _guard: Role<Root>,
     conn: DbConn,
+    user: UserInfoGuard<Param>,
+    info: Form<UserStatusForm>,
 ) -> Result<Redirect, Flash<Redirect>> {
-    conn.run(|c| {
-        let downgraded = info.info.get_user_status().down();
-        info.info.set_user_status(downgraded).update(c).map(|_| ())
-    })
-    .await
-    .into_flash(uri!("/"))?;
-    Ok(Redirect::to(uri!("/root", root)))
+    let id = user.info.get_id().to_string();
+    if let Some(status) = UserStatus::from_bits(info.status) {
+        conn.run(move |c| user.info.set_user_status(status).update(c))
+            .await
+            .into_flash(uri!("/"))?;
+        // We cannot get uri macro working
+        Ok(Redirect::to(format!("/root/user_status?user_id={}", id)))
+    } else {
+        Err(Flash::error(Redirect::to(uri!("/")), "invalid level"))
+    }
 }
 
 #[get("/delete_user")]

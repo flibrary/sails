@@ -43,7 +43,7 @@ impl UserId {
         let info = user.get_info(conn)?;
 
         // If the user is disabled, he will not be allowed to login
-        if info.get_user_status() != &UserStatus::Disabled {
+        if info.get_user_status() != UserStatus::DISABLED {
             if info.get_validated() {
                 match info.verify_passwd(passwd_provided) {
                     Ok(true) => {
@@ -102,13 +102,13 @@ impl<'a> UserFinder<'a> {
 
     pub fn stats(conn: &'a SqliteConnection) -> Result<UserStats> {
         let disabled = Self::new(conn, None)
-            .status(&UserStatus::Disabled, Cmp::Equal)
+            .status(&UserStatus::DISABLED, Cmp::Equal)
             .count()?;
         let normal = Self::new(conn, None)
-            .status(&UserStatus::Normal, Cmp::Equal)
+            .status(&UserStatus::NORMAL, Cmp::Equal)
             .count()?;
         let admin = Self::new(conn, None)
-            .status(&UserStatus::Admin, Cmp::Equal)
+            .status(&UserStatus::ADMIN, Cmp::Equal)
             .count()?;
 
         Ok(UserStats {
@@ -178,8 +178,8 @@ impl<'a> UserFinder<'a> {
     pub fn status(mut self, status: &'a UserStatus, cmp: Cmp) -> Self {
         use crate::schema::users::dsl::*;
         match cmp {
-            Cmp::Equal => self.query = self.query.filter(user_status.eq(status)),
-            Cmp::NotEqual => self.query = self.query.filter(user_status.ne(status)),
+            Cmp::Equal => self.query = self.query.filter(user_status.eq(status.bits() as i64)),
+            Cmp::NotEqual => self.query = self.query.filter(user_status.ne(status.bits() as i64)),
             // Currently it makes no sense for us to do so
             _ => unimplemented!(),
         }
@@ -188,7 +188,9 @@ impl<'a> UserFinder<'a> {
 
     pub fn allowed(mut self) -> Self {
         use crate::schema::users::dsl::*;
-        self.query = self.query.filter(user_status.ne(UserStatus::Disabled));
+        self.query = self
+            .query
+            .filter(user_status.ne(UserStatus::DISABLED.bits() as i64));
         self
     }
 
@@ -208,7 +210,7 @@ pub struct UserInfo {
     hashed_passwd: String,
     validated: bool,
     description: Option<String>,
-    user_status: UserStatus,
+    user_status: i64,
 }
 
 impl UserInfo {
@@ -259,19 +261,19 @@ impl UserInfo {
     }
 
     /// Get a reference to the user info's user status.
-    pub fn get_user_status(&self) -> &UserStatus {
-        &self.user_status
+    pub fn get_user_status(&self) -> UserStatus {
+        UserStatus::from_bits_truncate(self.user_status as u32)
     }
 
     /// Set the user info's user status.
     pub fn set_user_status(mut self, user_status: UserStatus) -> Self {
-        self.user_status = user_status;
+        self.user_status = user_status.bits() as i64;
         self
     }
 
     /// See if the user is admin or not
     pub fn is_admin(&self) -> bool {
-        self.user_status == UserStatus::Admin
+        UserStatus::from_bits_truncate(self.user_status as u32).contains(UserStatus::ADMIN)
     }
 
     /// Get a reference to the user info's validated.
@@ -309,7 +311,7 @@ pub struct UserInfoRef<'a> {
     validated: bool,
     description: Option<&'a str>,
     // This is owned because it was created when convert to UserInfoRef
-    user_status: UserStatus,
+    user_status: i64,
 }
 
 impl<'a> UserInfoRef<'a> {
@@ -411,7 +413,7 @@ impl<'a> UserForm<'a> {
             name: self.name,
             validated: false,
             description: self.description,
-            user_status: UserStatus::default(),
+            user_status: UserStatus::default().bits() as i64,
         })
     }
 }

@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS users (
   hashed_passwd VARCHAR(60) NOT NULL,
   validated BOOLEAN NOT NULL DEFAULT FALSE,
   description VARCHAR(400),
-  user_status TEXT CHECK(user_status IN ('normal', 'admin', 'disabled')) NOT NULL
+  user_status UNSIGNED BIG INT NOT NULL
 );

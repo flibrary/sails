@@ -1,15 +1,18 @@
-use super::{books::*, orders::*, users::*};
+use super::users::*;
 use rocket::{
     outcome::{try_outcome, Outcome},
     request::FromRequest,
 };
+use sails_db::enums::UserStatus;
 use std::marker::PhantomData;
 
 pub struct Root;
 pub struct Admin;
-pub struct BookAuthorized;
-pub struct Buyer;
-pub struct Seller;
+pub struct StoreKeeper;
+pub struct CustomerService;
+pub struct Normal;
+pub struct Disabled;
+
 pub struct Role<T> {
     plhdr: PhantomData<T>,
 }
@@ -33,57 +36,6 @@ impl<'r> FromRequest<'r> for Role<Root> {
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for Role<Seller> {
-    type Error = ();
-
-    async fn from_request(
-        request: &'r rocket::Request<'_>,
-    ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        let order = try_outcome!(request.guard::<OrderInfoGuard>().await);
-        if order.book_info.get_seller_id() == user.info.get_id() {
-            Outcome::Success(Role { plhdr: PhantomData })
-        } else {
-            Outcome::Forward(())
-        }
-    }
-}
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for Role<Buyer> {
-    type Error = ();
-
-    async fn from_request(
-        request: &'r rocket::Request<'_>,
-    ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        let order = try_outcome!(request.guard::<OrderInfoGuard>().await);
-        if order.order_info.get_buyer() == user.info.get_id() {
-            Outcome::Success(Role { plhdr: PhantomData })
-        } else {
-            Outcome::Forward(())
-        }
-    }
-}
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for Role<BookAuthorized> {
-    type Error = ();
-
-    async fn from_request(
-        request: &'r rocket::Request<'_>,
-    ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        let book = try_outcome!(request.guard::<BookIdGuard>().await);
-        if (book.seller_id.get_id() == user.info.get_id()) || user.info.is_admin() {
-            Outcome::Success(Role { plhdr: PhantomData })
-        } else {
-            Outcome::Forward(())
-        }
-    }
-}
-
-#[rocket::async_trait]
 impl<'r> FromRequest<'r> for Role<Admin> {
     type Error = ();
 
@@ -91,7 +43,80 @@ impl<'r> FromRequest<'r> for Role<Admin> {
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        if user.info.is_admin() {
+        if user.info.get_user_status().contains(UserStatus::ADMIN) {
+            Outcome::Success(Role { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Role<StoreKeeper> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        if user
+            .info
+            .get_user_status()
+            .contains(UserStatus::STORE_KEEPER)
+        {
+            Outcome::Success(Role { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Role<CustomerService> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        if user
+            .info
+            .get_user_status()
+            .contains(UserStatus::CUSTOMER_SERVICE)
+        {
+            Outcome::Success(Role { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Role<Normal> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        if user.info.get_user_status().contains(UserStatus::NORMAL) {
+            Outcome::Success(Role { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Role<Disabled> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        // Disabled user has no permission, we CANNOT use contains otherwise everyone is disabled!
+        if user.info.get_user_status() == UserStatus::DISABLED {
             Outcome::Success(Role { plhdr: PhantomData })
         } else {
             Outcome::Forward(())

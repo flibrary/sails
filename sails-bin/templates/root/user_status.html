@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Root dashboard{% endblock title %}
+{% block navbutton %}<li class="nav-item"><a href="/root/logout" class="btn btn-warning" role="button"><i class="bi bi-box-arrow-left"></i> Log out</a></li>{% endblock navbutton %}
+
+{% block content %}
+<main class="container">
+  <div class="p-5 rounded shadow">
+    <h1>You are now at the root dashboard</h1>
+    <p class="lead">Please leave unless you fully understand what you are doing.</p>
+  </div>
+  <br>
+
+  <div class="shadow p-5 rounded border border-5 border-danger">
+    <h1>User Information</h1>
+    <table class="table table-hover">
+      <tbody>
+	<tr>
+	  <th scope="row">Email</th>
+	  <td><a href="mailto:{{user.get_id()}}">{{ user.get_id() }}</a></td>
+	</tr>
+	<tr>
+	  <th scope="row">Name</th>
+	  <td>{{ user.get_name() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">School</th>
+	  <td>{{ user.get_school() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">Account status</th>
+	  <td>{{ "{:?}"|format(user.get_user_status()) }}</td>
+	</tr>
+      </tbody>
+    </table>
+    <br>
+    <h1>Sample Levels</h1>
+    <table class="table table-hover">
+      <tbody>
+	<tr>
+	  <th scope="row">Admin</th>
+	  <td>{{ sails_db::enums::UserStatus::ADMIN.bits() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">Storekeeper</th>
+	  <td>{{ sails_db::enums::UserStatus::STORE_KEEPER.bits() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">Customer Service</th>
+	  <td>{{ sails_db::enums::UserStatus::CUSTOMER_SERVICE.bits() }}</td>
+	</tr>
+	<tr>
+	  <th scope="row">Normal</th>
+	  <td>{{ sails_db::enums::UserStatus::NORMAL.bits() }}</td>
+	</tr>
+      </tbody>
+    </table>
+    <br>
+    <form action="user_status?user_id={{user.get_id()}}" method="post">
+      <div class="form-group row">
+	<label for="inputBook" class="col-sm-2 col-form-label">Permission Level</label>
+	<div class="col-sm-10">
+          <input type="number" min="0" class="form-control" id="inputPermission" placeholder="Permission level" value="{{ user.get_user_status().bits() }}" name="status">
+	</div>
+      </div>
+      <br>
+      <button class="w-100 btn btn-lg btn-primary" type="submit">Update User Status</button>
+    </form>
+  </div>
+  <br>
+</main>
+{% endblock content %}

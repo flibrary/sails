@@ -20,20 +20,9 @@ pub struct OrderInfoSellerOrAdmin {
     order: TransactionInfo,
 }
 
-#[get("/order_info", rank = 3)]
-pub async fn order_info_admin(
-    _buyer: Role<Admin>,
-    order: OrderInfoGuard,
-) -> OrderInfoSellerOrAdmin {
-    OrderInfoSellerOrAdmin {
-        book: order.book_info,
-        order: order.order_info,
-    }
-}
-
 #[get("/order_info", rank = 2)]
 pub async fn order_info_seller(
-    _buyer: Role<Seller>,
+    _auth: Auth<OrderReadable>,
     order: OrderInfoGuard,
 ) -> OrderInfoSellerOrAdmin {
     OrderInfoSellerOrAdmin {
@@ -53,7 +42,9 @@ pub struct OrderInfoBuyer {
 
 #[get("/order_info", rank = 1)]
 pub async fn order_info_buyer(
-    _buyer: Role<Buyer>,
+    // This page contains progressable information
+    // TODO: this is not a good enough distinguishment
+    _auth: Auth<OrderProgressable>,
     order: OrderInfoGuard,
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
@@ -93,7 +84,7 @@ pub async fn order_info_buyer(
 // Basically, we syncronize our trade status with that in alipay
 #[get("/progress", rank = 1)]
 pub async fn progress(
-    _role: Role<Buyer>,
+    _auth: Auth<OrderProgressable>,
     order: OrderInfoGuard,
     db: DbConn,
     priv_key: &State<AlipayAppPrivKey>,

@@ -41,10 +41,6 @@
 	  <th scope="row">School</th>
 	  <td>{{ user.get_school() }}</td>
 	</tr>
-	<tr>
-	  <th scope="row">Account status</th>
-	  <td>{{ "{:?}"|format(user.get_user_status()) }}</td>
-	</tr>
       </tbody>
     </table>
     {% block update_button %}{% endblock update_button %}

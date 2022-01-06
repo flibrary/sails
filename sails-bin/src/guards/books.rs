@@ -14,6 +14,7 @@ use sails_db::{
 pub struct BookIdGuard {
     pub book_id: ProductId,
     pub seller_id: UserId,
+    pub operator_id: UserId,
 }
 
 #[rocket::async_trait]
@@ -34,7 +35,14 @@ impl<'r> FromRequest<'r> for BookIdGuard {
                 let seller_id = UserFinder::new(c, None)
                     .id(book_id.get_info(c)?.get_seller_id())
                     .first()?;
-                Ok(BookIdGuard { book_id, seller_id })
+                let operator_id = UserFinder::new(c, None)
+                    .id(book_id.get_info(c)?.get_operator_id())
+                    .first()?;
+                Ok(BookIdGuard {
+                    book_id,
+                    seller_id,
+                    operator_id,
+                })
             })
             .await
             .ok()

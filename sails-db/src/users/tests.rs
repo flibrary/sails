@@ -106,15 +106,15 @@ fn delete_user() {
         .and_then(Category::into_leaf)
         .unwrap();
     IncompleteProduct::new(&econ, "Economics", 1, "A horrible book")
-        .create(&conn, &user)
+        .create(&conn, &user, &user)
         .unwrap();
 
     IncompleteProduct::new(&econ, "The Economics", 1, "Another horrible book")
-        .create(&conn, &user)
+        .create(&conn, &user, &user)
         .unwrap();
 
     IncompleteProduct::new(&econ, "Economics Principle", 1, "Another horrible book")
-        .create(&conn, &another_user)
+        .create(&conn, &another_user, &another_user)
         .unwrap();
 
     assert_eq!(ProductFinder::list(&conn).unwrap().len(), 3);
@@ -160,14 +160,14 @@ fn update_user() {
         .unwrap()
         .set_password("SomeStrongPasswd")
         .unwrap()
-        .set_school("University of Cambridge")
-        .set_user_status(UserStatus::Admin)
+        .set_school("University of Oxford")
+        .set_user_status(UserStatus::ADMIN)
         .update(&conn)
         .unwrap();
 
     let user_changed = user_id.get_info(&conn).unwrap();
-    assert_eq!(user_changed.get_school(), "University of Cambridge");
-    assert_eq!(user_changed.get_user_status(), &UserStatus::Admin);
+    assert_eq!(user_changed.get_school(), "University of Oxford");
+    assert_eq!(user_changed.get_user_status(), UserStatus::ADMIN);
     // Unchanged fields should stay the same
     assert_eq!(user_changed.get_name(), "Kanyang Ying");
     assert_eq!(

@@ -20,7 +20,6 @@
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="school" data-sortable="true" scope="col">School</th>
 	  <th data-field="activated" data-sortable="true" scope="col">Activated</th>
-	  <th data-field="status" data-sortable="true" scope="col">Status</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	  <th data-field="delete" scope="col">Dangerous</th>
 	</tr>
@@ -32,8 +31,7 @@
 	  <td>{{user.get_name()}}</td>
 	  <td>{{user.get_school()}}</td>
 	  <td>{{ "{:?}"|format(user.get_validated()) }}</td>
-	  <td>{{ "{:?}"|format(user.get_user_status()) }}</td>
-	  <td><a href="/root/activate_user?user_id={{user.get_id()}}" class="btn btn-success" role="button">🔑</a> <a href="/root/downgrade_user?user_id={{user.get_id()}}" class="btn btn-warning" role="button">▼</a> <a href="/root/promote_user?user_id={{user.get_id()}}" class="btn btn-primary" role="button">▲</a></td>
+	  <td><a href="/root/activate_user?user_id={{user.get_id()}}" class="btn btn-success" role="button"><i class="bi bi-key-fill"></i></a> <a href="/root/user_status?user_id={{user.get_id()}}" class="btn btn-primary" role="button">Sts</a></td>
 	  <td><a href="/root/delete_user?user_id={{user.get_id()}}" class="btn btn-danger" role="button" onclick="return confirm('Please confirm your action');">Delete</a>
 	</tr>
 	{% endfor %}

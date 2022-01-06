@@ -160,9 +160,30 @@ impl<'a> ProductFinder<'a> {
         self
     }
 
+    // User owns the product and operates it
     pub fn seller(mut self, seller: &'a str) -> Self {
         use crate::schema::products::dsl::*;
-        self.query = self.query.filter(seller_id.eq(seller));
+        self.query = self
+            .query
+            .filter(seller_id.eq(seller).and(operator_id.eq(seller)));
+        self
+    }
+
+    // User owns the product but delegated it to other users
+    pub fn owner(mut self, user: &'a str) -> Self {
+        use crate::schema::products::dsl::*;
+        self.query = self
+            .query
+            .filter(seller_id.eq(user).and(operator_id.ne(user)));
+        self
+    }
+
+    // User doesn't own the product but has the right to operate it.
+    pub fn delegator(mut self, user: &'a str) -> Self {
+        use crate::schema::products::dsl::*;
+        self.query = self
+            .query
+            .filter(seller_id.ne(user).and(operator_id.eq(user)));
         self
     }
 
@@ -270,14 +291,19 @@ impl IncompleteProductOwned {
         }
     }
 
-    pub fn create(&self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
+    pub fn create(
+        &self,
+        conn: &SqliteConnection,
+        seller: &UserId,
+        operator: &UserId,
+    ) -> Result<ProductId> {
         let refed = IncompleteProduct {
             category: &self.category,
             prodname: &self.prodname,
             price: self.price,
             description: &self.description,
         };
-        refed.create(conn, seller)
+        refed.create(conn, seller, operator)
     }
 }
 
@@ -308,7 +334,12 @@ impl<'a> ToSafe<SafeIncompleteProduct<'a>> for IncompleteProduct<'a> {
 }
 
 impl<'a> SafeIncompleteProduct<'a> {
-    pub fn create(self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
+    pub fn create(
+        self,
+        conn: &SqliteConnection,
+        seller: &UserId,
+        operator: &UserId,
+    ) -> Result<ProductId> {
         use crate::schema::products::dsl::*;
         let id_cloned = Uuid::new_v4();
         let shortid_str = id_cloned.as_fields().0.to_string();
@@ -317,6 +348,7 @@ impl<'a> SafeIncompleteProduct<'a> {
             id.eq(&id_cloned),
             shortid.eq(&shortid_str),
             seller_id.eq(seller.get_id()),
+            operator_id.eq(operator.get_id()),
             category.eq(self.category),
             prodname.eq(self.prodname),
             price.eq(self.price),
@@ -351,12 +383,17 @@ impl<'a> IncompleteProduct<'a> {
         }
     }
 
-    pub fn create(self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
-        self.verify(conn)?.create(conn, seller)
+    pub fn create(
+        self,
+        conn: &SqliteConnection,
+        seller: &UserId,
+        operator: &UserId,
+    ) -> Result<ProductId> {
+        self.verify(conn)?.create(conn, seller, operator)
     }
 }
 
-/// A single product info entry, corresponding to a row in the table `products`. This is unsoled.
+/// A single product info entry, corresponding to a row in the table `products`. This is unsold.
 #[derive(
     Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
 )]
@@ -365,6 +402,7 @@ pub struct MutableProductInfo {
     id: String,
     shortid: String,
     seller_id: String,
+    operator_id: String,
     category: String,
     prodname: String,
     price: i64,
@@ -382,6 +420,10 @@ impl MutableProductInfo {
     }
 
     pub fn get_seller_id(&self) -> &str {
+        &self.seller_id
+    }
+
+    pub fn get_operator_id(&self) -> &str {
         &self.seller_id
     }
 
@@ -404,6 +446,12 @@ impl MutableProductInfo {
     /// Set the product info's seller id.
     pub fn set_seller_id(mut self, seller_id: impl ToString) -> Self {
         self.seller_id = seller_id.to_string();
+        self
+    }
+
+    /// Set the product info's operator id.
+    pub fn set_operator_id(mut self, operator_id: impl ToString) -> Self {
+        self.operator_id = operator_id.to_string();
         self
     }
 
@@ -463,6 +511,7 @@ impl ToSafe<MutableProductInfo> for ProductInfo {
                 id: self.id,
                 shortid: self.shortid,
                 seller_id: self.seller_id,
+                operator_id: self.operator_id,
                 category: self.category,
                 prodname: self.prodname,
                 price: self.price,
@@ -484,6 +533,7 @@ pub struct ProductInfo {
     id: String,
     shortid: String,
     seller_id: String,
+    operator_id: String,
     category: String,
     prodname: String,
     price: i64,
@@ -501,6 +551,10 @@ impl ProductInfo {
     }
 
     pub fn get_seller_id(&self) -> &str {
+        &self.seller_id
+    }
+
+    pub fn get_operator_id(&self) -> &str {
         &self.seller_id
     }
 

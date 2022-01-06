@@ -49,7 +49,7 @@ fn products(c: &mut Criterion) {
         700,
         "A very great book on the subject of Economics",
     )
-    .create(&conn, &user_id)
+    .create(&conn, &user_id, &user_id)
     .unwrap();
 
     // Another Krugman's Economics, with a lower price!
@@ -59,7 +59,7 @@ fn products(c: &mut Criterion) {
         500,
         "A very great book on the subject of Economics",
     )
-    .create(&conn, &user_id)
+    .create(&conn, &user_id, &user_id)
     .unwrap();
 
     // Another Krugman's Economics, with a lower price!
@@ -69,7 +69,7 @@ fn products(c: &mut Criterion) {
         600,
         "A very great book on the subject of Economics",
     )
-    .create(&conn, &user_id)
+    .create(&conn, &user_id, &user_id)
     .unwrap();
 
     // Another different economics book
@@ -79,7 +79,7 @@ fn products(c: &mut Criterion) {
         600,
         "I finally had got a different econ textbook!",
     )
-    .create(&conn, &user_id)
+    .create(&conn, &user_id, &user_id)
     .unwrap();
 
     // Feynman's Lecture on Physics!
@@ -90,7 +90,7 @@ fn products(c: &mut Criterion) {
             900,
             "A very masterpiece on the theory of the universe",
         )
-        .create(&conn, &user_id)
+        .create(&conn, &user_id, &user_id)
         .unwrap();
     }
 

@@ -23,10 +23,6 @@
 	  <th scope="row">Seller's school</th>
 	  <td>{{ seller.get_school() }}</td>
 	</tr>
-	<tr>
-	  <th scope="row">Seller's account status</th>
-	  <td>{{ "{:?}"|format(seller.get_user_status()) }}</td>
-	</tr>
       </tbody>
     </table>
     <a href="/messages/chat?user_id={{seller.get_id()}}" class="btn btn-primary" role="button">Send a message</a>

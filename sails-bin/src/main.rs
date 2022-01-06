@@ -311,8 +311,8 @@ fn rocket() -> Rocket<Build> {
                 root::unverified_root,
                 root::validate,
                 root::root_verify,
-                root::promote,
-                root::downgrade,
+                root::user_status,
+                root::update_user_status,
                 root::delete_user,
                 root::activate_user,
             ],
@@ -337,8 +337,7 @@ fn rocket() -> Rocket<Build> {
                 orders::purchase,
                 orders::progress,
                 orders::order_info_buyer,
-                orders::order_info_seller,
-                orders::order_info_admin
+                orders::order_info_seller
             ],
         )
         .mount(
