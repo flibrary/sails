@@ -3,7 +3,7 @@ use sails_db::{categories::Category, products::*, test_utils::establish_connecti
 
 fn login_user(c: &mut Criterion) {
     let conn = establish_connection();
-    UserForm::new(
+    let user_id = UserForm::new(
         "TestUser@example.org",
         "Kanyang Ying",
         "NFLS",
@@ -14,6 +14,13 @@ fn login_user(c: &mut Criterion) {
     .unwrap()
     .create(&conn)
     .unwrap();
+
+    user_id
+        .get_info(&conn)
+        .unwrap()
+        .set_validated(true)
+        .update(&conn)
+        .unwrap();
 
     c.bench_function("login an user", |b| {
         b.iter(|| UserId::login(&conn, "TestUser@example.org", "strongpasswd").unwrap())
