@@ -23,6 +23,7 @@ structopt = "^0.3"
 urlencoding = "^2"
 rsa = {version = "^0.5", features = ["alloc"]}
 sha2 = "^0.10"
+rand = {version = "^0.8", features = ["std_rng"]}
 base64 = "^0.13"
 chrono = "^0.4"
 anyhow = "^1"

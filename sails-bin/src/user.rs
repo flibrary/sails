@@ -3,6 +3,9 @@ use crate::{
     IntoFlash,
 };
 use askama::Template;
+use chacha20poly1305::Nonce;
+use chrono::{offset::Utc, DateTime, Duration, NaiveDateTime};
+use rand::{prelude::StdRng, RngCore, SeedableRng};
 use rocket::{
     form::{Form, Strict},
     http::{Cookie as HttpCookie, CookieJar},
@@ -17,12 +20,42 @@ use sails_db::{
     users::*,
 };
 
+// 1. Should expire
+// 2. Should not be guessable
+// 3. Should invalidate once used
+// challenge = chacha20poly1305(plain = hashed_passwd, nonce = exipration datetime, key = app secret)
+// The basic idea is that the challenge cannot be guessed/coined (even with user himself)
+// And the challenge plaintext is kept safe throughout the process. Altering the exipration date fails the challenge as nonce is incorrect.
+// NOTE: Expiration time should be set in correct timezone, otherwise time-based attack could be possible.
+fn generate_passwd_reset_link(
+    dst: &str,
+    hashed_passwd: &str,
+    aead: &AeadKey,
+) -> anyhow::Result<String> {
+    let exp = (Utc::now() + Duration::minutes(30)).timestamp();
+    let mut exp_vec = exp.to_ne_bytes().to_vec();
+    exp_vec.extend_from_slice(&[0u8, 0u8, 0u8, 0u8]);
+    let challenge = base64::encode_config(
+        aead.encrypt(hashed_passwd.as_bytes(), &Nonce::clone_from_slice(&exp_vec))
+            .map_err(|_| anyhow::anyhow!("password reset link encryption failed"))?,
+        base64::URL_SAFE,
+    );
+    Ok(format!(
+        "https://flibrary.info/user/reset_passwd?user_id={}&exp={}&challenge={}",
+        dst, exp, challenge
+    ))
+}
+
 fn generate_verification_link(dst: &str, aead: &AeadKey) -> anyhow::Result<String> {
     Ok(format!(
         "https://flibrary.info/user/activate?enc_user_id={}",
         base64::encode_config(
-            aead.encrypt(dst.as_bytes())
-                .map_err(|_| anyhow::anyhow!("mailaddress encryption failed"))?,
+            // SECURITY ADVISORY: it's not secure to use the same nonce
+            aead.encrypt(
+                dst.as_bytes(),
+                &Nonce::clone_from_slice("unique nonce".as_ref()),
+            )
+            .map_err(|_| anyhow::anyhow!("mailaddress encryption failed"))?,
             base64::URL_SAFE
         )
     ))
@@ -150,6 +183,116 @@ pub async fn update_user(
             .set_school(info.school)
             .update(c)
     })
+    .await
+    .into_flash(uri!("/"))?;
+
+    Ok(Redirect::to(uri!("/user", portal)))
+}
+
+#[derive(Template)]
+#[template(path = "user/reset_passwd_confirmation.html")]
+pub struct ResetPasswdConfirmation {
+    reset_passwd: String,
+}
+
+#[derive(Template)]
+#[template(path = "user/reset_passwd.html")]
+pub struct ResetPasswd {
+    recaptcha_key: String,
+}
+
+// We validate the challenge based on expiration time and the AEAD encrypted hashed password.
+// Then we reset the user password to a CSPRNG-generated u32 number.
+#[get("/reset_passwd?<exp>&<challenge>", rank = 1)]
+pub async fn reset_passwd_now(
+    conn: DbConn,
+    user_info: UserInfoGuard<Param>,
+    aead: &State<AeadKey>,
+    exp: i64,
+    challenge: String,
+) -> Result<ResetPasswdConfirmation, Flash<Redirect>> {
+    if Utc::now() <= DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(exp, 0), Utc) {
+        // Within expiration time
+        let decoded = base64::decode_config(&challenge, base64::URL_SAFE).into_flash(uri!("/"))?;
+
+        let mut exp_vec = exp.to_ne_bytes().to_vec();
+        exp_vec.extend_from_slice(&[0u8, 0u8, 0u8, 0u8]);
+        let extracted_hashed_passwd = String::from_utf8(
+            aead.decrypt(&decoded, &Nonce::clone_from_slice(&exp_vec))
+                .map_err(|_| anyhow::anyhow!("reset password link decryption failed"))
+                .into_flash(uri!("/"))?,
+        )
+        .into_flash(uri!("/"))?;
+
+        if user_info.info.get_hashed_passwd() == extracted_hashed_passwd {
+            // We can finally reset it.
+            let rand_passwd = StdRng::from_entropy().next_u32().to_string();
+            let rand_passwd_clone = rand_passwd.clone();
+            conn.run(move |c| user_info.info.set_password(&rand_passwd_clone)?.update(c))
+                .await
+                .into_flash(uri!("/"))?;
+            Ok(ResetPasswdConfirmation {
+                reset_passwd: rand_passwd,
+            })
+        } else {
+            Err(Flash::error(
+                Redirect::to(uri!("/")),
+                "reset password link challenge failed",
+            ))
+        }
+    } else {
+        Err(Flash::error(
+            Redirect::to(uri!("/")),
+            "reset password link expired",
+        ))
+    }
+}
+
+#[get("/reset_passwd", rank = 2)]
+pub async fn reset_passwd_page(recaptcha: &State<ReCaptcha>) -> ResetPasswd {
+    ResetPasswd {
+        recaptcha_key: recaptcha.recaptcha_site_key().to_string(),
+    }
+}
+
+#[derive(FromForm)]
+pub struct ResetPasswdForm {
+    user_id: String,
+    #[field(name = "g-recaptcha-response")]
+    recaptcha_token: String,
+}
+
+#[post("/reset_passwd", data = "<form>")]
+pub async fn reset_passwd_post(
+    form: Form<ResetPasswdForm>,
+    conn: DbConn,
+    recaptcha: &State<ReCaptcha>,
+    aead: &State<AeadKey>,
+    smtp: &State<SmtpCreds>,
+) -> Result<Redirect, Flash<Redirect>> {
+    if !recaptcha
+        .verify(&form.recaptcha_token)
+        .await
+        .into_flash(uri!("/"))?
+        .success
+    {
+        return Err(Flash::error(
+            Redirect::to(uri!("/")),
+            "reCAPTCHA was unsuccessful".to_string(),
+        ));
+    };
+
+    let user = conn
+        .run(move |c| UserFinder::new(c, None).id(&form.user_id).first_info())
+        .await
+        .into_flash(uri!("/"))?;
+
+    smtp.send(
+        user.get_id(),
+        "Your FLibrary Password Reset Link",
+        generate_passwd_reset_link(user.get_id(), user.get_hashed_passwd(), aead)
+            .into_flash(uri!("/"))?,
+    )
     .await
     .into_flash(uri!("/"))?;
 

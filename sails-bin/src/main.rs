@@ -269,6 +269,9 @@ fn rocket() -> Rocket<Build> {
                 user::activate_user,
                 user::signup_instruction,
                 user::email_verified,
+                user::reset_passwd_page,
+                user::reset_passwd_post,
+                user::reset_passwd_now,
             ],
         )
         .mount(

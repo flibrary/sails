@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Reset Password Confirmation{% endblock title %}
+{% block content %}
+<main class="container">
+    <div class="p-5 rounded shadow">
+      <h1>Your password has been successfully reset</h1>
+
+      The new password is <code>{{reset_passwd}}</code>.<br>
+      Please sign in use the new password above and change it soon.
+    </div>
+    <br>
+</main>
+{% endblock content %}

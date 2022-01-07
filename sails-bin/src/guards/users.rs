@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::{aead::AeadKey, DbConn};
+use chacha20poly1305::Nonce;
 use rocket::{
     outcome::{try_outcome, IntoOutcome, Outcome},
     request::FromRequest,
@@ -97,9 +98,10 @@ impl<'r> FromRequest<'r> for UserIdGuard<Aead> {
         if let Some(key) = key {
             let decode_fn = || -> Result<String, anyhow::Error> {
                 let decoded = base64::decode_config(&key, base64::URL_SAFE)?;
-                Ok(String::from_utf8(aead.decrypt(&decoded).map_err(
-                    |_| anyhow::anyhow!("mailaddress decryption failed"),
-                )?)?)
+                Ok(String::from_utf8(
+                    aead.decrypt(&decoded, &Nonce::clone_from_slice("unique nonce".as_ref()))
+                        .map_err(|_| anyhow::anyhow!("mailaddress decryption failed"))?,
+                )?)
             };
 
             let uid = decode_fn();
@@ -182,9 +184,10 @@ impl<'r> FromRequest<'r> for UserInfoGuard<Aead> {
         if let Some(key) = key {
             let decode_fn = || -> Result<String, anyhow::Error> {
                 let decoded = base64::decode_config(&key, base64::URL_SAFE)?;
-                Ok(String::from_utf8(aead.decrypt(&decoded).map_err(
-                    |_| anyhow::anyhow!("mailaddress decryption failed"),
-                )?)?)
+                Ok(String::from_utf8(
+                    aead.decrypt(&decoded, &Nonce::clone_from_slice("unique nonce".as_ref()))
+                        .map_err(|_| anyhow::anyhow!("mailaddress decryption failed"))?,
+                )?)
             };
 
             let uid = decode_fn();

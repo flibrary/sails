@@ -297,6 +297,11 @@ impl UserInfo {
         self.description = description;
         self
     }
+
+    /// Get a reference to the user info's hashed passwd.
+    pub fn get_hashed_passwd(&self) -> &str {
+        self.hashed_passwd.as_ref()
+    }
 }
 
 // A struct used for update and insert

@@ -2518,6 +2518,7 @@ dependencies = [
  "diesel_migrations",
  "lettre",
  "once_cell",
+ "rand 0.8.4",
  "reqwest",
  "rocket",
  "rocket_sync_db_pools",
