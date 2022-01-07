@@ -24,7 +24,10 @@ impl Transactions {
 
         let product_info = product_p.get_info(conn)?;
 
-        if product_info.get_seller_id() == buyer_p.get_id() {
+        // Neither operator nor seller should be able to purchase their own products
+        if (product_info.get_seller_id() == buyer_p.get_id())
+            || (product_info.get_operator_id() == buyer_p.get_id())
+        {
             return Err(SailsDbError::SelfPurchaseNotAllowed);
         }
 

@@ -57,15 +57,27 @@
   </div>
   <br>
 
-  {% if books.len() > 0 %}
+  <div class="p-5 rounded shadow">
+  {% if books_operated.len() > 0 %}
+  {% let books = books_operated.iter() %}
+  <h3>Books operated</h3>
   {% include "book_list.html" %}
   {% else %}
-    <div class="p-5 rounded shadow">
-      <h3>No books posted on the market</h3>
-      {% block postbook_button %}{% endblock postbook_button %}
-    </div>
-    <br>
+  <h3>No books operated</h3>
+  {% block postbook_button %}{% endblock postbook_button %}
   {% endif %}
+  <br>
+
+  {% if books_owned.len() > 0 %}
+  <h3>Books owned</h3>
+  {% let books = books_owned.iter() %}
+  {% include "book_list.html" %}
+  {% else %}
+  <h3>No books owned</h3>
+  {% block postbook_button %}{% endblock postbook_button %}
+  {% endif %}
+  </div>
+  <br>
 
   {% block orders_placed %}{% endblock orders_placed %}
   {% block orders_received %}{% endblock orders_received %}

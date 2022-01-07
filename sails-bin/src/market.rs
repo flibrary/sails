@@ -121,6 +121,77 @@ pub async fn post_book_error_page() -> Flash<Redirect> {
 }
 
 #[derive(Template)]
+#[template(path = "market/post_book_interim.html")]
+pub struct PostBookInterim;
+
+#[get("/post_book_interim")]
+pub async fn post_book_interim() -> PostBookInterim {
+    PostBookInterim
+}
+
+#[derive(Template)]
+#[template(path = "market/delegate_book.html")]
+pub struct DelegateBookPage {
+    categories: Vec<Category>,
+}
+
+// Required to sign in
+#[get("/delegate_book")]
+pub async fn delegate_book_page(
+    conn: DbConn,
+    _user: UserIdGuard<Cookie>,
+) -> Result<DelegateBookPage, Flash<Redirect>> {
+    Ok(DelegateBookPage {
+        // If there is no leaves, user cannot create any books, a message should be displayed inside the template
+        // TODO: categories should only be fetched once
+        categories: conn
+            .run(move |c| Categories::list_leaves(c))
+            .await
+            .into_flash(uri!("/"))?,
+    })
+}
+
+#[derive(FromForm)]
+pub struct Delegation {
+    category: String,
+}
+
+#[post("/delegate_book", data = "<info>")]
+pub async fn delegate_book(
+    user: UserIdGuard<Cookie>,
+    info: Form<Delegation>,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    let category = conn
+        .run(move |c| Categories::find_by_id(c, &info.category))
+        .await
+        .into_flash(uri!("/"))?;
+
+    let info = IncompleteProductOwned {
+        category: category.id().to_string(),
+        prodname: category.name().to_string(),
+        price: 500,
+        description: "".to_string(),
+    };
+    let product_id = conn
+        .run(move |c| -> Result<ProductId, SailsDbError> {
+            info.create(
+                c,
+                &user.id,
+                &UserFinder::new(c, None)
+                    .id("flibrarynfls@outlook.com")
+                    .first()?,
+            )
+        })
+        .await
+        .into_flash(uri!("/"))?;
+    Ok(Redirect::to(format!(
+        "/market/instruction?book_id={}",
+        product_id.get_id()
+    )))
+}
+
+#[derive(Template)]
 #[template(path = "market/instruction.html")]
 pub struct InstructionPage {
     // Id is the first part of the UUID, written in decimal

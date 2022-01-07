@@ -424,7 +424,7 @@ impl MutableProductInfo {
     }
 
     pub fn get_operator_id(&self) -> &str {
-        &self.seller_id
+        &self.operator_id
     }
 
     pub fn get_description(&self) -> &str {
@@ -555,7 +555,7 @@ impl ProductInfo {
     }
 
     pub fn get_operator_id(&self) -> &str {
-        &self.seller_id
+        &self.operator_id
     }
 
     pub fn get_description(&self) -> &str {

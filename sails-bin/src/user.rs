@@ -241,14 +241,16 @@ pub async fn update_user_page(user: UserInfoGuard<Cookie>) -> UpdateUserPage {
 #[template(path = "user/portal_guest.html")]
 pub struct PortalGuestPage {
     user: UserInfo,
-    books: Vec<(ProductInfo, Option<Category>)>,
+    books_operated: Vec<(ProductInfo, Option<Category>)>,
+    books_owned: Vec<(ProductInfo, Option<Category>)>,
 }
 
 #[derive(Template)]
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
     user: UserInfo,
-    books: Vec<(ProductInfo, Option<Category>)>,
+    books_operated: Vec<(ProductInfo, Option<Category>)>,
+    books_owned: Vec<(ProductInfo, Option<Category>)>,
     orders_placed: Vec<(ProductInfo, TransactionInfo)>,
     orders_received: Vec<(ProductInfo, TransactionInfo)>,
 }
@@ -258,11 +260,11 @@ pub async fn portal_guest(
     _signedin: UserIdGuard<Cookie>,
     user: UserInfoGuard<Param>,
     conn: DbConn,
-) -> Result<PortalGuestPage, Redirect> {
+) -> Result<PortalGuestPage, Flash<Redirect>> {
     let uid = user.info.get_id().to_string();
 
     let uid_cloned = uid.clone();
-    let books = conn
+    let books_operated = conn
         .run(
             move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
                 ProductFinder::new(c, None)
@@ -273,24 +275,56 @@ pub async fn portal_guest(
                         let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
                         Ok((x, ctg))
                     })
+                    .chain(
+                        ProductFinder::new(c, None)
+                            .delegator(&uid_cloned)
+                            .search_info()?
+                            .into_iter()
+                            .map(|x| {
+                                let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                                Ok((x, ctg))
+                            }),
+                    )
                     .collect()
             },
         )
         .await
-        .unwrap(); // No error should be tolerated here (database error). 500 is expected
+        .into_flash(uri!("/"))?;
+
+    let uid_cloned = uid.clone();
+    let books_owned = conn
+        .run(
+            move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
+                ProductFinder::new(c, None)
+                    .owner(&uid_cloned)
+                    .search_info()?
+                    .into_iter()
+                    .map(|x| {
+                        let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                        Ok((x, ctg))
+                    })
+                    .collect()
+            },
+        )
+        .await
+        .into_flash(uri!("/"))?;
     Ok(PortalGuestPage {
         user: user.info,
-        books,
+        books_operated,
+        books_owned,
     })
 }
 
 // The flash message is required here because we may get error from update_user
 #[get("/", rank = 2)]
-pub async fn portal(user: UserInfoGuard<Cookie>, conn: DbConn) -> Result<PortalPage, Redirect> {
+pub async fn portal(
+    user: UserInfoGuard<Cookie>,
+    conn: DbConn,
+) -> Result<PortalPage, Flash<Redirect>> {
     let uid = user.info.get_id().to_string();
 
     let uid_cloned = uid.clone();
-    let books = conn
+    let books_operated = conn
         .run(
             move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
                 ProductFinder::new(c, None)
@@ -301,11 +335,39 @@ pub async fn portal(user: UserInfoGuard<Cookie>, conn: DbConn) -> Result<PortalP
                         let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
                         Ok((x, ctg))
                     })
+                    .chain(
+                        ProductFinder::new(c, None)
+                            .delegator(&uid_cloned)
+                            .search_info()?
+                            .into_iter()
+                            .map(|x| {
+                                let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                                Ok((x, ctg))
+                            }),
+                    )
                     .collect()
             },
         )
         .await
-        .unwrap(); // No error should be tolerated here (database error). 500 is expected
+        .into_flash(uri!("/"))?;
+
+    let uid_cloned = uid.clone();
+    let books_owned = conn
+        .run(
+            move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
+                ProductFinder::new(c, None)
+                    .owner(&uid_cloned)
+                    .search_info()?
+                    .into_iter()
+                    .map(|x| {
+                        let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                        Ok((x, ctg))
+                    })
+                    .collect()
+            },
+        )
+        .await
+        .into_flash(uri!("/"))?;
 
     let uid_cloned = uid.clone();
     let orders_placed = conn
@@ -351,7 +413,8 @@ pub async fn portal(user: UserInfoGuard<Cookie>, conn: DbConn) -> Result<PortalP
         user: user.info,
         orders_placed,
         orders_received,
-        books,
+        books_operated,
+        books_owned,
     })
 }
 

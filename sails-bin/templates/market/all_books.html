@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Market{% endblock title %}
-{% block navbutton %}<li class="nav-item"><a href="/market/post_book" class="btn btn-warning" role="button">Post a book</a></li>{% endblock navbutton %}
+{% block navbutton %}<li class="nav-item"><a href="/market/post_book_interim" class="btn btn-warning" role="button">Post a book</a></li>{% endblock navbutton %}
 
 {% block content %}
 <main class="container">
@@ -17,14 +17,14 @@
   </div>
   <br>
 
+  <div class="p-5 rounded shadow">
   {% if books.len() > 0 %}
   {% include "book_list.html" %}
   {% else %}
-    <div class="p-5 rounded shadow">
-      <h3>No books under your request</h3>
-    </div>
-    <br>
+  <h3>No books under your request</h3>
   {% endif %}
+  </div>
+  <br>
 </main>
 {% endblock content %}
 

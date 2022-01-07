@@ -117,9 +117,7 @@ impl<'r> FromRequest<'r> for Auth<BookWritable> {
             }
             _ => false,
         } {
-            {
-                Outcome::Success(Auth { plhdr: PhantomData })
-            }
+            Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
         }
@@ -167,9 +165,7 @@ impl<'r> FromRequest<'r> for Auth<BookRemovable> {
             }
             _ => false,
         } {
-            {
-                Outcome::Success(Auth { plhdr: PhantomData })
-            }
+            Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
         }
