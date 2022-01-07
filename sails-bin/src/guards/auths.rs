@@ -10,6 +10,7 @@ use std::marker::PhantomData;
 pub struct BookReadable;
 pub struct BookWritable;
 pub struct BookRemovable;
+pub struct BookAdmin;
 
 // For users
 pub struct UserReadable;
@@ -26,6 +27,23 @@ pub struct Auth<T> {
 }
 
 // Books
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<BookAdmin> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+
+        if user.info.get_user_status().contains(UserStatus::PROD_ADMIN) {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Auth<BookReadable> {
     type Error = ();
@@ -67,9 +85,7 @@ impl<'r> FromRequest<'r> for Auth<BookReadable> {
             }
             _ => false,
         } {
-            {
-                Outcome::Success(Auth { plhdr: PhantomData })
-            }
+            Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
         }

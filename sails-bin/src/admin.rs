@@ -51,10 +51,10 @@ pub struct AdminOrdersPage {
     finished_tx: Vec<(ProductInfo, TransactionInfo)>,
 }
 
-// If the user has already been verified, show him the root dashboard
+// CustomerService or above can READ all orders
 #[get("/orders")]
 pub async fn admin_orders(
-    _guard: Role<Admin>,
+    _guard: Role<CustomerService>,
     conn: DbConn,
 ) -> Result<AdminOrdersPage, Flash<Redirect>> {
     let paid_tx = conn
@@ -164,7 +164,7 @@ pub struct AdminBooksPage {
 // If the user has already been verified, show him the root dashboard
 #[get("/books")]
 pub async fn admin_books(
-    _guard: Role<Admin>,
+    _guard: Auth<BookAdmin>,
     conn: DbConn,
 ) -> Result<AdminBooksPage, Flash<Redirect>> {
     let normal_books = conn
@@ -203,7 +203,7 @@ pub async fn admin_books(
 
 #[get("/verify_book")]
 pub async fn verify_book(
-    _guard: Role<Admin>,
+    _guard: Auth<BookAdmin>,
     info: BookInfoGuard<MutableProductInfo>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -219,7 +219,7 @@ pub async fn verify_book(
 
 #[get("/disable_book")]
 pub async fn disable_book(
-    _guard: Role<Admin>,
+    _guard: Auth<BookAdmin>,
     info: BookInfoGuard<MutableProductInfo>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -235,7 +235,7 @@ pub async fn disable_book(
 
 #[get("/normalize_book")]
 pub async fn normalize_book(
-    _guard: Role<Admin>,
+    _guard: Auth<BookAdmin>,
     info: BookInfoGuard<MutableProductInfo>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -251,7 +251,7 @@ pub async fn normalize_book(
 
 #[get("/refund_order")]
 pub async fn refund_order(
-    _guard: Role<Admin>,
+    _auth: Auth<OrderRefundable>,
     id: OrderIdGuard,
     conn: DbConn,
     priv_key: &State<AlipayAppPrivKey>,
@@ -278,7 +278,7 @@ pub async fn refund_order(
 
 #[get("/finish_order")]
 pub async fn finish_order(
-    _guard: Role<Admin>,
+    _auth: Auth<OrderFinishable>,
     info: OrderInfoGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -293,6 +293,6 @@ pub async fn finish_order(
 }
 
 #[get("/")]
-pub async fn admin(_guard: Role<Admin>) -> Redirect {
+pub async fn admin(_guard: Auth<BookAdmin>) -> Redirect {
     Redirect::to(uri!("/admin", admin_metrics))
 }

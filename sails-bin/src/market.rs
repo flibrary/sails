@@ -136,7 +136,7 @@ pub struct DelegateBookPage {
 }
 
 // Required to sign in
-#[get("/delegate_book")]
+#[get("/delegate_book", rank = 1)]
 pub async fn delegate_book_page(
     conn: DbConn,
     _user: UserIdGuard<Cookie>,
@@ -149,6 +149,14 @@ pub async fn delegate_book_page(
             .await
             .into_flash(uri!("/"))?,
     })
+}
+
+#[get("/delegate_book", rank = 2)]
+pub async fn delegate_book_error_page() -> Flash<Redirect> {
+    Flash::error(
+        Redirect::to(uri!("/")),
+        "please check if you have logged in and authorized to update/create",
+    )
 }
 
 #[derive(FromForm)]

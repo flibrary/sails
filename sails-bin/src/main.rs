@@ -284,6 +284,7 @@ fn rocket() -> Rocket<Build> {
                 market::post_book_interim,
                 market::delegate_book_page,
                 market::delegate_book,
+                market::delegate_book_error_page,
                 market::update_book_page,
                 market::post_book_error_page,
                 market::update_book,
