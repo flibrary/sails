@@ -1,27 +1,27 @@
 {% extends "base.html" %}
-{% block title %}Update book{% endblock title %}
+{% block title %}更新书本{% endblock title %}
 {% block content %}
   <main class="container">
   <div class="p-5 rounded shadow">
-    <h1>Update the book</h1>
-    <p class="lead">Fill in relevant information to post a book for sale. If you want to add pictures, upload them elsewhere and paste link in the description below. If you don't know how to, please refer to our <a href="https://github.com/flibrary/flibrary.github.io/wiki/PublishGuide " target="_blank">help page</a>.</p>
+    <h1>更新书本信息</h1>
+    <p class="lead">在这里您可以修改书本的相关信息，买家会在商店里看到您对书本的描述</p>
   </div>
   <br>
 
   <div class="p-5 rounded shadow">
-    <h1>Book info</h1>
+    <h1>书本信息</h1>
     {% block form_link %}
     <form action="cow_book?book_id={{book.get_id()}}" method="post">
     {% endblock form_link %}
     <div class="form-group row">
-      <label for="inputBook" class="col-sm-2 col-form-label">Book name</label>
+      <label for="inputBook" class="col-sm-2 col-form-label">名称</label>
       <div class="col-sm-10">
         <input type="text" class="form-control" id="inputBook" placeholder="Book name" value="{{ book.get_prodname() }}" name="prodname">
       </div>
     </div>
     <br>
     <div class="form-group row">
-      <label for="inputCategory" class="col-sm-2 col-form-label">Category</label>
+      <label for="inputCategory" class="col-sm-2 col-form-label">种类</label>
       <div class="col-sm-4">
         <select class="form-select" aria-label="Default select example" name="category">
 	  {% for category in categories %}
@@ -36,20 +36,20 @@
     </div>
     <br>
     <div class="form-group row">
-      <label for="inputPrice" class="col-sm-2 col-form-label">Price</label>
+      <label for="inputPrice" class="col-sm-2 col-form-label">价格</label>
       <div class="col-sm-4">
         <input type="number" min="0" class="form-control" id="inputPrice" placeholder="Price" value="{{ book.get_price() }}" name="price">
       </div>
     </div>
     <br>
     <div class="form-group row">
-      <label for="inputDescription" class="col-sm-2 col-form-label">Description</label>
+      <label for="inputDescription" class="col-sm-2 col-form-label">简介</label>
       <div class="col-sm-10">
 	<textarea class="form-control" id="summernote" rows="15" name="description">{{ book.get_description() }}</textarea>
       </div>
     </div>
     <br>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Update the book!</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">更新书本信息</button>
   </form>
   </div>
   <br>

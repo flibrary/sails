@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Market{% endblock title %}
+{% block title %}书店{% endblock title %}
 {% block navbutton %}<li class="nav-item"><a href="/market/post_book_interim" class="btn btn-warning" role="button">Post a book</a></li>{% endblock navbutton %}
 
 {% block content %}
 <main class="container">
   <div class="p-5 rounded shadow">
-    <h1>Welcome to the market</h1>
-    <p class="lead">Here you can see what books are on sale and post your own books.</p>
-    <a href="categories" class="btn btn-primary" role="button">Browse by categories</a>
+    <h1>欢迎来带书店</h1>
+    <p class="lead">在这里您可以看到用户们上架的书，您也可以自己上架书本</p>
+    <a href="categories" class="btn btn-primary" role="button">按照课程进行分类</a>
     {% match ctg %}
     {% when Some with (ctg) %}
-    <a href="all_books?category={{ctg}}" class="btn btn-success" role="button">Table View</a>
+    <a href="all_books?category={{ctg}}" class="btn btn-success" role="button">表格视图</a>
     {% when None %}
-    <a href="all_books" class="btn btn-success" role="button">Table View</a>
+    <a href="all_books" class="btn btn-success" role="button">表格视图</a>
     {% endmatch %}
   </div>
   <br>
@@ -41,7 +41,7 @@
     <br>
   {% else %}
     <div class="p-5 rounded shadow">
-      <h3>No books under your request</h3>
+      <h3>没有符合条件的书</h3>
     </div>
     <br>
   {% endif %}

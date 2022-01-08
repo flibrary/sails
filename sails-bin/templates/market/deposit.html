@@ -52,19 +52,19 @@
       <table class="table table-hover">
     <tbody>
     <tr>
-      <th scope="row">Price</th>
+      <th scope="row">价格</th>
       <td>CN¥ {{ book.get_price() }}</td>
     </tr>
     <tr>
-      <th scope="row">Seller</th>
+      <th scope="row">卖家</th>
       <td>{{ book.get_seller_id() }}</td>
     </tr>
     <tr>
-      <th scope="row">Book ID</th>
+      <th scope="row">书本 ID</th>
       <td><a href="/market/book_info?book_id={{ book.get_id() }}">{{ book.get_shortid() }}</a></td>
     </tr>
     <tr>
-      <th scope="row">Status</th>
+      <th scope="row">状态</th>
       <td>{{ "{:?}"|format(book.get_product_status()) }}</td>
     </tr>
     </tbody>
