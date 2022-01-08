@@ -4,30 +4,30 @@
     {% when Some with (desc) %}
     {{ desc|safe }}
     {% when None %}
-    <h3>{{ seller.get_name() }} has no profile</h3>
+    <h3>{{ seller.get_name() }} 没有简介</h3>
     {% endmatch %}
 {% endblock seller_desc %}
 {% block seller %}
-    <h1>Seller's contact info</h1>
+    <h1>联系卖家</h1>
     <table class="table table-hover">
       <tbody>
 	<tr>
-	  <th scope="row">Seller's email</th>
+	  <th scope="row">卖家邮箱</th>
 	  <td><a href="mailto:{{seller.get_id()}}">{{ seller.get_id() }}</a></td>
 	</tr>
 	<tr>
-	  <th scope="row">Seller's real name</th>
+	  <th scope="row">卖家姓名</th>
 	  <td><a href="/user?user_id={{seller.get_id()}}">{{ seller.get_name() }}</a></td>
 	</tr>
 	<tr>
-	  <th scope="row">Seller's school</th>
+	  <th scope="row">卖家学校</th>
 	  <td>{{ seller.get_school() }}</td>
 	</tr>
       </tbody>
     </table>
-    <a href="/messages/chat?user_id={{seller.get_id()}}" class="btn btn-primary" role="button">Send a message</a>
+    <a href="/messages/chat?user_id={{seller.get_id()}}" class="btn btn-primary" role="button">发送消息</a>
 {% endblock seller %}
 
 {% block actions %}
-<a href="/orders/purchase?book_id={{book.get_id()}}" class="btn btn-primary" role="button" onclick="return confirm('Do you really want to purchase it?');"><i class="bi bi-credit-card"></i> Purchase</a>
+<a href="/orders/purchase?book_id={{book.get_id()}}" class="btn btn-primary" role="button" onclick="return confirm('Do you really want to purchase it?');"><i class="bi bi-credit-card"></i> 购买</a>
 {% endblock actions %}

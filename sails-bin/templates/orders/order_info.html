@@ -3,7 +3,7 @@
 {% block content %}
 <main class="container">
     <div class="p-5 rounded shadow">
-      <h1>Details of your order #{{ order.get_shortid() }}</h1>
+      <h1>您的订单 #{{ order.get_shortid() }} 的细节</h1>
       <br>
       {% match order.get_transaction_status() %}
       {% when sails_db::enums::TransactionStatus::Refunded %}
@@ -11,17 +11,17 @@
 	<div class="progress-bar bg-secondary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
       </div>
       <br>
-      <h3>Order refunded (canceled)</h3>
-      If you believe the order status is wrong, click on the refresh button below.<br>
-      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-primary" role="button">Refresh</a>
+      <h3>订单已退款（已取消）</h3>
+      如果您认为订单信息有误，请点击下方“更新”按钮<br>
+      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-primary" role="button">更新</a>
 
       {% when sails_db::enums::TransactionStatus::Placed %}
       <div class="progress">
 	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" style="width: 33%"></div>
       </div>
       <br>
-      <h3>Order successfully placed</h3>
-      Scan the QR code or click the button to pay. Then press "next" to proceed after you paid.<br>
+      <h3>您已成功下单</h3>
+      使用支付宝扫描下方二维码或点击下方按钮来付款，然后请点击下一步<br>
       <br>
 
       {% match resp.as_ref().unwrap() %}
@@ -30,13 +30,13 @@
 	注意：<b>请在扫码后三小时内付款。</b>
       </div>
       <center><div id="qrcode"></div></center><br>
-      <a href="alipays://platformapi/startapp?appId=20000067&url={{urlencoding::encode(resp.qr_code)}}" class="btn btn-primary" role="button">Pay via AliPay</a>
+      <a href="alipays://platformapi/startapp?appId=20000067&url={{urlencoding::encode(resp.qr_code)}}" class="btn btn-primary" role="button">使用支付宝支付</a>
       {% when Err with (err) %}
       <div class="alert alert-warning" role="alert">
 	<b>创建交易错误，请联系客服</b>: {{ err }}
       </div>
       {% endmatch %}
-      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-success" role="button">Next</a>
+      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-success" role="button">下一步</a>
 
 
       {% when sails_db::enums::TransactionStatus::Paid %}
@@ -44,16 +44,16 @@
 	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" style="width: 66%"></div>
       </div>
       <br>
-      <h3>Order successfully paid</h3>
-      The last step to complete this order is to come to the warehouse to get your book! Do remember to bring the order ID: <code>{{ order.get_shortid() }}</code>.
+      <h3>您已成功付款</h3>
+      感谢您的付款！接下来您只需要等待我们为您配送书本。或者您可以用订单 ID: <code>{{ order.get_shortid() }}</code> 来我们的仓库自提书本。
 
       {% when sails_db::enums::TransactionStatus::Finished %}
       <div class="progress">
 	<div class="progress-bar bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
       </div>
       <br>
-      <h3>Congratulations, order has been successfully finished!</h2>
-      There is nothing left to do. Enjoy your book!
+      <h3>恭喜，您的订单已成功交付！</h2>
+      Enjoy your book! 如有任何疑问或需要售后服务，请联系我们寻求帮助。
       {% endmatch %}
     </div>
 <br>
@@ -61,27 +61,27 @@
       <table class="table table-hover">
     <tbody>
     <tr>
-      <th scope="row">Price</th>
+      <th scope="row">价格</th>
       <td>CN¥ {{ book.get_price() }}</td>
     </tr>
     <tr>
-      <th scope="row">Seller</th>
+      <th scope="row">卖家</th>
       <td>{{ book.get_seller_id() }}</td>
     </tr>
     <tr>
-      <th scope="row">Book ID</th>
+      <th scope="row">书本 ID</th>
       <td><a href="/market/book_info?book_id={{ book.get_id() }}">{{ book.get_shortid() }}</a></td>
     </tr>
     <tr>
-      <th scope="row">Buyer</th>
+      <th scope="row">买家</th>
       <td>{{ order.get_buyer() }}</td>
     </tr>
     <tr>
-      <th scope="row">Timestamp</th>
+      <th scope="row">时间戳</th>
       <td>{{ order.get_time_sent() }}</td>
     </tr>
     <tr>
-      <th scope="row">Status</th>
+      <th scope="row">订单状态</th>
       <td>{{ "{:?}"|format(order.get_transaction_status()) }}</td>
     </tr>
     </tbody>

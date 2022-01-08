@@ -14,7 +14,7 @@
 	}
 </style>
 {% endblock head %}
-{% block title %}Book info{% endblock title %}
+{% block title %}书本信息{% endblock title %}
 
 {% block content %}
 <main class="container">
@@ -24,7 +24,7 @@
     <table class="table table-hover">
     <tbody>
     <tr>
-      <th scope="row">Price</th>
+      <th scope="row">价格</th>
       <td>CN¥ {{ book.get_price() }}</td>
     </tr>
     <tr>
@@ -32,7 +32,7 @@
       <td>{{ book.get_shortid() }}</td>
     </tr>
     <tr>
-      <th scope="row">Category</th>
+      <th scope="row">种类</th>
       	{% match category %}
 	{% when Some with (ctg) %}
         <td><a href="categories?category={{ ctg.id() }}">{{ ctg.name() }}</a></td>
@@ -41,7 +41,7 @@
         {% endmatch %}
     </tr>
     <tr>
-      <th scope="row">Status</th>
+      <th scope="row">状态</th>
       <td>{{ "{:?}"|format(book.get_product_status()) }}</td>
     </tr>
     </tbody>
@@ -58,16 +58,16 @@
 
     <div class="p-5 rounded shadow">
     {% block seller %}
-    <h1>Seller's contact info</h1>
-    <a href="/user" class="btn btn-primary" role="button">Sign in to contact the seller</a>
+    <h1>联系卖家</h1>
+    <a href="/user" class="btn btn-primary" role="button">登录以联系卖家</a>
     {% endblock seller %}
     </div>
     <br>
 
     <div class="p-5 rounded shadow">
       {% block seller_desc %}
-          <h1>Seller's  profile</h1>
-	  <a href="/user" class="btn btn-primary" role="button">Sign in to view seller's profile</a>
+          <h1>卖家基本信息</h1>
+	  <a href="/user" class="btn btn-primary" role="button">登录以查看卖家信息</a>
       {% endblock seller_desc %}
     </div>
     <br>

@@ -1,19 +1,19 @@
 {% extends "book_info_user.html" %}
 
 {% block seller %}
-<h1>Contact info</h1>
+<h1>联系方式</h1>
 <table class="table table-hover">
   <tbody>
     <tr>
-      <th scope="row">Email</th>
+      <th scope="row">邮箱</th>
       <td><a href="mailto:{{seller.get_id()}}">{{ seller.get_id() }}</a></td>
     </tr>
     <tr>
-      <th scope="row">Real name</th>
+      <th scope="row">名称</th>
       <td><a href="/user?user_id={{seller.get_id()}}">{{ seller.get_name() }}</a></td>
     </tr>
     <tr>
-      <th scope="row">School</th>
+      <th scope="row">学校</th>
       <td>{{ seller.get_school() }}</td>
     </tr>
   </tbody>
@@ -21,8 +21,8 @@
 {% endblock seller %}
 
 {% block actions %}
-<a href="post_book?book_id={{book.get_id()}}" class="btn btn-primary" role="button">Update</a>
-<a href="instruction?book_id={{book.get_id()}}" class="btn btn-warning" role="button">Instruction</a>
-<a href="delete?book_id={{book.get_id()}}" class="btn btn-danger" role="button" onclick="return confirm('Please confirm your action');">Delete</a>
-<a href="/orders/purchase?book_id={{book.get_id()}}" class="btn btn-primary" role="button" onclick="return confirm('Do you really want to purchase it?');"><i class="bi bi-credit-card"></i> Purchase</a>
+<a href="post_book?book_id={{book.get_id()}}" class="btn btn-primary" role="button">更新</a>
+<a href="instruction?book_id={{book.get_id()}}" class="btn btn-warning" role="button">指南</a>
+<a href="delete?book_id={{book.get_id()}}" class="btn btn-danger" role="button" onclick="return confirm('Please confirm your action');">删除</a>
+<a href="/orders/purchase?book_id={{book.get_id()}}" class="btn btn-primary" role="button" onclick="return confirm('Do you really want to purchase it?');"><i class="bi bi-credit-card"></i> 购买</a>
 {% endblock actions %}
