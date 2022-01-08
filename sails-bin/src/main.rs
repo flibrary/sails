@@ -299,6 +299,8 @@ fn rocket() -> Rocket<Build> {
                 market::delete_book,
                 market::create_book,
                 market::instruction,
+                market::deposit_info,
+                market::deposit_progress,
             ],
         )
         .mount(
