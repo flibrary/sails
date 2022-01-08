@@ -1,38 +1,38 @@
 {% extends "base.html" %}
-{% block title %}Update info{% endblock title %}
+{% block title %}用户信息更新{% endblock title %}
 {% block content %}
   <main class="container">
   <div class="p-5 rounded shadow">
-    <h1>Update your information</h1>
-    <p class="lead">Here you can update your name, school, and password</p>
+    <h1>更新您的用户信息</h1>
+    <p class="lead">在这里您可以编辑账号信息</p>
   </div>
   <br>
 
   <div class="p-5 rounded shadow">
-    <h1>User info</h1>
+    <h1>用户信息</h1>
     <form action="/user/update_user" method="post">
     <div class="form-group row">
-      <label for="inputName" class="col-sm-2 col-form-label">Real name</label>
+      <label for="inputName" class="col-sm-2 col-form-label">中文姓名</label>
       <div class="col-sm-10">
         <input type="text" class="form-control" id="inputName" placeholder="Your real name" value="{{ user.get_name() }}" name="name">
       </div>
     </div>
     <br>
     <div class="form-group row">
-      <label for="inputSchool" class="col-sm-2 col-form-label">School name</label>
+      <label for="inputSchool" class="col-sm-2 col-form-label">学校</label>
       <div class="col-sm-10">
         <input type="text" class="form-control" id="inputSchool" placeholder="School name" value="{{ user.get_school() }}" name="school">
       </div>
       </div>
     <br>
     <div class="form-group row">
-      <label for="inputDescription" class="col-sm-2 col-form-label">Description</label>
+      <label for="inputDescription" class="col-sm-2 col-form-label">个人简介</label>
       <div class="col-sm-10">
 	<textarea class="form-control" id="summernote" rows="15" name="description">{{ user.get_description().unwrap_or("") }}</textarea>
       </div>
     </div>
     <br>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Update</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">更新信息</button>
   </form>
   </div>
   <br>

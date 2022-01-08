@@ -14,31 +14,31 @@
 	}
 </style>
 {% endblock head %}
-{% block title %}{{user.get_name()}}'s Portal{% endblock title %}
-{% block navbutton %}<li class="nav-item"><a href="/user/logout" class="btn btn-warning" role="button"><i class="bi bi-box-arrow-left"></i> Log out</a></li>{% endblock navbutton %}
+{% block title %}{{user.get_name()}} 的主页{% endblock title %}
+{% block navbutton %}<li class="nav-item"><a href="/user/logout" class="btn btn-warning" role="button"><i class="bi bi-box-arrow-left"></i> 登出</a></li>{% endblock navbutton %}
 
 {% block content %}
 <main class="container">
   <div class="p-5 rounded shadow">
-    <h1>Welcome to {{ user.get_name() }}'s portal</h1>
-    <p class="lead">{% block intro %}This page helps you to find more out about {{ user.get_name() }}.{% endblock intro %}</p>
+    <h1>欢迎来到 {{ user.get_name() }} 的主页</h1>
+    <p class="lead">{% block intro %}你可以在这里查看 {{ user.get_name() }} 的信息。{% endblock intro %}</p>
   </div>
   <br>
 
   <div class="p-5 rounded shadow">
-    <h1>Information</h1>
+    <h1>基本信息</h1>
     <table class="table table-hover">
       <tbody>
 	<tr>
-	  <th scope="row">Email</th>
+	  <th scope="row">邮件</th>
 	  <td><a href="mailto:{{user.get_id()}}">{{ user.get_id() }}</a></td>
 	</tr>
 	<tr>
-	  <th scope="row">Real name</th>
+	  <th scope="row">姓名</th>
 	  <td>{{ user.get_name() }}</td>
 	</tr>
 	<tr>
-	  <th scope="row">School</th>
+	  <th scope="row">学校</th>
 	  <td>{{ user.get_school() }}</td>
 	</tr>
       </tbody>
@@ -52,7 +52,7 @@
     {% when Some with (desc) %}
     {{desc|safe}}
     {% when None %}
-    <h3>No description</h3>
+    <h3>没有简介</h3>
     {% endmatch %}
   </div>
   <br>
@@ -60,20 +60,20 @@
   <div class="p-5 rounded shadow">
   {% if books_operated.len() > 0 %}
   {% let books = books_operated.iter() %}
-  <h3>Books operated</h3>
+  <h3>此用户上架的书</h3>
   {% include "book_list.html" %}
   {% else %}
-  <h3>No books operated</h3>
+  <h3>此用户没有上架书</h3>
   {% block postbook_button %}{% endblock postbook_button %}
   {% endif %}
   <br>
 
   {% if books_owned.len() > 0 %}
-  <h3>Books owned</h3>
+  <h3>此用户拥有的书</h3>
   {% let books = books_owned.iter() %}
   {% include "book_list.html" %}
   {% else %}
-  <h3>No books owned</h3>
+  <h3>此用户没有使用 Flibrary Pro 服务</h3>
   {% block postbook_button %}{% endblock postbook_button %}
   {% endif %}
   </div>

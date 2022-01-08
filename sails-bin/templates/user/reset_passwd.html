@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Request Reset Password Link{% endblock title %}
+{% block title %}重置密码{% endblock title %}
 {% block head %}
     {% call super() %}
     <!-- Custom styles for sign in page -->
@@ -15,16 +15,16 @@
 {% block body %}
 <main class="form-signin text-center">
   <form action="reset_passwd" class="submit-once" method="post">
-    <h1 class="h3 mb-3 fw-normal">Enter your email below</h1>
+    <h1 class="h3 mb-3 fw-normal">请输入您的邮箱</h1>
 
     <div class="form-floating">
       <input type="email" class="form-control" id="floatingEmail" placeholder="Email" name="user_id">
-      <label for="floatingInput">Email</label>
+      <label for="floatingInput">邮箱</label>
     </div>
     <br>
     <div class="g-recaptcha" data-sitekey="{{ recaptcha_key }}"></div>
     <br/>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Verify</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">重置密码</button>
   </form>
 </main>
 {% block script %}

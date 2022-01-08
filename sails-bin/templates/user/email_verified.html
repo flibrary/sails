@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Email Verified!{% endblock title %}
+{% block title %}邮箱验证完成{% endblock title %}
 {% block content %}
 <main class="container">
     <div class="p-5 rounded shadow">
-      <h1>You are all set!</h1>
-
-      Your email has been successfully verified, and your account has been activated.
-      <br>
+      <h1>您已经完成验证！</h1>
+      <p class="lead">
+      您的电子邮件已成功验证，您的帐户已被激活。
+      </p>
       <hr>
-      <a href="/user/signin" class="btn btn-primary" role="button">Sign In</a>
+      <a href="/user/signin" class="btn btn-primary" role="button">登录</a>
     </div>
     <br>
 </main>

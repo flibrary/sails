@@ -1,20 +1,20 @@
 {% extends "portal_guest.html" %}
-{% block title %}Portal{% endblock title %}
+{% block title %}用户中心{% endblock title %}
 
-{% block intro %}This page helps you to manage your books posted in the market and your basic account information.{% endblock intro %}
-{% block update_button %}<a href="/user/update_user_page" class="btn btn-primary" role="button">Update</a> <a href="/user/change_passwd" class="btn btn-warning" role="button">Change password</a>{% endblock update_button %}
-{% block postbook_button %}<a href="/market/post_book_interim" class="btn btn-primary" role="button">Post a book</a>{% endblock postbook_button %}
+{% block intro %}在这里您可以管理您上传的书，也可以修改账号的基本信息。{% endblock intro %}
+{% block update_button %}<a href="/user/update_user_page" class="btn btn-primary" role="button">更新</a> <a href="/user/change_passwd" class="btn btn-warning" role="button">更改密码</a>{% endblock update_button %}
+{% block postbook_button %}<a href="/market/post_book_interim" class="btn btn-primary" role="button">上架书本</a>{% endblock postbook_button %}
 {% block orders_placed %}
 <div class="p-5 rounded shadow">
-  <h3>Orders Placed</h3>
+  <h3>您购买的</h3>
   <table class="table" data-toggle="table" data-pagination="true" data-search="true">
     <thead>
       <tr>
 	<th data-field="id" data-sortable="true" scope="col">ID</th>
-	<th data-field="name" data-sortable="true" scope="col">Book name</th>
-	<th data-field="price" data-sortable="true" scope="col">Price</th>
-	<th data-field="seller" data-sortable="true" scope="col">Seller</th>
-	<th data-field="status" data-sortable="true" scope="col">Status</th>
+	<th data-field="name" data-sortable="true" scope="col">名称</th>
+	<th data-field="price" data-sortable="true" scope="col">价格</th>
+	<th data-field="seller" data-sortable="true" scope="col">卖家</th>
+	<th data-field="status" data-sortable="true" scope="col">状态</th>
       </tr>
     </thead>
     <tbody>
@@ -35,15 +35,15 @@
 
 {% block orders_received %}
 <div class="p-5 rounded shadow">
-  <h3>Orders Received</h3>
+  <h3>您卖出的</h3>
   <table class="table" data-toggle="table" data-pagination="true" data-search="true">
     <thead>
       <tr>
 	<th data-field="id" data-sortable="true" scope="col">ID</th>
-	<th data-field="name" data-sortable="true" scope="col">Book name</th>
-	<th data-field="price" data-sortable="true" scope="col">Price</th>
-	<th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
-	<th data-field="status" data-sortable="true" scope="col">Status</th>
+	<th data-field="name" data-sortable="true" scope="col">名称</th>
+	<th data-field="price" data-sortable="true" scope="col">价格</th>
+	<th data-field="buyer" data-sortable="true" scope="col">买家</th>
+	<th data-field="status" data-sortable="true" scope="col">状态</th>
       </tr>
     </thead>
     <tbody>

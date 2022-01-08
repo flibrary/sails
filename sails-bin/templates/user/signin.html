@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Sign in{% endblock title %}
+{% block title %}登录{% endblock title %}
 {% block head %}
     {% call super() %}
     <!-- Custom styles for sign in page -->
@@ -9,19 +9,19 @@
 {% block body %}
 <main class="form-signin text-center">
   <form action="validate" method="post">
-    <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+    <h1 class="h3 mb-3 fw-normal">登录账号</h1>
 
     <div class="form-floating">
       <input type="email" class="form-control" id="floatingEmail" placeholder="Email" name="email">
-      <label for="floatingInput">Email</label>
+      <label for="floatingInput">邮箱</label>
     </div>
     <div class="form-floating">
       <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password">
-      <label for="floatingPassword">Password</label>
+      <label for="floatingPassword">密码</label>
     </div>
-    <button class="w-100 btn btn-lg btn-primary" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign in</button>
-    <a href="/user/signup">Sign up</a><br>
-    <a href="/user/reset_passwd">Reset Password</a>
+    <button class="w-100 btn btn-lg btn-primary" type="submit"><i class="bi bi-box-arrow-in-right"></i> 登录</button>
+    <a href="/user/signup">注册</a><br>
+    <a href="/user/reset_passwd">重置密码</a>
   </form>
 </main>
 {% endblock body %}
