@@ -20,6 +20,14 @@ use sails_db::{
     users::*,
 };
 
+// Convert i64 timestamp in secs to Nonce
+// [u8; 8] + [u8; 4]
+pub fn timestamp_to_nonce(exp: i64) -> Nonce {
+    let mut exp_vec = exp.to_ne_bytes().to_vec();
+    exp_vec.extend_from_slice(&[0u8, 0u8, 0u8, 0u8]);
+    Nonce::clone_from_slice(&exp_vec)
+}
+
 // 1. Should expire
 // 2. Should not be guessable
 // 3. Should invalidate once used
@@ -33,10 +41,8 @@ fn generate_passwd_reset_link(
     aead: &AeadKey,
 ) -> anyhow::Result<String> {
     let exp = (Utc::now() + Duration::minutes(30)).timestamp();
-    let mut exp_vec = exp.to_ne_bytes().to_vec();
-    exp_vec.extend_from_slice(&[0u8, 0u8, 0u8, 0u8]);
     let challenge = base64::encode_config(
-        aead.encrypt(hashed_passwd.as_bytes(), &Nonce::clone_from_slice(&exp_vec))
+        aead.encrypt(hashed_passwd.as_bytes(), &timestamp_to_nonce(exp))
             .map_err(|_| anyhow::anyhow!("password reset link encryption failed"))?,
         base64::URL_SAFE,
     );
@@ -47,13 +53,14 @@ fn generate_passwd_reset_link(
 }
 
 fn generate_verification_link(dst: &str, aead: &AeadKey) -> anyhow::Result<String> {
+    let exp = (Utc::now() + Duration::minutes(30)).timestamp();
     Ok(format!(
-        "https://flibrary.info/user/activate?enc_user_id={}",
+        "https://flibrary.info/user/activate?exp={}&enc_user_id={}",
+        exp,
         base64::encode_config(
-            // SECURITY ADVISORY: it's not secure to use the same nonce
             aead.encrypt(
                 dst.as_bytes(),
-                &Nonce::clone_from_slice("unique nonce".as_ref()),
+                &Nonce::clone_from_slice(&timestamp_to_nonce(exp)),
             )
             .map_err(|_| anyhow::anyhow!("mailaddress encryption failed"))?,
             base64::URL_SAFE
@@ -127,7 +134,7 @@ pub async fn create_user(
     if email.domain() == "outlook.com" {
         smtp.send(
             &info.user_info.id,
-            "Your FLibrary verification email",
+            "Your FLibrary Verification Email",
             generate_verification_link(&info.user_info.id, aead).into_flash(uri!("/"))?,
         )
         .await
@@ -215,10 +222,8 @@ pub async fn reset_passwd_now(
         // Within expiration time
         let decoded = base64::decode_config(&challenge, base64::URL_SAFE).into_flash(uri!("/"))?;
 
-        let mut exp_vec = exp.to_ne_bytes().to_vec();
-        exp_vec.extend_from_slice(&[0u8, 0u8, 0u8, 0u8]);
         let extracted_hashed_passwd = String::from_utf8(
-            aead.decrypt(&decoded, &Nonce::clone_from_slice(&exp_vec))
+            aead.decrypt(&decoded, &timestamp_to_nonce(exp))
                 .map_err(|_| anyhow::anyhow!("reset password link decryption failed"))
                 .into_flash(uri!("/"))?,
         )

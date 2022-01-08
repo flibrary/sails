@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::{aead::AeadKey, DbConn};
-use chacha20poly1305::Nonce;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use rocket::{
     outcome::{try_outcome, IntoOutcome, Outcome},
     request::FromRequest,
@@ -92,31 +92,37 @@ impl<'r> FromRequest<'r> for UserIdGuard<Aead> {
         let aead = try_outcome!(request.guard::<&State<AeadKey>>().await);
         let db = try_outcome!(request.guard::<DbConn>().await);
 
+        let exp = request.query_value::<i64>("exp").and_then(|x| x.ok());
         let key = request
             .query_value::<String>("enc_user_id")
             .and_then(|x| x.ok());
-        if let Some(key) = key {
-            let decode_fn = || -> Result<String, anyhow::Error> {
-                let decoded = base64::decode_config(&key, base64::URL_SAFE)?;
-                Ok(String::from_utf8(
-                    aead.decrypt(&decoded, &Nonce::clone_from_slice("unique nonce".as_ref()))
-                        .map_err(|_| anyhow::anyhow!("mailaddress decryption failed"))?,
-                )?)
-            };
+        match (key, exp) {
+            (Some(key), Some(exp))
+                if Utc::now()
+                    <= DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(exp, 0), Utc) =>
+            {
+                println!("Here");
+                let decode_fn = || -> Result<String, anyhow::Error> {
+                    let decoded = base64::decode_config(&key, base64::URL_SAFE)?;
+                    Ok(String::from_utf8(
+                        aead.decrypt(&decoded, &crate::user::timestamp_to_nonce(exp))
+                            .map_err(|_| anyhow::anyhow!("mailaddress decryption failed"))?,
+                    )?)
+                };
 
-            let uid = decode_fn();
+                let uid = decode_fn();
 
-            db.run(move |c| -> Result<UserIdGuard<Aead>, anyhow::Error> {
-                Ok(UserIdGuard {
-                    id: UserFinder::new(c, None).id(&uid?).first()?,
-                    plhdr: PhantomData,
+                db.run(move |c| -> Result<UserIdGuard<Aead>, anyhow::Error> {
+                    Ok(UserIdGuard {
+                        id: UserFinder::new(c, None).id(&uid?).first()?,
+                        plhdr: PhantomData,
+                    })
                 })
-            })
-            .await
-            .ok()
-            .or_forward(())
-        } else {
-            Outcome::Forward(())
+                .await
+                .ok()
+                .or_forward(())
+            }
+            _ => Outcome::Forward(()),
         }
     }
 }
@@ -178,31 +184,37 @@ impl<'r> FromRequest<'r> for UserInfoGuard<Aead> {
         let aead = try_outcome!(request.guard::<&State<AeadKey>>().await);
         let db = try_outcome!(request.guard::<DbConn>().await);
 
+        let exp = request.query_value::<i64>("exp").and_then(|x| x.ok());
         let key = request
             .query_value::<String>("enc_user_id")
             .and_then(|x| x.ok());
-        if let Some(key) = key {
-            let decode_fn = || -> Result<String, anyhow::Error> {
-                let decoded = base64::decode_config(&key, base64::URL_SAFE)?;
-                Ok(String::from_utf8(
-                    aead.decrypt(&decoded, &Nonce::clone_from_slice("unique nonce".as_ref()))
-                        .map_err(|_| anyhow::anyhow!("mailaddress decryption failed"))?,
-                )?)
-            };
+        match (key, exp) {
+            (Some(key), Some(exp))
+                if Utc::now()
+                    <= DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(exp, 0), Utc) =>
+            {
+                println!("Here");
+                let decode_fn = || -> Result<String, anyhow::Error> {
+                    let decoded = base64::decode_config(&key, base64::URL_SAFE)?;
+                    Ok(String::from_utf8(
+                        aead.decrypt(&decoded, &crate::user::timestamp_to_nonce(exp))
+                            .map_err(|_| anyhow::anyhow!("mailaddress decryption failed"))?,
+                    )?)
+                };
 
-            let uid = decode_fn();
+                let uid = decode_fn();
 
-            db.run(move |c| -> Result<UserInfoGuard<Aead>, anyhow::Error> {
-                Ok(UserInfoGuard {
-                    info: UserFinder::new(c, None).id(&uid?).first_info()?,
-                    plhdr: PhantomData,
+                db.run(move |c| -> Result<UserInfoGuard<Aead>, anyhow::Error> {
+                    Ok(UserInfoGuard {
+                        info: UserFinder::new(c, None).id(&uid?).first_info()?,
+                        plhdr: PhantomData,
+                    })
                 })
-            })
-            .await
-            .ok()
-            .or_forward(())
-        } else {
-            Outcome::Forward(())
+                .await
+                .ok()
+                .or_forward(())
+            }
+            _ => Outcome::Forward(()),
         }
     }
 }
