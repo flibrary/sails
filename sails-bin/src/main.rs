@@ -261,6 +261,7 @@ fn rocket() -> Rocket<Build> {
                 user::reset_passwd_page,
                 user::reset_passwd_post,
                 user::reset_passwd_now,
+                user::reset_passwd_instruction
             ],
         )
         .mount(
@@ -335,7 +336,8 @@ fn rocket() -> Rocket<Build> {
                 orders::purchase,
                 orders::progress,
                 orders::order_info_buyer,
-                orders::order_info_seller
+                orders::order_info_seller,
+                orders::user_cancel_order,
             ],
         )
         .mount(

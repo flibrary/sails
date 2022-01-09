@@ -101,15 +101,7 @@ impl TransactionId {
     }
 
     pub fn refund(&self, conn: &SqliteConnection) -> Result<()> {
-        let info = self.get_info(conn)?;
-        ProductFinder::new(conn, None)
-            .id(info.get_product())
-            .first_info()?
-            .set_verified()
-            .update(conn)?;
-        info.set_transaction_status(TransactionStatus::Refunded)
-            .update(conn)
-            .map(|_| ())
+        self.get_info(conn)?.refund(conn)
     }
 }
 
@@ -136,6 +128,19 @@ impl TransactionInfo {
     /// Get a reference to the transaction info's id.
     pub fn get_id(&self) -> &str {
         &self.id
+    }
+
+    pub fn refund(&self, conn: &SqliteConnection) -> Result<()> {
+        // Return the products to `verified` state.
+        ProductFinder::new(conn, None)
+            .id(self.get_product())
+            .first_info()?
+            .set_verified()
+            .update(conn)?;
+        self.clone()
+            .set_transaction_status(TransactionStatus::Refunded)
+            .update(conn)
+            .map(|_| ())
     }
 
     /// Get a reference to the transaction info's shortid.

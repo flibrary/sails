@@ -78,7 +78,10 @@ pub async fn deposit_progress(
         .into_flash(uri!("/"))?
         .into_flash(uri!("/"))?;
 
-    if (resp.trade_status == "TRADE_SUCCESS") | (resp.trade_status == "TRADE_FINISHED") {
+    // If the product status is abnormal, this progress update should not allow users to populate their books.
+    if ((resp.trade_status == "TRADE_SUCCESS") | (resp.trade_status == "TRADE_FINISHED"))
+        && (book.book_info.get_product_status() == &ProductStatus::Normal)
+    {
         // Both of these indicate that we have successfully finished the transaction.
         // TRADE_FINISHED indicates it has been well pass the refunding deadline.
         // This means we can now verify this book!

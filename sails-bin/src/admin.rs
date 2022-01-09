@@ -229,7 +229,7 @@ pub async fn disable_book(
             .update(c)
     })
     .await
-    .into_flash(uri!("/admin", admin_books))?;
+    .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/admin", admin_books)))
 }
 

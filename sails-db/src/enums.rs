@@ -35,6 +35,10 @@ bitflags! {
 	const PROD_OTHERS_WRITABLE = 0b010_000000_0000;
 	const PROD_OTHERS_REMOVABLE = 0b100_000000_0000;
 
+	// NOTE: Progressable also includes the permission to cancel transaction under limited circumstances:
+	// 1. Order placed but not paid
+	// 2. Order paid but not finished
+	// NOTE: Refundable means that the person granted this permission can cancel the order even if it is finished
 	// Access Control on transactions in which user acts as the buyer
 	const TX_BUYER_READABLE = 0b0000_0000_0001_0000000000000;
 	const TX_BUYER_PROGRESSABLE = 0b0000_0000_0010_0000000000000;
@@ -58,8 +62,8 @@ bitflags! {
 	const DISABLED = 0;
 	const NORMAL = Self::USER_SELF_READABLE.bits | Self::USER_SELF_WRITABLE.bits | Self::USER_OTHERS_READABLE.bits
 	    | Self::PROD_SELF_READABLE.bits | Self::PROD_SELF_WRITABLE.bits | Self::PROD_SELF_REMOVABLE.bits | Self::PROD_DELG_READABLE.bits | Self::PROD_DELG_WRITABLE.bits | Self::PROD_OTHERS_READABLE.bits
-	    | Self::TX_BUYER_READABLE.bits | Self::TX_BUYER_PROGRESSABLE.bits | Self::TX_SELLER_READABLE.bits | Self::TX_SELLER_PROGRESSABLE.bits;
-	const CUSTOMER_SERVICE = Self::NORMAL.bits | Self::TX_OTHERS_READABLE.bits | Self::TX_OTHERS_PROGRESSABLE.bits;
+	    | Self::TX_BUYER_READABLE.bits | Self::TX_BUYER_PROGRESSABLE.bits | Self::TX_SELLER_READABLE.bits;
+	const CUSTOMER_SERVICE = Self::NORMAL.bits | Self::TX_OTHERS_READABLE.bits;
 	const STORE_KEEPER = Self::CUSTOMER_SERVICE.bits | Self::TX_OTHERS_FINISHABLE.bits | Self::PROD_ADMIN.bits;
 	const ADMIN = 0b1_1111_1111_1111_111111111_1111;
     }

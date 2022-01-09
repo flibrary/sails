@@ -116,6 +116,15 @@ pub async fn signup_instruction() -> SignUpInstruction {
 }
 
 #[derive(Template)]
+#[template(path = "user/reset_passwd_instruction.html")]
+pub struct ResetPasswdInstruction;
+
+#[get("/reset_passwd_instruction")]
+pub async fn reset_passwd_instruction() -> ResetPasswdInstruction {
+    ResetPasswdInstruction
+}
+
+#[derive(Template)]
 #[template(path = "user/reset_passwd_confirmation.html")]
 pub struct ResetPasswdConfirmation {
     reset_passwd: String,
@@ -220,7 +229,7 @@ pub async fn reset_passwd_post(
     .await
     .into_flash(uri!("/"))?;
 
-    Ok(Redirect::to(uri!("/user", super::portal)))
+    Ok(Redirect::to(uri!("/user", reset_passwd_instruction)))
 }
 
 #[derive(Template)]

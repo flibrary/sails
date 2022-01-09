@@ -1,7 +1,7 @@
 use crate::{
     alipay::{
-        AlipayAppPrivKey, AlipayClient, Precreate, PrecreateResp, SignedResponse, TradeQuery,
-        TradeQueryResp,
+        AlipayAppPrivKey, AlipayClient, CancelTrade, CancelTradeResp, Precreate, PrecreateResp,
+        SignedResponse, TradeQuery, TradeQueryResp,
     },
     guards::*,
     DbConn, IntoFlash,
@@ -78,6 +78,43 @@ pub async fn order_info_buyer(
             order: order.order_info,
             resp: None,
         })
+    }
+}
+
+#[get("/cancel_order")]
+pub async fn user_cancel_order(
+    // Note: here we set the auth flag to order progressable, meaning that user or customer service can cancel order in limited situations.
+    _auth: Auth<OrderProgressable>,
+    info: OrderInfoGuard,
+    conn: DbConn,
+    priv_key: &State<AlipayAppPrivKey>,
+    client: &State<AlipayClient>,
+) -> Result<Redirect, Flash<Redirect>> {
+    let status = info.order_info.get_transaction_status();
+    // We only allow users to cancel their orders if they have not finished them.
+    if (status == &TransactionStatus::Placed) || (status == &TransactionStatus::Paid) {
+        loop {
+            let resp = client
+                .request(priv_key, CancelTrade::new(info.order_info.get_id()))
+                .into_flash(uri!("/"))?
+                .send::<CancelTradeResp>()
+                .await
+                .into_flash(uri!("/"))?
+                .into_flash(uri!("/"))?;
+            if resp.retry_flag == "N" {
+                break;
+            }
+        }
+
+        conn.run(move |c| info.order_info.refund(c))
+            .await
+            .into_flash(uri!("/"))?;
+        Ok(Redirect::to(uri!("/user", crate::user::portal)))
+    } else {
+        Err(Flash::error(
+            Redirect::to(uri!("/")),
+            "refunds not allowed due to order status constraints",
+        ))
     }
 }
 

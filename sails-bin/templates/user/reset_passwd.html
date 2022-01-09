@@ -7,7 +7,7 @@
     <script src="https://www.recaptcha.net/recaptcha/api.js" async defer></script>
     <script>
       function enableBtn(){
-	  document.getElementById("signup-submit").disabled = false;
+	  document.getElementById("reset-passwd-submit").disabled = false;
       }
     </script>
 {% endblock head %}
@@ -22,9 +22,9 @@
       <label for="floatingInput">邮箱</label>
     </div>
     <br>
-    <div class="g-recaptcha" data-sitekey="{{ recaptcha_key }}"></div>
+    <div class="g-recaptcha" data-sitekey="{{ recaptcha_key }}" data-callback="enableBtn"></div>
     <br/>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">重置密码</button>
+    <button class="w-100 btn btn-lg btn-primary" id="reset-passwd-submit" type="submit" onclick="onSubmit()" disabled="disabled">重置密码</button>
   </form>
 </main>
 {% block script %}

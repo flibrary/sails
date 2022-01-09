@@ -37,7 +37,7 @@
       </div>
       {% endmatch %}
       <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-success" role="button">下一步</a>
-
+      <a href="/orders/cancel_order?order_id={{order.get_id()}}" class="btn btn-danger" role="button" onclick="return confirm('您确认取消订单吗？这无法撤消。');">取消订单</a>
 
       {% when sails_db::enums::TransactionStatus::Paid %}
       <div class="progress">
@@ -46,6 +46,7 @@
       <br>
       <h3>您已成功付款</h3>
       感谢您的付款！接下来您只需要等待我们为您配送书本。或者您可以用订单 ID: <code>{{ order.get_shortid() }}</code> 来我们的仓库自提书本。
+      <a href="/orders/cancel_order?order_id={{order.get_id()}}" class="btn btn-danger" role="button" onclick="return confirm('您确认退款吗？这无法撤消。');">取消订单并退款</a>
 
       {% when sails_db::enums::TransactionStatus::Finished %}
       <div class="progress">

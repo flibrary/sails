@@ -13,7 +13,6 @@
       <br>
       <h3>订单已退款（已取消）</h3>
       您不需要进行任何操作。
-      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-primary" role="button">更新订单信息</a>
 
       {% when sails_db::enums::TransactionStatus::Placed %}
       <div class="progress">
@@ -21,7 +20,7 @@
       </div>
       <br>
       <h3>成功下单</h3>
-      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-primary" role="button">更新订单信息</a>
+      您不需要进行任何操作。
 
       {% when sails_db::enums::TransactionStatus::Paid %}
       <div class="progress">
@@ -29,6 +28,7 @@
       </div>
       <br>
       <h3>已成功付款</h3>
+      您不需要进行任何操作。
 
       {% when sails_db::enums::TransactionStatus::Finished %}
       <div class="progress">
