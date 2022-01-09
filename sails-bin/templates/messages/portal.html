@@ -1,22 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Chat Portal{% endblock title %}
+{% block title %}消息{% endblock title %}
 {% block content %}
 <main class="container">
   <div class="p-5 rounded shadow">
-    <h1>Messages</h1>
-    <p class="lead">Below is a list of recent messages sent to you.</p>
+    <h1>消息</h1>
+    <p class="lead">以下是所有发送给您的消息</p>
   </div>
   <br>
 
   {% if message_list.len() > 0 %}
     <div class="p-5 rounded shadow">
-      <h3>Recent messages</h3>
+      <h3>最近的消息</h3>
       <table class="table" data-toggle="table" data-pagination="true" data-search="true">
         <thead>
 	  <tr>
-	    <th data-field="id" scope="col">User</th>
-	    <th data-field="body" scope="col">Message</th>
-	    <th data-field="time" data-sortable="true" scope="col">Time</th>
+	    <th data-field="id" scope="col">用户</th>
+	    <th data-field="body" scope="col">内容</th>
+	    <th data-field="time" data-sortable="true" scope="col">时间</th>
 	  </tr>
         </thead>
         <tbody>
@@ -33,7 +33,7 @@
     <br>
   {% else %}
     <div class="p-5 rounded shadow">
-      <h3>You have not received any message</h3>
+      <h3>您还没有收到任何消息</h3>
     </div>
     <br>
   {% endif %}

@@ -83,6 +83,8 @@ pub struct UserStats {
     pub total: usize,
     pub disabled: usize,
     pub normal: usize,
+    pub customer_service: usize,
+    pub store_keeper: usize,
     pub admin: usize,
 }
 
@@ -101,21 +103,39 @@ impl<'a> UserFinder<'a> {
     }
 
     pub fn stats(conn: &'a SqliteConnection) -> Result<UserStats> {
+        // == DISABLED
         let disabled = Self::new(conn, None)
             .status(&UserStatus::DISABLED, Cmp::Equal)
             .count()?;
+        // == NORMAL
         let normal = Self::new(conn, None)
             .status(&UserStatus::NORMAL, Cmp::Equal)
             .count()?;
+        // CUSTOMER SERVICE <= STATUS < STORE_KEEPER
+        let customer_service = Self::new(conn, None)
+            .status(&UserStatus::CUSTOMER_SERVICE, Cmp::GreaterEqual)
+            .status(&UserStatus::STORE_KEEPER, Cmp::LessThan)
+            .count()?;
+        let store_keeper = Self::new(conn, None)
+            .status(&UserStatus::STORE_KEEPER, Cmp::GreaterEqual)
+            .status(&UserStatus::ADMIN, Cmp::LessThan)
+            .count()?;
+        // == ADMIN
         let admin = Self::new(conn, None)
             .status(&UserStatus::ADMIN, Cmp::Equal)
             .count()?;
+        // >= NORMAL
+        let total = Self::new(conn, None)
+            .status(&UserStatus::NORMAL, Cmp::GreaterEqual)
+            .count()?;
 
         Ok(UserStats {
-            total: normal + admin,
+            total,
             disabled,
             normal,
             admin,
+            customer_service,
+            store_keeper,
         })
     }
 
@@ -180,8 +200,14 @@ impl<'a> UserFinder<'a> {
         match cmp {
             Cmp::Equal => self.query = self.query.filter(user_status.eq(status.bits() as i64)),
             Cmp::NotEqual => self.query = self.query.filter(user_status.ne(status.bits() as i64)),
-            // Currently it makes no sense for us to do so
-            _ => unimplemented!(),
+            Cmp::GreaterThan => {
+                self.query = self.query.filter(user_status.gt(status.bits() as i64))
+            }
+            Cmp::LessThan => self.query = self.query.filter(user_status.lt(status.bits() as i64)),
+            Cmp::GreaterEqual => {
+                self.query = self.query.filter(user_status.ge(status.bits() as i64))
+            }
+            Cmp::LessEqual => self.query = self.query.filter(user_status.le(status.bits() as i64)),
         }
         self
     }
