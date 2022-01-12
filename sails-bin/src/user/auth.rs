@@ -78,7 +78,7 @@ pub async fn create_user(
         .id
         .parse::<lettre::Address>()
         .into_flash(uri!("/"))?;
-    if email.domain() == "outlook.com" {
+    if email.domain().to_ascii_lowercase() == "outlook.com" {
         smtp.send(
             &info.user_info.id,
             "Your FLibrary Verification Email",

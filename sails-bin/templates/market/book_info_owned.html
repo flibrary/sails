@@ -10,7 +10,7 @@
     </tr>
     <tr>
       <th scope="row">名称</th>
-      <td><a href="/user?user_id={{seller.get_id()}}">{{ seller.get_name() }}</a></td>
+      <td><a href="{{ uri!("/user", crate::user::portal_guest(self.seller.get_id())) }}">{{seller.get_name()}}</a></td>
     </tr>
     <tr>
       <th scope="row">学校</th>

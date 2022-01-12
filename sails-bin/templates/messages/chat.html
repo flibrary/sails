@@ -28,7 +28,7 @@
   </div>
   <br>
   <div class="shadow p-5 rounded" id="draft_section">
-    <form action="send?user_id={{ receiver.get_id() }}" method="post">
+    <form action="{{ uri!("/messages", crate::messages::send(self.receiver.get_id())) }}" method="post">
       <div class="form-group row">
 	<div class="col-sm-10">
 	  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="body" placeholder="Type your message here"></textarea>

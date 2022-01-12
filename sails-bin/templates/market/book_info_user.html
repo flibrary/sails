@@ -17,7 +17,7 @@
 	</tr>
 	<tr>
 	  <th scope="row">卖家姓名</th>
-	  <td><a href="/user?user_id={{seller.get_id()}}">{{ seller.get_name() }}</a></td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(self.seller.get_id())) }}">{{seller.get_name()}}</a></td>
 	</tr>
 	<tr>
 	  <th scope="row">卖家学校</th>
@@ -25,7 +25,7 @@
 	</tr>
       </tbody>
     </table>
-    <a href="/messages/chat?user_id={{seller.get_id()}}" class="btn btn-primary" role="button">发送消息</a>
+    <a href="{{ uri!("/messages", crate::messages::chat(self.seller.get_id())) }}" class="btn btn-primary" role="button">发送消息</a>
 {% endblock seller %}
 
 {% block actions %}

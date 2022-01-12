@@ -55,7 +55,7 @@
       </tbody>
     </table>
     <br>
-    <form action="user_status?user_id={{user.get_id()}}" method="post">
+    <form action="{{ uri!("/root", crate::root::user_status(self.user.get_id())) }}" method="post">
       <div class="form-group row">
 	<label for="inputBook" class="col-sm-2 col-form-label">Permission Level</label>
 	<div class="col-sm-10">

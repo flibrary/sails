@@ -18,7 +18,8 @@
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="price" data-sortable="true" scope="col">Price</th>
-	  <th data-field="email" data-sortable="true" scope="col">Seller's email</th>
+	  <th data-field="operator" data-sortable="true" scope="col">Operator</th>
+	  <th data-field="seller" data-sortable="true" scope="col">Seller</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	</tr>
       </thead>
@@ -28,7 +29,8 @@
 	  <th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
 	  <td>{{book.get_prodname()}}</td>
 	  <td>{{book.get_price()}}</td>
-	  <td><a href="/user?user_id={{book.get_seller_id()}}">{{book.get_seller_id()}}</a></td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(book.get_operator_id())) }}">{{book.get_operator_id()}}</a></td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(book.get_seller_id())) }}">{{book.get_seller_id()}}</a></td>
 	  <td><a href="{{ uri!("/admin", crate::admin::disable_book(book.get_id())) }}" class="btn btn-warning" role="button">Disable</a> <a href="{{ uri!("/admin", crate::admin::verify_book(book.get_id())) }}" class="btn btn-success" role="button">Verify</a></td>
 	</tr>
 	{% endfor %}
@@ -53,7 +55,8 @@
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="price" data-sortable="true" scope="col">Price</th>
-	  <th data-field="email" data-sortable="true" scope="col">Seller's email</th>
+	  <th data-field="operator" data-sortable="true" scope="col">Operator</th>
+	  <th data-field="seller" data-sortable="true" scope="col">Seller</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	</tr>
       </thead>
@@ -63,7 +66,8 @@
 	  <th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
 	  <td>{{book.get_prodname()}}</td>
 	  <td>{{book.get_price()}}</td>
-	  <td>{{book.get_seller_id()}}</td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(book.get_operator_id())) }}">{{book.get_operator_id()}}</a></td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(book.get_seller_id())) }}">{{book.get_seller_id()}}</a></td>
 	  <td><a href="{{ uri!("/admin", crate::admin::normalize_book(book.get_id())) }}" class="btn btn-primary" role="button">Revert</a></td>
 	</tr>
 	{% endfor %}
@@ -88,7 +92,8 @@
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="price" data-sortable="true" scope="col">Price</th>
-	  <th data-field="email" data-sortable="true" scope="col">Seller's email</th>
+	  <th data-field="operator" data-sortable="true" scope="col">Operator</th>
+	  <th data-field="seller" data-sortable="true" scope="col">Seller</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	</tr>
       </thead>
@@ -98,7 +103,8 @@
 	  <th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
 	  <td>{{book.get_prodname()}}</td>
 	  <td>{{book.get_price()}}</td>
-	  <td><a href="/user?user_id={{book.get_seller_id()}}">{{book.get_seller_id()}}</a></td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(book.get_operator_id())) }}">{{book.get_operator_id()}}</a></td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(book.get_seller_id())) }}">{{book.get_seller_id()}}</a></td>
 	  <td><a href="{{ uri!("/admin", crate::admin::normalize_book(book.get_id())) }}" class="btn btn-warning" role="button">Revert</a></td>
 	</tr>
 	{% endfor %}
