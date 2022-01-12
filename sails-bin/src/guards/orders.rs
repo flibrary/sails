@@ -1,70 +1,65 @@
 use crate::DbConn;
 use rocket::{
-    outcome::{try_outcome, IntoOutcome, Outcome},
-    request::FromRequest,
+    form::{self, FromFormField, ValueField},
+    http::uri::fmt::{FromUriParam, Query},
 };
 use sails_db::{error::SailsDbError, products::*, transactions::*};
 
-pub struct OrderInfoGuard {
-    pub order_info: TransactionInfo,
-    pub book_info: ProductInfo,
+#[derive(UriDisplayQuery)]
+pub struct OrderGuard(String);
+
+impl<'v> FromFormField<'v> for OrderGuard {
+    #[inline]
+    fn from_value(field: ValueField<'v>) -> form::Result<'v, Self> {
+        Ok(OrderGuard(
+            field.value.parse().map_err(form::error::Error::custom)?,
+        ))
+    }
 }
 
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for OrderInfoGuard {
-    type Error = ();
+impl<T: ToString> FromUriParam<Query, T> for OrderGuard {
+    type Target = OrderGuard;
 
-    async fn from_request(
-        request: &'r rocket::Request<'_>,
-    ) -> rocket::request::Outcome<Self, Self::Error> {
-        let order = try_outcome!(request.guard::<OrderIdGuard>().await);
-        let db = try_outcome!(request.guard::<DbConn>().await);
-        db.run(move |c| -> Result<OrderInfoGuard, SailsDbError> {
+    fn from_uri_param(id: T) -> OrderGuard {
+        OrderGuard(id.to_string())
+    }
+}
+
+impl OrderGuard {
+    pub async fn to_id(&self, db: &DbConn) -> Result<OrderId, SailsDbError> {
+        let order_id_inner = self.0.clone();
+        db.run(move |c| -> Result<OrderId, SailsDbError> {
+            Ok(OrderId {
+                id: TransactionFinder::new(c, None)
+                    .id(&order_id_inner)
+                    .first()?,
+            })
+        })
+        .await
+    }
+
+    pub async fn to_info(&self, db: &DbConn) -> Result<OrderInfo, SailsDbError> {
+        let order = self.to_id(db).await?;
+        db.run(move |c| -> Result<OrderInfo, SailsDbError> {
             let order_info = order.id.get_info(c)?;
             let book_info = ProductFinder::new(c, None)
                 .id(order_info.get_product())
                 .first_info()?;
-            Ok(OrderInfoGuard {
+            Ok(OrderInfo {
                 order_info,
                 book_info,
             })
         })
         .await
-        .ok()
-        .or_forward(())
     }
+}
+
+pub struct OrderInfo {
+    pub order_info: TransactionInfo,
+    pub book_info: ProductInfo,
 }
 
 // This request guard explicitly requires a valid transaction ID
-pub struct OrderIdGuard {
+pub struct OrderId {
     pub id: TransactionId,
-}
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for OrderIdGuard {
-    type Error = ();
-
-    async fn from_request(
-        request: &'r rocket::Request<'_>,
-    ) -> rocket::request::Outcome<Self, Self::Error> {
-        let db = try_outcome!(request.guard::<DbConn>().await);
-        let order_id = request
-            .query_value::<String>("order_id")
-            .and_then(|x| x.ok());
-        if let Some(order_id) = order_id {
-            let order_id_inner = order_id.clone();
-            db.run(move |c| -> Result<OrderIdGuard, SailsDbError> {
-                Ok(OrderIdGuard {
-                    id: TransactionFinder::new(c, None)
-                        .id(&order_id_inner)
-                        .first()?,
-                })
-            })
-            .await
-            .ok()
-            .or_forward(())
-        } else {
-            Outcome::Forward(())
-        }
-    }
 }

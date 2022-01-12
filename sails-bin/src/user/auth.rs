@@ -138,14 +138,15 @@ pub struct ResetPasswd {
 
 // We validate the challenge based on expiration time and the AEAD encrypted hashed password.
 // Then we reset the user password to a CSPRNG-generated u32 number.
-#[get("/reset_passwd?<exp>&<challenge>", rank = 1)]
+#[get("/reset_passwd?<user_id>&<exp>&<challenge>", rank = 1)]
 pub async fn reset_passwd_now(
     conn: DbConn,
-    user_info: UserInfoGuard<Param>,
+    user_id: UserGuard,
     aead: &State<AeadKey>,
     exp: i64,
     challenge: String,
 ) -> Result<ResetPasswdConfirmation, Flash<Redirect>> {
+    let user_info = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
     if Utc::now() <= DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(exp, 0), Utc) {
         // Within expiration time
         let decoded = base64::decode_config(&challenge, base64::URL_SAFE).into_flash(uri!("/"))?;
@@ -241,11 +242,17 @@ pub async fn email_verified() -> EmailVerified {
     EmailVerified
 }
 
-#[get("/activate")]
+#[get("/activate?<enc_user_id>&<exp>")]
 pub async fn activate_user(
-    info: UserInfoGuard<Aead>,
+    enc_user_id: UserGuard,
+    exp: i64,
     conn: DbConn,
+    aead: &State<AeadKey>,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let info = enc_user_id
+        .to_info_aead(&conn, exp, aead)
+        .await
+        .into_flash(uri!("/"))?;
     conn.run(move |c| info.info.set_validated(true).update(c))
         .await
         .into_flash(uri!("/"))?;

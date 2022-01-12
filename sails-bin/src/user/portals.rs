@@ -69,12 +69,14 @@ pub struct PortalPage {
     orders_received: Vec<(ProductInfo, TransactionInfo)>,
 }
 
-#[get("/", rank = 1)]
+#[get("/?<user_id>", rank = 1)]
 pub async fn portal_guest(
     _signedin: UserIdGuard<Cookie>,
-    user: UserInfoGuard<Param>,
+    user_id: UserGuard,
     conn: DbConn,
 ) -> Result<PortalGuestPage, Flash<Redirect>> {
+    let user = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
+
     let uid = user.info.get_id().to_string();
 
     let uid_cloned = uid.clone();

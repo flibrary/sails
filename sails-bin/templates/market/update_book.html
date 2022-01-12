@@ -11,7 +11,7 @@
   <div class="p-5 rounded shadow">
     <h1>书本信息</h1>
     {% block form_link %}
-    <form action="cow_book?book_id={{book.get_id()}}" method="post">
+    <form action="{{ uri!("/market", crate::market::update_book(self.book.get_id())) }}" method="post">
     {% endblock form_link %}
     <div class="form-group row">
       <label for="inputBook" class="col-sm-2 col-form-label">名称</label>

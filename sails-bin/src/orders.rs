@@ -20,15 +20,17 @@ pub struct OrderInfoSellerOrAdmin {
     order: TransactionInfo,
 }
 
-#[get("/order_info", rank = 2)]
+#[get("/order_info?<order_id>", rank = 2)]
 pub async fn order_info_seller(
     _auth: Auth<OrderReadable>,
-    order: OrderInfoGuard,
-) -> OrderInfoSellerOrAdmin {
-    OrderInfoSellerOrAdmin {
+    order_id: OrderGuard,
+    conn: DbConn,
+) -> Result<OrderInfoSellerOrAdmin, Flash<Redirect>> {
+    let order = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
+    Ok(OrderInfoSellerOrAdmin {
         book: order.book_info,
         order: order.order_info,
-    }
+    })
 }
 
 #[derive(Template)]
@@ -40,15 +42,17 @@ pub struct OrderInfoBuyer {
     resp: Option<Result<PrecreateResp, SignedResponse<PrecreateResp>>>,
 }
 
-#[get("/order_info", rank = 1)]
+#[get("/order_info?<order_id>", rank = 1)]
 pub async fn order_info_buyer(
     // This page contains progressable information
     // TODO: this is not a good enough distinguishment
     _auth: Auth<OrderProgressable>,
-    order: OrderInfoGuard,
+    order_id: OrderGuard,
+    conn: DbConn,
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
 ) -> Result<OrderInfoBuyer, Flash<Redirect>> {
+    let order = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
     if order.order_info.get_transaction_status() == &TransactionStatus::Placed {
         // It seems like we could request precreation even if the user has already paid the bill or the trade has already been created.
         // If, in the future, this behavior changes, we have to come up with a better mechanism.
@@ -81,15 +85,16 @@ pub async fn order_info_buyer(
     }
 }
 
-#[get("/cancel_order")]
+#[get("/cancel_order?<order_id>")]
 pub async fn user_cancel_order(
     // Note: here we set the auth flag to order progressable, meaning that user or customer service can cancel order in limited situations.
     _auth: Auth<OrderProgressable>,
-    info: OrderInfoGuard,
+    order_id: OrderGuard,
     conn: DbConn,
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let info = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
     let status = info.order_info.get_transaction_status();
     // We only allow users to cancel their orders if they have not finished them.
     if (status == &TransactionStatus::Placed) || (status == &TransactionStatus::Paid) {
@@ -119,15 +124,15 @@ pub async fn user_cancel_order(
 }
 
 // Basically, we syncronize our trade status with that in alipay
-#[get("/progress", rank = 1)]
+#[get("/progress?<order_id>", rank = 1)]
 pub async fn progress(
     _auth: Auth<OrderProgressable>,
-    order: OrderInfoGuard,
+    order_id: OrderGuard,
     db: DbConn,
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let id = order.order_info.get_id().to_string();
+    let order = order_id.to_info(&db).await.into_flash(uri!("/"))?;
 
     let resp = client
         .request(priv_key, TradeQuery::new(order.order_info.get_id()))
@@ -155,22 +160,20 @@ pub async fn progress(
     db.run(move |c| order.order_info.set_transaction_status(status).update(c))
         .await
         .into_flash(uri!("/"))?;
-    Ok(Redirect::to(format!("/orders/order_info?order_id={}", id)))
+    Ok(Redirect::to(uri!("/orders", order_info_buyer(order_id))))
 }
 
-#[get("/purchase")]
+#[get("/purchase?<book_id>")]
 pub async fn purchase(
     db: DbConn,
-    book: BookIdGuard,
+    book_id: BookGuard,
     user: UserIdGuard<Cookie>,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let book = book_id.to_id(&db).await.into_flash(uri!("/"))?;
     let id = db
         .run(move |c| Transactions::buy(c, &book.book_id, &user.id))
         .await
         .into_flash(uri!("/"))?;
 
-    Ok(Redirect::to(format!(
-        "/orders/order_info?order_id={}",
-        id.get_id()
-    )))
+    Ok(Redirect::to(uri!("/orders", order_info_buyer(id.get_id()))))
 }

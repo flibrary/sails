@@ -25,11 +25,11 @@
       <tbody>
 	{% for book in normal_books %}
 	<tr>
-	  <th scope="row"><a href="/market/book_info?book_id={{ book.get_id() }}">{{book.get_shortid()}}</a></th>
+	  <th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
 	  <td>{{book.get_prodname()}}</td>
 	  <td>{{book.get_price()}}</td>
 	  <td><a href="/user?user_id={{book.get_seller_id()}}">{{book.get_seller_id()}}</a></td>
-	  <td><a href="/admin/disable_book?book_id={{book.get_id()}}" class="btn btn-warning" role="button">Disable</a> <a href="/admin/verify_book?book_id={{book.get_id()}}" class="btn btn-success" role="button">Verify</a></td>
+	  <td><a href="{{ uri!("/admin", crate::admin::disable_book(book.get_id())) }}" class="btn btn-warning" role="button">Disable</a> <a href="{{ uri!("/admin", crate::admin::verify_book(book.get_id())) }}" class="btn btn-success" role="button">Verify</a></td>
 	</tr>
 	{% endfor %}
       </tbody>
@@ -60,11 +60,11 @@
       <tbody>
 	{% for book in disabled_books %}
 	<tr>
-	  <th scope="row"><a href="/market/book_info?book_id={{ book.get_id() }}">{{book.get_shortid()}}</a></th>
+	  <th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
 	  <td>{{book.get_prodname()}}</td>
 	  <td>{{book.get_price()}}</td>
 	  <td>{{book.get_seller_id()}}</td>
-	  <td><a href="/admin/normalize_book?book_id={{book.get_id()}}" class="btn btn-primary" role="button">Revert</a></td>
+	  <td><a href="{{ uri!("/admin", crate::admin::normalize_book(book.get_id())) }}" class="btn btn-primary" role="button">Revert</a></td>
 	</tr>
 	{% endfor %}
       </tbody>
@@ -95,11 +95,11 @@
       <tbody>
 	{% for book in verified_books %}
 	<tr>
-	  <th scope="row"><a href="/market/book_info?book_id={{ book.get_id() }}">{{book.get_shortid()}}</a></th>
+	  <th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
 	  <td>{{book.get_prodname()}}</td>
 	  <td>{{book.get_price()}}</td>
 	  <td><a href="/user?user_id={{book.get_seller_id()}}">{{book.get_seller_id()}}</a></td>
-	  <td><a href="/admin/normalize_book?book_id={{book.get_id()}}" class="btn btn-warning" role="button">Revert</a></td>
+	  <td><a href="{{ uri!("/admin", crate::admin::normalize_book(book.get_id())) }}" class="btn btn-warning" role="button">Revert</a></td>
 	</tr>
 	{% endfor %}
       </tbody>

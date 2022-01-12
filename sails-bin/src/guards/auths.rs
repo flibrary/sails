@@ -1,6 +1,7 @@
 use super::{books::*, orders::*, users::*};
+use crate::DbConn;
 use rocket::{
-    outcome::{try_outcome, Outcome},
+    outcome::{try_outcome, IntoOutcome, Outcome},
     request::FromRequest,
 };
 use sails_db::enums::UserStatus;
@@ -52,7 +53,14 @@ impl<'r> FromRequest<'r> for Auth<BookReadable> {
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        let book = try_outcome!(request.guard::<BookIdGuard>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let book = try_outcome!(request
+            .query_value::<BookGuard>("book_id")
+            .map(|x| x.ok())
+            .flatten()
+            .or_forward(()));
+        let book = try_outcome!(book.to_id(&db).await.ok().or_forward(()));
 
         if match (
             book.operator_id.get_id() == user.info.get_id(),
@@ -100,7 +108,14 @@ impl<'r> FromRequest<'r> for Auth<BookWritable> {
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        let book = try_outcome!(request.guard::<BookIdGuard>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let book = try_outcome!(request
+            .query_value::<BookGuard>("book_id")
+            .map(|x| x.ok())
+            .flatten()
+            .or_forward(()));
+        let book = try_outcome!(book.to_id(&db).await.ok().or_forward(()));
 
         if match (
             book.operator_id.get_id() == user.info.get_id(),
@@ -148,7 +163,14 @@ impl<'r> FromRequest<'r> for Auth<BookRemovable> {
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        let book = try_outcome!(request.guard::<BookIdGuard>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let book = try_outcome!(request
+            .query_value::<BookGuard>("book_id")
+            .map(|x| x.ok())
+            .flatten()
+            .or_forward(()));
+        let book = try_outcome!(book.to_id(&db).await.ok().or_forward(()));
 
         if match (
             book.operator_id.get_id() == user.info.get_id(),
@@ -197,12 +219,20 @@ impl<'r> FromRequest<'r> for Auth<UserReadable> {
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        if match request.guard::<UserIdGuard<Param>>().await {
-            Outcome::Success(_) => user
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let user_param = try_outcome!(request
+            .query_value::<UserGuard>("user_id")
+            .map(|x| x.ok())
+            .flatten()
+            .or_forward(()));
+
+        if match user_param.to_id_param(&db).await {
+            Ok(_) => user
                 .info
                 .get_user_status()
                 .contains(UserStatus::USER_OTHERS_READABLE),
-            Outcome::Failure(_) | Outcome::Forward(_) => user
+            Err(_) => user
                 .info
                 .get_user_status()
                 .contains(UserStatus::USER_SELF_READABLE),
@@ -222,12 +252,20 @@ impl<'r> FromRequest<'r> for Auth<UserWritable> {
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        if match request.guard::<UserIdGuard<Param>>().await {
-            Outcome::Success(_) => user
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let user_param = try_outcome!(request
+            .query_value::<UserGuard>("user_id")
+            .map(|x| x.ok())
+            .flatten()
+            .or_forward(()));
+
+        if match user_param.to_id_param(&db).await {
+            Ok(_) => user
                 .info
                 .get_user_status()
                 .contains(UserStatus::USER_OTHERS_WRITABLE),
-            Outcome::Failure(_) | Outcome::Forward(_) => user
+            Err(_) => user
                 .info
                 .get_user_status()
                 .contains(UserStatus::USER_SELF_WRITABLE),
@@ -248,7 +286,14 @@ impl<'r> FromRequest<'r> for Auth<OrderReadable> {
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        let order = try_outcome!(request.guard::<OrderInfoGuard>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let order = try_outcome!(request
+            .query_value::<OrderGuard>("order_id")
+            .map(|x| x.ok())
+            .flatten()
+            .or_forward(()));
+        let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
         if match (
             user.info.get_id() == order.order_info.get_buyer(),
@@ -294,7 +339,14 @@ impl<'r> FromRequest<'r> for Auth<OrderProgressable> {
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        let order = try_outcome!(request.guard::<OrderInfoGuard>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let order = try_outcome!(request
+            .query_value::<OrderGuard>("order_id")
+            .map(|x| x.ok())
+            .flatten()
+            .or_forward(()));
+        let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
         if match (
             user.info.get_id() == order.order_info.get_buyer(),
@@ -340,7 +392,14 @@ impl<'r> FromRequest<'r> for Auth<OrderFinishable> {
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        let order = try_outcome!(request.guard::<OrderInfoGuard>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let order = try_outcome!(request
+            .query_value::<OrderGuard>("order_id")
+            .map(|x| x.ok())
+            .flatten()
+            .or_forward(()));
+        let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
         if match (
             user.info.get_id() == order.order_info.get_buyer(),
@@ -386,7 +445,14 @@ impl<'r> FromRequest<'r> for Auth<OrderRefundable> {
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-        let order = try_outcome!(request.guard::<OrderInfoGuard>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let order = try_outcome!(request
+            .query_value::<OrderGuard>("order_id")
+            .map(|x| x.ok())
+            .flatten()
+            .or_forward(()));
+        let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
         if match (
             user.info.get_id() == order.order_info.get_buyer(),

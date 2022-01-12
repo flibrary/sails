@@ -15,20 +15,23 @@ pub struct SendMessage {
     body: String,
 }
 
-#[post("/send", data = "<info>")]
+#[post("/send?<user_id>", data = "<info>")]
 pub async fn send(
     user: UserIdGuard<Cookie>,
-    receiver: UserIdGuard<Param>,
+    user_id: UserGuard,
     info: Form<SendMessage>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let receiver = user_id.to_id_param(&conn).await.into_flash(uri!("/"))?;
+
     let receiver_id = receiver.id.clone();
     conn.run(move |c| Messages::send(c, &user.id, &receiver.id, &info.body))
         .await
         .into_flash(uri!("/"))?;
-    Ok(Redirect::to(format!(
-        "/messages/chat?user_id={}#draft_section",
-        receiver_id.get_id()
+    Ok(Redirect::to(uri!(
+        "/messages",
+        chat(receiver_id.get_id()),
+        "#draft_section"
     )))
 }
 
@@ -47,12 +50,14 @@ pub async fn chat_error() -> Flash<Redirect> {
     )
 }
 
-#[get("/chat", rank = 1)]
+#[get("/chat?<user_id>", rank = 1)]
 pub async fn chat(
     conn: DbConn,
     user: UserIdGuard<Cookie>,
-    receiver: UserInfoGuard<Param>,
+    user_id: UserGuard,
 ) -> Result<ChatPage, Flash<Redirect>> {
+    let receiver = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
+
     let receiver_id = receiver.info.to_id();
     let messages = conn
         .run(move |c| Messages::get_conv(c, &user.id, &receiver_id))

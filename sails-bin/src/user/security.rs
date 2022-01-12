@@ -1,4 +1,4 @@
-use crate::aead::AeadKey;
+use crate::{aead::AeadKey, guards::UserGuard};
 use chacha20poly1305::Nonce;
 use chrono::{offset::Utc, Duration};
 
@@ -28,24 +28,28 @@ pub(super) fn generate_passwd_reset_link(
             .map_err(|_| anyhow::anyhow!("password reset link encryption failed"))?,
         base64::URL_SAFE,
     );
-    Ok(format!(
-        "https://flibrary.info/user/reset_passwd?user_id={}&exp={}&challenge={}",
-        dst, exp, challenge
-    ))
+    Ok(uri!(
+        "https://flibrary.info/user",
+        super::reset_passwd_now(dst, exp, challenge)
+    )
+    .to_string())
 }
 
 pub(super) fn generate_verification_link(dst: &str, aead: &AeadKey) -> anyhow::Result<String> {
     let exp = (Utc::now() + Duration::minutes(30)).timestamp();
-    Ok(format!(
-        "https://flibrary.info/user/activate?exp={}&enc_user_id={}",
-        exp,
-        base64::encode_config(
-            aead.encrypt(
-                dst.as_bytes(),
-                &Nonce::clone_from_slice(&timestamp_to_nonce(exp)),
-            )
-            .map_err(|_| anyhow::anyhow!("mailaddress encryption failed"))?,
-            base64::URL_SAFE
+    Ok(uri!(
+        "https://flibrary.info/user",
+        super::activate_user(
+            base64::encode_config(
+                aead.encrypt(
+                    dst.as_bytes(),
+                    &Nonce::clone_from_slice(&timestamp_to_nonce(exp)),
+                )
+                .map_err(|_| anyhow::anyhow!("mailaddress encryption failed"))?,
+                base64::URL_SAFE
+            ),
+            exp
         )
-    ))
+    )
+    .to_string())
 }

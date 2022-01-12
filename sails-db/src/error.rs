@@ -58,4 +58,10 @@ pub enum SailsDbError {
 
     #[error("the user's was not verified. Please check your mailbox and junk folder to verify.")]
     NotValidatedEmail,
+
+    #[error("illegal query")]
+    IllegalQuery,
+
+    #[error("other errors: {0}")]
+    Anyhow(#[from] anyhow::Error),
 }

@@ -101,11 +101,14 @@ pub struct UserStatusPage {
     user: UserInfo,
 }
 
-#[get("/user_status")]
+#[get("/user_status?<user_id>")]
 pub async fn user_status(
     _guard: Role<Root>,
-    user: UserInfoGuard<Param>,
-) -> Result<UserStatusPage, Redirect> {
+    user_id: UserGuard,
+    conn: DbConn,
+) -> Result<UserStatusPage, Flash<Redirect>> {
+    let user = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
+
     Ok(UserStatusPage { user: user.info })
 }
 
@@ -114,41 +117,45 @@ pub struct UserStatusForm {
     pub status: u32,
 }
 
-#[post("/user_status", data = "<info>")]
+// TODO: Why do we write the user_id into here?
+#[post("/user_status?<user_id>", data = "<info>")]
 pub async fn update_user_status(
     _guard: Role<Root>,
     conn: DbConn,
-    user: UserInfoGuard<Param>,
+    user_id: UserGuard,
     info: Form<UserStatusForm>,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let user = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
     let id = user.info.get_id().to_string();
     if let Some(status) = UserStatus::from_bits(info.status) {
         conn.run(move |c| user.info.set_user_status(status).update(c))
             .await
             .into_flash(uri!("/"))?;
         // We cannot get uri macro working
-        Ok(Redirect::to(format!("/root/user_status?user_id={}", id)))
+        Ok(Redirect::to(uri!("/root", user_status(id))))
     } else {
         Err(Flash::error(Redirect::to(uri!("/")), "invalid level"))
     }
 }
 
-#[get("/delete_user")]
+#[get("/delete_user?<user_id>")]
 pub async fn delete_user(
     _guard: Role<Root>,
-    id: UserIdGuard<Param>,
+    user_id: UserGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let id = user_id.to_id_param(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| id.id.delete(c)).await.into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/root", root)))
 }
 
-#[get("/activate_user")]
+#[get("/activate_user?<user_id>")]
 pub async fn activate_user(
     _guard: Role<Root>,
-    info: UserInfoGuard<Param>,
+    user_id: UserGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let info = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| info.info.set_validated(true).update(c))
         .await
         .into_flash(uri!("/"))?;

@@ -13,7 +13,7 @@
       <br>
       <h3>订单已退款（已取消）</h3>
       如果您认为订单信息有误，请点击下方“更新”按钮<br>
-      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-primary" role="button">更新</a>
+      <a href="{{ uri!("/orders", crate::orders::progress(self.order.get_id())) }}" class="btn btn-primary" role="button">更新</a>
 
       {% when sails_db::enums::TransactionStatus::Placed %}
       <div class="progress">
@@ -36,8 +36,8 @@
 	<b>创建交易错误，请联系客服</b>: {{ err }}
       </div>
       {% endmatch %}
-      <a href="/orders/progress?order_id={{order.get_id()}}" class="btn btn-success" role="button">下一步</a>
-      <a href="/orders/cancel_order?order_id={{order.get_id()}}" class="btn btn-danger" role="button" onclick="return confirm('您确认取消订单吗？这无法撤消。');">取消订单</a>
+      <a href="{{ uri!("/orders", crate::orders::progress(self.order.get_id())) }}" class="btn btn-success" role="button">下一步</a>
+      <a href="{{ uri!("/orders", crate::orders::user_cancel_order(self.order.get_id())) }}" class="btn btn-danger" role="button" onclick="return confirm('您确认取消订单吗？这无法撤消。');">取消订单</a>
 
       {% when sails_db::enums::TransactionStatus::Paid %}
       <div class="progress">
@@ -46,7 +46,7 @@
       <br>
       <h3>您已成功付款</h3>
       感谢您的付款！接下来您只需要等待我们为您配送书本。或者您可以用订单 ID: <code>{{ order.get_shortid() }}</code> 来我们的仓库自提书本。
-      <a href="/orders/cancel_order?order_id={{order.get_id()}}" class="btn btn-danger" role="button" onclick="return confirm('您确认退款吗？这无法撤消。');">取消订单并退款</a>
+      <a href="{{ uri!("/orders", crate::orders::user_cancel_order(self.order.get_id())) }}" class="btn btn-danger" role="button" onclick="return confirm('您确认退款吗？这无法撤消。');">取消订单并退款</a>
 
       {% when sails_db::enums::TransactionStatus::Finished %}
       <div class="progress">
@@ -71,7 +71,7 @@
     </tr>
     <tr>
       <th scope="row">书本 ID</th>
-      <td><a href="/market/book_info?book_id={{ book.get_id() }}">{{ book.get_shortid() }}</a></td>
+      <td><a href="{{ uri!("/market", crate::market::book_page_owned(self.book.get_id())) }}">{{ book.get_shortid() }}</a></td>
     </tr>
     <tr>
       <th scope="row">买家</th>

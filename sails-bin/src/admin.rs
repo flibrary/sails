@@ -11,7 +11,7 @@ use rocket::{
 use sails_db::{
     enums::{ProductStatus, TransactionStatus},
     error::SailsDbError,
-    products::{MutableProductInfo, ProductFinder, ProductInfo},
+    products::{ProductFinder, ProductInfo},
     transactions::*,
     users::{UserFinder, UserStats},
     Cmp,
@@ -201,14 +201,15 @@ pub async fn admin_books(
     })
 }
 
-#[get("/verify_book")]
+#[get("/verify_book?<book_id>")]
 pub async fn verify_book(
     _guard: Auth<BookAdmin>,
-    info: BookInfoGuard<MutableProductInfo>,
+    book_id: BookGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let book = book_id.to_mut_info(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| {
-        info.book_info
+        book.book_info
             .set_product_status(ProductStatus::Verified)
             .update(c)
     })
@@ -217,14 +218,15 @@ pub async fn verify_book(
     Ok(Redirect::to(uri!("/admin", admin_books)))
 }
 
-#[get("/disable_book")]
+#[get("/disable_book?<book_id>")]
 pub async fn disable_book(
     _guard: Auth<BookAdmin>,
-    info: BookInfoGuard<MutableProductInfo>,
+    book_id: BookGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let book = book_id.to_mut_info(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| {
-        info.book_info
+        book.book_info
             .set_product_status(ProductStatus::Disabled)
             .update(c)
     })
@@ -233,14 +235,15 @@ pub async fn disable_book(
     Ok(Redirect::to(uri!("/admin", admin_books)))
 }
 
-#[get("/normalize_book")]
+#[get("/normalize_book?<book_id>")]
 pub async fn normalize_book(
     _guard: Auth<BookAdmin>,
-    info: BookInfoGuard<MutableProductInfo>,
+    book_id: BookGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let book = book_id.to_mut_info(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| {
-        info.book_info
+        book.book_info
             .set_product_status(ProductStatus::Normal)
             .update(c)
     })
@@ -249,14 +252,15 @@ pub async fn normalize_book(
     Ok(Redirect::to(uri!("/admin", admin_books)))
 }
 
-#[get("/refund_order")]
+#[get("/refund_order?<order_id>")]
 pub async fn refund_order(
     _auth: Auth<OrderRefundable>,
-    id: OrderIdGuard,
+    order_id: OrderGuard,
     conn: DbConn,
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let id = order_id.to_id(&conn).await.into_flash(uri!("/"))?;
     loop {
         let resp = client
             .request(priv_key, CancelTrade::new(id.id.get_id()))
@@ -276,12 +280,13 @@ pub async fn refund_order(
     Ok(Redirect::to(uri!("/admin", admin_orders)))
 }
 
-#[get("/finish_order")]
+#[get("/finish_order?<order_id>")]
 pub async fn finish_order(
     _auth: Auth<OrderFinishable>,
-    info: OrderInfoGuard,
+    order_id: OrderGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let info = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| {
         info.order_info
             .set_transaction_status(TransactionStatus::Finished)

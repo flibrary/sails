@@ -53,7 +53,7 @@
     </tr>
     <tr>
       <th scope="row">书本 ID</th>
-      <td><a href="/market/book_info?book_id={{ book.get_id() }}">{{ book.get_shortid() }}</a></td>
+      <td><a href="{{ uri!("/market", crate::market::book_page_owned(self.book.get_id())) }}">{{ book.get_shortid() }}</a></td>
     </tr>
     <tr>
       <th scope="row">买家</th>

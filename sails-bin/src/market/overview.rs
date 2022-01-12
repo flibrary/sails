@@ -1,4 +1,4 @@
-use crate::{DbConn, IntoFlash};
+use crate::{guards::BookGuard, DbConn, IntoFlash};
 use askama::Template;
 use rocket::response::{Flash, Redirect};
 use sails_db::{categories::*, error::SailsDbError, products::*, Cmp};

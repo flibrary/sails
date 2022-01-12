@@ -21,15 +21,17 @@ pub struct DepositInfo {
     resp: Option<Result<PrecreateResp, SignedResponse<PrecreateResp>>>,
 }
 
-#[get("/deposit_info")]
+#[get("/deposit_info?<book_id>")]
 pub async fn deposit_info(
     // This page contains progressable information
     // TODO: this is not a good enough distinguishment
     _auth: Auth<BookWritable>,
-    book: BookInfoGuard<ProductInfo>,
+    book_id: BookGuard,
+    conn: DbConn,
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
 ) -> Result<DepositInfo, Flash<Redirect>> {
+    let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
     if book.book_info.get_product_status() == &ProductStatus::Normal {
         // It seems like we could request precreation even if the user has already paid the bill or the trade has already been created.
         // If, in the future, this behavior changes, we have to come up with a better mechanism.
@@ -60,15 +62,15 @@ pub async fn deposit_info(
 }
 
 // Basically, we syncronize our trade status with that in alipay
-#[get("/deposit_progress", rank = 1)]
+#[get("/deposit_progress?<book_id>", rank = 1)]
 pub async fn deposit_progress(
     _auth: Auth<BookWritable>,
-    book: BookInfoGuard<MutableProductInfo>,
+    book_id: BookGuard,
     db: DbConn,
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let id = book.book_info.get_id().to_string();
+    let book = book_id.to_mut_info(&db).await.into_flash(uri!("/"))?;
 
     let resp = client
         .request(priv_key, TradeQuery::new(book.book_info.get_id()))
@@ -93,5 +95,5 @@ pub async fn deposit_progress(
         .await
         .into_flash(uri!("/"))?;
     }
-    Ok(Redirect::to(format!("/market/deposit_info?book_id={}", id)))
+    Ok(Redirect::to(uri!("/market", deposit_info(book_id))))
 }
