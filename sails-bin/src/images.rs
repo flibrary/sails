@@ -1,10 +1,10 @@
-use crate::guards::*;
-use reqwest::header::ACCEPT;
+use crate::{guards::*, IntoFlash};
+use reqwest::{header::ACCEPT, StatusCode};
 use rocket::{
     data::ToByteUnit,
     form::{self, error::ErrorKind, DataField, Form, FromFormField},
     http::{ContentType, Status},
-    response::Redirect,
+    response::{Flash, Redirect},
     State,
 };
 use serde::{Deserialize, Serialize};
@@ -46,15 +46,51 @@ impl<'r> FromFormField<'r> for Image {
 }
 
 #[get("/get/<hash>/<ext>?<size>", rank = 1)]
-pub async fn get(hash: &str, ext: &str, size: &str) -> Redirect {
-    Redirect::to(format!(
-        "https://flibrary.lexugeyky.workers.dev/https://raw.githubusercontent.com/flibrary/images/main/{}/{}.{}",
-        hash, size, ext
-    ))
+pub async fn get(hash: &str, ext: &str, mut size: &str) -> Result<Redirect, Flash<Redirect>> {
+    if size != "orig" {
+        // If we get query on thumbnail or other sizes, we test that out
+        if reqwest::Client::new()
+            .head(format!(
+                "https://raw.githubusercontent.com/flibrary/images/main/{}/{}.{}",
+                hash, size, ext
+            ))
+            .send()
+            .await
+            .into_flash(uri!("/"))?
+            .status()
+            != StatusCode::OK
+        {
+            // If thumbnail fails, we fallback to orig size
+            size = "orig";
+        }
+    }
+    Ok(if size == "orig" {
+        // We have not tested original one (either due to fallback or request)
+        if reqwest::Client::new()
+            .head(format!(
+                "https://raw.githubusercontent.com/flibrary/images/main/{}/{}.{}",
+                hash, size, ext
+            ))
+            .send()
+            .await
+            .into_flash(uri!("/"))?
+            .status()
+            == StatusCode::OK
+        {
+            // Original size seems to be OK
+            Redirect::to(format!("https://flibrary.lexugeyky.workers.dev/https://raw.githubusercontent.com/flibrary/images/main/{}/{}.{}", hash, size, ext))
+        } else {
+            // Original size failed as well. We shall now use placeholder image
+            Redirect::to(uri!("/static/logo.png"))
+        }
+    } else {
+        // We have already tested out and lets redirect
+        Redirect::to(format!("https://flibrary.lexugeyky.workers.dev/https://raw.githubusercontent.com/flibrary/images/main/{}/{}.{}", hash, size, ext))
+    })
 }
 
 #[get("/get/<hash>/<ext>", rank = 2)]
-pub async fn get_default(hash: &str, ext: &str) -> Redirect {
+pub async fn get_default(hash: &str, ext: &str) -> Result<Redirect, Flash<Redirect>> {
     get(hash, ext, "orig").await
 }
 
