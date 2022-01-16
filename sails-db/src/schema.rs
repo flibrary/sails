@@ -2,6 +2,7 @@ table! {
     categories (id) {
         id -> Text,
         name -> Text,
+        price -> BigInt,
         parent_id -> Nullable<Text>,
         is_leaf -> Bool,
     }

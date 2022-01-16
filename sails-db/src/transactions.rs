@@ -424,7 +424,7 @@ mod tests {
         .unwrap();
 
         // The book category
-        let econ = Category::create(&conn, "Economics Books")
+        let econ = Category::create(&conn, "Economics Books", 490)
             .and_then(Category::into_leaf)
             .unwrap();
         let book_id = IncompleteProduct::new(
@@ -540,7 +540,7 @@ mod tests {
         .unwrap();
 
         // The book category
-        let econ = Category::create(&conn, "Economics Books")
+        let econ = Category::create(&conn, "Economics Books", 490)
             .and_then(Category::into_leaf)
             .unwrap();
 

@@ -176,7 +176,7 @@ pub async fn delegate_book(
     let info = IncompleteProductOwned {
         category: category.id().to_string(),
         prodname: category.name().to_string(),
-        price: 500,
+        price: category.into_leaf().into_flash(uri!("/"))?.get_price(),
         description: "".to_string(),
     };
     let product_id = conn
@@ -221,7 +221,7 @@ pub async fn instruction(
 #[template(path = "market/book_info_owned.html")]
 pub struct BookPageOwned {
     book: ProductInfo,
-    category: Option<Category>,
+    category: Option<LeafCategory>,
     seller: UserInfo,
 }
 
@@ -229,7 +229,7 @@ pub struct BookPageOwned {
 #[template(path = "market/book_info_user.html")]
 pub struct BookPageUser {
     book: ProductInfo,
-    category: Option<Category>,
+    category: Option<LeafCategory>,
     seller: UserInfo,
 }
 
@@ -237,7 +237,7 @@ pub struct BookPageUser {
 #[template(path = "market/book_info_guest.html")]
 pub struct BookPageGuest {
     book: ProductInfo,
-    category: Option<Category>,
+    category: Option<LeafCategory>,
 }
 
 // If the seller is the user, buttons like update and delete are displayed
@@ -250,7 +250,10 @@ pub async fn book_page_owned(
     let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(BookPageOwned {
         book: book.book_info,
-        category: book.category,
+        category: book
+            .category
+            .map(|x| x.into_leaf().into_flash(uri!("/")))
+            .transpose()?,
         seller: book.seller_info,
     })
 }
@@ -265,7 +268,10 @@ pub async fn book_page_user(
     let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(BookPageUser {
         book: book.book_info,
-        category: book.category,
+        category: book
+            .category
+            .map(|x| x.into_leaf().into_flash(uri!("/")))
+            .transpose()?,
         seller: book.seller_info,
     })
 }
@@ -279,7 +285,10 @@ pub async fn book_page_guest(
     let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(BookPageGuest {
         book: book.book_info,
-        category: book.category,
+        category: book
+            .category
+            .map(|x| x.into_leaf().into_flash(uri!("/")))
+            .transpose()?,
     })
 }
 

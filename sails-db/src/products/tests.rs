@@ -18,7 +18,7 @@ fn create_product() {
     .unwrap();
 
     // The book category
-    let econ = Category::create(&conn, "Economics Books")
+    let econ = Category::create(&conn, "Economics Books", 490)
         .and_then(Category::into_leaf)
         .unwrap();
     IncompleteProduct::new(
@@ -49,11 +49,11 @@ fn search_products() {
     .unwrap();
 
     // The book category
-    let mut books = Category::create(&conn, "Books").unwrap();
-    let mut econ = Category::create(&conn, "Economics Books")
+    let mut books = Category::create(&conn, "Books", 0).unwrap();
+    let mut econ = Category::create(&conn, "Economics Books", 490)
         .and_then(Category::into_leaf)
         .unwrap();
-    let mut phys = Category::create(&conn, "Physics Books")
+    let mut phys = Category::create(&conn, "Physics Books", 630)
         .and_then(Category::into_leaf)
         .unwrap();
 
@@ -182,7 +182,7 @@ fn delete_product() {
     .unwrap();
 
     // The book category
-    let econ = Category::create(&conn, "Economics Books")
+    let econ = Category::create(&conn, "Economics Books", 490)
         .and_then(Category::into_leaf)
         .unwrap();
     let id = IncompleteProduct::new(
@@ -216,7 +216,7 @@ fn product_status() {
     .unwrap();
 
     // The book category
-    let econ = Category::create(&conn, "Economics Books")
+    let econ = Category::create(&conn, "Economics Books", 490)
         .and_then(Category::into_leaf)
         .unwrap();
     let id = IncompleteProduct::new(
@@ -274,7 +274,7 @@ fn delegation() {
     .create(&conn)
     .unwrap();
 
-    let econ = Category::create(&conn, "Economics")
+    let econ = Category::create(&conn, "Economics", 490)
         .and_then(Category::into_leaf)
         .unwrap();
     // Seller

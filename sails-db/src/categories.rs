@@ -61,6 +61,11 @@ impl LeafCategory {
     pub fn into_category(self) -> Category {
         self.0
     }
+
+    // Only price at leaf category is meaningful
+    pub fn get_price(&self) -> i64 {
+        self.0.price
+    }
 }
 
 // Rustfmt tends to remove pub
@@ -90,6 +95,7 @@ impl CtgTrait for LeafCategory {
 pub struct Category {
     id: String,
     name: String,
+    price: i64,
     parent_id: Option<String>,
     is_leaf: bool,
 }
@@ -103,28 +109,39 @@ impl Category {
         }
     }
 
-    fn new(name: impl ToString, id: impl ToString) -> Self {
+    fn new(name: impl ToString, id: impl ToString, price: i64) -> Self {
         Self {
             id: id.to_string(),
             name: name.to_string(),
+            price,
             parent_id: None,
             is_leaf: true,
         }
     }
 
     // Create a new category with a random UUID
-    pub fn create(conn: &SqliteConnection, name_provided: impl ToString) -> Result<Self> {
-        Self::create_with_id(conn, name_provided, Uuid::new_v4().to_string())
+    pub fn create(
+        conn: &SqliteConnection,
+        name_provided: impl ToString,
+        price_provided: i64,
+    ) -> Result<Self> {
+        Self::create_with_id(
+            conn,
+            name_provided,
+            price_provided,
+            Uuid::new_v4().to_string(),
+        )
     }
 
     // Create a new category with a specific UUID
     pub fn create_with_id(
         conn: &SqliteConnection,
         name_provided: impl ToString,
+        price_provided: i64,
         id_provided: impl ToString,
     ) -> Result<Self> {
         use crate::schema::categories::dsl::*;
-        let category = Category::new(name_provided, id_provided);
+        let category = Category::new(name_provided, id_provided, price_provided);
 
         if let Ok(0) = categories
             .filter(id.eq(&category.id))
@@ -192,7 +209,7 @@ use std::{collections::BTreeMap, sync::Arc};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
-    Id(Uuid),
+    Id { id: Uuid, price: u32 },
     SubCategory(CategoryBuilderInner),
 }
 
@@ -217,21 +234,21 @@ impl CtgBuilder {
         ) -> Result<()> {
             for (name, value) in current {
                 match value {
-                    Value::Id(id) => {
+                    Value::Id { id, price } => {
                         // Create the node
-                        let mut self_ctg = Category::create_with_id(c, name, id)?;
+                        let mut self_ctg = Category::create_with_id(c, name, *price as i64, id)?;
 
                         // If there is a parent, link it back
                         if let Some(mut parent) = parent.clone() {
                             self_ctg.insert(c, &mut parent)?;
-                        } else {
                         }
                     }
                     Value::SubCategory(sub) => {
-                        let mut self_ctg = Category::create(c, name).unwrap();
+                        // Price here is meaningless as it is not the leaf category
+                        // And it cannot be retrieved as well
+                        let mut self_ctg = Category::create(c, name, 0).unwrap();
                         if let Some(mut parent) = parent.clone() {
                             self_ctg.insert(c, &mut parent)?;
-                        } else {
                         }
                         walk(c, Some(self_ctg), sub)?
                     }

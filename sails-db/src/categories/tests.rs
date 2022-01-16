@@ -5,9 +5,9 @@ use uuid::Uuid;
 #[test]
 fn create_category() {
     let conn = establish_connection();
-    let id = Category::create(&conn, "Economics").unwrap();
+    let id = Category::create(&conn, "Economics", 490).unwrap();
     // Already created
-    assert!(Category::create_with_id(&conn, "Economics", id.id()).is_err());
+    assert!(Category::create_with_id(&conn, "Economics", 490, id.id()).is_err());
 }
 
 #[test]
@@ -16,15 +16,15 @@ fn category_builder() {
     #[rustfmt::skip]
     CtgBuilder::new(maplit::btreemap! {
 	"AP".into() => Value::SubCategory(maplit::btreemap!{
-            "AP Physics I".into() => Value::Id(Uuid::new_v4()),
-            "AP Physics II".into() => Value::Id(Uuid::new_v4()),
-            "AP Physics C".into() => Value::Id(Uuid::new_v4())
+            "AP Physics I".into() => Value::Id { id: Uuid::new_v4(), price: 630 },
+            "AP Physics II".into() => Value::Id { id: Uuid::new_v4(), price: 630 },
+            "AP Physics C".into() => Value::Id { id: Uuid::new_v4(), price: 1630 }
 	}),
 	"A Level".into() => Value::SubCategory(maplit::btreemap!{
-            "AS Physics".into() => Value::Id(Uuid::new_v4()),
-	    "A2 Physics".into() => Value::Id(Uuid::new_v4())
+            "AS Physics".into() => Value::Id { id: Uuid::new_v4(), price: 300 },
+	    "A2 Physics".into() => Value::Id { id: Uuid::new_v4(), price: 100 }
 	}),
-	"University Math".into() => Value::Id(Uuid::new_v4()),
+	"University Math".into() => Value::Id { id: Uuid::new_v4(), price: 2000 },
     })
     .build(&conn).unwrap();
 
@@ -35,10 +35,10 @@ fn category_builder() {
 #[test]
 fn manipulate_category() {
     let conn = establish_connection();
-    let mut knowledge = Category::create(&conn, "Knowledge").unwrap();
-    let mut books = Category::create(&conn, "Books").unwrap();
-    let mut economics = Category::create(&conn, "Economics").unwrap();
-    let mut physics = Category::create(&conn, "Physics").unwrap();
+    let mut knowledge = Category::create(&conn, "Knowledge", 0).unwrap();
+    let mut books = Category::create(&conn, "Books", 0).unwrap();
+    let mut economics = Category::create(&conn, "Economics", 300).unwrap();
+    let mut physics = Category::create(&conn, "Physics", 300).unwrap();
 
     // Knowledge, Books -> (Econ, Phys)
     economics.insert(&conn, &mut books).unwrap();
@@ -46,7 +46,7 @@ fn manipulate_category() {
     assert_eq!(books.subcategory(&conn).unwrap().len(), 2);
 
     // Knowledge -> Non-electronic -> Books -> (Econ, Phys)
-    let mut nonelec = Category::create(&conn, "Non-electronic").unwrap();
+    let mut nonelec = Category::create(&conn, "Non-electronic", 0).unwrap();
     nonelec.insert(&conn, &mut knowledge).unwrap();
     books.insert(&conn, &mut nonelec).unwrap();
     assert_eq!(knowledge.subcategory(&conn).unwrap().len(), 1);

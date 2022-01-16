@@ -43,10 +43,10 @@ fn products(c: &mut Criterion) {
     .unwrap();
 
     // The book category
-    let econ = Category::create(&conn, "Economics Books")
+    let econ = Category::create(&conn, "Economics Books", 490)
         .and_then(Category::into_leaf)
         .unwrap();
-    let phys = Category::create(&conn, "Physics Books")
+    let phys = Category::create(&conn, "Physics Books", 630)
         .and_then(Category::into_leaf)
         .unwrap();
 

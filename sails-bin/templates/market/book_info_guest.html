@@ -24,18 +24,27 @@
     <table class="table table-hover">
     <tbody>
     <tr>
+      <th scope="row">ID</th>
+      <td>{{ book.get_shortid() }}</td>
+    </tr>
+    <tr>
       <th scope="row">价格</th>
       <td>CN¥ {{ book.get_price() }}</td>
     </tr>
     <tr>
-      <th scope="row">ID</th>
-      <td>{{ book.get_shortid() }}</td>
+      <th scope="row">官方指导价</th>
+      	{% match category %}
+	{% when Some with (ctg) %}
+        <td>CN¥ {{ ctg.get_price() }}</td>
+        {% when None %}
+	<td>不可用</td>
+        {% endmatch %}
     </tr>
     <tr>
       <th scope="row">种类</th>
       	{% match category %}
 	{% when Some with (ctg) %}
-        <td><a href="categories?category={{ ctg.id() }}">{{ ctg.name() }}</a></td>
+        <td><a href="{{ uri!("/market", crate::market::categories(ctg.id())) }}">{{ ctg.name() }}</a></td>
         {% when None %}
 	<td>Not categorized</td>
         {% endmatch %}
