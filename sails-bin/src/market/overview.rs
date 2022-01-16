@@ -124,7 +124,7 @@ pub async fn all_books(conn: DbConn) -> Result<AllBooks, Flash<Redirect>> {
 #[template(path = "market/explore.html")]
 pub struct ExplorePage {
     // By using Option<Category>, we ensure thatthere will be no panick even if category doesn't exist
-    books: Vec<(ProductInfo, Option<String>)>,
+    books: Vec<(ProductInfo, Option<String>, LeafCategory)>,
     ctg: Option<String>,
 }
 
@@ -150,7 +150,7 @@ pub async fn explore_page_ctg(
     Ok(ExplorePage {
         books: conn
             .run(
-                move |c| -> Result<Vec<(ProductInfo, Option<String>)>, SailsDbError> {
+                move |c| -> Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError> {
                     let ctg = Categories::find_by_id(c, &category).and_then(Category::into_leaf)?;
                     // We only display allowed books
                     let books_info = ProductFinder::new(c, None)
@@ -162,7 +162,9 @@ pub async fn explore_page_ctg(
                         .into_iter()
                         .map(|x| {
                             let image = find_first_image(x.get_description());
-                            Ok((x, image))
+                            let category = Categories::find_by_id(c, x.get_category_id())
+                                .and_then(Category::into_leaf)?;
+                            Ok((x, image, category))
                         })
                         // Reverse the book order
                         .rev()
@@ -180,7 +182,7 @@ pub async fn explore_page(conn: DbConn) -> Result<ExplorePage, Flash<Redirect>> 
     Ok(ExplorePage {
         books: conn
             .run(
-                move |c| -> Result<Vec<(ProductInfo, Option<String>)>, SailsDbError> {
+                move |c| -> Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError> {
                     // We only display allowed books
                     let books_info = ProductFinder::new(c, None)
                         .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
@@ -190,7 +192,9 @@ pub async fn explore_page(conn: DbConn) -> Result<ExplorePage, Flash<Redirect>> 
                         .into_iter()
                         .map(|x| {
                             let image = find_first_image(x.get_description());
-                            Ok((x, image))
+                            let category = Categories::find_by_id(c, x.get_category_id())
+                                .and_then(Category::into_leaf)?;
+                            Ok((x, image, category))
                         })
                         // Reverse the book order
                         .rev()
