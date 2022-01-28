@@ -29,6 +29,8 @@ base64 = "^0.13"
 chrono = "^0.4"
 anyhow = "^1"
 lettre = { version = "0.10.0-rc.3", features = ["tokio1-rustls-tls", "builder", "smtp-transport", "r2d2", "tokio1"] }
+# IMPORTANT: tokio 1.16 breaks rocket, falling back now. Related issue: https://github.com/tokio-rs/tokio/issues/4435
+tokio = "=1.15.0"
 reqwest = { version = "0.11", features = ["json", "blocking"]}
 chacha20poly1305 = "^0.9"
 # We need askama as the backend template engine because it is type safe.
