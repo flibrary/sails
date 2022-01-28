@@ -77,8 +77,6 @@ impl Default for UserStatus {
 
 #[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum ProductStatus {
-    // The product has already been sold
-    Sold,
     Normal,
     // The product is already in warehouse and verified
     Verified,
@@ -97,8 +95,7 @@ impl Status for ProductStatus {
         match *self {
             Self::Disabled => Self::Normal,
             Self::Normal => Self::Verified,
-            Self::Verified => Self::Sold,
-            Self::Sold => Self::Sold,
+            Self::Verified => Self::Verified,
         }
     }
 
@@ -107,7 +104,6 @@ impl Status for ProductStatus {
             Self::Disabled => Self::Disabled,
             Self::Normal => Self::Disabled,
             Self::Verified => Self::Normal,
-            Self::Sold => Self::Verified,
         }
     }
 }

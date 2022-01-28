@@ -63,8 +63,8 @@ impl LeafCategory {
     }
 
     // Only price at leaf category is meaningful
-    pub fn get_price(&self) -> i64 {
-        self.0.price
+    pub fn get_price(&self) -> u32 {
+        self.0.price as u32
     }
 }
 
@@ -109,11 +109,11 @@ impl Category {
         }
     }
 
-    fn new(name: impl ToString, id: impl ToString, price: i64) -> Self {
+    fn new(name: impl ToString, id: impl ToString, price: NonZeroU32) -> Self {
         Self {
             id: id.to_string(),
             name: name.to_string(),
-            price,
+            price: price.get() as i64,
             parent_id: None,
             is_leaf: true,
         }
@@ -123,7 +123,7 @@ impl Category {
     pub fn create(
         conn: &SqliteConnection,
         name_provided: impl ToString,
-        price_provided: i64,
+        price_provided: u32,
     ) -> Result<Self> {
         Self::create_with_id(
             conn,
@@ -137,9 +137,12 @@ impl Category {
     pub fn create_with_id(
         conn: &SqliteConnection,
         name_provided: impl ToString,
-        price_provided: i64,
+        price_provided: u32,
         id_provided: impl ToString,
     ) -> Result<Self> {
+        let price_provided =
+            NonZeroU32::new(price_provided).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
+
         use crate::schema::categories::dsl::*;
         let category = Category::new(name_provided, id_provided, price_provided);
 
@@ -204,7 +207,7 @@ impl CtgTrait for Category {
     }
 }
 
-use std::{collections::BTreeMap, sync::Arc};
+use std::{collections::BTreeMap, num::NonZeroU32, sync::Arc};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -236,7 +239,7 @@ impl CtgBuilder {
                 match value {
                     Value::Id { id, price } => {
                         // Create the node
-                        let mut self_ctg = Category::create_with_id(c, name, *price as i64, id)?;
+                        let mut self_ctg = Category::create_with_id(c, name, *price, id)?;
 
                         // If there is a parent, link it back
                         if let Some(mut parent) = parent.clone() {
@@ -246,7 +249,7 @@ impl CtgBuilder {
                     Value::SubCategory(sub) => {
                         // Price here is meaningless as it is not the leaf category
                         // And it cannot be retrieved as well
-                        let mut self_ctg = Category::create(c, name, 0).unwrap();
+                        let mut self_ctg = Category::create(c, name, 1).unwrap();
                         if let Some(mut parent) = parent.clone() {
                             self_ctg.insert(c, &mut parent)?;
                         }

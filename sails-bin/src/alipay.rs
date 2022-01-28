@@ -1,4 +1,5 @@
 use core::fmt;
+use num_bigint::BigUint;
 use rocket::serde::DeserializeOwned;
 use rsa::{
     pkcs1::FromRsaPrivateKey, pkcs8::FromPublicKey, Hash, PaddingScheme::PKCS1v15Sign, PublicKey,
@@ -228,15 +229,15 @@ impl<'a, B: BizContent> Display for Request<'a, B> {
 pub struct Precreate<'a> {
     out_trade_no: &'a str,
     subject: &'a str,
-    total_amount: i64,
+    total_amount: String,
 }
 
 impl<'a> Precreate<'a> {
-    pub fn new(out_trade_no: &'a str, subject: &'a str, total_amount: i64) -> Self {
+    pub fn new(out_trade_no: &'a str, subject: &'a str, total_amount: BigUint) -> Self {
         Self {
             out_trade_no,
             subject,
-            total_amount,
+            total_amount: total_amount.to_string(),
         }
     }
 }
@@ -330,7 +331,10 @@ mod tests {
 
         let priv_key = priv_key();
         let mut req = client
-            .request(&priv_key, Precreate::new("12345", "AP PreCalculus", 100))
+            .request(
+                &priv_key,
+                Precreate::new("12345", "AP PreCalculus", 100u32.into()),
+            )
             .unwrap();
 
         // Seperate the signature from text

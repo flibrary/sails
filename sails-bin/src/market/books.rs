@@ -171,14 +171,13 @@ pub async fn delegate_book(
     let category = conn
         .run(move |c| Categories::find_by_id(c, &info.category))
         .await
+        .into_flash(uri!("/"))?
+        .into_leaf()
         .into_flash(uri!("/"))?;
 
-    let info = IncompleteProductOwned {
-        category: category.id().to_string(),
-        prodname: category.name().to_string(),
-        price: category.into_leaf().into_flash(uri!("/"))?.get_price(),
-        description: "".to_string(),
-    };
+    let info = IncompleteProductOwned::new(&category, category.name(), category.get_price(), 1, "")
+        .into_flash(uri!("/"))?;
+
     let product_id = conn
         .run(move |c| -> Result<ProductId, SailsDbError> {
             info.create(

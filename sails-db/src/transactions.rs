@@ -1,13 +1,16 @@
+use std::num::NonZeroU32;
+
 use crate::{
     enums::{ProductStatus, TransactionStatus},
     error::{SailsDbError, SailsDbResult as Result},
-    products::{ProductFinder, ProductId, ToSafe},
+    products::{ProductFinder, ProductId},
     schema::transactions,
     users::UserId,
     Cmp, Order,
 };
 use chrono::naive::NaiveDateTime;
 use diesel::{dsl::count, prelude::*, sqlite::Sqlite};
+use num_bigint::{BigUint, ToBigUint};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -19,7 +22,10 @@ impl Transactions {
         conn: &SqliteConnection,
         product_p: &ProductId,
         buyer_p: &UserId,
+        qty: u32,
     ) -> Result<TransactionId> {
+        let qty = NonZeroU32::new(qty).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
+
         use crate::schema::transactions::dsl::*;
 
         let product_info = product_p.get_info(conn)?;
@@ -39,6 +45,8 @@ impl Transactions {
                 shortid: shortid_str,
                 seller: product_info.get_seller_id().to_string(),
                 product: product_p.get_id().to_string(),
+                price: product_info.get_price() as i64,
+                quantity: qty.get() as i64,
                 buyer: buyer_p.get_id().to_string(),
                 time_sent: chrono::offset::Local::now().naive_utc(),
                 transaction_status: TransactionStatus::Placed,
@@ -47,10 +55,11 @@ impl Transactions {
             // Create transaction record
             diesel::insert_into(transactions).values(tx).execute(conn)?;
 
-            // Change the product status to sold
+            // Sub product quantity
+            // IMPORTANT We shall not use ? operator here because that abort the function and doesn't clean up
             if product_info
-                .verify(conn)
-                .and_then(|i| i.set_sold().update(conn))
+                .sub_quantity(qty.get())
+                .map(|s| s.update(conn))
                 .is_ok()
             {
                 // Return the transaction ID
@@ -60,7 +69,7 @@ impl Transactions {
             } else {
                 // There are some issues changing the status of the book, and we shall delete the transaction
                 diesel::delete(transactions.filter(id.eq(&id_cloned.to_string()))).execute(conn)?;
-                Err(SailsDbError::FailedAlterProductStatus)
+                Err(SailsDbError::FailedAlterProductQuantity)
             }
         } else {
             Err(SailsDbError::OrderOnUnverified)
@@ -116,6 +125,8 @@ pub struct TransactionInfo {
     seller: String,
     product: String,
     buyer: String,
+    price: i64,
+    quantity: i64,
     time_sent: NaiveDateTime,
     transaction_status: TransactionStatus,
 }
@@ -135,7 +146,7 @@ impl TransactionInfo {
         ProductFinder::new(conn, None)
             .id(self.get_product())
             .first_info()?
-            .set_verified()
+            .add_quantity(self.quantity as u32)?
             .update(conn)?;
         self.clone()
             .set_transaction_status(TransactionStatus::Refunded)
@@ -146,6 +157,22 @@ impl TransactionInfo {
     /// Get a reference to the transaction info's shortid.
     pub fn get_shortid(&self) -> &str {
         &self.shortid
+    }
+
+    /// Get a reference to the transaction info's price.
+    pub fn get_price(&self) -> u32 {
+        self.price as u32
+    }
+
+    /// Get a reference to the transaction info's quantity.
+    pub fn get_quantity(&self) -> u32 {
+        self.quantity as u32
+    }
+
+    pub fn get_total(&self) -> BigUint {
+        let qty: BigUint = self.get_quantity().into();
+        let price: BigUint = self.get_price().into();
+        qty * price
     }
 
     /// Get a reference to the transaction info's product.
@@ -190,16 +217,16 @@ pub struct TransactionFinder<'a> {
 
 #[derive(Eq, PartialEq, Debug, Default)]
 pub struct TxStats {
-    pub placed_subtotal: usize,
-    pub paid_subtotal: usize,
-    pub finished_subtotal: usize,
-    pub refunded_subtotal: usize,
-    pub total: usize, // including placed, paid, and finished
-    pub placed: usize,
-    pub paid: usize,
-    pub refunded: usize,
-    pub finished: usize,
-    pub total_num: usize,
+    pub placed_subtotal: BigUint,
+    pub paid_subtotal: BigUint,
+    pub finished_subtotal: BigUint,
+    pub refunded_subtotal: BigUint,
+    pub total: BigUint, // including placed, paid, and finished
+    pub placed: BigUint,
+    pub paid: BigUint,
+    pub refunded: BigUint,
+    pub finished: BigUint,
+    pub total_num: BigUint,
 }
 
 impl<'a> TransactionFinder<'a> {
@@ -211,26 +238,20 @@ impl<'a> TransactionFinder<'a> {
         Self::new(conn, None).search()
     }
 
-    pub fn count(self) -> Result<usize> {
+    pub fn count(self) -> Result<BigUint> {
         use crate::schema::transactions::dsl::*;
-        Ok(self.query.select(count(id)).first::<i64>(self.conn)? as usize)
+        Ok(self
+            .query
+            .select(count(id))
+            .first::<i64>(self.conn)?
+            .to_biguint()
+            .unwrap()) // guranteed to be positive.
     }
 
     pub fn stats(conn: &'a SqliteConnection, user: Option<&'a str>) -> Result<TxStats> {
         // TODO: we should write SQL instead
-        fn get_total(finder: TransactionFinder, conn: &SqliteConnection) -> Result<usize> {
-            Ok(finder
-                .search_info()?
-                .iter()
-                .map(|x| {
-                    ProductFinder::new(conn, None)
-                        .id(&x.product)
-                        .first_info()
-                        // Foreign key constraint ensures that we are safe here.
-                        .unwrap()
-                        .get_price() as usize
-                })
-                .sum())
+        fn get_total(finder: TransactionFinder) -> Result<BigUint> {
+            Ok(finder.search_info()?.iter().map(|x| x.get_total()).sum())
         }
 
         fn selection<'a>(
@@ -244,25 +265,17 @@ impl<'a> TransactionFinder<'a> {
             }
         }
 
-        let placed_subtotal = get_total(
-            selection(&user, conn).status(TransactionStatus::Placed, Cmp::Equal),
-            conn,
-        )?;
+        let placed_subtotal =
+            get_total(selection(&user, conn).status(TransactionStatus::Placed, Cmp::Equal))?;
 
-        let paid_subtotal = get_total(
-            selection(&user, conn).status(TransactionStatus::Paid, Cmp::Equal),
-            conn,
-        )?;
+        let paid_subtotal =
+            get_total(selection(&user, conn).status(TransactionStatus::Paid, Cmp::Equal))?;
 
-        let refunded_subtotal = get_total(
-            selection(&user, conn).status(TransactionStatus::Refunded, Cmp::Equal),
-            conn,
-        )?;
+        let refunded_subtotal =
+            get_total(selection(&user, conn).status(TransactionStatus::Refunded, Cmp::Equal))?;
 
-        let finished_subtotal = get_total(
-            selection(&user, conn).status(TransactionStatus::Finished, Cmp::Equal),
-            conn,
-        )?;
+        let finished_subtotal =
+            get_total(selection(&user, conn).status(TransactionStatus::Finished, Cmp::Equal))?;
 
         let refunded = selection(&user, conn)
             .status(TransactionStatus::Refunded, Cmp::Equal)
@@ -278,16 +291,16 @@ impl<'a> TransactionFinder<'a> {
             .count()?;
 
         Ok(TxStats {
+            total_num: placed.clone() + paid.clone() + finished.clone(),
+            total: placed_subtotal.clone() + paid_subtotal.clone() + finished_subtotal.clone(),
             placed_subtotal,
             paid_subtotal,
             refunded_subtotal,
             finished_subtotal,
-            total: placed_subtotal + paid_subtotal + finished_subtotal,
             placed,
             paid,
             refunded,
             finished,
-            total_num: placed + paid + finished,
         })
     }
 
@@ -391,7 +404,9 @@ impl<'a> TransactionFinder<'a> {
 mod tests {
     use super::*;
     use crate::{
-        categories::Category, products::IncompleteProduct, test_utils::establish_connection,
+        categories::Category,
+        products::{IncompleteProduct, ToSafe},
+        test_utils::establish_connection,
         users::*,
     };
 
@@ -431,37 +446,49 @@ mod tests {
             &econ,
             "Krugman's Economics 2nd Edition",
             700,
+            1,
             "A very great book on the subject of Economics",
         )
+        .unwrap()
         .create(&conn, &seller, &seller)
         .unwrap();
 
         // Unverified products are not subjected to purchases.
-        assert!(Transactions::buy(&conn, &book_id, &buyer).is_err());
+        assert!(matches!(
+            Transactions::buy(&conn, &book_id, &buyer, 1).err().unwrap(),
+            SailsDbError::OrderOnUnverified
+        ));
 
         // Verify the book
         book_id
             .get_info(&conn)
             .unwrap()
-            .verify(&conn)
-            .unwrap()
             .set_product_status(ProductStatus::Verified)
             .update(&conn)
             .unwrap();
 
+        // We cannot purchase more than available.
+        assert!(matches!(
+            Transactions::buy(&conn, &book_id, &buyer, 2).err().unwrap(),
+            SailsDbError::FailedAlterProductQuantity
+        ));
+
+        // There should be no transaction entry
+        assert_eq!(TransactionFinder::list(&conn).unwrap().len(), 0);
+
         // Purchase it
-        let tx_id = Transactions::buy(&conn, &book_id, &buyer).unwrap();
+        let tx_id = Transactions::buy(&conn, &book_id, &buyer, 1).unwrap();
 
         // There should be only one transaction entry
         assert_eq!(TransactionFinder::list(&conn).unwrap().len(), 1);
 
-        // The book status should be sold now
+        // The book status should be unverified now
         assert_eq!(
             book_id.get_info(&conn).unwrap().get_product_status(),
-            &ProductStatus::Sold
+            &ProductStatus::Normal
         );
 
-        // The book is locked and cannot be changed
+        // ... and changing the price should not affect our already-placed order.
         assert!(book_id
             .update(
                 &conn,
@@ -469,17 +496,23 @@ mod tests {
                     &econ,
                     "Agenuine Economics book",
                     600,
+                    2,
                     "That is a bad book though",
                 )
+                .unwrap()
                 .verify(&conn)
                 .unwrap()
             )
-            .is_err());
+            .is_ok());
+
+        // The transaction price should remain unchanged.
+        assert_eq!(tx_id.get_info(&conn).unwrap().get_price(), 700);
+        assert_eq!(tx_id.get_info(&conn).unwrap().get_quantity(), 1);
 
         // Refund the book, returning the book to verfied state
         tx_id.refund(&conn).unwrap();
 
-        // The book is now verfied but not sold
+        // The book is now verfied
         assert_eq!(
             book_id.get_info(&conn).unwrap().get_product_status(),
             &ProductStatus::Verified
@@ -487,28 +520,9 @@ mod tests {
 
         // The transaction status should now be refunded
         assert_eq!(
-            TransactionFinder::new(&conn, None)
-                .status(TransactionStatus::Refunded, Cmp::Equal)
-                .search()
-                .unwrap()
-                .len(),
-            1
+            tx_id.get_info(&conn).unwrap().get_transaction_status(),
+            &TransactionStatus::Refunded
         );
-
-        // ... and the book can be updated now
-        assert!(book_id
-            .update(
-                &conn,
-                IncompleteProduct::new(
-                    &econ,
-                    "Agenuine Economics book",
-                    600,
-                    "That is a bad book though",
-                )
-                .verify(&conn)
-                .unwrap()
-            )
-            .is_ok());
     }
 
     #[test]
@@ -549,8 +563,10 @@ mod tests {
             &econ,
             "Krugman's Economics 2nd Edition",
             400,
+            1,
             "A very great book on the subject of Economics",
         )
+        .unwrap()
         .create(&conn, &seller, &seller)
         .unwrap();
 
@@ -559,8 +575,10 @@ mod tests {
             &econ,
             "Krugman's Economics 2nd Edition",
             300,
+            1,
             "A very great book on the subject of Economics",
         )
+        .unwrap()
         .create(&conn, &seller, &seller)
         .unwrap();
 
@@ -568,9 +586,11 @@ mod tests {
         let book_3_id = IncompleteProduct::new(
             &econ,
             "Krugman's Economics 2nd Edition",
-            350,
+            u32::MAX,
+            2,
             "A very great book on the subject of Economics",
         )
+        .unwrap()
         .create(&conn, &seller, &seller)
         .unwrap();
 
@@ -579,8 +599,10 @@ mod tests {
             &econ,
             "Krugman's Economics 2nd Edition",
             700,
+            1,
             "A very great book on the subject of Economics",
         )
+        .unwrap()
         .create(&conn, &seller, &seller)
         .unwrap();
 
@@ -589,16 +611,16 @@ mod tests {
             &econ,
             "Krugman's Economics 2nd Edition",
             1000,
+            1,
             "A very great book on the subject of Economics",
         )
+        .unwrap()
         .create(&conn, &seller, &seller)
         .unwrap();
 
         // Verify the books
         book_1_id
             .get_info(&conn)
-            .unwrap()
-            .verify(&conn)
             .unwrap()
             .set_product_status(ProductStatus::Verified)
             .update(&conn)
@@ -607,16 +629,12 @@ mod tests {
         book_2_id
             .get_info(&conn)
             .unwrap()
-            .verify(&conn)
-            .unwrap()
             .set_product_status(ProductStatus::Verified)
             .update(&conn)
             .unwrap();
 
         book_3_id
             .get_info(&conn)
-            .unwrap()
-            .verify(&conn)
             .unwrap()
             .set_product_status(ProductStatus::Verified)
             .update(&conn)
@@ -625,8 +643,6 @@ mod tests {
         book_4_id
             .get_info(&conn)
             .unwrap()
-            .verify(&conn)
-            .unwrap()
             .set_product_status(ProductStatus::Verified)
             .update(&conn)
             .unwrap();
@@ -634,18 +650,16 @@ mod tests {
         book_5_id
             .get_info(&conn)
             .unwrap()
-            .verify(&conn)
-            .unwrap()
             .set_product_status(ProductStatus::Verified)
             .update(&conn)
             .unwrap();
 
         // Purchase it
-        Transactions::buy(&conn, &book_1_id, &buyer).unwrap();
-        Transactions::buy(&conn, &book_2_id, &buyer).unwrap();
-        let tx_3_id = Transactions::buy(&conn, &book_3_id, &buyer).unwrap();
-        let tx_4_id = Transactions::buy(&conn, &book_4_id, &buyer).unwrap();
-        let tx_5_id = Transactions::buy(&conn, &book_5_id, &buyer).unwrap();
+        Transactions::buy(&conn, &book_1_id, &buyer, 1).unwrap();
+        Transactions::buy(&conn, &book_2_id, &buyer, 1).unwrap();
+        let tx_3_id = Transactions::buy(&conn, &book_3_id, &buyer, 2).unwrap();
+        let tx_4_id = Transactions::buy(&conn, &book_4_id, &buyer, 1).unwrap();
+        let tx_5_id = Transactions::buy(&conn, &book_5_id, &buyer, 1).unwrap();
 
         tx_3_id
             .get_info(&conn)
@@ -662,16 +676,16 @@ mod tests {
         tx_5_id.refund(&conn).unwrap();
 
         let expected_stats = TxStats {
-            placed_subtotal: 700,
-            paid_subtotal: 350,
-            finished_subtotal: 700,
-            refunded_subtotal: 1000,
-            total: 1750,
-            placed: 2,
-            paid: 1,
-            refunded: 1,
-            finished: 1,
-            total_num: 4,
+            placed_subtotal: 700u32.into(),
+            paid_subtotal: ((u32::MAX as usize) * 2).into(),
+            finished_subtotal: 700u32.into(),
+            refunded_subtotal: 1000u32.into(),
+            total: (1400usize + (u32::MAX as usize) * 2).into(),
+            placed: 2u32.into(),
+            paid: 1u32.into(),
+            refunded: 1u32.into(),
+            finished: 1u32.into(),
+            total_num: 4u32.into(),
         };
 
         assert_eq!(

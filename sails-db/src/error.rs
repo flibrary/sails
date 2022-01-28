@@ -41,8 +41,14 @@ pub enum SailsDbError {
     #[error("non-leaf category is not allowed for the request")]
     NonLeafCategory,
 
-    #[error("sold products are not subjected to changes")]
-    ChangeOnSoldProduct,
+    #[error("the product has already been sold out")]
+    ProductSoldOut,
+
+    #[error("illegal price or quantity provided")]
+    IllegalPriceOrQuantity,
+
+    #[error("internal overflow")]
+    Overflow,
 
     #[error("purchasing unverified products")]
     OrderOnUnverified,
@@ -50,8 +56,8 @@ pub enum SailsDbError {
     #[error("seller cannot purchase his/her own products")]
     SelfPurchaseNotAllowed,
 
-    #[error("failed to change product status on purchase")]
-    FailedAlterProductStatus,
+    #[error("failed to change available product quantity on purchase")]
+    FailedAlterProductQuantity,
 
     #[error("the user has been disabled")]
     DisabledUser,

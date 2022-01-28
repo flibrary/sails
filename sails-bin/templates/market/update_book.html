@@ -35,13 +35,22 @@
       </div>
     </div>
     <br>
+
     <div class="form-group row">
       <label for="inputPrice" class="col-sm-2 col-form-label">价格</label>
       <div class="col-sm-4">
-        <input type="number" min="0" class="form-control" id="inputPrice" placeholder="Price" value="{{ book.get_price() }}" name="price">
+        <input type="number" min="1" class="form-control" id="inputPrice" placeholder="Price" value="{{ book.get_price() }}" name="price">
       </div>
     </div>
     <br>
+    <div class="form-group row">
+      <label for="inputQuantity" class="col-sm-2 col-form-label">数量</label>
+      <div class="col-sm-4">
+        <input type="number" min="1" class="form-control" id="inputPrice" placeholder="Quantity" value="{{ book.get_quantity() }}" name="quantity">
+      </div>
+    </div>
+    <br>
+
     <div class="form-group row">
       <label for="inputDescription" class="col-sm-2 col-form-label">简介</label>
       <div class="col-sm-10">

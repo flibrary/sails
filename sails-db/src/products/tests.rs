@@ -24,9 +24,11 @@ fn create_product() {
     IncompleteProduct::new(
         &econ,
         "Krugman's Economics 2nd Edition",
-        700,
+        700, // CNY 700 each
+        1,   // Only one book available
         "A very great book on the subject of Economics",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
     assert_eq!(ProductFinder::list(&conn).unwrap().len(), 1);
@@ -49,7 +51,7 @@ fn search_products() {
     .unwrap();
 
     // The book category
-    let mut books = Category::create(&conn, "Books", 0).unwrap();
+    let mut books = Category::create(&conn, "Books", 1).unwrap();
     let mut econ = Category::create(&conn, "Economics Books", 490)
         .and_then(Category::into_leaf)
         .unwrap();
@@ -75,8 +77,10 @@ fn search_products() {
         &econ,
         "Krugman's Economics 2nd Edition",
         700,
+        1,
         "A very great book on the subject of Economics",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
@@ -85,8 +89,10 @@ fn search_products() {
         &econ,
         "Krugman's Economics 2nd Edition",
         500,
+        1,
         "A very great book on the subject of Economics",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
@@ -95,8 +101,10 @@ fn search_products() {
         &econ,
         "Krugman's Economics 2nd Edition",
         600,
+        1,
         "That is a bad book though",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
@@ -105,8 +113,10 @@ fn search_products() {
         &econ,
         "The Economics",
         600,
+        1,
         "I finally had got a different econ textbook!",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
@@ -115,8 +125,10 @@ fn search_products() {
         &phys,
         "Feynman's Lecture on Physics",
         900,
+        1,
         "A very masterpiece on the theory of the universe",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
@@ -189,8 +201,10 @@ fn delete_product() {
         &econ,
         "Krugman's Economics 2nd Edition",
         600,
+        1,
         "That is a bad book though",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
@@ -223,14 +237,14 @@ fn product_status() {
         &econ,
         "Krugman's Economics 2nd Edition",
         600,
+        1,
         "That is a bad book though",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
     id.get_info(&conn)
-        .unwrap()
-        .verify(&conn)
         .unwrap()
         .set_product_status(ProductStatus::Disabled)
         .update(&conn)
@@ -278,12 +292,14 @@ fn delegation() {
         .and_then(Category::into_leaf)
         .unwrap();
     // Seller
-    IncompleteProduct::new(&econ, "Economics", 1, "A horrible book")
+    IncompleteProduct::new(&econ, "Economics", 1, 1, "A horrible book")
+        .unwrap()
         .create(&conn, &user, &user)
         .unwrap();
 
     // Owner
-    IncompleteProduct::new(&econ, "Economics Principle", 1, "Another horrible book")
+    IncompleteProduct::new(&econ, "Economics Principle", 1, 1, "Another horrible book")
+        .unwrap()
         .create(&conn, &user, &another_user)
         .unwrap();
 

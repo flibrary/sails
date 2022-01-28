@@ -30,6 +30,7 @@ table! {
         category -> Text,
         prodname -> Text,
         price -> BigInt,
+        quantity -> BigInt,
         description -> Text,
         product_status -> ProductStatusMapping,
     }
@@ -45,6 +46,8 @@ table! {
         seller -> Text,
         product -> Text,
         buyer -> Text,
+        price -> BigInt,
+        quantity -> BigInt,
         time_sent -> Timestamp,
         transaction_status -> TransactionStatusMapping,
     }

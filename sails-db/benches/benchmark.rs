@@ -54,8 +54,10 @@ fn products(c: &mut Criterion) {
         &econ,
         "Krugman's Economics 2nd Edition",
         700,
+        4,
         "A very great book on the subject of Economics",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
@@ -64,8 +66,10 @@ fn products(c: &mut Criterion) {
         &econ,
         "Krugman's Economics 2nd Edition",
         500,
+        3,
         "A very great book on the subject of Economics",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
@@ -74,8 +78,10 @@ fn products(c: &mut Criterion) {
         &econ,
         "Krugman's Economics 2nd Edition",
         600,
+        3,
         "A very great book on the subject of Economics",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
@@ -84,8 +90,10 @@ fn products(c: &mut Criterion) {
         &econ,
         "The Economics",
         600,
+        1,
         "I finally had got a different econ textbook!",
     )
+    .unwrap()
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
@@ -95,8 +103,10 @@ fn products(c: &mut Criterion) {
             &phys,
             "Feynman's Lecture on Physics",
             900,
+            100,
             "A very masterpiece on the theory of the universe",
         )
+        .unwrap()
         .create(&conn, &user_id, &user_id)
         .unwrap();
     }

@@ -35,8 +35,8 @@ fn category_builder() {
 #[test]
 fn manipulate_category() {
     let conn = establish_connection();
-    let mut knowledge = Category::create(&conn, "Knowledge", 0).unwrap();
-    let mut books = Category::create(&conn, "Books", 0).unwrap();
+    let mut knowledge = Category::create(&conn, "Knowledge", 1).unwrap();
+    let mut books = Category::create(&conn, "Books", 1).unwrap();
     let mut economics = Category::create(&conn, "Economics", 300).unwrap();
     let mut physics = Category::create(&conn, "Physics", 300).unwrap();
 
@@ -46,7 +46,7 @@ fn manipulate_category() {
     assert_eq!(books.subcategory(&conn).unwrap().len(), 2);
 
     // Knowledge -> Non-electronic -> Books -> (Econ, Phys)
-    let mut nonelec = Category::create(&conn, "Non-electronic", 0).unwrap();
+    let mut nonelec = Category::create(&conn, "Non-electronic", 1).unwrap();
     nonelec.insert(&conn, &mut knowledge).unwrap();
     books.insert(&conn, &mut nonelec).unwrap();
     assert_eq!(knowledge.subcategory(&conn).unwrap().len(), 1);

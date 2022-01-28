@@ -64,23 +64,6 @@ impl BookGuard {
         })
         .await
     }
-
-    pub async fn to_mut_info(
-        &self,
-        db: &DbConn,
-    ) -> Result<BookInfo<MutableProductInfo>, SailsDbError> {
-        let book = self.to_id(db).await?;
-        db.run(move |c| -> Result<BookInfo<_>, SailsDbError> {
-            let book_info = book.book_id.get_info(c)?.verify(c)?;
-            let category = Categories::find_by_id(c, book_info.get_category_id()).ok();
-            Ok(BookInfo {
-                book_info,
-                seller_info: book.seller_id.get_info(c)?,
-                category,
-            })
-        })
-        .await
-    }
 }
 
 // This request guard explicitly requires a valid book ID

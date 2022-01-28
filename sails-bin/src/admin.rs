@@ -207,7 +207,7 @@ pub async fn verify_book(
     book_id: BookGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_mut_info(&conn).await.into_flash(uri!("/"))?;
+    let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| {
         book.book_info
             .set_product_status(ProductStatus::Verified)
@@ -224,7 +224,7 @@ pub async fn disable_book(
     book_id: BookGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_mut_info(&conn).await.into_flash(uri!("/"))?;
+    let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| {
         book.book_info
             .set_product_status(ProductStatus::Disabled)
@@ -241,7 +241,7 @@ pub async fn normalize_book(
     book_id: BookGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_mut_info(&conn).await.into_flash(uri!("/"))?;
+    let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| {
         book.book_info
             .set_product_status(ProductStatus::Normal)

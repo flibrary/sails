@@ -1,6 +1,8 @@
 // We have to ensure: all the places where category can be supplied has to be using type Category instead of String.
 // If we cannot ensure on derivations like those did by serde, we then have to use isolation types to ensure it on a type level
 
+use std::num::NonZeroU32;
+
 use crate::{
     categories::{Categories, CtgTrait, LeafCategory},
     enums::ProductStatus,
@@ -41,19 +43,8 @@ impl ProductId {
 
     // IncompleteProduct update should only be allowed if the book is not sold (frozen)
     pub fn update(&self, conn: &SqliteConnection, info: SafeIncompleteProduct) -> Result<()> {
-        use crate::schema::products::dsl::*;
-
-        let status = products
-            .filter(id.eq(&self.id))
-            .first::<ProductInfo>(conn)?
-            .get_product_status()
-            .clone();
-        if (status == ProductStatus::Normal) || (status == ProductStatus::Verified) {
-            diesel::update(self).set(info).execute(conn)?;
-            Ok(())
-        } else {
-            Err(SailsDbError::ChangeOnSoldProduct)
-        }
+        diesel::update(self).set(info).execute(conn)?;
+        Ok(())
     }
 
     // IncompleteProduct update should only be allowed if the book is not sold (frozen)
@@ -63,19 +54,8 @@ impl ProductId {
         conn: &SqliteConnection,
         info: SafeIncompleteProductOwned,
     ) -> Result<()> {
-        use crate::schema::products::dsl::*;
-
-        let status = products
-            .filter(id.eq(&self.id))
-            .first::<ProductInfo>(conn)?
-            .get_product_status()
-            .clone();
-        if (status == ProductStatus::Normal) || (status == ProductStatus::Verified) {
-            diesel::update(self).set(info).execute(conn)?;
-            Ok(())
-        } else {
-            Err(SailsDbError::ChangeOnSoldProduct)
-        }
+        diesel::update(self).set(info).execute(conn)?;
+        Ok(())
     }
 
     pub fn get_id(&self) -> &str {
@@ -193,7 +173,8 @@ impl<'a> ProductFinder<'a> {
         self
     }
 
-    pub fn price(mut self, price_provided: i64, cmp: Cmp) -> Self {
+    pub fn price(mut self, price_provided: u32, cmp: Cmp) -> Self {
+        let price_provided = price_provided as i64;
         use crate::schema::products::dsl::*;
         match cmp {
             Cmp::GreaterThan => self.query = self.query.filter(price.gt(price_provided)),
@@ -240,6 +221,7 @@ pub trait ToSafe<T> {
 }
 
 // category-verified product
+// Since this product is acting as a changeset to the database, we have to use i64 here.
 #[derive(Debug, Clone, AsChangeset)]
 #[table_name = "products"]
 pub struct SafeIncompleteProductOwned {
@@ -247,6 +229,7 @@ pub struct SafeIncompleteProductOwned {
     pub category: String,
     pub prodname: String,
     pub price: i64,
+    pub quantity: i64,
     pub description: String,
 }
 
@@ -256,7 +239,8 @@ pub struct IncompleteProductOwned {
     // This is the ID (UUID) of the category
     pub category: String,
     pub prodname: String,
-    pub price: i64,
+    pub price: NonZeroU32,
+    pub quantity: NonZeroU32,
     pub description: String,
 }
 
@@ -267,7 +251,8 @@ impl ToSafe<SafeIncompleteProductOwned> for IncompleteProductOwned {
             Ok(SafeIncompleteProductOwned {
                 category: self.category,
                 prodname: self.prodname,
-                price: self.price,
+                price: self.price.get() as i64,
+                quantity: self.quantity.get() as i64,
                 description: self.description,
             })
         } else {
@@ -280,15 +265,19 @@ impl IncompleteProductOwned {
     pub fn new<T: ToString>(
         category: &LeafCategory,
         prodname: T,
-        price: i64,
+        price: u32,
+        quantity: u32,
         description: T,
-    ) -> Self {
-        Self {
+    ) -> Result<Self> {
+        let price = NonZeroU32::new(price).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
+        let quantity = NonZeroU32::new(quantity).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
+        Ok(Self {
             category: category.id().to_string(),
             prodname: prodname.to_string(),
             price,
+            quantity,
             description: description.to_string(),
-        }
+        })
     }
 
     pub fn create(
@@ -301,6 +290,7 @@ impl IncompleteProductOwned {
             category: &self.category,
             prodname: &self.prodname,
             price: self.price,
+            quantity: self.quantity,
             description: &self.description,
         };
         refed.create(conn, seller, operator)
@@ -314,6 +304,7 @@ pub struct SafeIncompleteProduct<'a> {
     pub category: &'a str,
     pub prodname: &'a str,
     pub price: i64,
+    pub quantity: i64,
     pub description: &'a str,
 }
 
@@ -324,7 +315,8 @@ impl<'a> ToSafe<SafeIncompleteProduct<'a>> for IncompleteProduct<'a> {
             Ok(SafeIncompleteProduct {
                 category: self.category,
                 prodname: self.prodname,
-                price: self.price,
+                price: self.price.get() as i64,
+                quantity: self.quantity.get() as i64,
                 description: self.description,
             })
         } else {
@@ -352,6 +344,7 @@ impl<'a> SafeIncompleteProduct<'a> {
             category.eq(self.category),
             prodname.eq(self.prodname),
             price.eq(self.price),
+            quantity.eq(self.quantity),
             description.eq(self.description),
             product_status.eq(ProductStatus::Normal),
         );
@@ -364,7 +357,8 @@ impl<'a> SafeIncompleteProduct<'a> {
 pub struct IncompleteProduct<'a> {
     pub category: &'a str,
     pub prodname: &'a str,
-    pub price: i64,
+    pub price: NonZeroU32,
+    pub quantity: NonZeroU32,
     pub description: &'a str,
 }
 
@@ -372,15 +366,19 @@ impl<'a> IncompleteProduct<'a> {
     pub fn new(
         category: &'a LeafCategory,
         prodname: &'a str,
-        price: i64,
+        price: u32,
+        quantity: u32,
         description: &'a str,
-    ) -> Self {
-        Self {
+    ) -> Result<Self> {
+        let price = NonZeroU32::new(price).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
+        let quantity = NonZeroU32::new(quantity).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
+        Ok(Self {
             category: category.id(),
             prodname,
             price,
+            quantity,
             description,
-        }
+        })
     }
 
     pub fn create(
@@ -393,138 +391,7 @@ impl<'a> IncompleteProduct<'a> {
     }
 }
 
-/// A single product info entry, corresponding to a row in the table `products`. This is unsold.
-#[derive(
-    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
-)]
-#[table_name = "products"]
-pub struct MutableProductInfo {
-    id: String,
-    shortid: String,
-    seller_id: String,
-    operator_id: String,
-    category: String,
-    prodname: String,
-    price: i64,
-    description: String,
-    product_status: ProductStatus,
-}
-
-impl MutableProductInfo {
-    pub fn update(self, conn: &SqliteConnection) -> Result<Self> {
-        Ok(self.save_changes::<MutableProductInfo>(conn)?)
-    }
-
-    pub fn get_id(&self) -> &str {
-        &self.id
-    }
-
-    pub fn get_seller_id(&self) -> &str {
-        &self.seller_id
-    }
-
-    pub fn get_operator_id(&self) -> &str {
-        &self.operator_id
-    }
-
-    pub fn get_description(&self) -> &str {
-        &self.description
-    }
-
-    pub fn get_category_id(&self) -> &str {
-        &self.category
-    }
-
-    pub fn get_prodname(&self) -> &str {
-        &self.prodname
-    }
-
-    pub fn get_price(&self) -> i64 {
-        self.price
-    }
-
-    /// Set the product info's seller id.
-    pub fn set_seller_id(mut self, seller_id: impl ToString) -> Self {
-        self.seller_id = seller_id.to_string();
-        self
-    }
-
-    /// Set the product info's operator id.
-    pub fn set_operator_id(mut self, operator_id: impl ToString) -> Self {
-        self.operator_id = operator_id.to_string();
-        self
-    }
-
-    /// Set the product info's category.
-    pub fn set_category(mut self, category: &LeafCategory) -> Result<Self> {
-        self.category = category.id().to_string();
-        Ok(self)
-    }
-
-    /// Set the product info's prodname.
-    pub fn set_prodname(mut self, prodname: impl ToString) -> Self {
-        self.prodname = prodname.to_string();
-        self
-    }
-
-    /// Set the product info's price.
-    pub fn set_price(mut self, price: i64) -> Self {
-        self.price = price;
-        self
-    }
-
-    /// Set the product info's description.
-    pub fn set_description(mut self, description: impl ToString) -> Self {
-        self.description = description.to_string();
-        self
-    }
-
-    /// Get a reference to the product info's shortid.
-    pub fn get_shortid(&self) -> &str {
-        &self.shortid
-    }
-
-    /// Get a reference to the product info's product status.
-    pub fn get_product_status(&self) -> &ProductStatus {
-        &self.product_status
-    }
-
-    /// Set the product info's product status.
-    // extern crate are not allowed to manually set the product status to sold. Otherwise, the transactions and the products are not gonna agree.
-    pub fn set_product_status(mut self, product_status: ProductStatus) -> Self {
-        if product_status != ProductStatus::Sold {
-            self.product_status = product_status;
-        }
-        self
-    }
-
-    pub(crate) fn set_sold(mut self) -> Self {
-        self.product_status = ProductStatus::Sold;
-        self
-    }
-}
-
-impl ToSafe<MutableProductInfo> for ProductInfo {
-    fn verify(self, _conn: &SqliteConnection) -> Result<MutableProductInfo> {
-        if self.product_status != ProductStatus::Sold {
-            Ok(MutableProductInfo {
-                id: self.id,
-                shortid: self.shortid,
-                seller_id: self.seller_id,
-                operator_id: self.operator_id,
-                category: self.category,
-                prodname: self.prodname,
-                price: self.price,
-                description: self.description,
-                product_status: self.product_status,
-            })
-        } else {
-            Err(SailsDbError::ChangeOnSoldProduct)
-        }
-    }
-}
-
-/// A single product info entry, corresponding to a row in the table `products`
+/// A single product info entry, corresponding to a row in the table `products`.
 #[derive(
     Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
 )]
@@ -537,6 +404,7 @@ pub struct ProductInfo {
     category: String,
     prodname: String,
     price: i64,
+    quantity: i64,
     description: String,
     product_status: ProductStatus,
 }
@@ -570,8 +438,85 @@ impl ProductInfo {
         &self.prodname
     }
 
-    pub fn get_price(&self) -> i64 {
-        self.price
+    pub fn get_price(&self) -> u32 {
+        self.price as u32
+    }
+
+    pub fn get_quantity(&self) -> u32 {
+        self.quantity as u32
+    }
+
+    /// Set the product info's seller id.
+    pub fn set_seller_id(mut self, seller_id: impl ToString) -> Self {
+        self.seller_id = seller_id.to_string();
+        self
+    }
+
+    /// Set the product info's operator id.
+    pub fn set_operator_id(mut self, operator_id: impl ToString) -> Self {
+        self.operator_id = operator_id.to_string();
+        self
+    }
+
+    /// Set the product info's category.
+    pub fn set_category(mut self, category: &LeafCategory) -> Result<Self> {
+        self.category = category.id().to_string();
+        Ok(self)
+    }
+
+    /// Set the product info's prodname.
+    pub fn set_prodname(mut self, prodname: impl ToString) -> Self {
+        self.prodname = prodname.to_string();
+        self
+    }
+
+    /// Set the product info's price.
+    pub fn set_price(mut self, price: NonZeroU32) -> Self {
+        self.price = price.get() as i64;
+        self
+    }
+
+    /// Set the product info's quantity.
+    // Quantity is not allowed to be set to zero but only allowed to be add/sub to zero.
+    // Practically, we cannot add to zero though.
+    pub fn set_quantity(mut self, qty: u32) -> Result<Self> {
+        let qty = NonZeroU32::new(qty).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
+        self.quantity = qty.get() as i64;
+        Ok(self)
+    }
+
+    pub(crate) fn sub_quantity(mut self, qty: u32) -> Result<Self> {
+        if let Some(u) = (self.quantity as u32).checked_sub(qty) {
+            self.quantity = u as i64;
+            // If quantity gets to zero, we normalize the product.
+            if self.quantity == 0 {
+                Ok(self.set_product_status(ProductStatus::Normal))
+            } else {
+                Ok(self)
+            }
+        } else {
+            Err(SailsDbError::Overflow)
+        }
+    }
+
+    pub(crate) fn add_quantity(mut self, qty: u32) -> Result<Self> {
+        if let Some(u) = (self.quantity as u32).checked_add(qty) {
+            self.quantity = u as i64;
+            // If quantity higher than zero, we reactivate the product.
+            if self.quantity > 0 {
+                Ok(self.set_product_status(ProductStatus::Verified))
+            } else {
+                Ok(self)
+            }
+        } else {
+            Err(SailsDbError::Overflow)
+        }
+    }
+
+    /// Set the product info's description.
+    pub fn set_description(mut self, description: impl ToString) -> Self {
+        self.description = description.to_string();
+        self
     }
 
     /// Get a reference to the product info's shortid.
@@ -584,10 +529,10 @@ impl ProductInfo {
         &self.product_status
     }
 
-    // For immutable product info, we only allow sold status being set, because it can be either sold or in other satuses.
-    // For sold, it should be only allowed to transfer back to verified; for others, they can be converted into mutable info.
-    pub(crate) fn set_verified(mut self) -> Self {
-        self.product_status = ProductStatus::Verified;
+    /// Set the product info's product status.
+    // extern crate are not allowed to manually set the product status to sold. Otherwise, the transactions and the products are not gonna agree.
+    pub fn set_product_status(mut self, product_status: ProductStatus) -> Self {
+        self.product_status = product_status;
         self
     }
 }

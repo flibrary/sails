@@ -22,6 +22,7 @@ select = "0.6.0-alpha.1"
 structopt = "^0.3"
 urlencoding = "^2"
 rsa = {version = "^0.5", features = ["alloc"]}
+num-bigint = {version = "^0.4", features = ["serde"]}
 sha2 = "^0.10"
 rand = {version = "^0.8", features = ["std_rng"]}
 base64 = "^0.13"

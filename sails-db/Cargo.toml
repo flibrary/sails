@@ -13,6 +13,7 @@ delegate-attr = "^0.2"
 serde = { version = "^1", features = ["derive", "rc"] }
 serde_json = "^1"
 diesel = { version = "^1.4", features = ["sqlite", "r2d2", "chrono", "uuidv07"] }
+num-bigint = "^0.4"
 bitflags = "^1"
 # Testing only, however, benchmark used it as well, and we have to use it in test_utils which cannot be gated
 diesel_migrations = "^1.4"

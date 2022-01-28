@@ -64,7 +64,7 @@ pub async fn order_info_buyer(
                     order.order_info.get_id(),
                     // Alipay doesn't play well with UTF-8
                     order.book_info.get_prodname(),
-                    order.book_info.get_price(),
+                    order.order_info.get_total(),
                 ),
             )
             .into_flash(uri!("/"))?
@@ -171,7 +171,8 @@ pub async fn purchase(
 ) -> Result<Redirect, Flash<Redirect>> {
     let book = book_id.to_id(&db).await.into_flash(uri!("/"))?;
     let id = db
-        .run(move |c| Transactions::buy(c, &book.book_id, &user.id))
+        // TODO: We need to allow user to specify quantity
+        .run(move |c| Transactions::buy(c, &book.book_id, &user.id, 1))
         .await
         .into_flash(uri!("/"))?;
 

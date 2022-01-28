@@ -42,7 +42,7 @@ pub async fn deposit_info(
                 Precreate::new(
                     book.book_info.get_id(),
                     &format!("Security Deposit: {}", book.book_info.get_prodname()),
-                    50,
+                    50u32.into(),
                 ),
             )
             .into_flash(uri!("/"))?
@@ -70,7 +70,7 @@ pub async fn deposit_progress(
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_mut_info(&db).await.into_flash(uri!("/"))?;
+    let book = book_id.to_info(&db).await.into_flash(uri!("/"))?;
 
     let resp = client
         .request(priv_key, TradeQuery::new(book.book_info.get_id()))
