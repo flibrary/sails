@@ -29,5 +29,5 @@
 {% endblock seller %}
 
 {% block actions %}
-<a href="{{ uri!("/orders", crate::orders::purchase(self.book.get_id())) }}" class="btn btn-primary" role="button" onclick="return confirm('Do you really want to purchase it?');"><i class="bi bi-credit-card"></i> 购买</a>
+<a href="{{ uri!("/orders", crate::orders::checkout(self.book.get_id())) }}" class="btn btn-primary" role="button"><i class="bi bi-credit-card"></i> 购买</a>
 {% endblock actions %}

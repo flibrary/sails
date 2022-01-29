@@ -23,6 +23,7 @@ impl Transactions {
         product_p: &ProductId,
         buyer_p: &UserId,
         qty: u32,
+        addr: impl ToString,
     ) -> Result<TransactionId> {
         let qty = NonZeroU32::new(qty).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
 
@@ -47,6 +48,7 @@ impl Transactions {
                 product: product_p.get_id().to_string(),
                 price: product_info.get_price() as i64,
                 quantity: qty.get() as i64,
+                address: addr.to_string(),
                 buyer: buyer_p.get_id().to_string(),
                 time_sent: chrono::offset::Local::now().naive_utc(),
                 transaction_status: TransactionStatus::Placed,
@@ -127,6 +129,7 @@ pub struct TransactionInfo {
     buyer: String,
     price: i64,
     quantity: i64,
+    address: String,
     time_sent: NaiveDateTime,
     transaction_status: TransactionStatus,
 }
@@ -183,6 +186,10 @@ impl TransactionInfo {
     /// Get a reference to the transaction info's buyer.
     pub fn get_buyer(&self) -> &str {
         &self.buyer
+    }
+
+    pub fn get_address(&self) -> &str {
+        &self.address
     }
 
     /// Get a reference to the transaction info's time sent.
@@ -246,6 +253,13 @@ impl<'a> TransactionFinder<'a> {
             .first::<i64>(self.conn)?
             .to_biguint()
             .unwrap()) // guranteed to be positive.
+    }
+
+    pub fn most_recent_order(conn: &'a SqliteConnection, user: &'a str) -> Result<TransactionInfo> {
+        Self::new(conn, None)
+            .buyer(user)
+            .order_by_time(Order::Desc)
+            .first_info()
     }
 
     pub fn stats(conn: &'a SqliteConnection, user: Option<&'a str>) -> Result<TxStats> {
@@ -455,7 +469,15 @@ mod tests {
 
         // Unverified products are not subjected to purchases.
         assert!(matches!(
-            Transactions::buy(&conn, &book_id, &buyer, 1).err().unwrap(),
+            Transactions::buy(
+                &conn,
+                &book_id,
+                &buyer,
+                1,
+                "258 Huanhu South Road, Dongqian Lake, Ningbo, China"
+            )
+            .err()
+            .unwrap(),
             SailsDbError::OrderOnUnverified
         ));
 
@@ -469,7 +491,15 @@ mod tests {
 
         // We cannot purchase more than available.
         assert!(matches!(
-            Transactions::buy(&conn, &book_id, &buyer, 2).err().unwrap(),
+            Transactions::buy(
+                &conn,
+                &book_id,
+                &buyer,
+                2,
+                "258 Huanhu South Road, Dongqian Lake, Ningbo, China"
+            )
+            .err()
+            .unwrap(),
             SailsDbError::FailedAlterProductQuantity
         ));
 
@@ -477,7 +507,14 @@ mod tests {
         assert_eq!(TransactionFinder::list(&conn).unwrap().len(), 0);
 
         // Purchase it
-        let tx_id = Transactions::buy(&conn, &book_id, &buyer, 1).unwrap();
+        let tx_id = Transactions::buy(
+            &conn,
+            &book_id,
+            &buyer,
+            1,
+            "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+        )
+        .unwrap();
 
         // There should be only one transaction entry
         assert_eq!(TransactionFinder::list(&conn).unwrap().len(), 1);
@@ -654,12 +691,59 @@ mod tests {
             .update(&conn)
             .unwrap();
 
+        // No most recent order before purchase
+        assert!(TransactionFinder::most_recent_order(&conn, &buyer.get_id()).is_err());
         // Purchase it
-        Transactions::buy(&conn, &book_1_id, &buyer, 1).unwrap();
-        Transactions::buy(&conn, &book_2_id, &buyer, 1).unwrap();
-        let tx_3_id = Transactions::buy(&conn, &book_3_id, &buyer, 2).unwrap();
-        let tx_4_id = Transactions::buy(&conn, &book_4_id, &buyer, 1).unwrap();
-        let tx_5_id = Transactions::buy(&conn, &book_5_id, &buyer, 1).unwrap();
+        Transactions::buy(
+            &conn,
+            &book_1_id,
+            &buyer,
+            1,
+            "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+        )
+        .unwrap();
+        // Last address updated
+        assert_eq!(
+            TransactionFinder::most_recent_order(&conn, &buyer.get_id())
+                .unwrap()
+                .get_address(),
+            "258 Huanhu South Road, Dongqian Lake, Ningbo, China"
+        );
+
+        Transactions::buy(
+            &conn,
+            &book_2_id,
+            &buyer,
+            1,
+            "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+        )
+        .unwrap();
+        let tx_3_id =
+            Transactions::buy(&conn, &book_3_id, &buyer, 2, "宁波外国语学校 S2202").unwrap();
+        // Last address updated
+        assert_eq!(
+            TransactionFinder::most_recent_order(&conn, &buyer.get_id())
+                .unwrap()
+                .get_address(),
+            "宁波外国语学校 S2202"
+        );
+        let tx_4_id =
+            Transactions::buy(&conn, &book_4_id, &buyer, 1, "宁波外国语学校 S2301").unwrap();
+        // Last order updated
+        assert_eq!(
+            TransactionFinder::most_recent_order(&conn, &buyer.get_id())
+                .unwrap()
+                .get_id(),
+            tx_4_id.get_id()
+        );
+        let tx_5_id =
+            Transactions::buy(&conn, &book_5_id, &buyer, 1, "宁波市海曙区天一广场").unwrap();
+        assert_eq!(
+            TransactionFinder::most_recent_order(&conn, &buyer.get_id())
+                .unwrap()
+                .get_id(),
+            tx_5_id.get_id()
+        );
 
         tx_3_id
             .get_info(&conn)

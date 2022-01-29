@@ -1,3 +1,5 @@
+use std::num::NonZeroU32;
+
 use crate::{
     alipay::{
         AlipayAppPrivKey, AlipayClient, CancelTrade, CancelTradeResp, Precreate, PrecreateResp,
@@ -8,6 +10,7 @@ use crate::{
 };
 use askama::Template;
 use rocket::{
+    form::{Form, Strict},
     response::{Flash, Redirect},
     State,
 };
@@ -163,16 +166,55 @@ pub async fn progress(
     Ok(Redirect::to(uri!("/orders", order_info_buyer(order_id))))
 }
 
-#[get("/purchase?<book_id>")]
+#[derive(Template)]
+#[template(path = "orders/checkout.html")]
+pub struct CheckoutPage {
+    book: ProductInfo,
+    recent_address: Option<String>,
+}
+
+#[get("/checkout?<book_id>")]
+pub async fn checkout(
+    db: DbConn,
+    book_id: BookGuard,
+    user: UserIdGuard<Cookie>,
+) -> Result<CheckoutPage, Flash<Redirect>> {
+    let addr = db
+        .run(move |c| TransactionFinder::most_recent_order(&c, user.id.get_id()))
+        .await
+        .map(|x| x.get_address().to_string())
+        .ok();
+    Ok(CheckoutPage {
+        book: book_id.to_info(&db).await.into_flash(uri!("/"))?.book_info,
+        recent_address: addr,
+    })
+}
+
+#[derive(FromForm)]
+pub struct CheckoutInfo {
+    quantity: NonZeroU32,
+    address: String,
+}
+
+#[post("/purchase?<book_id>", data = "<info>")]
 pub async fn purchase(
     db: DbConn,
     book_id: BookGuard,
     user: UserIdGuard<Cookie>,
+    info: Form<Strict<CheckoutInfo>>,
 ) -> Result<Redirect, Flash<Redirect>> {
     let book = book_id.to_id(&db).await.into_flash(uri!("/"))?;
     let id = db
         // TODO: We need to allow user to specify quantity
-        .run(move |c| Transactions::buy(c, &book.book_id, &user.id, 1))
+        .run(move |c| {
+            Transactions::buy(
+                c,
+                &book.book_id,
+                &user.id,
+                info.quantity.get(),
+                &info.address,
+            )
+        })
         .await
         .into_flash(uri!("/"))?;
 

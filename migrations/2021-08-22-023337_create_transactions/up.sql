@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   buyer CHAR(36) NOT NULL,
   price UNSIGNED BIG INT NOT NULL,
   quantity UNSIGNED BIG INT NOT NULL,
+  address VARCHAR(400) NOT NULL,
   time_sent TIMESTAMP NOT NULL,
   transaction_status TEXT CHECK(transaction_status IN ('refunded', 'placed', 'paid', 'finished')) NOT NULL,
   FOREIGN KEY (product) REFERENCES products(id),

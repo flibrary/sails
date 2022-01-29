@@ -48,6 +48,7 @@ table! {
         buyer -> Text,
         price -> BigInt,
         quantity -> BigInt,
+        address -> Text,
         time_sent -> Timestamp,
         transaction_status -> TransactionStatusMapping,
     }
