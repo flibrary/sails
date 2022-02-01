@@ -55,16 +55,16 @@ pub async fn update_user_page(user: UserInfoGuard<Cookie>) -> UpdateUserPage {
 #[template(path = "user/portal_guest.html")]
 pub struct PortalGuestPage {
     user: UserInfo,
-    books_operated: Vec<(ProductInfo, Option<Category>)>,
-    books_owned: Vec<(ProductInfo, Option<Category>)>,
+    books_operated: Vec<(ProductInfo, Category)>,
+    books_owned: Vec<(ProductInfo, Category)>,
 }
 
 #[derive(Template)]
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
     user: UserInfo,
-    books_operated: Vec<(ProductInfo, Option<Category>)>,
-    books_owned: Vec<(ProductInfo, Option<Category>)>,
+    books_operated: Vec<(ProductInfo, Category)>,
+    books_owned: Vec<(ProductInfo, Category)>,
     orders_placed: Vec<(ProductInfo, TransactionInfo)>,
     orders_received: Vec<(ProductInfo, TransactionInfo)>,
 }
@@ -82,13 +82,13 @@ pub async fn portal_guest(
     let uid_cloned = uid.clone();
     let books_operated = conn
         .run(
-            move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
+            move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
                 ProductFinder::new(c, None)
                     .seller(&uid_cloned)
                     .search_info()?
                     .into_iter()
                     .map(|x| {
-                        let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                        let ctg = Categories::find_by_id(c, x.get_category_id())?;
                         Ok((x, ctg))
                     })
                     .chain(
@@ -97,7 +97,7 @@ pub async fn portal_guest(
                             .search_info()?
                             .into_iter()
                             .map(|x| {
-                                let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                                let ctg = Categories::find_by_id(c, x.get_category_id())?;
                                 Ok((x, ctg))
                             }),
                     )
@@ -110,13 +110,13 @@ pub async fn portal_guest(
     let uid_cloned = uid.clone();
     let books_owned = conn
         .run(
-            move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
+            move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
                 ProductFinder::new(c, None)
                     .owner(&uid_cloned)
                     .search_info()?
                     .into_iter()
                     .map(|x| {
-                        let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                        let ctg = Categories::find_by_id(c, x.get_category_id())?;
                         Ok((x, ctg))
                     })
                     .collect()
@@ -142,13 +142,13 @@ pub async fn portal(
     let uid_cloned = uid.clone();
     let books_operated = conn
         .run(
-            move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
+            move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
                 ProductFinder::new(c, None)
                     .seller(&uid_cloned)
                     .search_info()?
                     .into_iter()
                     .map(|x| {
-                        let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                        let ctg = Categories::find_by_id(c, x.get_category_id())?;
                         Ok((x, ctg))
                     })
                     .chain(
@@ -157,7 +157,7 @@ pub async fn portal(
                             .search_info()?
                             .into_iter()
                             .map(|x| {
-                                let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                                let ctg = Categories::find_by_id(c, x.get_category_id())?;
                                 Ok((x, ctg))
                             }),
                     )
@@ -170,13 +170,13 @@ pub async fn portal(
     let uid_cloned = uid.clone();
     let books_owned = conn
         .run(
-            move |c| -> Result<Vec<(ProductInfo, Option<Category>)>, SailsDbError> {
+            move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
                 ProductFinder::new(c, None)
                     .owner(&uid_cloned)
                     .search_info()?
                     .into_iter()
                     .map(|x| {
-                        let ctg = Categories::find_by_id(c, x.get_category_id()).ok();
+                        let ctg = Categories::find_by_id(c, x.get_category_id())?;
                         Ok((x, ctg))
                     })
                     .collect()
@@ -196,15 +196,14 @@ pub async fn portal(
                     .map(|x| {
                         let product = ProductFinder::new(c, None)
                             .id(x.get_product())
-                            .first_info()
-                            .unwrap();
+                            .first_info()?;
                         Ok((product, x))
                     })
                     .collect()
             },
         )
         .await
-        .unwrap(); // No error should be tolerated here (database error). 500 is expected
+        .into_flash(uri!("/"))?;
 
     let orders_received = conn
         .run(
@@ -216,15 +215,14 @@ pub async fn portal(
                     .map(|x| {
                         let product = ProductFinder::new(c, None)
                             .id(x.get_product())
-                            .first_info()
-                            .unwrap();
+                            .first_info()?;
                         Ok((product, x))
                     })
                     .collect()
             },
         )
         .await
-        .unwrap(); // No error should be tolerated here (database error). 500 is expected
+        .into_flash(uri!("/"))?;
     Ok(PortalPage {
         user: user.info,
         orders_placed,

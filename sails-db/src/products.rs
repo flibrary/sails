@@ -11,7 +11,7 @@ use crate::{
     users::UserId,
     Cmp, Order,
 };
-use diesel::{prelude::*, sqlite::Sqlite};
+use diesel::{prelude::*, sql_types::Bool, sqlite::Sqlite};
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -167,10 +167,15 @@ impl<'a> ProductFinder<'a> {
         self
     }
 
-    pub fn category(mut self, category_provided: &'a LeafCategory) -> Self {
-        use crate::schema::products::dsl::*;
-        self.query = self.query.filter(category.eq(category_provided.id()));
-        self
+    pub fn category(mut self, category_provided: &'a impl CtgTrait) -> Result<Self> {
+        use crate::schema::products::{dsl::*, table};
+        let mut criteria: Box<dyn BoxableExpression<table, Sqlite, SqlType = Bool>> =
+            Box::new(false.into_sql::<Bool>());
+        for ctg in Categories::list_leaves(self.conn, Some(category_provided))? {
+            criteria = Box::new(criteria.or(category.eq(CtgTrait::id(&ctg).to_string())));
+        }
+        self.query = self.query.filter(criteria);
+        Ok(self)
     }
 
     pub fn price(mut self, price_provided: u32, cmp: Cmp) -> Self {

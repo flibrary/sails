@@ -418,7 +418,7 @@ impl<'a> TransactionFinder<'a> {
 mod tests {
     use super::*;
     use crate::{
-        categories::Category,
+        categories::{Category, CtgTrait},
         products::{IncompleteProduct, ToSafe},
         test_utils::establish_connection,
         users::*,

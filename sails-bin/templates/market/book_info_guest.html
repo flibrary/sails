@@ -51,7 +51,7 @@
       <th scope="row">种类</th>
       	{% match category %}
 	{% when Some with (ctg) %}
-        <td><a href="{{ uri!("/market", crate::market::categories(ctg.id())) }}">{{ ctg.name() }}</a></td>
+        <td><a href="{{ uri!("/search", crate::search::categories(ctg.id())) }}">{{ ctg.name() }}</a></td>
         {% when None %}
 	<td>Not categorized</td>
         {% endmatch %}

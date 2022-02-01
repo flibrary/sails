@@ -6,6 +6,7 @@ use delegate_attr::delegate;
 use diesel::prelude::*;
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
+use std::{collections::BTreeMap, num::NonZeroU32, sync::Arc};
 use uuid::Uuid;
 
 // A pseudo struct for managing the categories table.
@@ -24,9 +25,34 @@ impl Categories {
             .load::<Category>(conn)?)
     }
 
-    pub fn list_leaves(conn: &SqliteConnection) -> Result<Vec<Category>> {
+    pub fn list_leaves<T: CtgTrait>(
+        conn: &SqliteConnection,
+        root: Option<&T>,
+    ) -> Result<Vec<LeafCategory>> {
         use crate::schema::categories::dsl::*;
-        Ok(categories.filter(is_leaf.eq(true)).load::<Category>(conn)?)
+        if let Some(root) = root {
+            if root.is_leaf() {
+                // This means we are at the bottom of the search
+                // ... and we shall return the leaf
+                Ok(vec![root.clone().into_leaf()?])
+            } else {
+                let mut v = Vec::new();
+                for child in categories
+                    .filter(parent_id.eq(CtgTrait::id(root)))
+                    .load::<Category>(conn)?
+                {
+                    v = [v, Categories::list_leaves(conn, Some(&child))?].concat();
+                }
+                Ok(v)
+            }
+        } else {
+            Ok(categories
+                .filter(is_leaf.eq(true))
+                .load::<Category>(conn)?
+                .into_iter()
+                .map(|x| x.into_leaf().unwrap())
+                .collect())
+        }
     }
 
     pub fn find_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<Category> {
@@ -34,7 +60,17 @@ impl Categories {
         Ok(categories
             .into_boxed()
             .filter(id.eq(id_provided))
-            .get_result::<Category>(conn)?)
+            .first::<Category>(conn)?)
+    }
+
+    /// Note: this returns the first category matching the name.
+    /// Name is NOT guaranteed to be unique. Whenever possible, use find_by_id instead.
+    pub fn find_by_name(conn: &SqliteConnection, name_provided: &str) -> Result<Category> {
+        use crate::schema::categories::dsl::*;
+        Ok(categories
+            .into_boxed()
+            .filter(name.eq(name_provided))
+            .first::<Category>(conn)?)
     }
 
     pub fn delete_all(conn: &SqliteConnection) -> Result<usize> {
@@ -44,10 +80,12 @@ impl Categories {
 }
 
 // A trait governing both LeafCategory and Category
-pub trait CtgTrait: Sized {
+pub trait CtgTrait: Clone + Sized {
     fn id(&self) -> &str;
     fn name(&self) -> &str;
+    fn parent_id(&self) -> Option<&str>;
     fn is_leaf(&self) -> bool;
+    fn into_leaf(self) -> Result<LeafCategory>;
     // Leaf category should only be allowed to insert to category, otherwise type leakage may occur
     fn insert(&mut self, conn: &SqliteConnection, parent: &mut Category) -> Result<()>;
     fn update(&self, conn: &SqliteConnection) -> Result<Self>;
@@ -55,6 +93,7 @@ pub trait CtgTrait: Sized {
 }
 
 // A type-level wraper to ensuer that the category is leaf
+#[derive(Clone)]
 pub struct LeafCategory(Category);
 
 impl LeafCategory {
@@ -76,6 +115,8 @@ impl CtgTrait for LeafCategory {
     #[delegate(self.0)]
     fn name(&self) -> &str;
     #[delegate(self.0)]
+    fn parent_id(&self) -> Option<&str>;
+    #[delegate(self.0)]
     fn insert(&mut self, conn: &SqliteConnection, parent: &mut Category) -> Result<()>;
     fn is_leaf(&self) -> bool {
         true
@@ -86,6 +127,10 @@ impl CtgTrait for LeafCategory {
 
     #[delegate(self.0)]
     fn delete(self, conn: &SqliteConnection) -> Result<usize>;
+
+    fn into_leaf(self) -> Result<LeafCategory> {
+        Ok(self)
+    }
 }
 
 #[derive(
@@ -101,14 +146,6 @@ pub struct Category {
 }
 
 impl Category {
-    pub fn into_leaf(self) -> Result<LeafCategory> {
-        if self.is_leaf() {
-            Ok(LeafCategory(self))
-        } else {
-            Err(SailsDbError::NonLeafCategory)
-        }
-    }
-
     fn new(name: impl ToString, id: impl ToString, price: NonZeroU32) -> Self {
         Self {
             id: id.to_string(),
@@ -197,6 +234,10 @@ impl CtgTrait for Category {
         Ok(())
     }
 
+    fn parent_id(&self) -> Option<&str> {
+        self.parent_id.as_deref()
+    }
+
     fn update(&self, conn: &SqliteConnection) -> Result<Self> {
         Ok(self.save_changes::<Category>(conn)?)
     }
@@ -205,9 +246,15 @@ impl CtgTrait for Category {
         use crate::schema::categories::dsl::*;
         Ok(diesel::delete(categories.filter(id.eq(self.id))).execute(conn)?)
     }
-}
 
-use std::{collections::BTreeMap, num::NonZeroU32, sync::Arc};
+    fn into_leaf(self) -> Result<LeafCategory> {
+        if self.is_leaf() {
+            Ok(LeafCategory(self))
+        } else {
+            Err(SailsDbError::NonLeafCategory)
+        }
+    }
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]

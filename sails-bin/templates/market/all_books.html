@@ -7,13 +7,8 @@
   <div class="p-5 rounded shadow">
     <h1>欢迎来到书店</h1>
     <p class="lead">在这里您可以看到用户们上架的书，您也可以自己上架书本</p>
-    <a href="categories" class="btn btn-primary" role="button">按照课程进行分类</a>
-    {% match ctg %}
-    {% when Some with (ctg) %}
-    <a href="explore?category={{ctg}}" class="btn btn-success" role="button">卡片视图</a>
-    {% when None %}
-    <a href="explore" class="btn btn-success" role="button">卡片视图</a>
-    {% endmatch %}
+    <a href="{{ uri!("/search", crate::search::categories_all) }}" class="btn btn-primary" role="button">通过类别搜索</a>
+    <a href="explore?table=false" class="btn btn-success" role="button">卡片视图</a>
   </div>
   <br>
 

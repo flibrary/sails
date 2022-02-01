@@ -65,7 +65,7 @@ pub async fn create_book(
 #[template(path = "market/update_book.html")]
 pub struct UpdateBook {
     book: ProductInfo,
-    categories: Vec<Category>,
+    categories: Vec<LeafCategory>,
 }
 
 // If there is a book specified, we then use the default value of that specified book for update
@@ -80,7 +80,7 @@ pub async fn update_book_page(
         // If there is no leaves, user cannot create any books, a message should be displayed inside the template
         // TODO: categories should only be fetched once
         categories: conn
-            .run(move |c| Categories::list_leaves(c))
+            .run(move |c| Categories::list_leaves::<LeafCategory>(c, None))
             .await
             .into_flash(uri!("/"))?,
         book: book.book_info,
@@ -90,7 +90,7 @@ pub async fn update_book_page(
 #[derive(Template)]
 #[template(path = "market/post_book.html")]
 pub struct PostBook {
-    categories: Vec<Category>,
+    categories: Vec<LeafCategory>,
 }
 
 // post_book page
@@ -104,7 +104,7 @@ pub async fn post_book_page(
         // If there is no leaves, user cannot create any books, a message should be displayed inside the template
         // TODO: categories should only be fetched once
         categories: conn
-            .run(move |c| Categories::list_leaves(c))
+            .run(move |c| Categories::list_leaves::<LeafCategory>(c, None))
             .await
             .into_flash(uri!("/"))?,
     })
@@ -130,7 +130,7 @@ pub async fn post_book_interim() -> PostBookInterim {
 #[derive(Template)]
 #[template(path = "market/delegate_book.html")]
 pub struct DelegateBookPage {
-    categories: Vec<Category>,
+    categories: Vec<LeafCategory>,
 }
 
 // Required to sign in
@@ -143,7 +143,7 @@ pub async fn delegate_book_page(
         // If there is no leaves, user cannot create any books, a message should be displayed inside the template
         // TODO: categories should only be fetched once
         categories: conn
-            .run(move |c| Categories::list_leaves(c))
+            .run(move |c| Categories::list_leaves::<LeafCategory>(c, None))
             .await
             .into_flash(uri!("/"))?,
     })

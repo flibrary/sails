@@ -169,11 +169,23 @@ fn search_products() {
     assert_eq!(
         ProductFinder::new(&conn, None)
             .category(&econ)
+            .unwrap()
             .price(550, Cmp::GreaterThan)
             .search()
             .unwrap()
             .len(),
         3
+    );
+
+    assert_eq!(
+        ProductFinder::new(&conn, None)
+            .category(&books)
+            .unwrap()
+            .price(550, Cmp::GreaterThan)
+            .search()
+            .unwrap()
+            .len(),
+        4
     );
 }
 

@@ -11,25 +11,58 @@ fn create_category() {
 }
 
 #[test]
-fn category_builder() {
+fn category_build_and_search() {
     let conn = establish_connection();
     #[rustfmt::skip]
     CtgBuilder::new(maplit::btreemap! {
-	"AP".into() => Value::SubCategory(maplit::btreemap!{
-            "AP Physics I".into() => Value::Id { id: Uuid::new_v4(), price: 630 },
-            "AP Physics II".into() => Value::Id { id: Uuid::new_v4(), price: 630 },
-            "AP Physics C".into() => Value::Id { id: Uuid::new_v4(), price: 1630 }
-	}),
-	"A Level".into() => Value::SubCategory(maplit::btreemap!{
-            "AS Physics".into() => Value::Id { id: Uuid::new_v4(), price: 300 },
-	    "A2 Physics".into() => Value::Id { id: Uuid::new_v4(), price: 100 }
+	"High School".into() => Value::SubCategory(maplit::btreemap!{
+    	    "AP".into() => Value::SubCategory(maplit::btreemap!{
+		"AP Physics I".into() => Value::Id { id: Uuid::new_v4(), price: 630 },
+		"AP Physics II".into() => Value::Id { id: Uuid::new_v4(), price: 630 },
+		"AP Physics C".into() => Value::Id { id: Uuid::new_v4(), price: 1630 }
+	    }),
+	    "A Level".into() => Value::SubCategory(maplit::btreemap!{
+		"AS Physics".into() => Value::Id { id: Uuid::new_v4(), price: 300 },
+		"A2 Physics".into() => Value::Id { id: Uuid::new_v4(), price: 100 }
+	    }),
 	}),
 	"University Math".into() => Value::Id { id: Uuid::new_v4(), price: 2000 },
     })
     .build(&conn).unwrap();
 
-    assert_eq!(Categories::list_all(&conn).unwrap().len(), 8);
-    assert_eq!(Categories::list_top(&conn).unwrap().len(), 3);
+    // General testing
+    assert_eq!(Categories::list_all(&conn).unwrap().len(), 9);
+    assert_eq!(Categories::list_top(&conn).unwrap().len(), 2);
+    assert_eq!(
+        Categories::list_leaves::<Category>(&conn, None)
+            .unwrap()
+            .len(),
+        6
+    );
+
+    // Leaf nodes should have itself upon search
+    let ap_phy_2 = Categories::find_by_name(&conn, "AP Physics II").unwrap();
+
+    assert_eq!(
+        1,
+        Categories::list_leaves(&conn, Some(&ap_phy_2))
+            .unwrap()
+            .len(),
+    );
+    assert_eq!(
+        ap_phy_2.id(),
+        Categories::list_leaves(&conn, Some(&ap_phy_2)).unwrap()[0].id(),
+    );
+
+    // Recursive search
+    let high_school = Categories::find_by_name(&conn, "High School").unwrap();
+
+    assert_eq!(
+        5,
+        Categories::list_leaves(&conn, Some(&high_school))
+            .unwrap()
+            .len(),
+    );
 }
 
 #[test]

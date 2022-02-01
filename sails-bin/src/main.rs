@@ -15,6 +15,7 @@ mod messages;
 mod orders;
 mod recaptcha;
 mod root;
+mod search;
 mod smtp;
 mod user;
 
@@ -268,11 +269,8 @@ fn rocket() -> Rocket<Build> {
             "/market",
             routes![
                 market::market,
-                market::all_books,
                 market::explore_page,
-                market::explore_page_ctg,
-                market::all_books_category,
-                market::categories,
+                // market::categories,
                 market::post_book_page,
                 market::post_book_interim,
                 market::delegate_book_page,
@@ -285,13 +283,17 @@ fn rocket() -> Rocket<Build> {
                 market::book_page_owned,
                 market::book_page_user,
                 market::book_page_error,
-                market::categories_all,
+                // market::categories_all,
                 market::delete_book,
                 market::create_book,
                 market::instruction,
                 market::deposit_info,
                 market::deposit_progress,
             ],
+        )
+        .mount(
+            "/search",
+            routes![search::categories, search::categories_all],
         )
         .mount(
             "/messages",

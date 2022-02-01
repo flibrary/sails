@@ -1,5 +1,10 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use sails_db::{categories::Category, products::*, test_utils::establish_connection, users::*};
+use sails_db::{
+    categories::{Category, CtgTrait},
+    products::*,
+    test_utils::establish_connection,
+    users::*,
+};
 
 fn login_user(c: &mut Criterion) {
     let conn = establish_connection();

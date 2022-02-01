@@ -12,12 +12,7 @@
       <tr>
 	<th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.0.get_id())) }}">{{book.0.get_shortid()}}</a></th>
 	<td><a href="{{ uri!("/market", crate::market::book_page_owned(book.0.get_id())) }}">{{book.0.get_prodname()}}</a></td>
-	{% match book.1 %}
-	{% when Some with (ctg) %}
-	<td>{{ctg.name()}}</td>
-        {% when None %}
-	<td>Not categorized</td>
-        {% endmatch %}
+	<td>{{book.1.name()}}</td>
 	<td>{{book.0.get_price()}}</td>
       </tr>
       {% endfor %}

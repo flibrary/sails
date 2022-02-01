@@ -1,5 +1,9 @@
 use super::*;
-use crate::{categories::Category, products::*, test_utils::establish_connection};
+use crate::{
+    categories::{Category, CtgTrait},
+    products::*,
+    test_utils::establish_connection,
+};
 
 #[test]
 fn create_user() {

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}通过类别搜索{% endblock title %}
+{% block content %}
+<main class="container">
+  <div class="p-5 rounded shadow">
+    <h1>按照类别搜索您想要的产品</h1>
+
+    {% match current_ctg %}
+    {% when Some with (current_ctg)%}
+    <p class="lead">当前类别为“{{current_ctg.name()}}”</p>
+    {% when None %}
+    <p class="lead">当前显示所有类别</p>
+    {% endmatch %}
+    {% match categories %}
+    {% when Some with (categories)%}
+      {% if categories.len() > 0 %}
+      <div class="list-group">
+        {% for category in categories %}
+        <a href="{{ uri!("/search", crate::search::categories(category.id())) }}" class="list-group-item list-group-item-action">{{category.name()}}</a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <h3>在您的请求下没有找到任何类别，这将被视为一个错误。请联系管理员。</h3>
+      {% endif %}
+    {% when None %}
+      <h4>没有更多子类别</h4>
+    {% endmatch %}
+
+    <br>
+    <a href="{{ uri!("/market", crate::market::explore_page(false)) }}" class="btn btn-warning" role="button">前往书店</a>
+
+    {% match parent_ctg %}
+    {% when Some with (parent_ctg)%}
+    <a href="{{ uri!("/search", crate::search::categories(parent_ctg.id())) }}" class="btn btn-primary" role="button">返回“{{parent_ctg.name()}}”</a>
+    {% when None %}
+    {% if current_ctg.is_none() %}
+    {% else %}
+    <a href="{{ uri!("/search", crate::search::categories_all) }}" class="btn btn-primary" role="button">所有类别</a>
+    {% endif %}
+    {% endmatch %}
+  </div>
+  <br>
+
+  {% if products.len() > 0 %}
+  <div class="p-5 rounded shadow">
+    <h3>搜索结果</h3>
+    <div class="row grid">
+	{% for product in products %}
+	<div class="col-sm-6 col-lg-4 mb-4 grid-item">
+	  <div class="card">
+	    {% match product.1 %}
+	    {% when Some with (img) %}
+	    <img src="{{img}}?size=thumbnail" loading="lazy" class="card-img-top">
+            {% when None %}
+            {% endmatch %}
+            <div class="card-body">
+              <h5 class="card-title"><a href="{{ uri!("/market", crate::market::book_page_owned(product.0.get_id())) }}">{{product.0.get_prodname()}}</a></h5>
+	      {% if product.0.get_operator_id() == "flibrarynfls@outlook.com" -%}
+	      <h6 class="card-subtitle mb-2 text-success"><i class="bi bi-award-fill"></i> FLibrary Pro</h6>
+	      {% endif -%}
+              <p class="card-text"><b>价格: ¥{{product.0.get_price()}}</b> 原价：¥{{product.2.get_price()}}</p>
+            </div>
+	  </div>
+	</div>
+	{% endfor %}
+
+      </div>
+    </div>
+    <br>
+  {% else %}
+    <div class="p-5 rounded shadow">
+     <h3>此类别下没有产品</h3>
+    </div>
+    <br>
+  {% endif %}
+  <br>
+</main>
+{% endblock content %}
