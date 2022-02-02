@@ -6,7 +6,6 @@ use crate::{
 use askama::Template;
 use rocket::response::{Flash, Redirect};
 use sails_db::{categories::*, error::SailsDbError, products::*, Cmp};
-use std::cmp::Ordering;
 
 #[derive(Template)]
 #[template(path = "search/categories.html")]
@@ -99,11 +98,7 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
                     .rev()
                     .collect::<Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError>>()?;
 
-                product_info.sort_unstable_by(|(_, a, _), (_, b, _)| match (a, b) {
-                    (None, Some(_)) => Ordering::Less,
-                    (Some(_), None) => Ordering::Greater,
-                    _ => Ordering::Equal,
-                });
+                product_info.sort_unstable_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
 
                 Ok(product_info)
             },
