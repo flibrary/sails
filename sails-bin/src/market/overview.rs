@@ -5,6 +5,9 @@ use askama::Template;
 use rocket::response::{Flash, Redirect};
 use sails_db::{categories::*, error::SailsDbError, products::*, Cmp};
 
+// Imaged > None
+// determined & transistive: everything equal except options differ. just like comparing 0 and 1.
+// NOTE: to preserve the order, use stable sort.
 pub fn cmp_image(this: Option<&str>, other: Option<&str>) -> Ordering {
     match (this, other) {
         (None, Some(_)) => Ordering::Greater,
@@ -62,7 +65,7 @@ pub async fn explore_page(
                     .rev()
                     .collect::<Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError>>()?;
 
-		book_info.sort_unstable_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
+		book_info.sort_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
 		Ok(book_info)
             },
         )

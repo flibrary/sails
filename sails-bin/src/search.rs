@@ -37,7 +37,7 @@ pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redire
                     .rev()
                     .collect::<Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError>>()?;
 
-                product_info.sort_unstable_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
+                product_info.sort_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
 
                 Ok(product_info)
             },
@@ -82,7 +82,6 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
         .run(
             move |c| -> Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError> {
                 // We only display allowed books
-
                 let mut product_info = ProductFinder::new(c, None)
                     .category(&category)?
                     .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
@@ -98,7 +97,8 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
                     .rev()
                     .collect::<Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError>>()?;
 
-                product_info.sort_unstable_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
+		// Sort the products to make ones containing image appear on top.
+                product_info.sort_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
 
                 Ok(product_info)
             },
