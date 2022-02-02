@@ -48,12 +48,16 @@ fn products(c: &mut Criterion) {
     .unwrap();
 
     // The book category
-    let econ = Category::create(&conn, "Economics Books", 490)
+    let mut books = Category::create(&conn, "Books", 1).unwrap();
+    let mut econ = Category::create(&conn, "Economics Books", 490)
         .and_then(Category::into_leaf)
         .unwrap();
-    let phys = Category::create(&conn, "Physics Books", 630)
+    let mut phys = Category::create(&conn, "Physics Books", 630)
         .and_then(Category::into_leaf)
         .unwrap();
+
+    econ.insert(&conn, &mut books).unwrap();
+    phys.insert(&conn, &mut books).unwrap();
 
     IncompleteProduct::new(
         &econ,
@@ -116,10 +120,21 @@ fn products(c: &mut Criterion) {
         .unwrap();
     }
 
-    c.bench_function("search products", |b| {
+    c.bench_function("search products by price", |b| {
         b.iter(|| {
             ProductFinder::new(&conn, None)
                 .prodname("Krugman's Economics 2nd Edition")
+                .price(550, sails_db::Cmp::LessThan)
+                .search()
+                .unwrap()
+        })
+    });
+
+    c.bench_function("search products by category", |b| {
+        b.iter(|| {
+            ProductFinder::new(&conn, None)
+                .category(&books)
+                .unwrap()
                 .price(550, sails_db::Cmp::LessThan)
                 .search()
                 .unwrap()
