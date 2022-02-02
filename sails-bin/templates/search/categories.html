@@ -76,3 +76,23 @@
   <br>
 </main>
 {% endblock content %}
+
+{% block script %}
+  {% call super()%}
+  <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/imagesloaded@4.1.4/imagesloaded.min.js"></script>
+  <script>
+    // init Masonry
+    var grid = document.querySelector('.grid');
+
+    var msnry = new Masonry( grid, {
+	itemSelector: '.grid-item',
+	percentPosition: true
+    });
+
+    imagesLoaded( grid ).on( 'progress', function() {
+	// layout Masonry after each image loads
+	msnry.layout();
+    });
+  </script>
+{% endblock script %}
