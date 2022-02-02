@@ -1,7 +1,12 @@
-use crate::{guards::BookGuard, market::find_first_image, DbConn, IntoFlash};
+use crate::{
+    guards::BookGuard,
+    market::{cmp_image, find_first_image},
+    DbConn, IntoFlash,
+};
 use askama::Template;
 use rocket::response::{Flash, Redirect};
 use sails_db::{categories::*, error::SailsDbError, products::*, Cmp};
+use std::cmp::Ordering;
 
 #[derive(Template)]
 #[template(path = "search/categories.html")]
@@ -19,11 +24,9 @@ pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redire
         .run(
             move |c| -> Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError> {
                 // We only display allowed books
-                let products_info = ProductFinder::new(c, None)
+                let mut product_info = ProductFinder::new(c, None)
                     .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
-                    .search_info()?;
-
-                products_info
+                    .search_info()?
                     .into_iter()
                     .map(|x| {
                         let image = find_first_image(x.get_description());
@@ -33,7 +36,11 @@ pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redire
                     })
                     // Reverse the book order
                     .rev()
-                    .collect()
+                    .collect::<Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError>>()?;
+
+                product_info.sort_unstable_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
+
+                Ok(product_info)
             },
         )
         .await
@@ -76,12 +83,11 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
         .run(
             move |c| -> Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError> {
                 // We only display allowed books
-                let products_info = ProductFinder::new(c, None)
+
+                let mut product_info = ProductFinder::new(c, None)
                     .category(&category)?
                     .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
-                    .search_info()?;
-
-                products_info
+                    .search_info()?
                     .into_iter()
                     .map(|x| {
                         let image = find_first_image(x.get_description());
@@ -91,7 +97,15 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
                     })
                     // Reverse the book order
                     .rev()
-                    .collect()
+                    .collect::<Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError>>()?;
+
+                product_info.sort_unstable_by(|(_, a, _), (_, b, _)| match (a, b) {
+                    (None, Some(_)) => Ordering::Less,
+                    (Some(_), None) => Ordering::Greater,
+                    _ => Ordering::Equal,
+                });
+
+                Ok(product_info)
             },
         )
         .await

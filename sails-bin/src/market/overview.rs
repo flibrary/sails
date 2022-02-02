@@ -1,7 +1,17 @@
+use std::cmp::Ordering;
+
 use crate::{guards::BookGuard, DbConn, IntoFlash};
 use askama::Template;
 use rocket::response::{Flash, Redirect};
 use sails_db::{categories::*, error::SailsDbError, products::*, Cmp};
+
+pub fn cmp_image(this: Option<&str>, other: Option<&str>) -> Ordering {
+    match (this, other) {
+        (None, Some(_)) => Ordering::Greater,
+        (Some(_), None) => Ordering::Less,
+        _ => Ordering::Equal,
+    }
+}
 
 pub fn find_first_image(fragment: &str) -> Option<String> {
     use select::{document::Document, predicate::Name};
@@ -38,11 +48,9 @@ pub async fn explore_page(
             move |c| -> Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError> {
                 // TODO: We shall scope books by a father category
                 // We only display allowed books
-                let books_info = ProductFinder::new(c, None)
+                let mut book_info = ProductFinder::new(c, None)
                     .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
-                    .search_info()?;
-
-                books_info
+                    .search_info()?
                     .into_iter()
                     .map(|x| {
                         let image = find_first_image(x.get_description());
@@ -52,7 +60,10 @@ pub async fn explore_page(
                     })
                     // Reverse the book order
                     .rev()
-                    .collect()
+                    .collect::<Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError>>()?;
+
+		book_info.sort_unstable_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
+		Ok(book_info)
             },
         )
         .await
