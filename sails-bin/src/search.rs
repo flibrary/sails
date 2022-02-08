@@ -1,11 +1,11 @@
 use crate::{
     guards::BookGuard,
-    market::{cmp_image, find_first_image},
+    market::{cmp_product, find_first_image, ProductCard},
     DbConn, IntoFlash,
 };
 use askama::Template;
 use rocket::response::{Flash, Redirect};
-use sails_db::{categories::*, error::SailsDbError, products::*, Cmp};
+use sails_db::{categories::*, error::SailsDbError, products::*, tags::*, Cmp};
 
 #[derive(Template)]
 #[template(path = "search/categories.html")]
@@ -13,35 +13,36 @@ pub struct CategoriesPage {
     categories: Option<Vec<Category>>,
     current_ctg: Option<Category>,
     parent_ctg: Option<Category>,
-    products: Vec<(ProductInfo, Option<String>, LeafCategory)>,
+    products: Vec<ProductCard>,
 }
 
 // Browse all categories
 #[get("/categories", rank = 2)]
 pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redirect>> {
     let products = conn
-        .run(
-            move |c| -> Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError> {
-                // We only display allowed books
-                let mut product_info = ProductFinder::new(c, None)
-                    .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
-                    .search_info()?
-                    .into_iter()
-                    .map(|x| {
-                        let image = find_first_image(x.get_description());
-                        let category = Categories::find_by_id(c, x.get_category_id())
-                            .and_then(Category::into_leaf)?;
-                        Ok((x, image, category))
-                    })
-                    // Reverse the book order
-                    .rev()
-                    .collect::<Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError>>()?;
+        .run(move |c| -> Result<Vec<ProductCard>, SailsDbError> {
+            // We only display allowed books
+            let mut product_info = ProductFinder::new(c, None)
+                .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
+                .search_info()?
+                .into_iter()
+                .map(|x| {
+                    let image = find_first_image(x.get_description());
+                    let category = Categories::find_by_id(c, x.get_category_id())
+                        .and_then(Category::into_leaf)?;
+                    let tags = TagMappingFinder::new(c, None)
+                        .product(&x.to_id())
+                        .search_tag()?;
+                    Ok((x, image, category, tags))
+                })
+                // Reverse the book order
+                .rev()
+                .collect::<Result<Vec<ProductCard>, SailsDbError>>()?;
 
-                product_info.sort_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
+            product_info.sort_by(cmp_product);
 
-                Ok(product_info)
-            },
-        )
+            Ok(product_info)
+        })
         .await
         .into_flash(uri!("/"))?;
 
@@ -79,30 +80,31 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
         .into_flash(uri!("/"))?;
 
     let products = conn
-        .run(
-            move |c| -> Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError> {
-                // We only display allowed books
-                let mut product_info = ProductFinder::new(c, None)
-                    .category(&category)?
-                    .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
-                    .search_info()?
-                    .into_iter()
-                    .map(|x| {
-                        let image = find_first_image(x.get_description());
-                        let category = Categories::find_by_id(c, x.get_category_id())
-                            .and_then(Category::into_leaf)?;
-                        Ok((x, image, category))
-                    })
-                    // Reverse the book order
-                    .rev()
-                    .collect::<Result<Vec<(ProductInfo, Option<String>, LeafCategory)>, SailsDbError>>()?;
+        .run(move |c| -> Result<Vec<ProductCard>, SailsDbError> {
+            // We only display allowed books
+            let mut product_info = ProductFinder::new(c, None)
+                .category(&category)?
+                .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
+                .search_info()?
+                .into_iter()
+                .map(|x| {
+                    let image = find_first_image(x.get_description());
+                    let category = Categories::find_by_id(c, x.get_category_id())
+                        .and_then(Category::into_leaf)?;
+                    let tags = TagMappingFinder::new(c, None)
+                        .product(&x.to_id())
+                        .search_tag()?;
+                    Ok((x, image, category, tags))
+                })
+                // Reverse the book order
+                .rev()
+                .collect::<Result<Vec<ProductCard>, SailsDbError>>()?;
 
-		// Sort the products to make ones containing image appear on top.
-                product_info.sort_by(|(_, a, _), (_, b, _)| cmp_image(a.as_deref(), b.as_deref()));
+            // Sort the products to make ones containing image appear on top.
+            product_info.sort_by(cmp_product);
 
-                Ok(product_info)
-            },
-        )
+            Ok(product_info)
+        })
         .await
         .into_flash(uri!("/"))?;
 

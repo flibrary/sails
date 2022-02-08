@@ -25,9 +25,10 @@
             {% endmatch %}
             <div class="card-body">
               <h5 class="card-title"><a href="{{ uri!("/market", crate::market::book_page_owned(book.0.get_id())) }}">{{book.0.get_prodname()}}</a></h5>
-	      {% if book.0.get_operator_id() == "flibrarynfls@outlook.com" -%}
-	      <h6 class="card-subtitle mb-2 text-success"><i class="bi bi-award-fill"></i> FLibrary Pro</h6>
-	      {% endif -%}
+	      <h5 class="card-subtitle mb-2">
+		{% let tags = book.3.clone() %}
+		{% include "display_tag.html" %}
+	      </h5>
               <p class="card-text"><b>价格: ¥{{book.0.get_price()}}</b> <del>原价：¥{{book.2.get_price()}}</del></p>
             </div>
 	  </div>

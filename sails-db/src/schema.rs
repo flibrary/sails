@@ -37,6 +37,23 @@ table! {
 }
 
 table! {
+    tagmappings (id) {
+        id -> Text,
+        tag -> Text,
+        product -> Text,
+    }
+}
+
+table! {
+    tags (id) {
+        id -> Text,
+        name -> Text,
+        html -> Nullable<Text>,
+        description -> Nullable<Text>,
+    }
+}
+
+table! {
     use diesel::sql_types::*;
     use crate::enums::*;
 
@@ -67,6 +84,16 @@ table! {
 }
 
 joinable!(products -> categories (category));
+joinable!(tagmappings -> products (product));
+joinable!(tagmappings -> tags (tag));
 joinable!(transactions -> products (product));
 
-allow_tables_to_appear_in_same_query!(categories, messages, products, transactions, users,);
+allow_tables_to_appear_in_same_query!(
+    categories,
+    messages,
+    products,
+    tagmappings,
+    tags,
+    transactions,
+    users,
+);

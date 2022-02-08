@@ -37,7 +37,10 @@ use rocket::{
     Build, Rocket,
 };
 use rust_embed::RustEmbed;
-use sails_db::categories::{Categories, CtgBuilder};
+use sails_db::{
+    categories::{Categories, CtgBuilder},
+    tags::{Tags, TagsBuilder},
+};
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 
@@ -118,6 +121,7 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     let conn = DbConn::get_one(&rocket).await.expect("database connection");
 
     let ctg = rocket.state::<CtgBuilder>().cloned();
+    let tags = rocket.state::<TagsBuilder>().cloned();
     // Initialize the database
     conn.run(|c| {
         // Enforce foreign key relation
@@ -125,14 +129,17 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
 
         c.batch_execute("PRAGMA foreign_keys = OFF;").unwrap();
 
-        // Delete all the categories by default
+        // Delete all the categories and tags, then we rebuild them.
         Categories::delete_all(c).unwrap();
+        Tags::delete_all(c).unwrap();
 
         c.batch_execute("PRAGMA foreign_keys = ON;").unwrap();
 
-        if let Some(ctg) = ctg {
-            ctg.build(c).unwrap()
-        } else {
+        if let Some(x) = ctg {
+            x.build(c).unwrap()
+        }
+        if let Some(x) = tags {
+            x.build(c).unwrap()
         }
     })
     .await;
@@ -230,6 +237,7 @@ fn rocket() -> Rocket<Build> {
         .attach(DbConn::fairing())
         .attach(Shield::new())
         .attach(AdHoc::config::<CtgBuilder>())
+        .attach(AdHoc::config::<TagsBuilder>())
         .attach(AdHoc::config::<RootPasswd>())
         .attach(AdHoc::config::<ReCaptcha>())
         .attach(AdHoc::config::<SmtpCreds>())
@@ -270,7 +278,6 @@ fn rocket() -> Rocket<Build> {
             routes![
                 market::market,
                 market::explore_page,
-                // market::categories,
                 market::post_book_page,
                 market::post_book_interim,
                 market::delegate_book_page,
@@ -283,7 +290,6 @@ fn rocket() -> Rocket<Build> {
                 market::book_page_owned,
                 market::book_page_user,
                 market::book_page_error,
-                // market::categories_all,
                 market::delete_book,
                 market::create_book,
                 market::instruction,
@@ -322,6 +328,9 @@ fn rocket() -> Rocket<Build> {
             "/admin",
             routes![
                 admin::admin,
+                admin::admin_tag,
+                admin::add_tag,
+                admin::remove_tag,
                 admin::admin_books,
                 admin::admin_metrics,
                 admin::verify_book,

@@ -419,6 +419,12 @@ impl ProductInfo {
         Ok(self.save_changes::<ProductInfo>(conn)?)
     }
 
+    pub fn to_id(&self) -> ProductId {
+        ProductId {
+            id: self.id.clone(),
+        }
+    }
+
     pub fn get_id(&self) -> &str {
         &self.id
     }

@@ -4,7 +4,7 @@ use rocket::{
     form::Form,
     response::{Flash, Redirect},
 };
-use sails_db::{categories::*, error::SailsDbError, products::*, users::*};
+use sails_db::{categories::*, error::SailsDbError, products::*, tags::*, users::*};
 
 // Delete can happen if and only if the user is authorized and the product is specified
 #[get("/delete?<book_id>")]
@@ -222,6 +222,7 @@ pub struct BookPageOwned {
     book: ProductInfo,
     category: Option<LeafCategory>,
     seller: UserInfo,
+    tags: Vec<Tag>,
 }
 
 #[derive(Template)]
@@ -230,6 +231,7 @@ pub struct BookPageUser {
     book: ProductInfo,
     category: Option<LeafCategory>,
     seller: UserInfo,
+    tags: Vec<Tag>,
 }
 
 #[derive(Template)]
@@ -237,6 +239,7 @@ pub struct BookPageUser {
 pub struct BookPageGuest {
     book: ProductInfo,
     category: Option<LeafCategory>,
+    tags: Vec<Tag>,
 }
 
 // If the seller is the user, buttons like update and delete are displayed
@@ -249,6 +252,7 @@ pub async fn book_page_owned(
     let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(BookPageOwned {
         book: book.book_info,
+        tags: book.tags,
         category: book
             .category
             .map(|x| x.into_leaf().into_flash(uri!("/")))
@@ -267,6 +271,7 @@ pub async fn book_page_user(
     let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(BookPageUser {
         book: book.book_info,
+        tags: book.tags,
         category: book
             .category
             .map(|x| x.into_leaf().into_flash(uri!("/")))
@@ -284,6 +289,7 @@ pub async fn book_page_guest(
     let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(BookPageGuest {
         book: book.book_info,
+        tags: book.tags,
         category: book
             .category
             .map(|x| x.into_leaf().into_flash(uri!("/")))

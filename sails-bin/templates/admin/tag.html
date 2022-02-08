@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock title %}
+
+{% block content %}
+<main class="container">
+  <div class="p-5 rounded shadow">
+    <h1>You are now at the admin dashboard</h1>
+    <p class="lead">Please make sure every action you make has been well-thought.</p>
+  </div>
+  <br>
+
+  {% if tagged.len() > 0 %}
+  <div class="shadow p-5 rounded border border-5 border-warning">
+    <h3>Book with tag "{{tag.get_name()}}"</h3>
+    <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+      <thead>
+	<tr>
+	  <th data-field="id" data-sortable="true" scope="col">ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
+	  <th data-field="operator" data-sortable="true" scope="col">Operator</th>
+	  <th data-field="seller" data-sortable="true" scope="col">Seller</th>
+	  <th data-field="actions" scope="col">Actions</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for book in tagged %}
+	<tr>
+	  <th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
+	  <td>{{book.get_prodname()}}</td>
+	  <td>{{book.get_price()}}</td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(book.get_operator_id())) }}">{{book.get_operator_id()}}</a></td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(book.get_seller_id())) }}">{{book.get_seller_id()}}</a></td>
+	  <td><a href="{{ uri!("/admin", crate::admin::remove_tag(self.tag.get_id(),book.get_id())) }}" class="btn btn-warning" role="button">Remove</a></td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <br>
+  {% else %}
+    <div class="p-5 rounded shadow">
+      <h3>No book has tag "{{tag.get_name()}}"</h3>
+    </div>
+    <br>
+  {% endif %}
+
+  {% if untagged.len() > 0 %}
+  <div class="shadow p-5 rounded border border-5 border-warning">
+    <h3>Book without tag "{{tag.get_name()}}"</h3>
+    <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+      <thead>
+	<tr>
+	  <th data-field="id" data-sortable="true" scope="col">ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
+	  <th data-field="operator" data-sortable="true" scope="col">Operator</th>
+	  <th data-field="seller" data-sortable="true" scope="col">Seller</th>
+	  <th data-field="actions" scope="col">Actions</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for book in untagged %}
+	<tr>
+	  <th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
+	  <td>{{book.get_prodname()}}</td>
+	  <td>{{book.get_price()}}</td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(book.get_operator_id())) }}">{{book.get_operator_id()}}</a></td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(book.get_seller_id())) }}">{{book.get_seller_id()}}</a></td>
+	  <td><a href="{{ uri!("/admin", crate::admin::add_tag(self.tag.get_id(),book.get_id())) }}" class="btn btn-success" role="button">Add</a></td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <br>
+  {% else %}
+    <div class="p-5 rounded shadow">
+      <h3>All books have tag "{{tag.get_name()}}"</h3>
+    </div>
+    <br>
+  {% endif %}
+
+</main>
+{% endblock content %}

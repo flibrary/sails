@@ -11,6 +11,7 @@ use std::marker::PhantomData;
 pub struct BookReadable;
 pub struct BookWritable;
 pub struct BookRemovable;
+// This doesn't mean that the user has to be the real admin (i.e. all bits set), instead, this is a seperate bit
 pub struct BookAdmin;
 
 // For users

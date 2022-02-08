@@ -21,9 +21,9 @@
     <div class="p-5 rounded shadow">
     {% block book %}
     <h1>{{ book.get_prodname() }}</h1>
-    {% if book.get_operator_id() == "flibrarynfls@outlook.com" -%}
-    <h4 class="card-subtitle mb-2 text-success"><i class="bi bi-award-fill"></i> FLibrary Pro</h6>
-    {% endif -%}
+    <h4 class="card-subtitle mb-2">
+       {% include "display_tag.html" %}
+    </h4>
     <table class="table table-hover">
     <tbody>
     <tr>

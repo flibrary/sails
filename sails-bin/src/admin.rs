@@ -12,6 +12,7 @@ use sails_db::{
     enums::{ProductStatus, TransactionStatus},
     error::SailsDbError,
     products::{ProductFinder, ProductInfo},
+    tags::*,
     transactions::*,
     users::{UserFinder, UserStats},
     Cmp,
@@ -150,6 +151,93 @@ pub async fn admin_orders(
         placed_tx,
         refunded_tx,
         finished_tx,
+    })
+}
+
+#[get("/remove_tag?<tag_id>&<book_id>")]
+pub async fn remove_tag(
+    _guard: Auth<BookAdmin>,
+    tag_id: TagGuard,
+    book_id: BookGuard,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    let book = book_id.to_id(&conn).await.into_flash(uri!("/"))?;
+    let tag = tag_id.to_tag(&conn).await.into_flash(uri!("/"))?;
+    let tag_cloned = tag.clone();
+    conn.run(move |c| {
+        TagMappingFinder::new(c, None)
+            .product(&book.book_id)
+            .tag(&tag)
+            .first()
+            .map(|x| x.delete(c))
+    })
+    .await
+    .into_flash(uri!("/"))?
+    .into_flash(uri!("/"))?;
+    Ok(Redirect::to(uri!("/admin", admin_tag(tag_cloned.get_id()))))
+}
+
+#[get("/add_tag?<tag_id>&<book_id>")]
+pub async fn add_tag(
+    _guard: Auth<BookAdmin>,
+    tag_id: TagGuard,
+    book_id: BookGuard,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    let book = book_id.to_id(&conn).await.into_flash(uri!("/"))?;
+    let tag = tag_id.to_tag(&conn).await.into_flash(uri!("/"))?;
+    let tag_cloned = tag.clone();
+    conn.run(move |c| TagMapping::create(c, &tag, &book.book_id))
+        .await
+        .into_flash(uri!("/"))?;
+    Ok(Redirect::to(uri!("/admin", admin_tag(tag_cloned.get_id()))))
+}
+
+#[derive(Template)]
+#[template(path = "admin/tag.html")]
+pub struct AdminTagPage {
+    tag: Tag,
+    tagged: Vec<ProductInfo>,
+    untagged: Vec<ProductInfo>,
+}
+
+#[get("/tag?<id>")]
+pub async fn admin_tag(
+    _guard: Auth<BookAdmin>,
+    id: TagGuard,
+    conn: DbConn,
+) -> Result<AdminTagPage, Flash<Redirect>> {
+    let id = id.to_tag(&conn).await.into_flash(uri!("/"))?;
+    let tag = id.clone();
+    let tag_clone = id.clone();
+    let tagged = conn
+        .run(move |c| {
+            ProductFinder::list_info(c).map(|x| {
+                x.into_iter()
+                    .filter(|p| TagMappingFinder::has_mapping(c, &tag, &p.to_id()).unwrap_or(false))
+                    .collect()
+            })
+        })
+        .await
+        .into_flash(uri!("/"))?;
+
+    let untagged = conn
+        .run(move |c| {
+            ProductFinder::list_info(c).map(|x| {
+                x.into_iter()
+                    .filter(|p| {
+                        !TagMappingFinder::has_mapping(c, &tag_clone, &p.to_id()).unwrap_or(false)
+                    })
+                    .collect()
+            })
+        })
+        .await
+        .into_flash(uri!("/"))?;
+
+    Ok(AdminTagPage {
+        tag: id,
+        tagged,
+        untagged,
     })
 }
 

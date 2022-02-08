@@ -11,6 +11,7 @@ pub mod products;
 #[rustfmt::skip]
 mod schema;
 pub mod categories;
+pub mod tags;
 pub mod test_utils;
 pub mod transactions;
 pub mod users;

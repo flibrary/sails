@@ -8,6 +8,8 @@ edition = "2018"
 
 [dependencies]
 anyhow = "^1"
+once_cell = "^1"
+maplit = "^1"
 diesel-derive-enum = { version = "1", features = ["sqlite"] }
 delegate-attr = "^0.2"
 serde = { version = "^1", features = ["derive", "rc"] }
@@ -28,7 +30,6 @@ chrono = { version = "^0.4", features = ["serde"] }
 
 [dev-dependencies]
 criterion = "^0.3"
-maplit = "^1"
 
 [[bench]]
 name = "benchmark"

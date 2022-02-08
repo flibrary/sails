@@ -32,6 +32,12 @@ pub enum SailsDbError {
     #[error("category already existed")]
     CategoryExisted,
 
+    #[error("tag already existed")]
+    TagExisted,
+
+    #[error("tag mapping already existed")]
+    TagMappingExisted,
+
     #[error("category doesn't exist")]
     CategoryNotFound,
 

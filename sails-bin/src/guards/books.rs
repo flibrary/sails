@@ -7,6 +7,7 @@ use sails_db::{
     categories::{Categories, Category},
     error::SailsDbError,
     products::*,
+    tags::*,
     users::*,
 };
 
@@ -56,10 +57,14 @@ impl BookGuard {
         db.run(move |c| -> Result<BookInfo<_>, SailsDbError> {
             let book_info = book.book_id.get_info(c)?;
             let category = Categories::find_by_id(c, book_info.get_category_id()).ok();
+            let tags = TagMappingFinder::new(c, None)
+                .product(&book.book_id)
+                .search_tag()?;
             Ok(BookInfo {
                 book_info,
                 seller_info: book.seller_id.get_info(c)?,
                 category,
+                tags,
             })
         })
         .await
@@ -77,4 +82,5 @@ pub struct BookInfo<T> {
     pub book_info: T,
     pub seller_info: UserInfo,
     pub category: Option<Category>,
+    pub tags: Vec<Tag>,
 }

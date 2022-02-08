@@ -1,0 +1,7 @@
+{% for tag in tags %}
+{% match tag.get_html() %}
+{% when Some with (html) %}
+  {{html|safe}}
+{% when None %}
+{% endmatch %}
+{% endfor %}

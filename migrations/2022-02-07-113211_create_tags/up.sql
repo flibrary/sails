@@ -1,0 +1,7 @@
+-- Your SQL goes here
+CREATE TABLE IF NOT EXISTS tags (
+  id VARCHAR(60) NOT NULL PRIMARY KEY,
+  name VARCHAR(60) NOT NULL,
+  html VARCHAR(1000),
+  description VARCHAR(400)
+);
