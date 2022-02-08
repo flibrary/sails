@@ -13,9 +13,9 @@ use uuid::Uuid;
 pub static BUILTIN_TAGS: Lazy<HashMap<Arc<str>, Value>> = Lazy::new(|| {
     use maplit::hashmap;
     hashmap! {
-        "digicon".into() => Value {name: "数字内容".to_string(), html: Some(r#"<span class="badge bg-primary text-white"><i class="bi bi-file-earmark-arrow-down-fill"></i> 数字内容</span>"#.to_string()), description: Some("以下商品包含可访问的数字内容，购买后无需等待即可使用。".to_string()) },
+        "digicon".into() => Value {name: "数字内容".to_string(), html: Some(r#"<span class="badge bg-primary text-white"><i class="bi bi-file-earmark-arrow-down-fill"></i> 数字内容</span>"#.to_string()), description: Some("商品包含可访问的数字内容，购买后无需等待即可使用。".to_string()) },
         "ads".into() => Value {name: "广告".to_string(), html: None, description: None },
-        "sales".into() => Value {name: "特别优惠".to_string(), html: Some(r#"<span class="badge bg-success text-white"><i class="bi bi-percent"></i> 特别优惠</span>"#.to_string()), description: Some("以下商品现已加入特别优惠，即刻超值入手".to_string()) },
+        "sales".into() => Value {name: "特别优惠".to_string(), html: Some(r#"<span class="badge bg-success text-white"><i class="bi bi-percent"></i> 特别优惠</span>"#.to_string()), description: Some("商品现已加入特别优惠，即刻超值入手".to_string()) },
     }
 });
 

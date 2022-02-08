@@ -1,7 +1,14 @@
 {% for tag in tags %}
 {% match tag.get_html() %}
 {% when Some with (html) %}
-  {{html|safe}}
+  {% match tag.get_description() %}
+  {% when Some with (desc) %}
+  <span data-toggle="tooltip" data-placement="bottom" title="{{desc}}">
+    {{html|safe}}
+  </span>
+  {% when None %}
+    {{html|safe}}
+  {% endmatch %}
 {% when None %}
 {% endmatch %}
 {% endfor %}

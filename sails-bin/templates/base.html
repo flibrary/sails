@@ -64,6 +64,9 @@
     $('.navbar-collapse a').click(() => {
         $(".navbar-collapse").collapse('hide');
     });
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    });
   </script>
   {% endblock script %}
   <br>

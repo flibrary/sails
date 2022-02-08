@@ -209,28 +209,26 @@ pub async fn admin_tag(
 ) -> Result<AdminTagPage, Flash<Redirect>> {
     let id = id.to_tag(&conn).await.into_flash(uri!("/"))?;
     let tag = id.clone();
-    let tag_clone = id.clone();
-    let tagged = conn
-        .run(move |c| {
-            ProductFinder::list_info(c).map(|x| {
-                x.into_iter()
-                    .filter(|p| TagMappingFinder::has_mapping(c, &tag, &p.to_id()).unwrap_or(false))
-                    .collect()
-            })
-        })
-        .await
-        .into_flash(uri!("/"))?;
-
-    let untagged = conn
-        .run(move |c| {
-            ProductFinder::list_info(c).map(|x| {
-                x.into_iter()
-                    .filter(|p| {
-                        !TagMappingFinder::has_mapping(c, &tag_clone, &p.to_id()).unwrap_or(false)
-                    })
-                    .collect()
-            })
-        })
+    let (tagged, untagged) = conn
+        .run(
+            move |c| -> Result<(Vec<ProductInfo>, Vec<ProductInfo>), SailsDbError> {
+                let tagged = ProductFinder::list_info(c).map(|x| {
+                    x.into_iter()
+                        .filter(|p| {
+                            TagMappingFinder::has_mapping(c, &tag, &p.to_id()).unwrap_or(false)
+                        })
+                        .collect()
+                })?;
+                let untagged = ProductFinder::list_info(c).map(|x| {
+                    x.into_iter()
+                        .filter(|p| {
+                            !TagMappingFinder::has_mapping(c, &tag, &p.to_id()).unwrap_or(false)
+                        })
+                        .collect()
+                })?;
+                Ok((tagged, untagged))
+            },
+        )
         .await
         .into_flash(uri!("/"))?;
 

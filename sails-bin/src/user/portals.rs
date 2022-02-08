@@ -12,6 +12,9 @@ use sails_db::{
     users::*,
 };
 
+type ProductEntry = (ProductInfo, Category);
+type OrderEntry = (ProductInfo, TransactionInfo);
+
 #[derive(Debug, FromForm, Clone)]
 pub struct PartialUserFormOwned {
     pub name: String,
@@ -55,18 +58,18 @@ pub async fn update_user_page(user: UserInfoGuard<Cookie>) -> UpdateUserPage {
 #[template(path = "user/portal_guest.html")]
 pub struct PortalGuestPage {
     user: UserInfo,
-    books_operated: Vec<(ProductInfo, Category)>,
-    books_owned: Vec<(ProductInfo, Category)>,
+    books_operated: Vec<ProductEntry>,
+    books_owned: Vec<ProductEntry>,
 }
 
 #[derive(Template)]
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
     user: UserInfo,
-    books_operated: Vec<(ProductInfo, Category)>,
-    books_owned: Vec<(ProductInfo, Category)>,
-    orders_placed: Vec<(ProductInfo, TransactionInfo)>,
-    orders_received: Vec<(ProductInfo, TransactionInfo)>,
+    books_operated: Vec<ProductEntry>,
+    books_owned: Vec<ProductEntry>,
+    orders_placed: Vec<OrderEntry>,
+    orders_received: Vec<OrderEntry>,
 }
 
 #[get("/?<user_id>", rank = 1)]
@@ -78,13 +81,11 @@ pub async fn portal_guest(
     let user = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
 
     let uid = user.info.get_id().to_string();
-
-    let uid_cloned = uid.clone();
-    let books_operated = conn
+    let (books_operated, books_owned) = conn
         .run(
-            move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
-                ProductFinder::new(c, None)
-                    .seller(&uid_cloned)
+            move |c| -> Result<(Vec<ProductEntry>, Vec<ProductEntry>), SailsDbError> {
+                let books_operated = ProductFinder::new(c, None)
+                    .seller(&uid)
                     .search_info()?
                     .into_iter()
                     .map(|x| {
@@ -93,7 +94,7 @@ pub async fn portal_guest(
                     })
                     .chain(
                         ProductFinder::new(c, None)
-                            .delegator(&uid_cloned)
+                            .delegator(&uid)
                             .search_info()?
                             .into_iter()
                             .map(|x| {
@@ -101,29 +102,22 @@ pub async fn portal_guest(
                                 Ok((x, ctg))
                             }),
                     )
-                    .collect()
-            },
-        )
-        .await
-        .into_flash(uri!("/"))?;
-
-    let uid_cloned = uid.clone();
-    let books_owned = conn
-        .run(
-            move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
-                ProductFinder::new(c, None)
-                    .owner(&uid_cloned)
+                    .collect::<Result<Vec<ProductEntry>, SailsDbError>>()?;
+                let books_owned = ProductFinder::new(c, None)
+                    .owner(&uid)
                     .search_info()?
                     .into_iter()
                     .map(|x| {
                         let ctg = Categories::find_by_id(c, x.get_category_id())?;
                         Ok((x, ctg))
                     })
-                    .collect()
+                    .collect::<Result<Vec<ProductEntry>, SailsDbError>>()?;
+                Ok((books_operated, books_owned))
             },
         )
         .await
         .into_flash(uri!("/"))?;
+
     Ok(PortalGuestPage {
         user: user.info,
         books_operated,
@@ -138,13 +132,20 @@ pub async fn portal(
     conn: DbConn,
 ) -> Result<PortalPage, Flash<Redirect>> {
     let uid = user.info.get_id().to_string();
-
-    let uid_cloned = uid.clone();
-    let books_operated = conn
+    #[allow(clippy::type_complexity)]
+    let (books_operated, books_owned, orders_placed, orders_received) = conn
         .run(
-            move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
-                ProductFinder::new(c, None)
-                    .seller(&uid_cloned)
+            move |c| -> Result<
+                (
+                    Vec<ProductEntry>,
+                    Vec<ProductEntry>,
+                    Vec<OrderEntry>,
+                    Vec<OrderEntry>,
+                ),
+                SailsDbError,
+            > {
+                let books_operated = ProductFinder::new(c, None)
+                    .seller(&uid)
                     .search_info()?
                     .into_iter()
                     .map(|x| {
@@ -153,7 +154,7 @@ pub async fn portal(
                     })
                     .chain(
                         ProductFinder::new(c, None)
-                            .delegator(&uid_cloned)
+                            .delegator(&uid)
                             .search_info()?
                             .into_iter()
                             .map(|x| {
@@ -161,36 +162,19 @@ pub async fn portal(
                                 Ok((x, ctg))
                             }),
                     )
-                    .collect()
-            },
-        )
-        .await
-        .into_flash(uri!("/"))?;
-
-    let uid_cloned = uid.clone();
-    let books_owned = conn
-        .run(
-            move |c| -> Result<Vec<(ProductInfo, Category)>, SailsDbError> {
-                ProductFinder::new(c, None)
-                    .owner(&uid_cloned)
+                    .collect::<Result<Vec<ProductEntry>, SailsDbError>>()?;
+                let books_owned = ProductFinder::new(c, None)
+                    .owner(&uid)
                     .search_info()?
                     .into_iter()
                     .map(|x| {
                         let ctg = Categories::find_by_id(c, x.get_category_id())?;
                         Ok((x, ctg))
                     })
-                    .collect()
-            },
-        )
-        .await
-        .into_flash(uri!("/"))?;
+                    .collect::<Result<Vec<ProductEntry>, SailsDbError>>()?;
 
-    let uid_cloned = uid.clone();
-    let orders_placed = conn
-        .run(
-            move |c| -> Result<Vec<(ProductInfo, TransactionInfo)>, SailsDbError> {
-                TransactionFinder::new(c, None)
-                    .buyer(&uid_cloned)
+                let orders_placed = TransactionFinder::new(c, None)
+                    .buyer(&uid)
                     .search_info()?
                     .into_iter()
                     .map(|x| {
@@ -199,16 +183,9 @@ pub async fn portal(
                             .first_info()?;
                         Ok((product, x))
                     })
-                    .collect()
-            },
-        )
-        .await
-        .into_flash(uri!("/"))?;
+                    .collect::<Result<Vec<OrderEntry>, SailsDbError>>()?;
 
-    let orders_received = conn
-        .run(
-            move |c| -> Result<Vec<(ProductInfo, TransactionInfo)>, SailsDbError> {
-                TransactionFinder::new(c, None)
+                let orders_received = TransactionFinder::new(c, None)
                     .seller(&uid)
                     .search_info()?
                     .into_iter()
@@ -218,11 +195,13 @@ pub async fn portal(
                             .first_info()?;
                         Ok((product, x))
                     })
-                    .collect()
+                    .collect::<Result<Vec<OrderEntry>, SailsDbError>>()?;
+                Ok((books_operated, books_owned, orders_placed, orders_received))
             },
         )
         .await
         .into_flash(uri!("/"))?;
+
     Ok(PortalPage {
         user: user.info,
         orders_placed,
