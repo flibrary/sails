@@ -156,7 +156,7 @@ pub async fn admin_orders(
 
 #[get("/remove_tag?<tag_id>&<book_id>")]
 pub async fn remove_tag(
-    _guard: Auth<BookAdmin>,
+    _guard: Auth<TagWritable>,
     tag_id: TagGuard,
     book_id: BookGuard,
     conn: DbConn,
@@ -179,7 +179,7 @@ pub async fn remove_tag(
 
 #[get("/add_tag?<tag_id>&<book_id>")]
 pub async fn add_tag(
-    _guard: Auth<BookAdmin>,
+    _guard: Auth<TagWritable>,
     tag_id: TagGuard,
     book_id: BookGuard,
     conn: DbConn,
@@ -201,7 +201,7 @@ pub struct AdminTagsPage {
 
 #[get("/tags")]
 pub async fn admin_tags(
-    _guard: Auth<BookAdmin>,
+    _guard: Auth<TagWritable>,
     conn: DbConn,
 ) -> Result<AdminTagsPage, Flash<Redirect>> {
     Ok(AdminTagsPage {
@@ -222,7 +222,7 @@ pub struct AdminTagPage {
 
 #[get("/tag?<id>")]
 pub async fn admin_tag(
-    _guard: Auth<BookAdmin>,
+    _guard: Auth<TagWritable>,
     id: TagGuard,
     conn: DbConn,
 ) -> Result<AdminTagPage, Flash<Redirect>> {

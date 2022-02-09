@@ -2542,6 +2542,7 @@ dependencies = [
  "diesel",
  "diesel_migrations",
  "lettre",
+ "maplit",
  "num-bigint",
  "once_cell",
  "rand 0.8.4",

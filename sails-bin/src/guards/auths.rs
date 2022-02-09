@@ -7,11 +7,14 @@ use rocket::{
 use sails_db::enums::UserStatus;
 use std::marker::PhantomData;
 
+// Misc
+pub struct TagWritable;
+pub struct StoreModifiable;
+
 // For books
 pub struct BookReadable;
 pub struct BookWritable;
 pub struct BookRemovable;
-// This doesn't mean that the user has to be the real admin (i.e. all bits set), instead, this is a seperate bit
 pub struct BookAdmin;
 
 // For users
@@ -26,6 +29,48 @@ pub struct OrderRefundable;
 
 pub struct Auth<T> {
     plhdr: PhantomData<T>,
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<TagWritable> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+
+        if user
+            .info
+            .get_user_status()
+            .contains(UserStatus::TAG_WRITABLE)
+        {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<StoreModifiable> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+
+        if user
+            .info
+            .get_user_status()
+            .contains(UserStatus::STORE_MODIFIABLE)
+        {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
 }
 
 // Books
@@ -116,11 +161,12 @@ impl<'r> FromRequest<'r> for Auth<BookWritable> {
             .map(|x| x.ok())
             .flatten()
             .or_forward(()));
-        let book = try_outcome!(book.to_id(&db).await.ok().or_forward(()));
+        let book_id = try_outcome!(book.to_id(&db).await.ok().or_forward(()));
+        let book_info = try_outcome!(book.to_info(&db).await.ok().or_forward(()));
 
-        if match (
-            book.operator_id.get_id() == user.info.get_id(),
-            book.seller_id.get_id() == user.info.get_id(),
+        let product_permission = match (
+            book_id.operator_id.get_id() == user.info.get_id(),
+            book_id.seller_id.get_id() == user.info.get_id(),
         ) {
             // seller
             (true, true)
@@ -148,6 +194,16 @@ impl<'r> FromRequest<'r> for Auth<BookWritable> {
                 true
             }
             _ => false,
+        };
+
+        if if book_info.tags.iter().any(|x| x.get_id() != "store") {
+            product_permission
+        } else {
+            product_permission
+                && (user
+                    .info
+                    .get_user_status()
+                    .contains(UserStatus::STORE_MODIFIABLE))
         } {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
@@ -171,11 +227,12 @@ impl<'r> FromRequest<'r> for Auth<BookRemovable> {
             .map(|x| x.ok())
             .flatten()
             .or_forward(()));
-        let book = try_outcome!(book.to_id(&db).await.ok().or_forward(()));
+        let book_id = try_outcome!(book.to_id(&db).await.ok().or_forward(()));
+        let book_info = try_outcome!(book.to_info(&db).await.ok().or_forward(()));
 
-        if match (
-            book.operator_id.get_id() == user.info.get_id(),
-            book.seller_id.get_id() == user.info.get_id(),
+        let product_permission = match (
+            book_id.operator_id.get_id() == user.info.get_id(),
+            book_id.seller_id.get_id() == user.info.get_id(),
         ) {
             // seller
             (true, true)
@@ -203,6 +260,16 @@ impl<'r> FromRequest<'r> for Auth<BookRemovable> {
                 true
             }
             _ => false,
+        };
+
+        if if book_info.tags.iter().any(|x| x.get_id() != "store") {
+            product_permission
+        } else {
+            product_permission
+                && (user
+                    .info
+                    .get_user_status()
+                    .contains(UserStatus::STORE_MODIFIABLE))
         } {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {

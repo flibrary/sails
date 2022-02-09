@@ -54,6 +54,7 @@ pub async fn explore_page(
             // We only display allowed books
             let mut book_info = ProductFinder::new(c, None)
                 .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
+                .category(&Categories::find_by_name(c, "书本市场")?)?
                 .search_info()?
                 .into_iter()
                 .map(|x| {

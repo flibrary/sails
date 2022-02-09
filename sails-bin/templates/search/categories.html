@@ -27,8 +27,6 @@
     {% endmatch %}
 
     <br>
-    <a href="{{ uri!("/market", crate::market::explore_page(false)) }}" class="btn btn-warning" role="button">前往书店</a>
-
     {% match parent_ctg %}
     {% when Some with (parent_ctg)%}
     <a href="{{ uri!("/search", crate::search::categories(parent_ctg.id())) }}" class="btn btn-primary" role="button">返回“{{parent_ctg.name()}}”</a>
@@ -59,7 +57,7 @@
          	{% let tags = product.3.clone() %}
 		{% include "display_tag.html" %}
 	      </h5>
-              <p class="card-text"><b>价格: ¥{{product.0.get_price()}}</b> 原价：¥{{product.2.get_price()}}</p>
+              <p class="card-text"><b>价格: ¥{{product.0.get_price()}}</b></p>
             </div>
 	  </div>
 	</div>

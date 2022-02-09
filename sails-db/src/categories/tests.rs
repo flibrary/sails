@@ -14,14 +14,14 @@ fn create_category() {
 fn category_build_and_search() {
     let conn = establish_connection();
     #[rustfmt::skip]
-    CtgBuilder::new(maplit::btreemap! {
-	"High School".into() => Value::SubCategory(maplit::btreemap!{
-    	    "AP".into() => Value::SubCategory(maplit::btreemap!{
+    CtgBuilder::new(maplit::hashmap! {
+	"High School".into() => Value::SubCategory(maplit::hashmap!{
+    	    "AP".into() => Value::SubCategory(maplit::hashmap!{
 		"AP Physics I".into() => Value::Id { id: Uuid::new_v4(), price: 630 },
 		"AP Physics II".into() => Value::Id { id: Uuid::new_v4(), price: 630 },
 		"AP Physics C".into() => Value::Id { id: Uuid::new_v4(), price: 1630 }
 	    }),
-	    "A Level".into() => Value::SubCategory(maplit::btreemap!{
+	    "A Level".into() => Value::SubCategory(maplit::hashmap!{
 		"AS Physics".into() => Value::Id { id: Uuid::new_v4(), price: 300 },
 		"A2 Physics".into() => Value::Id { id: Uuid::new_v4(), price: 100 }
 	    }),

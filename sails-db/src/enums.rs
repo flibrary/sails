@@ -57,6 +57,10 @@ bitflags! {
 
 	// Can verify, disable, normalize products;
 	const PROD_ADMIN = 0b1_0000_0000_0000_0000000000000;
+	// Can add tag to or remove tag from products;
+	const TAG_WRITABLE = 0b10_0000_0000_0000_0000000000000;
+       // Can manage products and description in store;
+	const STORE_MODIFIABLE = 0b100_0000_0000_0000_0000000000000;
 
 	// Different role profiles
 	const DISABLED = 0;
@@ -65,7 +69,7 @@ bitflags! {
 	    | Self::TX_BUYER_READABLE.bits | Self::TX_BUYER_PROGRESSABLE.bits | Self::TX_SELLER_READABLE.bits;
 	const CUSTOMER_SERVICE = Self::NORMAL.bits | Self::TX_OTHERS_READABLE.bits;
 	const STORE_KEEPER = Self::CUSTOMER_SERVICE.bits | Self::TX_OTHERS_FINISHABLE.bits | Self::PROD_ADMIN.bits;
-	const ADMIN = 0b1_1111_1111_1111_111111111_1111;
+	const ADMIN = 0b111_1111_1111_1111_111111111_1111;
     }
 }
 

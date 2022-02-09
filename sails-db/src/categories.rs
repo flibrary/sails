@@ -6,7 +6,7 @@ use delegate_attr::delegate;
 use diesel::prelude::*;
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, num::NonZeroU32, sync::Arc};
+use std::{collections::HashMap, num::NonZeroU32, sync::Arc};
 use uuid::Uuid;
 
 // A pseudo struct for managing the categories table.
@@ -263,7 +263,7 @@ pub enum Value {
     SubCategory(CategoryBuilderInner),
 }
 
-pub type CategoryBuilderInner = BTreeMap<Arc<str>, Value>;
+pub type CategoryBuilderInner = HashMap<Arc<str>, Value>;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CtgBuilder {
@@ -274,6 +274,10 @@ pub struct CtgBuilder {
 impl CtgBuilder {
     pub fn new(inner: CategoryBuilderInner) -> Self {
         Self { inner }
+    }
+
+    pub fn inner(self) -> CategoryBuilderInner {
+        self.inner
     }
 
     pub fn build(self, conn: &SqliteConnection) -> Result<()> {

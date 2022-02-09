@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Store 在线商店{% endblock title %}
+
+{% block content %}
+<main class="container">
+  <div class="p-5 rounded shadow">
+    <h1><b>FLibrary Store <span class = "text-muted">让好奇心为您赋能</span></b></h1>
+  </div>
+  <br>
+
+{% if entries.len() > 0 %}
+  {% for entry in entries %}
+  <div class="p-5 rounded shadow">
+    <h3><b>{{entry.0.name()}}</b></h3>
+    <div class="row grid">
+       {% for product in entry.1 %}
+       <div class="col-sm-6 col-lg-4 mb-4 grid-item">
+	  <div class="card h-100">
+	    {% match product.1 %}
+	    {% when Some with (img) %}
+	    <img src="{{img}}?size=thumbnail" loading="lazy" class="card-img-bottom">
+            {% when None %}
+            {% endmatch %}
+            <div class="card-body">
+              <h5 class="card-title"><a href="{{ uri!("/market", crate::market::book_page_owned(product.0.get_id())) }}">{{product.0.get_prodname()}}</a></h5>
+	      <h5 class="card-subtitle mb-2">
+		{% let tags = product.3.clone() %}
+		{% include "display_tag.html" %}
+	      </h5>
+              <p class="card-text"><b>价格: ¥{{product.0.get_price()}}</b></p>
+            </div>
+	  </div>
+	</div>
+	{% endfor %}
+      </div>
+    </div>
+    <br>
+  {% endfor %}
+  {% else %}
+  {% endif %}
+</main>
+{% endblock content %}

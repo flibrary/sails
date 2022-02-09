@@ -70,9 +70,10 @@ pub struct UpdateBook {
 
 // If there is a book specified, we then use the default value of that specified book for update
 #[get("/post_book?<book_id>", rank = 1)]
-pub async fn update_book_page(
+pub async fn update_book_admin_page(
     conn: DbConn,
     _auth: Auth<BookWritable>,
+    _guard: Auth<StoreModifiable>,
     book_id: BookGuard,
 ) -> Result<UpdateBook, Flash<Redirect>> {
     let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
@@ -87,6 +88,30 @@ pub async fn update_book_page(
     })
 }
 
+// If there is a book specified, we then use the default value of that specified book for update
+#[get("/post_book?<book_id>", rank = 2)]
+pub async fn update_book_page(
+    conn: DbConn,
+    _auth: Auth<BookWritable>,
+    book_id: BookGuard,
+) -> Result<UpdateBook, Flash<Redirect>> {
+    let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
+    Ok(UpdateBook {
+        // If there is no leaves, user cannot create any books, a message should be displayed inside the template
+        // TODO: categories should only be fetched once
+        categories: conn
+            .run(move |c| {
+                Categories::list_leaves::<Category>(
+                    c,
+                    Some(&Categories::find_by_name(c, "书本市场")?),
+                )
+            })
+            .await
+            .into_flash(uri!("/"))?,
+        book: book.book_info,
+    })
+}
+
 #[derive(Template)]
 #[template(path = "market/post_book.html")]
 pub struct PostBook {
@@ -95,9 +120,10 @@ pub struct PostBook {
 
 // post_book page
 // If there is a book specified, we then use the default value of that specified book for update
-#[get("/post_book", rank = 2)]
-pub async fn post_book_page(
+#[get("/post_book", rank = 3)]
+pub async fn post_book_admin_page(
     conn: DbConn,
+    _guard: Auth<StoreModifiable>,
     _user: UserIdGuard<Cookie>,
 ) -> Result<PostBook, Flash<Redirect>> {
     Ok(PostBook {
@@ -110,7 +136,29 @@ pub async fn post_book_page(
     })
 }
 
-#[get("/post_book", rank = 3)]
+// post_book page
+// If there is a book specified, we then use the default value of that specified book for update
+#[get("/post_book", rank = 4)]
+pub async fn post_book_page(
+    conn: DbConn,
+    _user: UserIdGuard<Cookie>,
+) -> Result<PostBook, Flash<Redirect>> {
+    Ok(PostBook {
+        // If there is no leaves, user cannot create any books, a message should be displayed inside the template
+        // TODO: categories should only be fetched once
+        categories: conn
+            .run(move |c| {
+                Categories::list_leaves::<Category>(
+                    c,
+                    Some(&Categories::find_by_name(c, "书本市场")?),
+                )
+            })
+            .await
+            .into_flash(uri!("/"))?,
+    })
+}
+
+#[get("/post_book", rank = 5)]
 pub async fn post_book_error_page() -> Flash<Redirect> {
     Flash::error(
         Redirect::to(uri!("/")),

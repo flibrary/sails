@@ -17,6 +17,7 @@ mod recaptcha;
 mod root;
 mod search;
 mod smtp;
+mod store;
 mod user;
 
 use aead::AeadKey;
@@ -38,9 +39,10 @@ use rocket::{
 };
 use rust_embed::RustEmbed;
 use sails_db::{
-    categories::{Categories, CtgBuilder},
+    categories::{Categories, CtgBuilder, Value},
     tags::{Tags, TagsBuilder},
 };
+use serde::{Deserialize, Serialize};
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 
@@ -112,6 +114,21 @@ impl Msg {
     }
 }
 
+#[derive(Deserialize, Serialize, Clone)]
+struct CtgFramework {
+    market: CtgBuilder,
+    store: CtgBuilder,
+}
+
+impl CtgFramework {
+    fn into_builder(self) -> CtgBuilder {
+        CtgBuilder::new(maplit::hashmap! {
+            "书本市场".into() => Value::SubCategory(self.market.inner()),
+            "Store 在线商店".into() => Value::SubCategory(self.store.inner()),
+        })
+    }
+}
+
 async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     // This macro from `diesel_migrations` defines an `embedded_migrations`
     // module containing a function named `run`. This allows the example to be
@@ -120,7 +137,7 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
 
     let conn = DbConn::get_one(&rocket).await.expect("database connection");
 
-    let ctg = rocket.state::<CtgBuilder>().cloned();
+    let ctg = rocket.state::<CtgFramework>().cloned();
     let tags = rocket.state::<TagsBuilder>().cloned();
     // Initialize the database
     conn.run(|c| {
@@ -136,7 +153,7 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
         c.batch_execute("PRAGMA foreign_keys = ON;").unwrap();
 
         if let Some(x) = ctg {
-            x.build(c).unwrap()
+            x.into_builder().build(c).unwrap()
         }
         if let Some(x) = tags {
             x.build(c).unwrap()
@@ -236,7 +253,7 @@ fn rocket() -> Rocket<Build> {
     rocket::custom(figment)
         .attach(DbConn::fairing())
         .attach(Shield::new())
-        .attach(AdHoc::config::<CtgBuilder>())
+        .attach(AdHoc::config::<CtgFramework>())
         .attach(AdHoc::config::<TagsBuilder>())
         .attach(AdHoc::config::<RootPasswd>())
         .attach(AdHoc::config::<ReCaptcha>())
@@ -279,11 +296,13 @@ fn rocket() -> Rocket<Build> {
                 market::market,
                 market::explore_page,
                 market::post_book_page,
+                market::post_book_admin_page,
                 market::post_book_interim,
                 market::delegate_book_page,
                 market::delegate_book,
                 market::delegate_book_error_page,
                 market::update_book_page,
+                market::update_book_admin_page,
                 market::post_book_error_page,
                 market::update_book,
                 market::book_page_guest,
@@ -357,5 +376,6 @@ fn rocket() -> Rocket<Build> {
             "/images",
             routes![images::upload, images::get, images::get_default],
         )
+        .mount("/store", routes![store::home_page])
         .register("/", catchers![page404, page422, page500])
 }
