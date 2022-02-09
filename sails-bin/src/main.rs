@@ -329,6 +329,7 @@ fn rocket() -> Rocket<Build> {
             routes![
                 admin::admin,
                 admin::admin_tag,
+                admin::admin_tags,
                 admin::add_tag,
                 admin::remove_tag,
                 admin::admin_books,

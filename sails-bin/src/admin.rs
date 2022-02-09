@@ -194,6 +194,25 @@ pub async fn add_tag(
 }
 
 #[derive(Template)]
+#[template(path = "admin/tags.html")]
+pub struct AdminTagsPage {
+    tags: Vec<Tag>,
+}
+
+#[get("/tags")]
+pub async fn admin_tags(
+    _guard: Auth<BookAdmin>,
+    conn: DbConn,
+) -> Result<AdminTagsPage, Flash<Redirect>> {
+    Ok(AdminTagsPage {
+        tags: conn
+            .run(|c| Tags::list_all(c))
+            .await
+            .into_flash(uri!("/"))?,
+    })
+}
+
+#[derive(Template)]
 #[template(path = "admin/tag.html")]
 pub struct AdminTagPage {
     tag: Tag,
