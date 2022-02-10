@@ -196,14 +196,14 @@ impl<'r> FromRequest<'r> for Auth<BookWritable> {
             _ => false,
         };
 
-        if if book_info.tags.iter().any(|x| x.get_id() != "store") {
-            product_permission
-        } else {
+        if if book_info.tags.iter().any(|x| x.get_id() == "store") {
             product_permission
                 && (user
                     .info
                     .get_user_status()
                     .contains(UserStatus::STORE_MODIFIABLE))
+        } else {
+            product_permission
         } {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
@@ -262,14 +262,14 @@ impl<'r> FromRequest<'r> for Auth<BookRemovable> {
             _ => false,
         };
 
-        if if book_info.tags.iter().any(|x| x.get_id() != "store") {
-            product_permission
-        } else {
+        if if book_info.tags.iter().any(|x| x.get_id() == "store") {
             product_permission
                 && (user
                     .info
                     .get_user_status()
                     .contains(UserStatus::STORE_MODIFIABLE))
+        } else {
+            product_permission
         } {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
