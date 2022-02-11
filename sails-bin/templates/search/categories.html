@@ -48,7 +48,9 @@
 	  <div class="card">
 	    {% match product.1 %}
 	    {% when Some with (img) %}
-	    <img src="{{img}}?size=thumbnail" loading="lazy" class="card-img-top">
+	    <a href="{{ uri!("/market", crate::market::book_page_owned(product.0.get_id())) }}">
+	      <img src="{{img}}?size=thumbnail" loading="lazy" class="card-img-top">
+            </a>
             {% when None %}
             {% endmatch %}
             <div class="card-body">

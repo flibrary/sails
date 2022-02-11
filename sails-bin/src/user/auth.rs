@@ -7,7 +7,7 @@ use chrono::{offset::Utc, DateTime, NaiveDateTime};
 use rand::{prelude::StdRng, RngCore, SeedableRng};
 use rocket::{
     form::{Form, Strict},
-    http::{Cookie as HttpCookie, CookieJar},
+    http::{Cookie as HttpCookie, CookieJar, SameSite},
     response::{Flash, Redirect},
     State,
 };
@@ -269,8 +269,10 @@ pub async fn validate(
         .run(move |c| UserId::login(c, &info.email, &info.password))
         .await
         .into_flash(uri!("/"))?;
-    let mut cookie = HttpCookie::new("uid", user.get_id().to_string());
-    cookie.set_secure(true);
+    let cookie = HttpCookie::build("uid", user.get_id().to_string())
+        .secure(true)
+        .same_site(SameSite::Strict)
+        .finish();
     // Successfully validated, set private cookie.
     jar.add_private(cookie);
     Ok(Redirect::to(uri!("/user", super::portal)))

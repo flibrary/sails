@@ -2,7 +2,7 @@ use crate::{guards::*, recaptcha::ReCaptcha, DbConn, IntoFlash};
 use askama::Template;
 use rocket::{
     form::Form,
-    http::{Cookie, CookieJar},
+    http::{Cookie, CookieJar, SameSite},
     response::{Flash, Redirect},
     State,
 };
@@ -53,8 +53,10 @@ pub async fn validate(
     };
 
     if root_passwd.verify(&info.password) {
-        let mut cookie = Cookie::new("root_challenge", "ROOT");
-        cookie.set_secure(true);
+        let cookie = Cookie::build("root_challenge", "ROOT")
+            .secure(true)
+            .same_site(SameSite::Strict)
+            .finish();
         // Successfully validated, set private cookie.
         jar.add_private(cookie);
         Ok(Redirect::to(uri!("/root", root)))
