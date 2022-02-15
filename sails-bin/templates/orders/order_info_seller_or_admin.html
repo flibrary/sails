@@ -68,10 +68,6 @@
       <td><a href="{{ uri!("/market", crate::market::book_page_owned(self.book.get_id())) }}">{{ book.get_shortid() }}</a></td>
     </tr>
     <tr>
-      <th scope="row">买家</th>
-      <td>{{ order.get_buyer() }}</td>
-    </tr>
-    <tr>
       <th scope="row">时间戳</th>
       <td>{{ order.get_time_sent() }}</td>
     </tr>
