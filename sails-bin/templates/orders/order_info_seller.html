@@ -3,7 +3,7 @@
 {% block content %}
 <main class="container">
     <div class="p-5 rounded shadow">
-      <h1>订单 #{{ order.get_shortid() }} 的细节</h1>
+      <h1>您收到的订单 #{{ order.get_shortid() }} 的细节</h1>
       <br>
       {% match order.get_transaction_status() %}
       {% when sails_db::enums::TransactionStatus::Refunded %}

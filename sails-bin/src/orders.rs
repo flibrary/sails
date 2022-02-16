@@ -17,8 +17,8 @@ use rocket::{
 use sails_db::{enums::TransactionStatus, products::*, transactions::*};
 
 #[derive(Template)]
-#[template(path = "orders/order_info_seller_or_admin.html")]
-pub struct OrderInfoSellerOrAdmin {
+#[template(path = "orders/order_info_seller.html")]
+pub struct OrderInfoSeller {
     book: ProductInfo,
     order: TransactionInfo,
 }
@@ -28,9 +28,9 @@ pub async fn order_info_seller(
     _auth: Auth<OrderReadable>,
     order_id: OrderGuard,
     conn: DbConn,
-) -> Result<OrderInfoSellerOrAdmin, Flash<Redirect>> {
+) -> Result<OrderInfoSeller, Flash<Redirect>> {
     let order = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
-    Ok(OrderInfoSellerOrAdmin {
+    Ok(OrderInfoSeller {
         book: order.book_info,
         order: order.order_info,
     })

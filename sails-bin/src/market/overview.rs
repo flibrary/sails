@@ -6,16 +6,17 @@ use std::cmp::Ordering;
 
 pub type ProductCard = (ProductInfo, Option<String>, LeafCategory, Vec<Tag>);
 
-// TaggedImaged > Tagged > Imaged > None
-// determined & transistive: everything equal except options differ. just like comparing 0 and 1.
-// NOTE: to preserve the order, use stable sort.
+// Score the product and sort
 pub fn cmp_product(this: &ProductCard, other: &ProductCard) -> Ordering {
-    match (this, other) {
-        ((_, None, _, _), (_, Some(_), _, _)) => Ordering::Greater,
-        ((_, Some(_), _, _), (_, None, _, _)) => Ordering::Less,
-        ((_, Some(_), _, v1), (_, Some(_), _, v2)) => v1.len().cmp(&v2.len()).reverse(),
-        ((_, None, _, v1), (_, None, _, v2)) => v1.len().cmp(&v2.len()).reverse(),
+    fn scoring(card: &ProductCard) -> usize {
+        let mut score = 0;
+        if card.1.is_some() {
+            score += 2;
+        }
+        score += card.3.len();
+        score
     }
+    scoring(this).cmp(&scoring(other)).reverse()
 }
 
 pub fn find_first_image(fragment: &str) -> Option<String> {

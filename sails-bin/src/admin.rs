@@ -402,6 +402,27 @@ pub async fn finish_order(
     Ok(Redirect::to(uri!("/admin", admin_orders)))
 }
 
+#[derive(Template)]
+#[template(path = "admin/order_info_admin.html")]
+pub struct OrderInfoAdmin {
+    book: ProductInfo,
+    order: TransactionInfo,
+}
+
+#[get("/order_info?<order_id>")]
+pub async fn order_info(
+    // CustomerService imply OrderOthersReadable, which is what this admin page is for.
+    _auth: Role<CustomerService>,
+    order_id: OrderGuard,
+    conn: DbConn,
+) -> Result<OrderInfoAdmin, Flash<Redirect>> {
+    let order = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
+    Ok(OrderInfoAdmin {
+        book: order.book_info,
+        order: order.order_info,
+    })
+}
+
 #[get("/")]
 pub async fn admin(_guard: Auth<BookAdmin>) -> Redirect {
     Redirect::to(uri!("/admin", admin_metrics))
