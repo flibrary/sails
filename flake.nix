@@ -2,50 +2,16 @@
   description = "FLibrary sails project";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
+    rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
+    rust-overlay.inputs.flake-utils.follows = "utils";
+    cargo2nix.url = "github:cargo2nix/cargo2nix/master";
     utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { nixpkgs, rust-overlay, utils, ... }:
+  outputs = { nixpkgs, rust-overlay, utils, cargo2nix, ... }:
     let
-      pkgsWithRust = system:
-        import nixpkgs {
-          system = "${system}";
-          overlays = [ rust-overlay.overlay ];
-        };
-      pkgWith = system:
-        with (pkgsWithRust system);
-        (makeRustPlatform {
-          cargo = rust-bin.stable.latest.default;
-          rustc = rust-bin.stable.latest.default;
-        }).buildRustPackage {
-          name = "sails-bin";
-          version = "git";
-          src = ./.;
-          cargoLock = {
-            lockFile = ./Cargo.lock;
-            outputHashes = {
-              "askama-0.11.0-beta.1" =
-                "sha256-ttUCzGL/lMfPhpKbiOiPCYVpYXobCaneSb0xpvde10A=";
-              "askama_derive-0.11.0-beta.1" =
-                "sha256-ttUCzGL/lMfPhpKbiOiPCYVpYXobCaneSb0xpvde10A=";
-              "askama_rocket-0.11.0-rc.2" =
-                "sha256-ttUCzGL/lMfPhpKbiOiPCYVpYXobCaneSb0xpvde10A=";
-              "askama_escape-0.10.2" =
-                "sha256-ttUCzGL/lMfPhpKbiOiPCYVpYXobCaneSb0xpvde10A=";
-              "askama_shared-0.12.0-beta.1" =
-                "sha256-ttUCzGL/lMfPhpKbiOiPCYVpYXobCaneSb0xpvde10A=";
-            };
-          };
-          nativeBuildInputs = [ pkgconfig ];
-          buildInputs = [
-            # used by email
-            openssl
-            # Used by diesel
-            sqlite
-          ];
-        };
       # We customizely define the default system because ghc is broken on aarch64-darwin
       defaultSystems = [
         "aarch64-linux"
@@ -54,18 +20,36 @@
         "x86_64-darwin"
         "x86_64-linux"
       ];
+      pkgs = system:
+        import nixpkgs {
+          system = "${system}";
+          overlays = [
+            rust-overlay.overlay
+            (import "${cargo2nix}/overlay")
+            (final: prev: {
+              cargo2nix = cargo2nix."${system}".packages.cargo2nix;
+            })
+          ];
+        };
+      rustPkgs = system:
+        with (pkgs system);
+        (rustBuilder.makePackageSet' {
+          # appended to "stable"
+          rustChannel = "latest";
+          packageFun = import ./Cargo.nix;
+          # packageOverrides = pkgs: pkgs.rustBuilder.overrides.all; # Implied, if not specified
+          packageOverrides = pkgs:
+            pkgs.rustBuilder.overrides.all ++ ((import ./overrides-list.nix) pkgs);
+        });
     in (utils.lib.eachSystem (defaultSystems) (system: rec {
       # `nix build`
       packages = {
         # We have to do it like `nix develop .#commit` because libraries don't play well with `makeBinPath` or `makeLibraryPath`.
         commit = (import ./commit.nix {
           lib = utils.lib;
-          pkgs = import nixpkgs {
-            system = "${system}";
-            overlays = [ rust-overlay.overlay ];
-          };
+          pkgs = (pkgs system);
         });
-        sails-bin = (pkgWith "${system}");
+        sails-bin = ((rustPkgs system).workspace.sails-bin { }).bin;
       };
 
       defaultPackage = packages.sails-bin;
@@ -78,10 +62,7 @@
       defaultApp = apps.sails-bin;
 
       # `nix develop`
-      devShell = with import nixpkgs {
-        system = "${system}";
-        overlays = [ rust-overlay.overlay ];
-      };
+      devShell = with (pkgs system);
         mkShell {
           nativeBuildInputs = [
             # write rustfmt first to ensure we are using nightly rustfmt
@@ -91,6 +72,8 @@
               targets = [ "x86_64-unknown-linux-musl" ];
             })
             rust-analyzer
+
+            cargo2nix
 
             # used by email
             openssl
@@ -106,6 +89,6 @@
     })) // {
       nixosModule = (import ./module.nix);
 
-      overlay = final: prev: { sails = (pkgWith "${prev.pkgs.system}"); };
+      overlay = final: prev: { sails = (rustPkgs "${prev.pkgs.system}"); };
     };
 }
