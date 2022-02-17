@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
 use uuid::Uuid;
 
+// Built-in tags are the tags that we use throughout the codebase of sails-db and sails-bin.
 pub static BUILTIN_TAGS: Lazy<HashMap<Arc<str>, Value>> = Lazy::new(|| {
     use maplit::hashmap;
     hashmap! {
@@ -17,7 +18,6 @@ pub static BUILTIN_TAGS: Lazy<HashMap<Arc<str>, Value>> = Lazy::new(|| {
         "ads".into() => Value {name: "广告".to_string(), html: None, description: None },
         "store".into() => Value {name: "在线商店产品".to_string(), html: None, description: None },
         "sales".into() => Value {name: "特别优惠".to_string(), html: Some(r#"<span class="badge bg-success"><i class="bi bi-percent"></i> 特别优惠</span>"#.to_string()), description: Some("商品现已加入特别优惠，即刻超值入手".to_string()) },
-        "official".into() => Value { name: "自营".to_string(), html: Some(r#"<span class="badge bg-danger"><i class="bi bi-patch-check-fill"></i> 自营</span>"#.to_string()), description: Some("自营商品与服务由 FLibrary 直接提供，拥有最优质的使用体验和售后权益".to_string())},
         "preoder".into() => Value { name: "预售".to_string(), html: Some(r#"<span class="badge bg-warning"><i class="bi bi-hourglass-split"></i> 预售</span>"#.to_string()), description: Some(r#"卖家已经为预售产品支付押金，如有质量问题可赔付"#.to_string())},
         "flibrarypro".into() => Value { name: "FLibrary Pro".to_string(), html: Some(r#"<span class="badge bg-secondary"><i class="bi bi-award-fill"></i> FLibrary Pro</span>"#.to_string()), description: Some(r#"该商品已加入 FLibrary Pro 计划"#.to_string()) }
 
@@ -77,7 +77,8 @@ impl TagsBuilder {
 
     pub fn build(self, conn: &SqliteConnection) -> Result<()> {
         let mut tags = BUILTIN_TAGS.clone();
-        // Extend will not override builtin tags.
+        // Extend WILL update the existing entries.
+        // We would be happy to allow user to override builtins if they need to.
         tags.extend(self.inner.into_iter());
         for (id, value) in tags {
             Tag::create(conn, id, value.name, value.html, value.description)?;
