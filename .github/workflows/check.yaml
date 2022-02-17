@@ -16,6 +16,8 @@ jobs:
           # Nix Flakes doesn't work on shallow clones
           fetch-depth: 0
       - uses: cachix/install-nix-action@v16
+        # with:
+        #  install_url: https://github.com/numtide/nix-unstable-installer/releases/download/nix-2.6.0pre20211217_6e6e998/install
       - uses: cachix/cachix-action@v8
         if: ${{ github.event_name == 'push' }}
         with:

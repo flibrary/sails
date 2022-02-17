@@ -1,8 +1,8 @@
 edition = "2018"
-merge_imports=true
+imports_granularity="Crate"
 report_fixme="Always"
 # We don't want to be the format-police here!
-ignore = [
-    "askama_shared",
-    "askama_rocket",
-]
+# ignore = [
+#     "askama_shared",
+#     "askama_rocket",
+# ]
