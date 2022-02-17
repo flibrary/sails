@@ -42,6 +42,7 @@ pub struct AllBooks {
 #[template(path = "market/explore.html")]
 pub struct ExplorePage {
     books: Vec<ProductCard>,
+    sales: Vec<ProductCard>,
 }
 
 #[get("/explore?<table>", rank = 1)]
@@ -49,31 +50,38 @@ pub async fn explore_page(
     conn: DbConn,
     table: bool,
 ) -> Result<Result<ExplorePage, AllBooks>, Flash<Redirect>> {
-    let books = conn
-        .run(move |c| -> Result<Vec<ProductCard>, SailsDbError> {
-            // TODO: We shall scope books by a father category
-            // We only display allowed books
-            let mut book_info = ProductFinder::new(c, None)
-                .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
-                .category(&Categories::find_by_name(c, "书本市场")?)?
-                .search_info()?
-                .into_iter()
-                .map(|x| {
-                    let image = find_first_image(x.get_description());
-                    let category = Categories::find_by_id(c, x.get_category_id())
-                        .and_then(Category::into_leaf)?;
-                    let tags = TagMappingFinder::new(c, None)
-                        .product(&x.to_id())
-                        .search_tag()?;
-                    Ok((x, image, category, tags))
-                })
-                // Reverse the book order
-                .rev()
-                .collect::<Result<Vec<ProductCard>, SailsDbError>>()?;
+    let (books, sales) = conn
+        .run(
+            move |c| -> Result<(Vec<ProductCard>, Vec<ProductCard>), SailsDbError> {
+                // TODO: We shall scope books by a father category
+                // We only display allowed books
+                let mut book_info = ProductFinder::new(c, None)
+                    .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
+                    .category(&Categories::find_by_name(c, "书本市场")?)?
+                    .search_info()?
+                    .into_iter()
+                    .map(|x| {
+                        let image = find_first_image(x.get_description());
+                        let category = Categories::find_by_id(c, x.get_category_id())
+                            .and_then(Category::into_leaf)?;
+                        let tags = TagMappingFinder::new(c, None)
+                            .product(&x.to_id())
+                            .search_tag()?;
+                        Ok((x, image, category, tags))
+                    })
+                    // Reverse the book order
+                    .rev()
+                    .collect::<Result<Vec<ProductCard>, SailsDbError>>()?;
 
-            book_info.sort_by(cmp_product);
-            Ok(book_info)
-        })
+                book_info.sort_by(cmp_product);
+                let sales = book_info
+                    .iter()
+                    .filter(|(_, _, _, tags)| tags.iter().any(|x| x.get_id() == "sales"))
+                    .cloned()
+                    .collect();
+                Ok((book_info, sales))
+            },
+        )
         .await
         .into_flash(uri!("/"))?;
     if table {
@@ -83,7 +91,7 @@ pub async fn explore_page(
             .collect();
         Ok(Err(AllBooks { books }))
     } else {
-        Ok(Ok(ExplorePage { books }))
+        Ok(Ok(ExplorePage { books, sales }))
     }
 }
 

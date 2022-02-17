@@ -94,6 +94,8 @@
     in attrs // {
       nixosModule = (import ./module.nix);
 
-      overlay = final: prev: { sails-bin = attrs.packages."${prev.pkgs.system}".sails-bin; };
+      overlay = final: prev: {
+        sails-bin = attrs.packages."${prev.pkgs.system}".sails-bin;
+      };
     };
 }

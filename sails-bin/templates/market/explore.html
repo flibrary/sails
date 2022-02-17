@@ -12,6 +12,52 @@
   </div>
   <br>
 
+  {% if sales.len() > 0 %}
+  <div class="p-5 rounded shadow">
+    <h1>优选与特惠</h1>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#salesModal">了解更多</button>
+
+    <div class="modal fade" id="salesModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">优选与特惠</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            以下书本是 FLibrary 从市场中{{books.len()}}本书中为您精心挑选而来的。这些书本或附带有笔记或教辅书，或是同类型成新书中价格最低的。<b>我们会不定期更新优选与特惠书目，因此价格和书本内容可能随时变动。</b>
+          </div>
+         </div>
+        </div>
+      </div>
+      <br><br>
+
+      <div class="row grid">
+	{% for book in sales %}
+	<div class="col-sm-6 col-lg-4 mb-4 grid-item">
+	  <div class="card">
+	    {% match book.1 %}
+	    {% when Some with (img) %}
+	    <a href="{{ uri!("/market", crate::market::book_page_owned(book.0.get_id())) }}">
+	      <img src="{{img}}?size=thumbnail" loading="lazy" class="card-img-top">
+	    </a>
+            {% when None %}
+            {% endmatch %}
+            <div class="card-body">
+              <h5 class="card-title"><a href="{{ uri!("/market", crate::market::book_page_owned(book.0.get_id())) }}">{{book.0.get_prodname()}}</a></h5>
+	      <h5 class="card-subtitle mb-2">
+		{% let tags = book.3.clone() %}
+		{% include "display_tag.html" %}
+	      </h5>
+              <p class="card-text"><b>价格: ¥{{book.0.get_price()}}</b> <del>原价：¥{{book.2.get_price()}}</del></p>
+            </div>
+	  </div>
+	</div>
+	{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   {% if books.len() > 0 %}
   <div class="p-5 rounded shadow">
     <div class="row grid">
