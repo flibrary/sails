@@ -29,7 +29,7 @@
 	  <td><a href="{{ uri!("/market", crate::market::book_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
-	  <td><a href="{{ uri!("/admin", crate::admin::refund_order(order.1.get_id())) }}" class="btn btn-warning" role="button">Refund</a> <a href="{{ uri!("/admin", crate::admin::finish_order(order.1.get_id())) }}" class="btn btn-success" role="button">Finish</a></td>
+	  <td><a href="{{ uri!("/orders", crate::orders::cancel_order(order.1.get_id(), uri!("/admin", admin_orders).to_string())) }}" class="btn btn-warning" role="button">Refund</a> <a href="{{ uri!("/admin", crate::admin::finish_order(order.1.get_id())) }}" class="btn btn-success" role="button">Finish</a></td>
 	</tr>
 	{% endfor %}
       </tbody>
@@ -63,7 +63,7 @@
 	  <td><a href="{{ uri!("/market", crate::market::book_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
-	  <td><a href="{{ uri!("/admin", crate::admin::refund_order(order.1.get_id())) }}" class="btn btn-warning" role="button">Cancel</a></td>
+	  <td><a href="{{ uri!("/orders", crate::orders::cancel_order(order.1.get_id(), uri!("/admin", admin_orders).to_string())) }}" class="btn btn-warning" role="button">Cancel</a></td>
 	</tr>
 	{% endfor %}
       </tbody>

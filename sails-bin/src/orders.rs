@@ -3,7 +3,7 @@ use std::num::NonZeroU32;
 use crate::{
     alipay::{
         AlipayAppPrivKey, AlipayClient, CancelTrade, CancelTradeResp, Precreate, PrecreateResp,
-        SignedResponse, TradeQuery, TradeQueryResp,
+        RefundTrade, RefundTradeResp, SignedResponse, TradeQuery, TradeQueryResp,
     },
     guards::*,
     DbConn, IntoFlash,
@@ -88,41 +88,62 @@ pub async fn order_info_buyer(
     }
 }
 
-#[get("/cancel_order?<order_id>")]
-pub async fn user_cancel_order(
-    // Note: here we set the auth flag to order progressable, meaning that user or customer service can cancel order in limited situations.
-    _auth: Auth<OrderProgressable>,
+#[get("/cancel_order?<order_id>&<redirect>")]
+pub async fn cancel_order(
     order_id: OrderGuard,
     conn: DbConn,
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
+    redirect: String,
 ) -> Result<Redirect, Flash<Redirect>> {
     let info = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
     let status = info.order_info.get_transaction_status();
     // We only allow users to cancel their orders if they have not finished them.
-    if (status == &TransactionStatus::Placed) || (status == &TransactionStatus::Paid) {
-        loop {
-            let resp = client
-                .request(priv_key, CancelTrade::new(info.order_info.get_id()))
+    match status {
+        TransactionStatus::Placed => {
+            loop {
+                let resp = client
+                    .request(priv_key, CancelTrade::new(info.order_info.get_id()))
+                    .into_flash(uri!("/"))?
+                    .send::<CancelTradeResp>()
+                    .await
+                    .into_flash(uri!("/"))?
+                    .into_flash(uri!("/"))?;
+                if resp.retry_flag == "N" {
+                    break;
+                }
+            }
+
+            conn.run(move |c| info.order_info.refund(c))
+                .await
+                .into_flash(uri!("/"))?;
+            Ok(Redirect::to(redirect))
+        }
+        TransactionStatus::Paid => {
+            client
+                .request(
+                    priv_key,
+                    RefundTrade::new(
+                        info.order_info.get_id(),
+                        "用户发起无理由退款",
+                        info.order_info.get_total(),
+                    ),
+                )
                 .into_flash(uri!("/"))?
-                .send::<CancelTradeResp>()
+                .send::<RefundTradeResp>()
                 .await
                 .into_flash(uri!("/"))?
                 .into_flash(uri!("/"))?;
-            if resp.retry_flag == "N" {
-                break;
-            }
-        }
 
-        conn.run(move |c| info.order_info.refund(c))
-            .await
-            .into_flash(uri!("/"))?;
-        Ok(Redirect::to(uri!("/user", crate::user::portal)))
-    } else {
-        Err(Flash::error(
+            conn.run(move |c| info.order_info.refund(c))
+                .await
+                .into_flash(uri!("/"))?;
+            Ok(Redirect::to(redirect))
+        }
+        _ => Err(Flash::error(
             Redirect::to(uri!("/")),
             "refunds not allowed due to order status constraints",
-        ))
+        )),
     }
 }
 

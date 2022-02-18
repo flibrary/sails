@@ -370,7 +370,7 @@ fn rocket() -> Rocket<Build> {
                 orders::progress,
                 orders::order_info_buyer,
                 orders::order_info_seller,
-                orders::user_cancel_order,
+                orders::cancel_order,
             ],
         )
         .mount(

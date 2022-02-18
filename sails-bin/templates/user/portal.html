@@ -42,7 +42,6 @@
 	<th data-field="id" data-sortable="true" scope="col">ID</th>
 	<th data-field="name" data-sortable="true" scope="col">名称</th>
 	<th data-field="price" data-sortable="true" scope="col">价格</th>
-	<th data-field="buyer" data-sortable="true" scope="col">买家</th>
 	<th data-field="status" data-sortable="true" scope="col">状态</th>
       </tr>
     </thead>
@@ -52,7 +51,6 @@
 	<th scope="row"><a href="{{ uri!("/orders", crate::orders::order_info_buyer(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
 	<td>{{order.0.get_prodname()}}</td>
 	<td>{{order.0.get_price()}}</td>
-	<td>{{order.1.get_buyer()}}</td>
 	<td>{{ "{:?}"|format(order.1.get_transaction_status()) }}</td>
       </tr>
       {% endfor %}

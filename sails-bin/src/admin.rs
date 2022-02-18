@@ -1,5 +1,5 @@
 use crate::{
-    alipay::{AlipayAppPrivKey, AlipayClient, CancelTrade, CancelTradeResp},
+    alipay::{AlipayAppPrivKey, AlipayClient, RefundTrade, RefundTradeResp},
     guards::*,
     DbConn, IntoFlash,
 };
@@ -357,6 +357,8 @@ pub async fn normalize_book(
     Ok(Redirect::to(uri!("/admin", admin_books)))
 }
 
+// This only handles the refunding process AFTER finish
+// For other refunding processes, see crate::orders
 #[get("/refund_order?<order_id>")]
 pub async fn refund_order(
     _auth: Auth<OrderRefundable>,
@@ -365,21 +367,23 @@ pub async fn refund_order(
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let id = order_id.to_id(&conn).await.into_flash(uri!("/"))?;
-    loop {
-        let resp = client
-            .request(priv_key, CancelTrade::new(id.id.get_id()))
-            .into_flash(uri!("/"))?
-            .send::<CancelTradeResp>()
-            .await
-            .into_flash(uri!("/"))?
-            .into_flash(uri!("/"))?;
-        if resp.retry_flag == "N" {
-            break;
-        }
-    }
+    let info = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
+    client
+        .request(
+            priv_key,
+            RefundTrade::new(
+                info.order_info.get_id(),
+                "平台发起退货退款",
+                info.order_info.get_total(),
+            ),
+        )
+        .into_flash(uri!("/"))?
+        .send::<RefundTradeResp>()
+        .await
+        .into_flash(uri!("/"))?
+        .into_flash(uri!("/"))?;
 
-    conn.run(move |c| id.id.refund(c))
+    conn.run(move |c| info.order_info.refund(c))
         .await
         .into_flash(uri!("/admin", admin_orders))?;
     Ok(Redirect::to(uri!("/admin", admin_orders)))

@@ -152,7 +152,8 @@ pub struct SignedResponse<T> {
     #[serde(
         alias = "alipay_trade_query_response",
         alias = "alipay_trade_precreate_response",
-        alias = "alipay_trade_cancel_response"
+        alias = "alipay_trade_cancel_response",
+        alias = "alipay_trade_refund_response"
     )]
     response: Response<T>,
     #[allow(unused)]
@@ -280,6 +281,38 @@ impl<'a> BizContent for CancelTrade<'a> {
     fn method(&self) -> &'static str {
         "alipay.trade.cancel"
     }
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct RefundTrade<'a> {
+    out_trade_no: &'a str,
+    refund_amount: String,
+    refund_reason: &'a str,
+    out_request_no: &'static str,
+}
+
+impl<'a> RefundTrade<'a> {
+    pub fn new(out_trade_no: &'a str, refund_reason: &'a str, refund_amount: BigUint) -> Self {
+        Self {
+            out_trade_no,
+            refund_reason,
+            refund_amount: refund_amount.to_string(),
+            // We are obliged to keep out_request_no the same under each transaction ID to avoid redundent refunding.
+            out_request_no: "0001",
+        }
+    }
+}
+
+impl<'a> BizContent for RefundTrade<'a> {
+    fn method(&self) -> &'static str {
+        "alipay.trade.refund"
+    }
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct RefundTradeResp {
+    pub fund_change: String,
+    pub refund_fee: String,
 }
 
 #[derive(Deserialize, Clone, Debug)]
