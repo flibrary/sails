@@ -12,7 +12,7 @@ use sails_db::{categories::*, error::SailsDbError, products::*, tags::*, Cmp};
 pub struct CategoriesPage {
     categories: Option<Vec<Category>>,
     current_ctg: Option<Category>,
-    parent_ctg: Option<Category>,
+    parent_ctgs: Vec<Category>,
     products: Vec<ProductCard>,
 }
 
@@ -55,7 +55,7 @@ pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redire
                 .into_flash(uri!("/"))?,
         ),
         products,
-        parent_ctg: None,
+        parent_ctgs: Vec::new(),
     })
 }
 
@@ -63,14 +63,22 @@ pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redire
 #[get("/categories?<category>", rank = 1)]
 pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage, Flash<Redirect>> {
     // We didn't use map for that we want to throw out errors.
-    let (category, parent_ctg, products) = conn
+    let (category, parent_ctgs, products) = conn
         .run(
-            move |c| -> Result<(Category, Option<Category>, Vec<ProductCard>), SailsDbError> {
+            move |c| -> Result<(Category, Vec<Category>, Vec<ProductCard>), SailsDbError> {
                 let category = Categories::find_by_id(c, &category)?;
-                let parent_category = category
-                    .parent_id()
+
+                let mut parent_categories = Vec::new();
+                // The parent ID of the current category
+                let mut current_parent = category.parent_id();
+                while let Some(parent_ctg) = current_parent
                     .map(|x| Categories::find_by_id(c, x))
-                    .transpose()?;
+                    .transpose()?
+                {
+                    parent_categories.insert(0, parent_ctg);
+                    // Change the "current parent" to the parent of the "current parent"
+                    current_parent = parent_categories[0].parent_id();
+                }
 
                 // We only display allowed books
                 let mut product_info = ProductFinder::new(c, None)
@@ -94,7 +102,7 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
                 // Sort the products to make ones containing image appear on top.
                 product_info.sort_by(cmp_product);
 
-                Ok((category, parent_category, product_info))
+                Ok((category, parent_categories, product_info))
             },
         )
         .await
@@ -112,6 +120,6 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
             )
         },
         products,
-        parent_ctg,
+        parent_ctgs,
     })
 }

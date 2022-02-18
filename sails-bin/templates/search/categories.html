@@ -5,12 +5,21 @@
   <div class="p-5 rounded shadow">
     <h1>按照类别搜索您想要的产品</h1>
 
-    {% match current_ctg %}
-    {% when Some with (current_ctg)%}
-    <p class="lead">当前类别为“{{current_ctg.name()}}”</p>
-    {% when None %}
-    <p class="lead">当前显示所有类别</p>
-    {% endmatch %}
+
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ uri!("/search", crate::search::categories_all) }}">所有类别</a></li>
+	{% for parent in parent_ctgs %}
+	  <li class="breadcrumb-item"><a href="{{ uri!("/search", crate::search::categories(parent.id())) }}">{{parent.name()}}</a></li>
+        {% endfor %}
+        {% match current_ctg %}
+        {% when Some with (current_ctg)%}
+        <li class="breadcrumb-item active" aria-current="page">{{current_ctg.name()}}</li>
+        {% when None %}
+        {% endmatch %}
+      </ol>
+    </nav>
+
     {% match categories %}
     {% when Some with (categories)%}
       {% if categories.len() > 0 %}
@@ -24,17 +33,6 @@
       {% endif %}
     {% when None %}
       <h4>没有更多子类别</h4>
-    {% endmatch %}
-
-    <br>
-    {% match parent_ctg %}
-    {% when Some with (parent_ctg)%}
-    <a href="{{ uri!("/search", crate::search::categories(parent_ctg.id())) }}" class="btn btn-primary" role="button">返回“{{parent_ctg.name()}}”</a>
-    {% when None %}
-    {% if current_ctg.is_none() %}
-    {% else %}
-    <a href="{{ uri!("/search", crate::search::categories_all) }}" class="btn btn-primary" role="button">所有类别</a>
-    {% endif %}
     {% endmatch %}
   </div>
   <br>

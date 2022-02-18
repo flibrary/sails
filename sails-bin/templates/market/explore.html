@@ -25,16 +25,17 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            以下书本是 FLibrary 从市场中{{books.len()}}本书中为您精心挑选而来的。这些书本或附带有笔记或教辅书，或是同类型成新书中价格最低的。<b>我们会不定期更新优选与特惠书目，因此价格和书本内容可能随时变动。</b>
+            以下书本是 FLibrary 从{{books.len()}}本书中为您精心挑选而来的。这些书本或附带有笔记或教辅书，或是同类型成新书中价格最低的。<br><br>
+	    <b>我们会不定期更新优选与特惠书目，因此价格和书本内容可能随时变动。</b>
           </div>
          </div>
         </div>
       </div>
       <br><br>
 
-      <div class="row grid">
+      <div class="row sale">
 	{% for book in sales %}
-	<div class="col-sm-6 col-lg-4 mb-4 grid-item">
+	<div class="col-sm-6 col-lg-4 mb-4 sale-item">
 	  <div class="card">
 	    {% match book.1 %}
 	    {% when Some with (img) %}
@@ -62,9 +63,9 @@
   {% if books.len() > 0 %}
   <div class="p-5 rounded shadow">
     <h1>所有书本</h1>
-    <div class="row grid">
+    <div class="row book">
 	{% for book in books %}
-	<div class="col-sm-6 col-lg-4 mb-4 grid-item">
+	<div class="col-sm-6 col-lg-4 mb-4 book-item">
 	  <div class="card">
 	    {% match book.1 %}
 	    {% when Some with (img) %}
@@ -102,17 +103,29 @@
   <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/imagesloaded@4.1.4/imagesloaded.min.js"></script>
   <script>
-    // init Masonry
-    var grid = document.querySelector('.grid');
+    // init Masonry for sales
+    var sale = document.querySelector('.sale');
 
-    var msnry = new Masonry( grid, {
-	itemSelector: '.grid-item',
+    var msnry_sale = new Masonry( sale, {
+	itemSelector: '.sale-item',
 	percentPosition: true
     });
 
-    imagesLoaded( grid ).on( 'progress', function() {
+    imagesLoaded( sale ).on( 'progress', function() {
 	// layout Masonry after each image loads
-	msnry.layout();
+	msnry_sale.layout();
+    });
+
+    var book = document.querySelector('.book');
+
+    var msnry_book = new Masonry( book, {
+	itemSelector: '.book-item',
+	percentPosition: true
+    });
+
+    imagesLoaded( book ).on( 'progress', function() {
+	// layout Masonry after each image loads
+	msnry_book.layout();
     });
   </script>
 {% endblock script %}
