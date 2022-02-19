@@ -31,7 +31,7 @@ use rocket::{
         providers::{Format, Toml},
         Figment,
     },
-    http::{uri::Reference, Status},
+    http::{uri::Reference, Header, Status},
     request::FlashMessage,
     response::{self, Flash, Redirect},
     shield::Shield,
@@ -198,6 +198,7 @@ impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for StaticFile {
                     .ok_or_else(|| Status::new(400))?;
                 response::Response::build()
                     .header(content_type)
+                    .header(Header::new("Cache-Control", "max-age=31536000"))
                     .sized_body(d.data.len(), Cursor::new(d.data))
                     .ok()
             },

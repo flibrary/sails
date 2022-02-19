@@ -158,11 +158,11 @@ in
     };
   });
   
-  "registry+https://github.com/rust-lang/crates.io-index".anyhow."1.0.53" = overridableMkRustCrate (profileName: rec {
+  "registry+https://github.com/rust-lang/crates.io-index".anyhow."1.0.54" = overridableMkRustCrate (profileName: rec {
     name = "anyhow";
-    version = "1.0.53";
+    version = "1.0.54";
     registry = "registry+https://github.com/rust-lang/crates.io-index";
-    src = fetchCratesIo { inherit name version; sha256 = "94a45b455c14666b85fc40a019e8ab9eb75e3a124e05494f5397122bc9eb06e0"; };
+    src = fetchCratesIo { inherit name version; sha256 = "7a99269dff3bc004caa411f38845c20303f1e393ca2bd6581576fa3a7f59577d"; };
     features = builtins.concatLists [
       [ "default" ]
       [ "std" ]
@@ -3574,10 +3574,11 @@ in
     src = fetchCrateLocal (workspaceSrc + "/sails-bin");
     dependencies = {
       ammonia = rustPackages."registry+https://github.com/rust-lang/crates.io-index".ammonia."3.1.4" { inherit profileName; };
-      anyhow = rustPackages."registry+https://github.com/rust-lang/crates.io-index".anyhow."1.0.53" { inherit profileName; };
+      anyhow = rustPackages."registry+https://github.com/rust-lang/crates.io-index".anyhow."1.0.54" { inherit profileName; };
       askama = rustPackages."git+https://github.com/djc/askama".askama."0.11.0-beta.1" { inherit profileName; };
       askama_rocket = rustPackages."git+https://github.com/djc/askama".askama_rocket."0.11.0-rc.2" { inherit profileName; };
       base64 = rustPackages."registry+https://github.com/rust-lang/crates.io-index".base64."0.13.0" { inherit profileName; };
+      bytes = rustPackages."registry+https://github.com/rust-lang/crates.io-index".bytes."1.1.0" { inherit profileName; };
       chacha20poly1305 = rustPackages."registry+https://github.com/rust-lang/crates.io-index".chacha20poly1305."0.9.0" { inherit profileName; };
       chrono = rustPackages."registry+https://github.com/rust-lang/crates.io-index".chrono."0.4.19" { inherit profileName; };
       diesel = rustPackages."registry+https://github.com/rust-lang/crates.io-index".diesel."1.4.8" { inherit profileName; };
@@ -3609,7 +3610,7 @@ in
     registry = "unknown";
     src = fetchCrateLocal (workspaceSrc + "/sails-db");
     dependencies = {
-      anyhow = rustPackages."registry+https://github.com/rust-lang/crates.io-index".anyhow."1.0.53" { inherit profileName; };
+      anyhow = rustPackages."registry+https://github.com/rust-lang/crates.io-index".anyhow."1.0.54" { inherit profileName; };
       bcrypt = rustPackages."registry+https://github.com/rust-lang/crates.io-index".bcrypt."0.10.1" { inherit profileName; };
       bitflags = rustPackages."registry+https://github.com/rust-lang/crates.io-index".bitflags."1.3.2" { inherit profileName; };
       chrono = rustPackages."registry+https://github.com/rust-lang/crates.io-index".chrono."0.4.19" { inherit profileName; };
@@ -5150,15 +5151,15 @@ in
       [ "zeroize_derive" ]
     ];
     dependencies = {
-      zeroize_derive = buildRustPackages."registry+https://github.com/rust-lang/crates.io-index".zeroize_derive."1.3.1" { profileName = "__noProfile"; };
+      zeroize_derive = buildRustPackages."registry+https://github.com/rust-lang/crates.io-index".zeroize_derive."1.3.2" { profileName = "__noProfile"; };
     };
   });
   
-  "registry+https://github.com/rust-lang/crates.io-index".zeroize_derive."1.3.1" = overridableMkRustCrate (profileName: rec {
+  "registry+https://github.com/rust-lang/crates.io-index".zeroize_derive."1.3.2" = overridableMkRustCrate (profileName: rec {
     name = "zeroize_derive";
-    version = "1.3.1";
+    version = "1.3.2";
     registry = "registry+https://github.com/rust-lang/crates.io-index";
-    src = fetchCratesIo { inherit name version; sha256 = "81e8f13fef10b63c06356d65d416b070798ddabcadc10d3ece0c5be9b3c7eddb"; };
+    src = fetchCratesIo { inherit name version; sha256 = "3f8f187641dad4f680d25c4bfc4225b418165984179f26ca76ec4fb6441d3a17"; };
     dependencies = {
       proc_macro2 = rustPackages."registry+https://github.com/rust-lang/crates.io-index".proc-macro2."1.0.36" { inherit profileName; };
       quote = rustPackages."registry+https://github.com/rust-lang/crates.io-index".quote."1.0.15" { inherit profileName; };
