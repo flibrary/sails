@@ -18,6 +18,7 @@ mod root;
 mod search;
 mod smtp;
 mod store;
+mod telegram_bot;
 mod user;
 
 use aead::AeadKey;
@@ -45,6 +46,7 @@ use sails_db::{
 use serde::{Deserialize, Serialize};
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
+use telegram_bot::TelegramBot;
 
 use crate::{
     alipay::{AlipayAppPrivKey, AlipayClient},
@@ -263,6 +265,7 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<ImageHosting>())
         .attach(AdHoc::config::<AlipayAppPrivKey>())
         .attach(AdHoc::config::<AlipayClient>())
+        .attach(AdHoc::config::<TelegramBot>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .mount("/", routes![index, get_icon])
         .mount("/static", routes![get_file])

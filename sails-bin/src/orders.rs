@@ -6,6 +6,7 @@ use crate::{
         RefundTrade, RefundTradeResp, SignedResponse, TradeQuery, TradeQueryResp,
     },
     guards::*,
+    telegram_bot::TelegramBot,
     DbConn, IntoFlash,
 };
 use askama::Template;
@@ -221,23 +222,40 @@ pub struct CheckoutInfo {
 pub async fn purchase(
     db: DbConn,
     book_id: BookGuard,
-    user: UserIdGuard<Cookie>,
+    user: UserInfoGuard<Cookie>,
     info: Form<Strict<CheckoutInfo>>,
+    bot: &State<TelegramBot>,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_id(&db).await.into_flash(uri!("/"))?;
-    let id = db
+    let book = book_id.to_info(&db).await.into_flash(uri!("/"))?;
+    let seller_info = book.seller_info.clone();
+    let book_info = book.book_info.clone();
+    let buyer_info = user.info.clone();
+
+    let info = db
         // TODO: We need to allow user to specify quantity
         .run(move |c| {
             Transactions::buy(
                 c,
-                &book.book_id,
-                &user.id,
+                &book.book_info.to_id(),
+                &user.info.to_id(),
                 info.quantity.get(),
                 &info.address,
             )
+            .map(|t| t.get_info(c))
         })
         .await
+        .into_flash(uri!("/"))?
         .into_flash(uri!("/"))?;
 
-    Ok(Redirect::to(uri!("/orders", order_info_buyer(id.get_id()))))
+    // TODO: can we make it elegant
+    let id = info.get_id().to_string();
+
+    let bot_cloned = bot.inner().clone();
+    tokio::spawn(async move {
+        bot_cloned
+            .send_order_placed(&info, &buyer_info, &seller_info, &book_info)
+            .await
+    });
+
+    Ok(Redirect::to(uri!("/orders", order_info_buyer(id))))
 }

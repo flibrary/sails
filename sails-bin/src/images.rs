@@ -81,17 +81,20 @@ pub async fn get(
     ext: &str,
     size: &str,
 ) -> Result<Result<Image, Redirect>, Flash<Redirect>> {
-    match reqwest::get(format!(
+    let resp = reqwest::get(format!(
         "https://raw.githubusercontent.com/flibrary/images/main/{}/{}.{}",
         hash, size, ext
     ))
     .await
-    .into_flash(uri!("/"))
-    {
-        Ok(resp) => Ok(Ok(Image::from_response(resp)
+    .into_flash(uri!("/"))?;
+
+    match resp.status().is_success() {
+        // If we have successfully retrieved the image
+        true => Ok(Ok(Image::from_response(resp)
             .await
             .into_flash(uri!("/"))?)),
-        Err(_) if size != "orig" => {
+        // If the size indication is not original, we may fallback to original quality
+        false if size != "orig" => {
             if let Ok(orig_resp) = reqwest::get(format!(
                 "https://raw.githubusercontent.com/flibrary/images/main/{}/{}.{}",
                 hash, "orig", ext
@@ -106,8 +109,9 @@ pub async fn get(
                 Ok(Err(Redirect::to(uri!("/static/logo.png"))))
             }
         }
-        Err(_) if size == "orig" => Ok(Err(Redirect::to(uri!("/static/logo.png")))),
-        Err(_) => unreachable!(),
+        // We have nothing to fallback, return placeholder image
+        false if size == "orig" => Ok(Err(Redirect::to(uri!("/static/logo.png")))),
+        false => unreachable!(),
     }
 }
 
