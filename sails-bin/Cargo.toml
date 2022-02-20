@@ -32,7 +32,7 @@ rand = {version = "^0.8", features = ["std_rng"]}
 base64 = "^0.13"
 chrono = "^0.4"
 anyhow = "^1"
-lettre = { version = "0.10.0-rc.3", features = ["tokio1-rustls-tls", "builder", "smtp-transport", "r2d2", "tokio1"] }
+lettre = { version = "0.10.0-rc.3", features = ["tokio1-native-tls", "builder", "smtp-transport", "r2d2", "tokio1"] }
 reqwest = { version = "0.11", features = ["json", "blocking"]}
 chacha20poly1305 = "^0.9"
 # We need askama as the backend template engine because it is type safe.
