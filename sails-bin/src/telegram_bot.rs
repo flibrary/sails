@@ -1,4 +1,4 @@
-use crate::guards::{BookGuard, UserGuard};
+use crate::guards::{BookGuard, OrderGuard, UserGuard};
 use sails_db::{products::ProductInfo, transactions::TransactionInfo, users::UserInfo};
 use serde::{Deserialize, Deserializer};
 use std::{future::Future, sync::Arc, time::Duration};
@@ -52,15 +52,27 @@ impl TelegramBot {
                 )
             )
         };
+        let order_link = |t: &TransactionInfo| {
+            format!(
+                "[{}]({})",
+                t.get_shortid(),
+                uri!(
+                    "https://flibrary.info/admin",
+                    crate::admin::order_info(t.get_id())
+                )
+            )
+        };
 
         let msg = format!(
             r#"*New order placed*:
+Order: {order}
 Buyer: {buyer}
 Seller: {seller}
 Product: {product}
 Price: {price}
 Quantity: {qty}
 Total: {total}"#,
+            order = order_link(order),
             buyer = user_link(buyer),
             seller = user_link(seller),
             product = product_link(product),
