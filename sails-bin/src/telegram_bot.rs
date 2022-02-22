@@ -64,7 +64,7 @@ impl TelegramBot {
         };
 
         let msg = format!(
-            r#"*New order placed*:
+            r#"Order Status Update: *{:?}*:
 Order: {order}
 Buyer: {buyer}
 Seller: {seller}
@@ -72,6 +72,7 @@ Product: {product}
 Price: {price}
 Quantity: {qty}
 Total: {total}"#,
+            order.get_transaction_status(),
             order = order_link(order),
             buyer = user_link(buyer),
             seller = user_link(seller),

@@ -96,6 +96,7 @@ pub async fn cancel_order(
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
     redirect: String,
+    bot: &State<TelegramBot>,
 ) -> Result<Redirect, Flash<Redirect>> {
     let info = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
     let status = info.order_info.get_transaction_status();
@@ -118,7 +119,6 @@ pub async fn cancel_order(
             conn.run(move |c| info.order_info.refund(c))
                 .await
                 .into_flash(uri!("/"))?;
-            Ok(Redirect::to(redirect))
         }
         TransactionStatus::Paid => {
             client
@@ -139,13 +139,28 @@ pub async fn cancel_order(
             conn.run(move |c| info.order_info.refund(c))
                 .await
                 .into_flash(uri!("/"))?;
-            Ok(Redirect::to(redirect))
         }
-        _ => Err(Flash::error(
-            Redirect::to(uri!("/")),
-            "refunds not allowed due to order status constraints",
-        )),
+        _ => {
+            return Err(Flash::error(
+                Redirect::to(uri!("/")),
+                "refunds not allowed due to order status constraints",
+            ))
+        }
     }
+    // We redo the `to_info` in order to update the order info we got.
+    let order_clone = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
+    let bot_cloned = bot.inner().clone();
+    tokio::spawn(async move {
+        bot_cloned
+            .send_order_placed(
+                &order_clone.order_info,
+                &order_clone.buyer_info,
+                &order_clone.seller_info,
+                &order_clone.book_info,
+            )
+            .await
+    });
+    Ok(Redirect::to(redirect))
 }
 
 // Basically, we syncronize our trade status with that in alipay
@@ -156,6 +171,7 @@ pub async fn progress(
     db: DbConn,
     priv_key: &State<AlipayAppPrivKey>,
     client: &State<AlipayClient>,
+    bot: &State<TelegramBot>,
 ) -> Result<Redirect, Flash<Redirect>> {
     let order = order_id.to_info(&db).await.into_flash(uri!("/"))?;
 
@@ -185,6 +201,20 @@ pub async fn progress(
     db.run(move |c| order.order_info.set_transaction_status(status).update(c))
         .await
         .into_flash(uri!("/"))?;
+
+    // We redo the `to_info` in order to update the order info we got.
+    let order_clone = order_id.to_info(&db).await.into_flash(uri!("/"))?;
+    let bot_cloned = bot.inner().clone();
+    tokio::spawn(async move {
+        bot_cloned
+            .send_order_placed(
+                &order_clone.order_info,
+                &order_clone.buyer_info,
+                &order_clone.seller_info,
+                &order_clone.book_info,
+            )
+            .await
+    });
     Ok(Redirect::to(uri!("/orders", order_info_buyer(order_id))))
 }
 

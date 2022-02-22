@@ -3,7 +3,12 @@ use rocket::{
     form::{self, FromFormField, ValueField},
     http::uri::fmt::{FromUriParam, Query},
 };
-use sails_db::{error::SailsDbError, products::*, transactions::*};
+use sails_db::{
+    error::SailsDbError,
+    products::*,
+    transactions::*,
+    users::{UserFinder, UserInfo},
+};
 
 #[derive(UriDisplayQuery)]
 pub struct OrderGuard(String);
@@ -45,18 +50,30 @@ impl OrderGuard {
             let book_info = ProductFinder::new(c, None)
                 .id(order_info.get_product())
                 .first_info()?;
+            let seller_info = UserFinder::new(c, None)
+                .id(order_info.get_seller())
+                .first_info()?;
+            let buyer_info = UserFinder::new(c, None)
+                .id(order_info.get_buyer())
+                .first_info()?;
+
             Ok(OrderInfo {
                 order_info,
                 book_info,
+                seller_info,
+                buyer_info,
             })
         })
         .await
     }
 }
 
+#[derive(Clone)]
 pub struct OrderInfo {
     pub order_info: TransactionInfo,
     pub book_info: ProductInfo,
+    pub seller_info: UserInfo,
+    pub buyer_info: UserInfo,
 }
 
 // This request guard explicitly requires a valid transaction ID
