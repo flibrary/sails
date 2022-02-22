@@ -31,6 +31,10 @@ impl<T: ToString> FromUriParam<Query, T> for OrderGuard {
 }
 
 impl OrderGuard {
+    pub fn get_id(&self) -> &str {
+        &self.0
+    }
+
     pub async fn to_id(&self, db: &DbConn) -> Result<OrderId, SailsDbError> {
         let order_id_inner = self.0.clone();
         db.run(move |c| -> Result<OrderId, SailsDbError> {
@@ -65,6 +69,10 @@ impl OrderGuard {
             })
         })
         .await
+    }
+
+    pub fn new(id: impl ToString) -> OrderGuard {
+        OrderGuard(id.to_string())
     }
 }
 

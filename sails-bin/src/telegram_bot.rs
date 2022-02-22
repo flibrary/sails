@@ -1,4 +1,7 @@
-use crate::guards::{BookGuard, OrderGuard, UserGuard};
+use crate::{
+    guards::{BookGuard, OrderGuard, UserGuard},
+    DbConn,
+};
 use sails_db::{products::ProductInfo, transactions::TransactionInfo, users::UserInfo};
 use serde::{Deserialize, Deserializer};
 use std::{future::Future, sync::Arc, time::Duration};
@@ -25,46 +28,49 @@ pub struct TelegramBot {
 }
 
 impl TelegramBot {
-    pub async fn send_order_placed(
-        &self,
-        order: &TransactionInfo,
-        buyer: &UserInfo,
-        seller: &UserInfo,
-        product: &ProductInfo,
-    ) {
-        let user_link = |u: &UserInfo| {
-            format!(
-                "[{}]({})",
-                u.get_name(),
-                uri!(
-                    "https://flibrary.info/user",
-                    crate::user::portal_guest(u.get_id())
-                )
-            )
-        };
-        let product_link = |p: &ProductInfo| {
-            format!(
-                "[{}]({})",
-                p.get_prodname(),
-                uri!(
-                    "https://flibrary.info/market",
-                    crate::market::book_page_guest(p.get_id())
-                )
-            )
-        };
-        let order_link = |t: &TransactionInfo| {
-            format!(
-                "[{}]({})",
-                t.get_shortid(),
-                uri!(
-                    "https://flibrary.info/admin",
-                    crate::admin::order_info(t.get_id())
-                )
-            )
-        };
+    pub fn send_order_update(self, id: impl ToString, conn: DbConn) {
+        let id = id.to_string();
+        tokio::spawn(async move {
+            // TODO: better error mechanism
+            let order = OrderGuard::new(id).to_info(&conn).await.unwrap();
+            let buyer = order.buyer_info;
+            let seller = order.seller_info;
+            let product = order.book_info;
+            let order = order.order_info;
 
-        let msg = format!(
-            r#"Order Status Update: *{:?}*:
+            let user_link = |u: &UserInfo| {
+                format!(
+                    "[{}]({})",
+                    u.get_name(),
+                    uri!(
+                        "https://flibrary.info/user",
+                        crate::user::portal_guest(u.get_id())
+                    )
+                )
+            };
+            let product_link = |p: &ProductInfo| {
+                format!(
+                    "[{}]({})",
+                    p.get_prodname(),
+                    uri!(
+                        "https://flibrary.info/market",
+                        crate::market::book_page_guest(p.get_id())
+                    )
+                )
+            };
+            let order_link = |t: &TransactionInfo| {
+                format!(
+                    "[{}]({})",
+                    t.get_shortid(),
+                    uri!(
+                        "https://flibrary.info/admin",
+                        crate::admin::order_info(t.get_id())
+                    )
+                )
+            };
+
+            let msg = format!(
+                r#"Order Status Update: *{:?}*:
 Order: {order}
 Buyer: {buyer}
 Seller: {seller}
@@ -72,30 +78,31 @@ Product: {product}
 Price: {price}
 Quantity: {qty}
 Total: {total}"#,
-            order.get_transaction_status(),
-            order = order_link(order),
-            buyer = user_link(buyer),
-            seller = user_link(seller),
-            product = product_link(product),
-            price = order.get_price(),
-            qty = order.get_quantity(),
-            total = order.get_total()
-        );
-        // Discard the error
-        tryn(5, Duration::from_secs(5), || {
-            self.bot_token
-                .send_message(self.channel_id, msg.clone())
-                .disable_web_page_preview(true)
-        })
-        .await
-        .map(drop)
-        .unwrap_or_else(|err| {
-            error_!(
-                "telegram bot failed to send notification of placed order {} to chat {}: {}",
-                order.get_shortid(),
-                self.channel_id,
-                err
-            )
+                order.get_transaction_status(),
+                order = order_link(&order),
+                buyer = user_link(&buyer),
+                seller = user_link(&seller),
+                product = product_link(&product),
+                price = order.get_price(),
+                qty = order.get_quantity(),
+                total = order.get_total()
+            );
+            // Discard the error
+            tryn(5, Duration::from_secs(5), || {
+                self.bot_token
+                    .send_message(self.channel_id, msg.clone())
+                    .disable_web_page_preview(true)
+            })
+            .await
+            .map(drop)
+            .unwrap_or_else(|err| {
+                error_!(
+                    "telegram bot failed to send notification of placed order {} to chat {}: {}",
+                    order.get_shortid(),
+                    self.channel_id,
+                    err
+                )
+            });
         });
     }
 }

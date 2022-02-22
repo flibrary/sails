@@ -148,18 +148,9 @@ pub async fn cancel_order(
         }
     }
     // We redo the `to_info` in order to update the order info we got.
-    let order_clone = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
-    let bot_cloned = bot.inner().clone();
-    tokio::spawn(async move {
-        bot_cloned
-            .send_order_placed(
-                &order_clone.order_info,
-                &order_clone.buyer_info,
-                &order_clone.seller_info,
-                &order_clone.book_info,
-            )
-            .await
-    });
+    bot.inner()
+        .clone()
+        .send_order_update(order_id.get_id(), conn);
     Ok(Redirect::to(redirect))
 }
 
@@ -202,19 +193,7 @@ pub async fn progress(
         .await
         .into_flash(uri!("/"))?;
 
-    // We redo the `to_info` in order to update the order info we got.
-    let order_clone = order_id.to_info(&db).await.into_flash(uri!("/"))?;
-    let bot_cloned = bot.inner().clone();
-    tokio::spawn(async move {
-        bot_cloned
-            .send_order_placed(
-                &order_clone.order_info,
-                &order_clone.buyer_info,
-                &order_clone.seller_info,
-                &order_clone.book_info,
-            )
-            .await
-    });
+    bot.inner().clone().send_order_update(order_id.get_id(), db);
     Ok(Redirect::to(uri!("/orders", order_info_buyer(order_id))))
 }
 
@@ -257,9 +236,6 @@ pub async fn purchase(
     bot: &State<TelegramBot>,
 ) -> Result<Redirect, Flash<Redirect>> {
     let book = book_id.to_info(&db).await.into_flash(uri!("/"))?;
-    let seller_info = book.seller_info.clone();
-    let book_info = book.book_info.clone();
-    let buyer_info = user.info.clone();
 
     let info = db
         // TODO: We need to allow user to specify quantity
@@ -280,12 +256,7 @@ pub async fn purchase(
     // TODO: can we make it elegant
     let id = info.get_id().to_string();
 
-    let bot_cloned = bot.inner().clone();
-    tokio::spawn(async move {
-        bot_cloned
-            .send_order_placed(&info, &buyer_info, &seller_info, &book_info)
-            .await
-    });
+    bot.inner().clone().send_order_update(&id, db);
 
     Ok(Redirect::to(uri!("/orders", order_info_buyer(id))))
 }
