@@ -18,7 +18,7 @@ pub static BUILTIN_TAGS: Lazy<HashMap<Arc<str>, Value>> = Lazy::new(|| {
         "ads".into() => Value {name: "广告".to_string(), html: None, description: None },
         "store".into() => Value {name: "在线商店产品".to_string(), html: None, description: None },
         "sales".into() => Value {name: "特别优惠".to_string(), html: Some(r#"<span class="badge bg-success"><i class="bi bi-percent"></i> 特别优惠</span>"#.to_string()), description: Some("商品现已加入特别优惠，即刻超值入手".to_string()) },
-        "preoder".into() => Value { name: "预售".to_string(), html: Some(r#"<span class="badge bg-warning"><i class="bi bi-hourglass-split"></i> 预售</span>"#.to_string()), description: Some(r#"卖家已经为预售产品支付押金，如有质量问题可赔付"#.to_string())},
+        "preorder".into() => Value { name: "预售".to_string(), html: Some(r#"<span class="badge bg-warning"><i class="bi bi-hourglass-split"></i> 预售</span>"#.to_string()), description: Some(r#"卖家已经为预售产品支付押金，如有质量问题可赔付"#.to_string())},
         "flibrarypro".into() => Value { name: "FLibrary Pro".to_string(), html: Some(r#"<span class="badge bg-secondary"><i class="bi bi-award-fill"></i> FLibrary Pro</span>"#.to_string()), description: Some(r#"该商品已加入 FLibrary Pro 计划"#.to_string()) }
 
     }
