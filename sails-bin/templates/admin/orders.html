@@ -18,6 +18,7 @@
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
 	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	</tr>
@@ -28,6 +29,7 @@
 	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="{{ uri!("/market", crate::market::book_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
+	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
 	  <td><a href="{{ uri!("/orders", crate::orders::cancel_order(order.1.get_id(), uri!("/admin", admin_orders).to_string())) }}" class="btn btn-warning" role="button">Refund</a> <a href="{{ uri!("/admin", crate::admin::finish_order(order.1.get_id())) }}" class="btn btn-success" role="button">Finish</a></td>
 	</tr>
@@ -52,6 +54,7 @@
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
 	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	</tr>
@@ -62,6 +65,7 @@
 	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="{{ uri!("/market", crate::market::book_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
+	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
 	  <td><a href="{{ uri!("/orders", crate::orders::cancel_order(order.1.get_id(), uri!("/admin", admin_orders).to_string())) }}" class="btn btn-warning" role="button">Cancel</a></td>
 	</tr>
@@ -86,6 +90,7 @@
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
 	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
 	</tr>
       </thead>
@@ -95,6 +100,7 @@
 	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="{{ uri!("/market", crate::market::book_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
+	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
 	</tr>
 	{% endfor %}
@@ -119,6 +125,7 @@
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
 	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
 	  <th data-field="actions" scope="col">Actions</th>
 	</tr>
@@ -129,6 +136,7 @@
 	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
 	  <td><a href="{{ uri!("/market", crate::market::book_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
+	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
 	  <td><a href="{{ uri!("/admin", crate::admin::refund_order(order.1.get_id())) }}" class="btn btn-warning" role="button">Cancel</a></td>
 	</tr>

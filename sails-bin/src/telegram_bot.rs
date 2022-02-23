@@ -57,7 +57,7 @@ impl TelegramBot {
         };
         let order_link = |t: &TransactionInfo| {
             format!(
-                "[{}]({})",
+                "[#{}]({})",
                 t.get_shortid(),
                 uri!(
                     "https://flibrary.info/admin",
@@ -67,7 +67,7 @@ impl TelegramBot {
         };
 
         let msg = format!(
-            r#"Order Status Update: *{:?}*:
+            r#"Order Status Update: *#{:?}*:
 Order: {order}
 Buyer: {buyer}
 Seller: {seller}
