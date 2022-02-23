@@ -147,10 +147,10 @@ pub async fn cancel_order(
             ))
         }
     }
-    // We redo the `to_info` in order to update the order info we got.
-    bot.inner()
-        .clone()
-        .send_order_update(order_id.get_id(), conn);
+
+    bot.send_order_update(order_id.get_id(), &conn)
+        .await
+        .into_flash(uri!("/"))?;
     Ok(Redirect::to(redirect))
 }
 
@@ -193,7 +193,9 @@ pub async fn progress(
         .await
         .into_flash(uri!("/"))?;
 
-    bot.inner().clone().send_order_update(order_id.get_id(), db);
+    bot.send_order_update(order_id.get_id(), &db)
+        .await
+        .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/orders", order_info_buyer(order_id))))
 }
 
@@ -256,7 +258,9 @@ pub async fn purchase(
     // TODO: can we make it elegant
     let id = info.get_id().to_string();
 
-    bot.inner().clone().send_order_update(&id, db);
+    bot.send_order_update(&id, &db)
+        .await
+        .into_flash(uri!("/"))?;
 
     Ok(Redirect::to(uri!("/orders", order_info_buyer(id))))
 }
