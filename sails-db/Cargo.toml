@@ -20,7 +20,7 @@ bitflags = "^1"
 # Testing only, however, benchmark used it as well, and we have to use it in test_utils which cannot be gated
 diesel_migrations = "^1.4"
 # Verify users in a secure manner
-bcrypt = "^0.10"
+bcrypt = "^0.11"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 thiserror = "^1"
 phonenumber = "^0.3"
