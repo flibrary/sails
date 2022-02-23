@@ -11,7 +11,12 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
-use sails_db::{enums::ProductStatus, products::*};
+use sails_db::{
+    enums::ProductStatus,
+    error::SailsDbError,
+    products::*,
+    tags::{TagMapping, Tags},
+};
 
 #[derive(Template)]
 #[template(path = "market/deposit.html")]
@@ -84,6 +89,7 @@ pub async fn deposit_progress(
     if ((resp.trade_status == "TRADE_SUCCESS") | (resp.trade_status == "TRADE_FINISHED"))
         && (book.book_info.get_product_status() == &ProductStatus::Normal)
     {
+        let id = book.book_info.to_id();
         // Both of these indicate that we have successfully finished the transaction.
         // TRADE_FINISHED indicates it has been well pass the refunding deadline.
         // This means we can now verify this book!
@@ -91,6 +97,15 @@ pub async fn deposit_progress(
             book.book_info
                 .set_product_status(ProductStatus::Verified)
                 .update(c)
+        })
+        .await
+        .into_flash(uri!("/"))?;
+
+        // Add the preorder tag automatically
+        db.run(move |c| -> Result<(), SailsDbError> {
+            let tag = Tags::find_by_id(c, "preorder")?;
+            TagMapping::create(c, &tag, &id)?;
+            Ok(())
         })
         .await
         .into_flash(uri!("/"))?;
