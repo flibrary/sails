@@ -209,6 +209,12 @@ impl<'a> TagMappingFinder<'a> {
         Ok(self.query.first::<TagMapping>(self.conn)?)
     }
 
+    pub fn delete_by_product(self, product_id: &'a ProductId) -> Result<()> {
+        use crate::schema::tagmappings::dsl::*;
+        diesel::delete(tagmappings.filter(product.eq(product_id.get_id()))).execute(self.conn)?;
+        Ok(())
+    }
+
     pub fn id(mut self, id_provided: &'a str) -> Self {
         use crate::schema::tagmappings::dsl::*;
         self.query = self.query.filter(id.eq(id_provided));

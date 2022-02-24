@@ -8,6 +8,7 @@ use crate::{
     enums::ProductStatus,
     error::{SailsDbError, SailsDbResult as Result},
     schema::products,
+    tags::TagMappingFinder,
     users::UserId,
     Cmp, Order,
 };
@@ -37,6 +38,8 @@ impl ProductId {
     // Deletion would not be allowed if the product is referenced in the transaction due to the foreign key constraints
     pub fn delete(self, conn: &SqliteConnection) -> Result<()> {
         use crate::schema::products::dsl::*;
+        // Delete the tags mapping associated with the product
+        TagMappingFinder::new(conn, None).delete_by_product(&self)?;
         diesel::delete(products.filter(id.eq(&self.id))).execute(conn)?;
         Ok(())
     }
@@ -67,9 +70,14 @@ impl ProductId {
 pub struct Products;
 
 impl Products {
-    pub fn delete_by_seller(conn: &SqliteConnection, seller: &UserId) -> Result<usize> {
-        use crate::schema::products::dsl::*;
-        Ok(diesel::delete(products.filter(seller_id.eq(seller.get_id()))).execute(conn)?)
+    pub fn delete_by_seller(conn: &SqliteConnection, seller: &UserId) -> Result<()> {
+        for p in ProductFinder::new(conn, None)
+            .seller(seller.get_id())
+            .search()?
+        {
+            p.delete(conn)?;
+        }
+        Ok(())
     }
 }
 

@@ -1,5 +1,6 @@
 use super::*;
-use crate::{categories::Category, test_utils::establish_connection, users::*, Cmp};
+use crate::{categories::Category, tags::*, test_utils::establish_connection, users::*, Cmp};
+use std::collections::HashMap;
 
 #[test]
 fn create_product() {
@@ -192,6 +193,9 @@ fn search_products() {
 #[test]
 fn delete_product() {
     let conn = establish_connection();
+    let builder = TagsBuilder::new(HashMap::new());
+    builder.build(&conn).unwrap();
+
     // our seller
     let user_id = UserForm::new(
         "TestUser@example.org",
@@ -220,9 +224,14 @@ fn delete_product() {
     .create(&conn, &user_id, &user_id)
     .unwrap();
 
+    let sales = Tags::find_by_id(&conn, "sales").unwrap();
+    TagMapping::create(&conn, &sales, &id).unwrap();
+
     assert_eq!(ProductFinder::list(&conn).unwrap().len(), 1);
+    assert_eq!(TagMappingFinder::new(&conn, None).count().unwrap(), 1);
     id.delete(&conn).unwrap();
     assert_eq!(ProductFinder::list(&conn).unwrap().len(), 0);
+    assert_eq!(TagMappingFinder::new(&conn, None).count().unwrap(), 0);
 }
 
 #[test]

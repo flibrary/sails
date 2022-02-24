@@ -87,6 +87,7 @@ Total: {total}"#,
 
         let bot_token = self.bot_token.clone();
         let channel_id = self.channel_id;
+        // I don't know why it redundantly sends update sometimes.
         tokio::spawn(async move {
             // Discard the error
             tryn(5, Duration::from_secs(5), || {

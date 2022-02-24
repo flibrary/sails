@@ -2,8 +2,10 @@ use super::*;
 use crate::{
     categories::{Category, CtgTrait},
     products::*,
+    tags::*,
     test_utils::establish_connection,
 };
+use std::collections::HashMap;
 
 #[test]
 fn create_user() {
@@ -82,6 +84,9 @@ fn login_user() {
 #[test]
 fn delete_user() {
     let conn = establish_connection();
+    let builder = TagsBuilder::new(HashMap::new());
+    builder.build(&conn).unwrap();
+
     let user = UserForm::new(
         "TestUser@example.org",
         "Kanyang Ying",
@@ -109,7 +114,7 @@ fn delete_user() {
     let econ = Category::create(&conn, "Economics", 490)
         .and_then(Category::into_leaf)
         .unwrap();
-    IncompleteProduct::new(&econ, "Economics", 1, 1, "A horrible book")
+    let id = IncompleteProduct::new(&econ, "Economics", 1, 1, "A horrible book")
         .unwrap()
         .create(&conn, &user, &user)
         .unwrap();
@@ -124,13 +129,19 @@ fn delete_user() {
         .create(&conn, &another_user, &another_user)
         .unwrap();
 
+    let sales = Tags::find_by_id(&conn, "sales").unwrap();
+    TagMapping::create(&conn, &sales, &id).unwrap();
+
     assert_eq!(ProductFinder::list(&conn).unwrap().len(), 3);
     assert_eq!(UserFinder::list(&conn).unwrap().len(), 2);
+    assert_eq!(TagMappingFinder::new(&conn, None).count().unwrap(), 1);
     user.delete(&conn).unwrap();
     // There is still one book created by TestUser2
     assert_eq!(ProductFinder::list(&conn).unwrap().len(), 1);
     // Only TestUser2 is left
     assert_eq!(UserFinder::list(&conn).unwrap().len(), 1);
+    // Tag Mapping
+    assert_eq!(TagMappingFinder::new(&conn, None).count().unwrap(), 0);
 }
 
 #[test]
