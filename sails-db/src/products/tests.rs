@@ -327,7 +327,7 @@ fn delegation() {
     assert_eq!(ProductFinder::list(&conn).unwrap().len(), 2);
     assert_eq!(
         ProductFinder::new(&conn, None)
-            .seller(&user.get_id())
+            .seller(&user)
             .first_info()
             .unwrap()
             .prodname,
@@ -335,7 +335,7 @@ fn delegation() {
     );
     assert_eq!(
         ProductFinder::new(&conn, None)
-            .owner(&user.get_id())
+            .owner(&user)
             .first_info()
             .unwrap()
             .prodname,
@@ -344,7 +344,7 @@ fn delegation() {
     // Another user owns nothing!
     assert_eq!(
         ProductFinder::new(&conn, None)
-            .seller(&another_user.get_id())
+            .seller(&another_user)
             .search()
             .unwrap()
             .len(),
@@ -352,7 +352,7 @@ fn delegation() {
     );
     assert_eq!(
         ProductFinder::new(&conn, None)
-            .delegator(&another_user.get_id())
+            .delegator(&another_user)
             .first_info()
             .unwrap()
             .prodname,

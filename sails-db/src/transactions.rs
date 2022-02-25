@@ -80,7 +80,7 @@ impl Transactions {
 
     pub fn buyer_refundable(conn: &SqliteConnection, buyer: &UserId) -> Result<bool> {
         Ok(TransactionFinder::new(conn, None)
-            .buyer(buyer.get_id())
+            .buyer(buyer)
             .status(TransactionStatus::Refunded, Cmp::Equal)
             .search()?
             .len()
@@ -255,21 +255,24 @@ impl<'a> TransactionFinder<'a> {
             .unwrap()) // guranteed to be positive.
     }
 
-    pub fn most_recent_order(conn: &'a SqliteConnection, user: &'a str) -> Result<TransactionInfo> {
+    pub fn most_recent_order(
+        conn: &'a SqliteConnection,
+        user: &'a UserId,
+    ) -> Result<TransactionInfo> {
         Self::new(conn, None)
             .buyer(user)
             .order_by_time(Order::Desc)
             .first_info()
     }
 
-    pub fn stats(conn: &'a SqliteConnection, user: Option<&'a str>) -> Result<TxStats> {
+    pub fn stats(conn: &'a SqliteConnection, user: Option<&'a UserId>) -> Result<TxStats> {
         // TODO: we should write SQL instead
         fn get_total(finder: TransactionFinder) -> Result<BigUint> {
             Ok(finder.search_info()?.iter().map(|x| x.get_total()).sum())
         }
 
         fn selection<'a>(
-            user: &Option<&'a str>,
+            user: &Option<&'a UserId>,
             conn: &'a SqliteConnection,
         ) -> TransactionFinder<'a> {
             if let Some(user) = user {
@@ -362,21 +365,21 @@ impl<'a> TransactionFinder<'a> {
         self
     }
 
-    pub fn seller(mut self, seller_id: &'a str) -> Self {
+    pub fn seller(mut self, seller_id: &'a UserId) -> Self {
         use crate::schema::transactions::dsl::*;
-        self.query = self.query.filter(seller.eq(seller_id));
+        self.query = self.query.filter(seller.eq(seller_id.get_id()));
         self
     }
 
-    pub fn product(mut self, product_id: &'a str) -> Self {
+    pub fn product(mut self, product_id: &'a ProductId) -> Self {
         use crate::schema::transactions::dsl::*;
-        self.query = self.query.filter(product.eq(product_id));
+        self.query = self.query.filter(product.eq(product_id.get_id()));
         self
     }
 
-    pub fn buyer(mut self, buyer_id: &'a str) -> Self {
+    pub fn buyer(mut self, buyer_id: &'a UserId) -> Self {
         use crate::schema::transactions::dsl::*;
-        self.query = self.query.filter(buyer.eq(buyer_id));
+        self.query = self.query.filter(buyer.eq(buyer_id.get_id()));
         self
     }
 
@@ -692,7 +695,7 @@ mod tests {
             .unwrap();
 
         // No most recent order before purchase
-        assert!(TransactionFinder::most_recent_order(&conn, &buyer.get_id()).is_err());
+        assert!(TransactionFinder::most_recent_order(&conn, &buyer).is_err());
         // Purchase it
         Transactions::buy(
             &conn,
@@ -704,7 +707,7 @@ mod tests {
         .unwrap();
         // Last address updated
         assert_eq!(
-            TransactionFinder::most_recent_order(&conn, &buyer.get_id())
+            TransactionFinder::most_recent_order(&conn, &buyer)
                 .unwrap()
                 .get_address(),
             "258 Huanhu South Road, Dongqian Lake, Ningbo, China"
@@ -722,7 +725,7 @@ mod tests {
             Transactions::buy(&conn, &book_3_id, &buyer, 2, "宁波外国语学校 S2202").unwrap();
         // Last address updated
         assert_eq!(
-            TransactionFinder::most_recent_order(&conn, &buyer.get_id())
+            TransactionFinder::most_recent_order(&conn, &buyer)
                 .unwrap()
                 .get_address(),
             "宁波外国语学校 S2202"
@@ -731,7 +734,7 @@ mod tests {
             Transactions::buy(&conn, &book_4_id, &buyer, 1, "宁波外国语学校 S2301").unwrap();
         // Last order updated
         assert_eq!(
-            TransactionFinder::most_recent_order(&conn, &buyer.get_id())
+            TransactionFinder::most_recent_order(&conn, &buyer)
                 .unwrap()
                 .get_id(),
             tx_4_id.get_id()
@@ -739,7 +742,7 @@ mod tests {
         let tx_5_id =
             Transactions::buy(&conn, &book_5_id, &buyer, 1, "宁波市海曙区天一广场").unwrap();
         assert_eq!(
-            TransactionFinder::most_recent_order(&conn, &buyer.get_id())
+            TransactionFinder::most_recent_order(&conn, &buyer)
                 .unwrap()
                 .get_id(),
             tx_5_id.get_id()
@@ -778,7 +781,7 @@ mod tests {
         );
 
         assert_eq!(
-            TransactionFinder::stats(&conn, Some(seller.get_id())).unwrap(),
+            TransactionFinder::stats(&conn, Some(&seller)).unwrap(),
             expected_stats
         );
     }

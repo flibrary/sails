@@ -80,7 +80,7 @@ pub async fn portal_guest(
 ) -> Result<PortalGuestPage, Flash<Redirect>> {
     let user = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
 
-    let uid = user.info.get_id().to_string();
+    let uid = user.info.to_id();
     let (books_operated, books_owned) = conn
         .run(
             move |c| -> Result<(Vec<ProductEntry>, Vec<ProductEntry>), SailsDbError> {
@@ -131,7 +131,7 @@ pub async fn portal(
     user: UserInfoGuard<Cookie>,
     conn: DbConn,
 ) -> Result<PortalPage, Flash<Redirect>> {
-    let uid = user.info.get_id().to_string();
+    let uid = user.info.to_id();
     #[allow(clippy::type_complexity)]
     let (books_operated, books_owned, orders_placed, orders_received) = conn
         .run(

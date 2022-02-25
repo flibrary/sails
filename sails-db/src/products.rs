@@ -71,10 +71,7 @@ pub struct Products;
 
 impl Products {
     pub fn delete_by_seller(conn: &SqliteConnection, seller: &UserId) -> Result<()> {
-        for p in ProductFinder::new(conn, None)
-            .seller(seller.get_id())
-            .search()?
-        {
+        for p in ProductFinder::new(conn, None).seller(seller).search()? {
             p.delete(conn)?;
         }
         Ok(())
@@ -149,29 +146,35 @@ impl<'a> ProductFinder<'a> {
     }
 
     // User owns the product and operates it
-    pub fn seller(mut self, seller: &'a str) -> Self {
+    pub fn seller(mut self, seller: &'a UserId) -> Self {
         use crate::schema::products::dsl::*;
-        self.query = self
-            .query
-            .filter(seller_id.eq(seller).and(operator_id.eq(seller)));
+        self.query = self.query.filter(
+            seller_id
+                .eq(seller.get_id())
+                .and(operator_id.eq(seller.get_id())),
+        );
         self
     }
 
     // User owns the product but delegated it to other users
-    pub fn owner(mut self, user: &'a str) -> Self {
+    pub fn owner(mut self, user: &'a UserId) -> Self {
         use crate::schema::products::dsl::*;
-        self.query = self
-            .query
-            .filter(seller_id.eq(user).and(operator_id.ne(user)));
+        self.query = self.query.filter(
+            seller_id
+                .eq(user.get_id())
+                .and(operator_id.ne(user.get_id())),
+        );
         self
     }
 
     // User doesn't own the product but has the right to operate it.
-    pub fn delegator(mut self, user: &'a str) -> Self {
+    pub fn delegator(mut self, user: &'a UserId) -> Self {
         use crate::schema::products::dsl::*;
-        self.query = self
-            .query
-            .filter(seller_id.ne(user).and(operator_id.eq(user)));
+        self.query = self.query.filter(
+            seller_id
+                .ne(user.get_id())
+                .and(operator_id.eq(user.get_id())),
+        );
         self
     }
 

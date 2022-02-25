@@ -213,7 +213,7 @@ pub async fn checkout(
     user: UserIdGuard<Cookie>,
 ) -> Result<CheckoutPage, Flash<Redirect>> {
     let addr = db
-        .run(move |c| TransactionFinder::most_recent_order(c, user.id.get_id()))
+        .run(move |c| TransactionFinder::most_recent_order(c, &user.id))
         .await
         .map(|x| x.get_address().to_string())
         .ok();
