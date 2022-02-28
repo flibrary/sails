@@ -378,7 +378,7 @@ pub async fn refund_order(
             ),
         )
         .into_flash(uri!("/"))?
-        .send::<RefundTradeResp>()
+        .send::<RefundTradeResp>(client.client())
         .await
         .into_flash(uri!("/"))?
         .into_flash(uri!("/"))?;

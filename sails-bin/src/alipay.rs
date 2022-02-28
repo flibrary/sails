@@ -1,5 +1,6 @@
 use core::fmt;
 use num_bigint::BigUint;
+use reqwest::Client;
 use rocket::serde::DeserializeOwned;
 use rsa::{
     pkcs1::FromRsaPrivateKey, pkcs8::FromPublicKey, Hash, PaddingScheme::PKCS1v15Sign, PublicKey,
@@ -82,12 +83,30 @@ impl AlipayAppPrivKey {
     }
 }
 
+fn deserialize_reqwest_client<'de, D>(deserializer: D) -> Result<(String, Client), D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let app_id = String::deserialize(deserializer)?;
+    Ok((app_id, Client::new()))
+}
+
+// Reuse the client to reduce memory footprint
 #[derive(Clone, Debug, Deserialize)]
 pub struct AlipayClient {
-    alipay_app_id: String,
+    #[serde(deserialize_with = "deserialize_reqwest_client")]
+    #[serde(rename = "alipay_app_id")]
+    inner: (String, Client),
 }
 
 impl AlipayClient {
+    #[allow(unused)]
+    pub fn new(alipay_app_id: String) -> Self {
+        AlipayClient {
+            inner: (alipay_app_id, Client::new()),
+        }
+    }
+
     pub fn request<'a, B: BizContent>(
         &'a self,
         private_key: &'a AlipayAppPrivKey,
@@ -96,7 +115,7 @@ impl AlipayClient {
         use chrono::{FixedOffset, Utc};
 
         let mut req = Request {
-            app_id: &self.alipay_app_id,
+            app_id: &self.inner.0,
             charset: "utf-8",
             method: biz_content.method(),
             sign_type: "RSA2",
@@ -111,6 +130,10 @@ impl AlipayClient {
 
         req.sign = Some(private_key.borrow().sign(&req)?);
         Ok(req)
+    }
+
+    pub fn client(&self) -> &Client {
+        &self.inner.1
     }
 }
 
@@ -173,8 +196,10 @@ impl<T> Display for SignedResponse<T> {
 impl<'a, B: BizContent> Request<'a, B> {
     // On success, it returns the customized response. On failure, it returns the full response for debug
     // It the outer result is a failure, then something unrelated to the API requests went wrong (e.g. network is switched off)
-    pub async fn send<T: DeserializeOwned>(&self) -> anyhow::Result<Result<T, SignedResponse<T>>> {
-        let client = reqwest::Client::new();
+    pub async fn send<T: DeserializeOwned>(
+        &self,
+        client: &Client,
+    ) -> anyhow::Result<Result<T, SignedResponse<T>>> {
         let res = client
             // The official alipay SDK concats charset after gateway as well. Blame their documentations.
             // For reference: https://github.com/yansongda/pay/issues/14
@@ -358,9 +383,7 @@ mod tests {
 
     #[test]
     fn precreate_request() {
-        let client = AlipayClient {
-            alipay_app_id: "2021003109657615".to_string(),
-        };
+        let client = AlipayClient::new("2021003109657615".to_string());
 
         let priv_key = priv_key();
         let mut req = client
@@ -380,9 +403,7 @@ mod tests {
 
     #[test]
     fn trade_query() {
-        let client = AlipayClient {
-            alipay_app_id: "2021003109657615".to_string(),
-        };
+        let client = AlipayClient::new("2021003109657615".to_string());
 
         let priv_key = priv_key();
         let mut req = client.request(&priv_key, TradeQuery::new("12345")).unwrap();

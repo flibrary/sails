@@ -72,7 +72,7 @@ pub async fn order_info_buyer(
                 ),
             )
             .into_flash(uri!("/"))?
-            .send::<PrecreateResp>()
+            .send::<PrecreateResp>(client.client())
             .await
             .into_flash(uri!("/"))?;
         Ok(OrderInfoBuyer {
@@ -107,7 +107,7 @@ pub async fn cancel_order(
                 let resp = client
                     .request(priv_key, CancelTrade::new(info.order_info.get_id()))
                     .into_flash(uri!("/"))?
-                    .send::<CancelTradeResp>()
+                    .send::<CancelTradeResp>(client.client())
                     .await
                     .into_flash(uri!("/"))?
                     .into_flash(uri!("/"))?;
@@ -131,7 +131,7 @@ pub async fn cancel_order(
                     ),
                 )
                 .into_flash(uri!("/"))?
-                .send::<RefundTradeResp>()
+                .send::<RefundTradeResp>(client.client())
                 .await
                 .into_flash(uri!("/"))?
                 .into_flash(uri!("/"))?;
@@ -169,7 +169,7 @@ pub async fn progress(
     let resp = client
         .request(priv_key, TradeQuery::new(order.order_info.get_id()))
         .into_flash(uri!("/"))?
-        .send::<TradeQueryResp>()
+        .send::<TradeQueryResp>(client.client())
         .await
         .into_flash(uri!("/"))?
         .into_flash(uri!("/"))?;

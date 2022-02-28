@@ -51,7 +51,7 @@ pub async fn deposit_info(
                 ),
             )
             .into_flash(uri!("/"))?
-            .send::<PrecreateResp>()
+            .send::<PrecreateResp>(client.client())
             .await
             .into_flash(uri!("/"))?;
         Ok(DepositInfo {
@@ -80,7 +80,7 @@ pub async fn deposit_progress(
     let resp = client
         .request(priv_key, TradeQuery::new(book.book_info.get_id()))
         .into_flash(uri!("/"))?
-        .send::<TradeQueryResp>()
+        .send::<TradeQueryResp>(client.client())
         .await
         .into_flash(uri!("/"))?
         .into_flash(uri!("/"))?;
