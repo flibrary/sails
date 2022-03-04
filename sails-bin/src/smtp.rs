@@ -1,6 +1,6 @@
 use lettre::{
-    transport::smtp::authentication::Credentials, AsyncSmtpTransport, AsyncTransport, Message,
-    Tokio1Executor,
+    message::Mailbox, transport::smtp::authentication::Credentials, AsyncSmtpTransport,
+    AsyncTransport, Message, Tokio1Executor,
 };
 use serde::{Deserialize, Serialize};
 
@@ -14,7 +14,10 @@ pub struct SmtpCreds {
 impl SmtpCreds {
     pub async fn send(&self, dst: &str, subject: &str, body: String) -> anyhow::Result<()> {
         let email = Message::builder()
-            .from(self.smtp_username.parse()?)
+            .from(Mailbox::new(
+                Some("FLibrary Sails".to_string()),
+                self.smtp_username.parse()?,
+            ))
             // We have already checked it once
             .to(dst.parse()?)
             .subject(subject)

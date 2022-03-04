@@ -72,38 +72,25 @@ pub async fn create_user(
         ));
     };
 
-    // We parse it to only allow outlook emails
-    let email: lettre::Address = info
+    smtp.send(
+        &info.user_info.id,
+        "Your FLibrary Verification Email",
+        generate_verification_link(&info.user_info.id, aead).into_flash(uri!("/"))?,
+    )
+    .await
+    .into_flash(uri!("/"))?;
+    // Sanitize the html
+    // Even though we didn't give user a chance to type in description,
+    // malicious users can still manually post the form to us.
+    info.user_info.description = info
         .user_info
-        .id
-        .parse::<lettre::Address>()
-        .into_flash(uri!("/"))?;
-    if email.domain().to_ascii_lowercase() == "outlook.com" {
-        smtp.send(
-            &info.user_info.id,
-            "Your FLibrary Verification Email",
-            generate_verification_link(&info.user_info.id, aead).into_flash(uri!("/"))?,
-        )
+        .description
+        .as_ref()
+        .map(|d| sanitize_html(d));
+    conn.run(move |c| info.user_info.to_ref()?.create(c))
         .await
         .into_flash(uri!("/"))?;
-        // Sanitize the html
-        // Even though we didn't give user a chance to type in description,
-        // malicious users can still manually post the form to us.
-        info.user_info.description = info
-            .user_info
-            .description
-            .as_ref()
-            .map(|d| sanitize_html(d));
-        conn.run(move |c| info.user_info.to_ref()?.create(c))
-            .await
-            .into_flash(uri!("/"))?;
-        Ok(Redirect::to(uri!("/user", signup_instruction)))
-    } else {
-        Err(Flash::error(
-            Redirect::to(uri!("/")),
-            "please use outlook email addresses",
-        ))
-    }
+    Ok(Redirect::to(uri!("/user", signup_instruction)))
 }
 
 #[derive(Template)]
