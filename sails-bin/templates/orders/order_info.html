@@ -29,6 +29,9 @@
       <div class="alert alert-warning" role="alert">
 	注意：<b>请在扫码后三小时内付款。</b>
       </div>
+      <div class="alert alert-warning" role="alert">
+	超过订单取消时限，订单信息已冻结。<b>您可继续付款以完成订单</b>，如需取消订单请联系客服。
+      </div>
       <center><div id="qrcode"></div></center><br>
       <a href="alipays://platformapi/startapp?appId=20000067&url={{urlencoding::encode(resp.qr_code)}}" class="btn btn-primary" role="button">使用支付宝支付</a>
       {% when Err with (err) %}
@@ -37,7 +40,7 @@
       </div>
       {% endmatch %}
       <a href="{{ uri!("/orders", crate::orders::progress(self.order.get_id())) }}" class="btn btn-success" role="button">下一步</a>
-      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger" role="button" onclick="return confirm('您确认取消订单吗？这无法撤消。');">取消订单</a>
+      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger disabled" role="button" onclick="return confirm('您确认取消订单吗？这无法撤消。');">取消订单</a>
 
       {% when sails_db::enums::TransactionStatus::Paid %}
       <div class="progress">
@@ -47,7 +50,7 @@
       <h3>您已成功付款</h3>
       感谢您的付款！接下来您只需要等待我们为您配送书本。或者您可以用订单 ID: <code>{{ order.get_shortid() }}</code> 来我们的仓库自提书本。
       <br>
-      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger" role="button" onclick="return confirm('您确认退款吗？这无法撤消。');">取消订单并退款</a>
+      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger disabled" role="button" onclick="return confirm('您确认退款吗？这无法撤消。');">取消订单并退款</a>
 
       {% when sails_db::enums::TransactionStatus::Finished %}
       <div class="progress">
