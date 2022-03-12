@@ -4,15 +4,8 @@ use rocket::{
     form::Form,
     response::{Flash, Redirect},
 };
-use sails_db::{
-    categories::{Categories, Category, CtgTrait},
-    error::SailsDbError,
-    products::*,
-    transactions::*,
-    users::*,
-};
+use sails_db::{error::SailsDbError, products::*, transactions::*, users::*};
 
-type ProductEntry = (ProductInfo, Category);
 type OrderEntry = (ProductInfo, TransactionInfo);
 
 #[derive(Debug, FromForm, Clone)]
@@ -58,16 +51,16 @@ pub async fn update_user_page(user: UserInfoGuard<Cookie>) -> UpdateUserPage {
 #[template(path = "user/portal_guest.html")]
 pub struct PortalGuestPage {
     user: UserInfo,
-    books_operated: Vec<ProductEntry>,
-    books_owned: Vec<ProductEntry>,
+    books_operated: Vec<ProductInfo>,
+    books_owned: Vec<ProductInfo>,
 }
 
 #[derive(Template)]
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
     user: UserInfo,
-    books_operated: Vec<ProductEntry>,
-    books_owned: Vec<ProductEntry>,
+    books_operated: Vec<ProductInfo>,
+    books_owned: Vec<ProductInfo>,
     orders_placed: Vec<OrderEntry>,
     orders_received: Vec<OrderEntry>,
 }
@@ -83,35 +76,19 @@ pub async fn portal_guest(
     let uid = user.info.to_id();
     let (books_operated, books_owned) = conn
         .run(
-            move |c| -> Result<(Vec<ProductEntry>, Vec<ProductEntry>), SailsDbError> {
+            move |c| -> Result<(Vec<ProductInfo>, Vec<ProductInfo>), SailsDbError> {
                 let books_operated = ProductFinder::new(c, None)
                     .seller(&uid)
                     .search_info()?
                     .into_iter()
-                    .map(|x| {
-                        let ctg = Categories::find_by_id(c, x.get_category_id())?;
-                        Ok((x, ctg))
-                    })
                     .chain(
                         ProductFinder::new(c, None)
                             .delegator(&uid)
                             .search_info()?
-                            .into_iter()
-                            .map(|x| {
-                                let ctg = Categories::find_by_id(c, x.get_category_id())?;
-                                Ok((x, ctg))
-                            }),
+                            .into_iter(),
                     )
-                    .collect::<Result<Vec<ProductEntry>, SailsDbError>>()?;
-                let books_owned = ProductFinder::new(c, None)
-                    .owner(&uid)
-                    .search_info()?
-                    .into_iter()
-                    .map(|x| {
-                        let ctg = Categories::find_by_id(c, x.get_category_id())?;
-                        Ok((x, ctg))
-                    })
-                    .collect::<Result<Vec<ProductEntry>, SailsDbError>>()?;
+                    .collect();
+                let books_owned = ProductFinder::new(c, None).owner(&uid).search_info()?;
                 Ok((books_operated, books_owned))
             },
         )
@@ -137,8 +114,8 @@ pub async fn portal(
         .run(
             move |c| -> Result<
                 (
-                    Vec<ProductEntry>,
-                    Vec<ProductEntry>,
+                    Vec<ProductInfo>,
+                    Vec<ProductInfo>,
                     Vec<OrderEntry>,
                     Vec<OrderEntry>,
                 ),
@@ -148,30 +125,14 @@ pub async fn portal(
                     .seller(&uid)
                     .search_info()?
                     .into_iter()
-                    .map(|x| {
-                        let ctg = Categories::find_by_id(c, x.get_category_id())?;
-                        Ok((x, ctg))
-                    })
                     .chain(
                         ProductFinder::new(c, None)
                             .delegator(&uid)
                             .search_info()?
-                            .into_iter()
-                            .map(|x| {
-                                let ctg = Categories::find_by_id(c, x.get_category_id())?;
-                                Ok((x, ctg))
-                            }),
+                            .into_iter(),
                     )
-                    .collect::<Result<Vec<ProductEntry>, SailsDbError>>()?;
-                let books_owned = ProductFinder::new(c, None)
-                    .owner(&uid)
-                    .search_info()?
-                    .into_iter()
-                    .map(|x| {
-                        let ctg = Categories::find_by_id(c, x.get_category_id())?;
-                        Ok((x, ctg))
-                    })
-                    .collect::<Result<Vec<ProductEntry>, SailsDbError>>()?;
+                    .collect();
+                let books_owned = ProductFinder::new(c, None).owner(&uid).search_info()?;
 
                 let orders_placed = TransactionFinder::new(c, None)
                     .buyer(&uid)

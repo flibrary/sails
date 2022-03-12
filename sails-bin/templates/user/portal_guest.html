@@ -61,7 +61,24 @@
   {% if books_operated.len() > 0 %}
   {% let books = books_operated.iter() %}
   <h3>此用户上架的书</h3>
-  {% include "book_list.html" %}
+  <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+    <thead>
+      <tr>
+	<th data-field="id" data-sortable="true" scope="col">ID</th>
+	<th data-field="name" data-sortable="true" scope="col">Book name</th>
+	<th data-field="price" data-sortable="true" scope="col">Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for book in books %}
+      <tr>
+	<th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
+	<td><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_prodname()}}</a></td>
+	<td>{{book.get_price()}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
   {% else %}
   <h3>此用户没有上架书</h3>
   {% block postbook_button %}{% endblock postbook_button %}
@@ -71,7 +88,24 @@
   {% if books_owned.len() > 0 %}
   <h3>此用户拥有的书</h3>
   {% let books = books_owned.iter() %}
-  {% include "book_list.html" %}
+  <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+    <thead>
+      <tr>
+	<th data-field="id" data-sortable="true" scope="col">ID</th>
+	<th data-field="name" data-sortable="true" scope="col">Book name</th>
+	<th data-field="price" data-sortable="true" scope="col">Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for book in books %}
+      <tr>
+	<th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
+	<td><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_prodname()}}</a></td>
+	<td>{{book.get_price()}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
   {% else %}
   <h3>此用户没有使用 Flibrary Pro 服务</h3>
   {% block postbook_button %}{% endblock postbook_button %}
