@@ -1,22 +1,22 @@
 {% extends "base.html" %}
-{% block title %}上架书本{% endblock title %}
+{% block title %}上架商品{% endblock title %}
 {% block content %}
   <main class="container">
   <div class="p-5 rounded shadow">
-    <h1>上架书本</h1>
-    <p class="lead">填写书本相关信息，买家会在商店里看到您对书本的描述</p>
+    <h1>上架商品</h1>
+    <p class="lead">填写商品相关信息，买家会在商店里看到您对商品的描述</p>
   </div>
   <br>
 
   <div class="p-5 rounded shadow">
-    <h1>书本信息</h1>
+    <h1>商品信息</h1>
     {% block form_link %}
-    <form action="cow_book" method="post">
+    <form action="cow_prod" method="post">
     {% endblock form_link %}
     <div class="form-group row">
-      <label for="inputBook" class="col-sm-2 col-form-label">名称</label>
+      <label for="inputProd" class="col-sm-2 col-form-label">名称</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" id="inputBook" placeholder="Book name" name="prodname">
+        <input type="text" class="form-control" id="inputProd" placeholder="Prod name" name="prodname">
       </div>
     </div>
     <br>
@@ -52,7 +52,7 @@
       </div>
     </div>
     <br>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">上架书本</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">上架商品</button>
   </form>
   </div>
   <br>

@@ -116,17 +116,17 @@ fn delete_user() {
         .unwrap();
     let id = IncompleteProduct::new(&econ, "Economics", 1, 1, "A horrible book")
         .unwrap()
-        .create(&conn, &user, &user)
+        .create(&conn, &user)
         .unwrap();
 
     IncompleteProduct::new(&econ, "The Economics", 1, 1, "Another horrible book")
         .unwrap()
-        .create(&conn, &user, &user)
+        .create(&conn, &user)
         .unwrap();
 
     IncompleteProduct::new(&econ, "Economics Principle", 1, 1, "Another horrible book")
         .unwrap()
-        .create(&conn, &another_user, &another_user)
+        .create(&conn, &another_user)
         .unwrap();
 
     let sales = Tags::find_by_id(&conn, "sales").unwrap();

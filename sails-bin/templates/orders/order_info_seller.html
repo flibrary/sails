@@ -61,11 +61,11 @@
     </tr>
     <tr>
       <th scope="row">卖家</th>
-      <td>{{ book.get_seller_id() }}</td>
+      <td>{{ prod.get_seller_id() }}</td>
     </tr>
     <tr>
-      <th scope="row">书本 ID</th>
-      <td><a href="{{ uri!("/market", crate::market::book_page_owned(self.book.get_id())) }}">{{ book.get_shortid() }}</a></td>
+      <th scope="row">商品 ID</th>
+      <td><a href="{{ uri!("/store", crate::store::prod_page_owned(self.prod.get_id())) }}">{{ prod.get_shortid() }}</a></td>
     </tr>
     <tr>
       <th scope="row">时间戳</th>

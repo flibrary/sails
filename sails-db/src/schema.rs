@@ -26,7 +26,6 @@ table! {
         id -> Text,
         shortid -> Text,
         seller_id -> Text,
-        operator_id -> Text,
         category -> Text,
         prodname -> Text,
         price -> BigInt,
@@ -84,6 +83,7 @@ table! {
 }
 
 joinable!(products -> categories (category));
+joinable!(products -> users (seller_id));
 joinable!(tagmappings -> products (product));
 joinable!(tagmappings -> tags (tag));
 joinable!(transactions -> products (product));

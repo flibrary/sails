@@ -20,7 +20,7 @@ use sails_db::{enums::TransactionStatus, products::*, transactions::*};
 #[derive(Template)]
 #[template(path = "orders/order_info_seller.html")]
 pub struct OrderInfoSeller {
-    book: ProductInfo,
+    prod: ProductInfo,
     order: TransactionInfo,
 }
 
@@ -32,7 +32,7 @@ pub async fn order_info_seller(
 ) -> Result<OrderInfoSeller, Flash<Redirect>> {
     let order = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(OrderInfoSeller {
-        book: order.book_info,
+        prod: order.prod_info,
         order: order.order_info,
     })
 }
@@ -40,7 +40,7 @@ pub async fn order_info_seller(
 #[derive(Template)]
 #[template(path = "orders/order_info.html")]
 pub struct OrderInfoBuyer {
-    book: ProductInfo,
+    prod: ProductInfo,
     order: TransactionInfo,
     // Alipay precreate API response
     resp: Option<Result<PrecreateResp, SignedResponse<PrecreateResp>>>,
@@ -67,7 +67,7 @@ pub async fn order_info_buyer(
                 Precreate::new(
                     order.order_info.get_id(),
                     // Alipay doesn't play well with UTF-8
-                    order.book_info.get_prodname(),
+                    order.prod_info.get_prodname(),
                     order.order_info.get_total(),
                 ),
             )
@@ -76,13 +76,13 @@ pub async fn order_info_buyer(
             .await
             .into_flash(uri!("/"))?;
         Ok(OrderInfoBuyer {
-            book: order.book_info,
+            prod: order.prod_info,
             order: order.order_info,
             resp: Some(resp),
         })
     } else {
         Ok(OrderInfoBuyer {
-            book: order.book_info,
+            prod: order.prod_info,
             order: order.order_info,
             resp: None,
         })
@@ -202,14 +202,14 @@ pub async fn progress(
 #[derive(Template)]
 #[template(path = "orders/checkout.html")]
 pub struct CheckoutPage {
-    book: ProductInfo,
+    prod: ProductInfo,
     recent_address: Option<String>,
 }
 
-#[get("/checkout?<book_id>")]
+#[get("/checkout?<prod_id>")]
 pub async fn checkout(
     db: DbConn,
-    book_id: BookGuard,
+    prod_id: ProdGuard,
     user: UserIdGuard<Cookie>,
 ) -> Result<CheckoutPage, Flash<Redirect>> {
     let addr = db
@@ -218,7 +218,7 @@ pub async fn checkout(
         .map(|x| x.get_address().to_string())
         .ok();
     Ok(CheckoutPage {
-        book: book_id.to_info(&db).await.into_flash(uri!("/"))?.book_info,
+        prod: prod_id.to_info(&db).await.into_flash(uri!("/"))?.prod_info,
         recent_address: addr,
     })
 }
@@ -229,22 +229,22 @@ pub struct CheckoutInfo {
     address: String,
 }
 
-#[post("/purchase?<book_id>", data = "<info>")]
+#[post("/purchase?<prod_id>", data = "<info>")]
 pub async fn purchase(
     db: DbConn,
-    book_id: BookGuard,
+    prod_id: ProdGuard,
     user: UserInfoGuard<Cookie>,
     info: Form<Strict<CheckoutInfo>>,
     bot: &State<TelegramBot>,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_info(&db).await.into_flash(uri!("/"))?;
+    let prod = prod_id.to_info(&db).await.into_flash(uri!("/"))?;
 
     let info = db
         // TODO: We need to allow user to specify quantity
         .run(move |c| {
             Transactions::buy(
                 c,
-                &book.book_info.to_id(),
+                &prod.prod_info.to_id(),
                 &user.info.to_id(),
                 info.quantity.get(),
                 &info.address,

@@ -1,6 +1,6 @@
 use crate::{
-    guards::BookGuard,
-    market::{cmp_product, find_first_image, ProductCard},
+    guards::ProdGuard,
+    store::{cmp_product, find_first_image, ProductCard},
     DbConn, IntoFlash,
 };
 use askama::Template;
@@ -21,7 +21,7 @@ pub struct CategoriesPage {
 pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redirect>> {
     let products = conn
         .run(move |c| -> Result<Vec<ProductCard>, SailsDbError> {
-            // We only display allowed books
+            // We only display allowed prods
             let mut product_info = ProductFinder::new(c, None)
                 .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
                 .search_info()?
@@ -35,7 +35,7 @@ pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redire
                         .search_tag()?;
                     Ok((x, image, category, tags))
                 })
-                // Reverse the book order
+                // Reverse the prod order
                 .rev()
                 .collect::<Result<Vec<ProductCard>, SailsDbError>>()?;
 
@@ -80,7 +80,7 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
                     current_parent = parent_categories[0].parent_id();
                 }
 
-                // We only display allowed books
+                // We only display allowed prods
                 let mut product_info = ProductFinder::new(c, None)
                     .category(&category)?
                     .status(sails_db::enums::ProductStatus::Verified, Cmp::Equal)
@@ -95,7 +95,7 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
                             .search_tag()?;
                         Ok((x, image, category, tags))
                     })
-                    // Reverse the book order
+                    // Reverse the prod order
                     .rev()
                     .collect::<Result<Vec<ProductCard>, SailsDbError>>()?;
 

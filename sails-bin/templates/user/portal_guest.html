@@ -57,58 +57,31 @@
   </div>
   <br>
 
-  <div class="p-5 rounded shadow">
-  {% if books_operated.len() > 0 %}
-  {% let books = books_operated.iter() %}
+  <div class="shadow p-5 rounded html-body">
+  {% if prods_owned.len() > 0 %}
   <h3>此用户上架的书</h3>
+  {% let prods = prods_owned.iter() %}
   <table class="table" data-toggle="table" data-pagination="true" data-search="true">
     <thead>
       <tr>
 	<th data-field="id" data-sortable="true" scope="col">ID</th>
-	<th data-field="name" data-sortable="true" scope="col">Book name</th>
+	<th data-field="name" data-sortable="true" scope="col">Prod name</th>
 	<th data-field="price" data-sortable="true" scope="col">Price</th>
       </tr>
     </thead>
     <tbody>
-      {% for book in books %}
+      {% for prod in prods %}
       <tr>
-	<th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
-	<td><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_prodname()}}</a></td>
-	<td>{{book.get_price()}}</td>
+	<th scope="row"><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
+	<td><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.get_id())) }}">{{prod.get_prodname()}}</a></td>
+	<td>{{prod.get_price()}}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% else %}
-  <h3>此用户没有上架书</h3>
-  {% block postbook_button %}{% endblock postbook_button %}
-  {% endif %}
-  <br>
-
-  {% if books_owned.len() > 0 %}
-  <h3>此用户拥有的书</h3>
-  {% let books = books_owned.iter() %}
-  <table class="table" data-toggle="table" data-pagination="true" data-search="true">
-    <thead>
-      <tr>
-	<th data-field="id" data-sortable="true" scope="col">ID</th>
-	<th data-field="name" data-sortable="true" scope="col">Book name</th>
-	<th data-field="price" data-sortable="true" scope="col">Price</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for book in books %}
-      <tr>
-	<th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_shortid()}}</a></th>
-	<td><a href="{{ uri!("/market", crate::market::book_page_owned(book.get_id())) }}">{{book.get_prodname()}}</a></td>
-	<td>{{book.get_price()}}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <h3>此用户没有使用 Flibrary Pro 服务</h3>
-  {% block postbook_button %}{% endblock postbook_button %}
+  <h3>此用户没有上架商品</h3>
+  {% block postprod_button %}{% endblock postprod_button %}
   {% endif %}
   </div>
   <br>

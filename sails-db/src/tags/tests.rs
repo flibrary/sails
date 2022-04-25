@@ -79,7 +79,7 @@ fn mapping() {
         "A very great book on the subject of Economics",
     )
     .unwrap()
-    .create(&conn, &user_id, &user_id)
+    .create(&conn, &user_id)
     .unwrap();
 
     let subscription = IncompleteProduct::new(
@@ -90,7 +90,7 @@ fn mapping() {
         "Everything you love in FLibrary at an unbelievable price",
     )
     .unwrap()
-    .create(&conn, &user_id, &user_id)
+    .create(&conn, &user_id)
     .unwrap();
 
     let ads = Tags::find_by_id(&conn, "ads").unwrap();

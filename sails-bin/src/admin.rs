@@ -154,19 +154,19 @@ pub async fn admin_orders(
     })
 }
 
-#[get("/remove_tag?<tag_id>&<book_id>")]
+#[get("/remove_tag?<tag_id>&<prod_id>")]
 pub async fn remove_tag(
     _guard: Auth<TagWritable>,
     tag_id: TagGuard,
-    book_id: BookGuard,
+    prod_id: ProdGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_id(&conn).await.into_flash(uri!("/"))?;
+    let prod = prod_id.to_id(&conn).await.into_flash(uri!("/"))?;
     let tag = tag_id.to_tag(&conn).await.into_flash(uri!("/"))?;
     let tag_cloned = tag.clone();
     conn.run(move |c| {
         TagMappingFinder::new(c, None)
-            .product(&book.book_id)
+            .product(&prod.prod_id)
             .tag(&tag)
             .first()
             .map(|x| x.delete(c))
@@ -177,17 +177,17 @@ pub async fn remove_tag(
     Ok(Redirect::to(uri!("/admin", admin_tag(tag_cloned.get_id()))))
 }
 
-#[get("/add_tag?<tag_id>&<book_id>")]
+#[get("/add_tag?<tag_id>&<prod_id>")]
 pub async fn add_tag(
     _guard: Auth<TagWritable>,
     tag_id: TagGuard,
-    book_id: BookGuard,
+    prod_id: ProdGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_id(&conn).await.into_flash(uri!("/"))?;
+    let prod = prod_id.to_id(&conn).await.into_flash(uri!("/"))?;
     let tag = tag_id.to_tag(&conn).await.into_flash(uri!("/"))?;
     let tag_cloned = tag.clone();
-    conn.run(move |c| TagMapping::create(c, &tag, &book.book_id))
+    conn.run(move |c| TagMapping::create(c, &tag, &prod.prod_id))
         .await
         .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/admin", admin_tag(tag_cloned.get_id()))))
@@ -259,29 +259,19 @@ pub async fn admin_tag(
 }
 
 #[derive(Template)]
-#[template(path = "admin/books.html")]
-pub struct AdminBooksPage {
-    normal_books: Vec<ProductInfo>,
-    verified_books: Vec<ProductInfo>,
-    disabled_books: Vec<ProductInfo>,
+#[template(path = "admin/prods.html")]
+pub struct AdminProdsPage {
+    verified_prods: Vec<ProductInfo>,
+    disabled_prods: Vec<ProductInfo>,
 }
 
 // If the user has already been verified, show him the root dashboard
-#[get("/books")]
-pub async fn admin_books(
-    _guard: Auth<BookAdmin>,
+#[get("/prods")]
+pub async fn admin_prods(
+    _guard: Auth<ProdAdmin>,
     conn: DbConn,
-) -> Result<AdminBooksPage, Flash<Redirect>> {
-    let normal_books = conn
-        .run(|c| {
-            ProductFinder::new(c, None)
-                .status(ProductStatus::Normal, Cmp::Equal)
-                .search_info()
-        })
-        .await
-        .into_flash(uri!("/"))?;
-
-    let disabled_books = conn
+) -> Result<AdminProdsPage, Flash<Redirect>> {
+    let disabled_prods = conn
         .run(|c| {
             ProductFinder::new(c, None)
                 .status(ProductStatus::Disabled, Cmp::Equal)
@@ -290,7 +280,7 @@ pub async fn admin_books(
         .await
         .into_flash(uri!("/"))?;
 
-    let verified_books = conn
+    let verified_prods = conn
         .run(|c| {
             ProductFinder::new(c, None)
                 .status(ProductStatus::Verified, Cmp::Equal)
@@ -299,62 +289,44 @@ pub async fn admin_books(
         .await
         .into_flash(uri!("/"))?;
 
-    Ok(AdminBooksPage {
-        normal_books,
-        disabled_books,
-        verified_books,
+    Ok(AdminProdsPage {
+        disabled_prods,
+        verified_prods,
     })
 }
 
-#[get("/verify_book?<book_id>")]
-pub async fn verify_book(
-    _guard: Auth<BookAdmin>,
-    book_id: BookGuard,
+#[get("/verify_prod?<prod_id>")]
+pub async fn verify_prod(
+    _guard: Auth<ProdAdmin>,
+    prod_id: ProdGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
+    let prod = prod_id.to_info(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| {
-        book.book_info
+        prod.prod_info
             .set_product_status(ProductStatus::Verified)
             .update(c)
     })
     .await
     .into_flash(uri!("/"))?;
-    Ok(Redirect::to(uri!("/admin", admin_books)))
+    Ok(Redirect::to(uri!("/admin", admin_prods)))
 }
 
-#[get("/disable_book?<book_id>")]
-pub async fn disable_book(
-    _guard: Auth<BookAdmin>,
-    book_id: BookGuard,
+#[get("/disable_prod?<prod_id>")]
+pub async fn disable_prod(
+    _guard: Auth<ProdAdmin>,
+    prod_id: ProdGuard,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
+    let prod = prod_id.to_info(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| {
-        book.book_info
+        prod.prod_info
             .set_product_status(ProductStatus::Disabled)
             .update(c)
     })
     .await
     .into_flash(uri!("/"))?;
-    Ok(Redirect::to(uri!("/admin", admin_books)))
-}
-
-#[get("/normalize_book?<book_id>")]
-pub async fn normalize_book(
-    _guard: Auth<BookAdmin>,
-    book_id: BookGuard,
-    conn: DbConn,
-) -> Result<Redirect, Flash<Redirect>> {
-    let book = book_id.to_info(&conn).await.into_flash(uri!("/"))?;
-    conn.run(|c| {
-        book.book_info
-            .set_product_status(ProductStatus::Normal)
-            .update(c)
-    })
-    .await
-    .into_flash(uri!("/"))?;
-    Ok(Redirect::to(uri!("/admin", admin_books)))
+    Ok(Redirect::to(uri!("/admin", admin_prods)))
 }
 
 // This only handles the refunding process AFTER finish
@@ -409,7 +381,7 @@ pub async fn finish_order(
 #[derive(Template)]
 #[template(path = "admin/order_info_admin.html")]
 pub struct OrderInfoAdmin {
-    book: ProductInfo,
+    prod: ProductInfo,
     order: TransactionInfo,
 }
 
@@ -422,12 +394,12 @@ pub async fn order_info(
 ) -> Result<OrderInfoAdmin, Flash<Redirect>> {
     let order = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(OrderInfoAdmin {
-        book: order.book_info,
+        prod: order.prod_info,
         order: order.order_info,
     })
 }
 
 #[get("/")]
-pub async fn admin(_guard: Auth<BookAdmin>) -> Redirect {
+pub async fn admin(_guard: Auth<ProdAdmin>) -> Redirect {
     Redirect::to(uri!("/admin", admin_metrics))
 }

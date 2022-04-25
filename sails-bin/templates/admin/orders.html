@@ -16,7 +16,7 @@
       <thead>
 	<tr>
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
-	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="prodid" data-sortable="true" scope="col">Prod ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="price" data-sortable="true" scope="col">Price</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
@@ -27,7 +27,7 @@
 	{% for order in paid_tx %}
 	<tr>
 	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
-	  <td><a href="{{ uri!("/market", crate::market::book_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
+	  <td><a href="{{ uri!("/store", crate::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
@@ -52,7 +52,7 @@
       <thead>
 	<tr>
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
-	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="prodid" data-sortable="true" scope="col">Prod ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="price" data-sortable="true" scope="col">Price</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
@@ -63,7 +63,7 @@
 	{% for order in placed_tx %}
 	<tr>
 	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
-	  <td><a href="{{ uri!("/market", crate::market::book_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
+	  <td><a href="{{ uri!("/store", crate::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
@@ -88,7 +88,7 @@
       <thead>
 	<tr>
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
-	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="prodid" data-sortable="true" scope="col">Prod ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="price" data-sortable="true" scope="col">Price</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
@@ -98,7 +98,7 @@
 	{% for order in refunded_tx %}
 	<tr>
 	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
-	  <td><a href="{{ uri!("/market", crate::market::book_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
+	  <td><a href="{{ uri!("/store", crate::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
@@ -123,7 +123,7 @@
       <thead>
 	<tr>
 	  <th data-field="id" data-sortable="true" scope="col">ID</th>
-	  <th data-field="bookid" data-sortable="true" scope="col">Book ID</th>
+	  <th data-field="prodid" data-sortable="true" scope="col">Prod ID</th>
 	  <th data-field="name" data-sortable="true" scope="col">Name</th>
 	  <th data-field="price" data-sortable="true" scope="col">Price</th>
 	  <th data-field="buyer" data-sortable="true" scope="col">Buyer</th>
@@ -134,7 +134,7 @@
 	{% for order in finished_tx %}
 	<tr>
 	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
-	  <td><a href="{{ uri!("/market", crate::market::book_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
+	  <td><a href="{{ uri!("/store", crate::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>

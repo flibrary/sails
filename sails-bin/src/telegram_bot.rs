@@ -1,5 +1,5 @@
 use crate::{
-    guards::{BookGuard, OrderGuard, UserGuard},
+    guards::{OrderGuard, ProdGuard, UserGuard},
     DbConn,
 };
 use sails_db::{products::ProductInfo, transactions::TransactionInfo, users::UserInfo};
@@ -32,7 +32,7 @@ impl TelegramBot {
         let order = OrderGuard::new(id).to_info(conn).await?;
         let buyer = order.buyer_info;
         let seller = order.seller_info;
-        let product = order.book_info;
+        let product = order.prod_info;
         let order = order.order_info;
 
         let user_link = |u: &UserInfo| {
@@ -50,8 +50,8 @@ impl TelegramBot {
                 "[{}]({})",
                 p.get_prodname(),
                 uri!(
-                    "https://flibrary.info/market",
-                    crate::market::book_page_guest(p.get_id())
+                    "https://flibrary.info/store",
+                    crate::store::prod_page_guest(p.get_id())
                 )
             )
         };

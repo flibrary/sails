@@ -51,16 +51,14 @@ pub async fn update_user_page(user: UserInfoGuard<Cookie>) -> UpdateUserPage {
 #[template(path = "user/portal_guest.html")]
 pub struct PortalGuestPage {
     user: UserInfo,
-    books_operated: Vec<ProductInfo>,
-    books_owned: Vec<ProductInfo>,
+    prods_owned: Vec<ProductInfo>,
 }
 
 #[derive(Template)]
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
     user: UserInfo,
-    books_operated: Vec<ProductInfo>,
-    books_owned: Vec<ProductInfo>,
+    prods_owned: Vec<ProductInfo>,
     orders_placed: Vec<OrderEntry>,
     orders_received: Vec<OrderEntry>,
 }
@@ -74,31 +72,17 @@ pub async fn portal_guest(
     let user = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
 
     let uid = user.info.to_id();
-    let (books_operated, books_owned) = conn
-        .run(
-            move |c| -> Result<(Vec<ProductInfo>, Vec<ProductInfo>), SailsDbError> {
-                let books_operated = ProductFinder::new(c, None)
-                    .seller(&uid)
-                    .search_info()?
-                    .into_iter()
-                    .chain(
-                        ProductFinder::new(c, None)
-                            .delegator(&uid)
-                            .search_info()?
-                            .into_iter(),
-                    )
-                    .collect();
-                let books_owned = ProductFinder::new(c, None).owner(&uid).search_info()?;
-                Ok((books_operated, books_owned))
-            },
-        )
+    let prods_owned = conn
+        .run(move |c| -> Result<Vec<ProductInfo>, SailsDbError> {
+            let prods_owned = ProductFinder::new(c, None).seller(&uid).search_info()?;
+            Ok(prods_owned)
+        })
         .await
         .into_flash(uri!("/"))?;
 
     Ok(PortalGuestPage {
         user: user.info,
-        books_operated,
-        books_owned,
+        prods_owned,
     })
 }
 
@@ -110,29 +94,10 @@ pub async fn portal(
 ) -> Result<PortalPage, Flash<Redirect>> {
     let uid = user.info.to_id();
     #[allow(clippy::type_complexity)]
-    let (books_operated, books_owned, orders_placed, orders_received) = conn
+    let (prods_owned, orders_placed, orders_received) = conn
         .run(
-            move |c| -> Result<
-                (
-                    Vec<ProductInfo>,
-                    Vec<ProductInfo>,
-                    Vec<OrderEntry>,
-                    Vec<OrderEntry>,
-                ),
-                SailsDbError,
-            > {
-                let books_operated = ProductFinder::new(c, None)
-                    .seller(&uid)
-                    .search_info()?
-                    .into_iter()
-                    .chain(
-                        ProductFinder::new(c, None)
-                            .delegator(&uid)
-                            .search_info()?
-                            .into_iter(),
-                    )
-                    .collect();
-                let books_owned = ProductFinder::new(c, None).owner(&uid).search_info()?;
+            move |c| -> Result<(Vec<ProductInfo>, Vec<OrderEntry>, Vec<OrderEntry>), SailsDbError> {
+                let prods_owned = ProductFinder::new(c, None).seller(&uid).search_info()?;
 
                 let orders_placed = TransactionFinder::new(c, None)
                     .buyer(&uid)
@@ -157,7 +122,7 @@ pub async fn portal(
                         Ok((product, x))
                     })
                     .collect::<Result<Vec<OrderEntry>, SailsDbError>>()?;
-                Ok((books_operated, books_owned, orders_placed, orders_received))
+                Ok((prods_owned, orders_placed, orders_received))
             },
         )
         .await
@@ -167,8 +132,7 @@ pub async fn portal(
         user: user.info,
         orders_placed,
         orders_received,
-        books_operated,
-        books_owned,
+        prods_owned,
     })
 }
 

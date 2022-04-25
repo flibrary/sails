@@ -57,6 +57,7 @@
               # cargo2nix uses the minimal profile which doesn't provide clippy
               rust-bin.stable.latest.clippy
               rust-analyzer
+              diesel-cli
             ];
             shellHook = if hook == null then "" else hook;
           });

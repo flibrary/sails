@@ -2,18 +2,18 @@
     <thead>
       <tr>
 	<th data-field="id" data-sortable="true" scope="col">ID</th>
-	<th data-field="name" data-sortable="true" scope="col">Book name</th>
+	<th data-field="name" data-sortable="true" scope="col">Product name</th>
 	<th data-field="category" data-sortable="true" scope="col">Category</th>
 	<th data-field="price" data-sortable="true" scope="col">Price</th>
       </tr>
     </thead>
     <tbody>
-      {% for book in books %}
+      {% for prod in prods %}
       <tr>
-	<th scope="row"><a href="{{ uri!("/market", crate::market::book_page_owned(book.0.get_id())) }}">{{book.0.get_shortid()}}</a></th>
-	<td><a href="{{ uri!("/market", crate::market::book_page_owned(book.0.get_id())) }}">{{book.0.get_prodname()}}</a></td>
-	<td>{{book.1.name()}}</td>
-	<td>{{book.0.get_price()}}</td>
+	<th scope="row"><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.0.get_id())) }}">{{prod.0.get_shortid()}}</a></th>
+	<td><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.0.get_id())) }}">{{prod.0.get_prodname()}}</a></td>
+	<td>{{prod.1.name()}}</td>
+	<td>{{prod.0.get_price()}}</td>
       </tr>
       {% endfor %}
     </tbody>

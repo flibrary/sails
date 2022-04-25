@@ -8,27 +8,27 @@
     <tbody>
     <tr>
       <th scope="row">ID</th>
-      <td>{{ book.get_shortid() }}</td>
+      <td>{{ prod.get_shortid() }}</td>
     </tr>
     <tr>
       <th scope="row">名称</th>
-      <td>{{ book.get_prodname() }}</td>
+      <td>{{ prod.get_prodname() }}</td>
     </tr>
     <tr>
       <th scope="row">单价</th>
-      <td>CN¥ {{ book.get_price() }}</td>
+      <td>CN¥ {{ prod.get_price() }}</td>
     </tr>
-    <!--<tr>
+    <tr>
       <th scope="row">库存数量</th>
-      <td>{{ book.get_quantity() }}</td>
-    </tr>-->
+      <td>{{ prod.get_quantity() }}</td>
+    </tr>
     </tbody>
     </table>
 
-    <form action="{{ uri!("/orders", crate::orders::purchase(self.book.get_id())) }}" method="post">
+    <form action="{{ uri!("/orders", crate::orders::purchase(self.prod.get_id())) }}" method="post">
     <div class="form-group row">
       <label for="inputQuantity" class="col-sm-2 col-form-label">购买数量</label>
-      <input type="number" min="1" max="{{book.get_quantity()}}" class="form-control" id="inputQuantity" placeholder="Quantity" value="1" name="quantity" required>
+      <input type="number" min="1" max="{{prod.get_quantity()}}" class="form-control" id="inputQuantity" placeholder="Quantity" value="1" name="quantity" required>
     </div>
     <br>
 

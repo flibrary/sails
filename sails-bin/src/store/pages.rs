@@ -1,13 +1,38 @@
-use crate::{
-    guards::*,
-    market::{find_first_image, ProductCard},
-    DbConn, IntoFlash,
-};
+use crate::{guards::*, DbConn, IntoFlash};
 use askama::Template;
 use rocket::response::{Flash, Redirect};
 use sails_db::{
     categories::*, enums::ProductStatus, error::SailsDbError, products::*, tags::*, Cmp,
 };
+use std::cmp::Ordering;
+
+pub type ProductCard = (ProductInfo, Option<String>, LeafCategory, Vec<Tag>);
+
+// Score the product and sort
+pub fn cmp_product(this: &ProductCard, other: &ProductCard) -> Ordering {
+    fn scoring(card: &ProductCard) -> usize {
+        let mut score = 0;
+        if card.1.is_some() {
+            score += 2;
+        }
+        score += card.3.len();
+        score
+    }
+    scoring(this).cmp(&scoring(other)).reverse()
+}
+
+pub fn find_first_image(fragment: &str) -> Option<String> {
+    use select::{document::Document, predicate::Name};
+
+    match Document::from_read(fragment.as_bytes()).ok().map(|doc| {
+        doc.select(Name("img"))
+            .next()
+            .map(|x| x.attr("src").map(|s| s.to_string()))
+    }) {
+        Some(Some(s)) => s,
+        _ => None,
+    }
+}
 
 #[derive(Template)]
 #[template(path = "store/home.html")]
@@ -20,10 +45,7 @@ pub async fn home_page(conn: DbConn) -> Result<StoreHomePage, Flash<Redirect>> {
     let entries = conn
         .run(
             move |c| -> Result<Vec<(LeafCategory, Vec<ProductCard>)>, SailsDbError> {
-                let categories = Categories::list_leaves(
-                    c,
-                    Some(&Categories::find_by_name(c, "Store 在线商店")?),
-                )?;
+                let categories = Categories::list_leaves::<Category>(c, None)?;
                 categories
                     .into_iter()
                     .map(
@@ -42,13 +64,9 @@ pub async fn home_page(conn: DbConn) -> Result<StoreHomePage, Flash<Redirect>> {
                                         .product(&x.to_id())
                                         .search_tag()
                                         .ok()?;
-                                    if tags.iter().any(|x| x.get_id() == "store") {
-                                        Some(Ok((x, image, category, tags)))
-                                    } else {
-                                        None
-                                    }
+                                    Some(Ok((x, image, category, tags)))
                                 })
-                                // Reverse the book order
+                                // Reverse the prod order
                                 .rev()
                                 .collect::<Result<Vec<ProductCard>, SailsDbError>>()?;
                             Ok((x, products))

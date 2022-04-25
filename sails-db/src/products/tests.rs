@@ -30,7 +30,7 @@ fn create_product() {
         "A very great book on the subject of Economics",
     )
     .unwrap()
-    .create(&conn, &user_id, &user_id)
+    .create(&conn, &user_id)
     .unwrap();
     assert_eq!(ProductFinder::list(&conn).unwrap().len(), 1);
 }
@@ -82,7 +82,7 @@ fn search_products() {
         "A very great book on the subject of Economics",
     )
     .unwrap()
-    .create(&conn, &user_id, &user_id)
+    .create(&conn, &user_id)
     .unwrap();
 
     // Another Krugman's Economics, with a lower price!
@@ -94,7 +94,7 @@ fn search_products() {
         "A very great book on the subject of Economics",
     )
     .unwrap()
-    .create(&conn, &user_id, &user_id)
+    .create(&conn, &user_id)
     .unwrap();
 
     // Another Krugman's Economics, with a lower price!
@@ -106,7 +106,7 @@ fn search_products() {
         "That is a bad book though",
     )
     .unwrap()
-    .create(&conn, &user_id, &user_id)
+    .create(&conn, &user_id)
     .unwrap();
 
     // Another different economics book
@@ -118,7 +118,7 @@ fn search_products() {
         "I finally had got a different econ textbook!",
     )
     .unwrap()
-    .create(&conn, &user_id, &user_id)
+    .create(&conn, &user_id)
     .unwrap();
 
     // Feynman's Lecture on Physics!
@@ -130,7 +130,7 @@ fn search_products() {
         "A very masterpiece on the theory of the universe",
     )
     .unwrap()
-    .create(&conn, &user_id, &user_id)
+    .create(&conn, &user_id)
     .unwrap();
 
     // Search lower than CNY 300 Feynman's Lecture on Physics
@@ -221,7 +221,7 @@ fn delete_product() {
         "That is a bad book though",
     )
     .unwrap()
-    .create(&conn, &user_id, &user_id)
+    .create(&conn, &user_id)
     .unwrap();
 
     let sales = Tags::find_by_id(&conn, "sales").unwrap();
@@ -262,7 +262,7 @@ fn product_status() {
         "That is a bad book though",
     )
     .unwrap()
-    .create(&conn, &user_id, &user_id)
+    .create(&conn, &user_id)
     .unwrap();
 
     id.get_info(&conn)
@@ -279,83 +279,5 @@ fn product_status() {
             .unwrap()
             .len(),
         0
-    );
-}
-
-#[test]
-fn delegation() {
-    let conn = establish_connection();
-    let user = UserForm::new(
-        "TestUser@example.org",
-        "Kanyang Ying",
-        "NFLS",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
-
-    let another_user = UserForm::new(
-        "TestUser2@example.org",
-        "Kanyang Ying",
-        "NFLS",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
-
-    let econ = Category::create(&conn, "Economics", 490)
-        .and_then(Category::into_leaf)
-        .unwrap();
-    // Seller
-    IncompleteProduct::new(&econ, "Economics", 1, 1, "A horrible book")
-        .unwrap()
-        .create(&conn, &user, &user)
-        .unwrap();
-
-    // Owner
-    IncompleteProduct::new(&econ, "Economics Principle", 1, 1, "Another horrible book")
-        .unwrap()
-        .create(&conn, &user, &another_user)
-        .unwrap();
-
-    assert_eq!(ProductFinder::list(&conn).unwrap().len(), 2);
-    assert_eq!(
-        ProductFinder::new(&conn, None)
-            .seller(&user)
-            .first_info()
-            .unwrap()
-            .prodname,
-        "Economics"
-    );
-    assert_eq!(
-        ProductFinder::new(&conn, None)
-            .owner(&user)
-            .first_info()
-            .unwrap()
-            .prodname,
-        "Economics Principle"
-    );
-    // Another user owns nothing!
-    assert_eq!(
-        ProductFinder::new(&conn, None)
-            .seller(&another_user)
-            .search()
-            .unwrap()
-            .len(),
-        0
-    );
-    assert_eq!(
-        ProductFinder::new(&conn, None)
-            .delegator(&another_user)
-            .first_info()
-            .unwrap()
-            .prodname,
-        "Economics Principle"
     );
 }

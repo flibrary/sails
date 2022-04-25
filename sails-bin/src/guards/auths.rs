@@ -1,4 +1,4 @@
-use super::{books::*, orders::*, users::*};
+use super::{orders::*, prods::*, users::*};
 use crate::DbConn;
 use rocket::{
     outcome::{try_outcome, IntoOutcome, Outcome},
@@ -11,11 +11,11 @@ use std::marker::PhantomData;
 pub struct TagWritable;
 pub struct StoreModifiable;
 
-// For books
-pub struct BookReadable;
-pub struct BookWritable;
-pub struct BookRemovable;
-pub struct BookAdmin;
+// For prods
+pub struct ProdReadable;
+pub struct ProdWritable;
+pub struct ProdRemovable;
+pub struct ProdAdmin;
 
 // For users
 pub struct UserReadable;
@@ -73,9 +73,9 @@ impl<'r> FromRequest<'r> for Auth<StoreModifiable> {
     }
 }
 
-// Books
+// Prods
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for Auth<BookAdmin> {
+impl<'r> FromRequest<'r> for Auth<ProdAdmin> {
     type Error = ();
 
     async fn from_request(
@@ -92,7 +92,7 @@ impl<'r> FromRequest<'r> for Auth<BookAdmin> {
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for Auth<BookReadable> {
+impl<'r> FromRequest<'r> for Auth<ProdReadable> {
     type Error = ();
 
     async fn from_request(
@@ -101,44 +101,24 @@ impl<'r> FromRequest<'r> for Auth<BookReadable> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
 
         let db = try_outcome!(request.guard::<DbConn>().await);
-        let book = try_outcome!(request
-            .query_value::<BookGuard>("book_id")
+        let prod = try_outcome!(request
+            .query_value::<ProdGuard>("prod_id")
             .map(|x| x.ok())
             .flatten()
             .or_forward(()));
-        let book = try_outcome!(book.to_id(&db).await.ok().or_forward(()));
+        let prod = try_outcome!(prod.to_id(&db).await.ok().or_forward(()));
 
-        if match (
-            book.operator_id.get_id() == user.info.get_id(),
-            book.seller_id.get_id() == user.info.get_id(),
-        ) {
-            // seller
-            (true, true)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::PROD_SELF_READABLE) =>
-            {
-                true
-            }
-            // delegator
-            (true, false)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::PROD_DELG_READABLE) =>
-            {
-                true
-            }
-            _ if user
+        if ((prod.seller_id.get_id() == user.info.get_id())
+            && (user
                 .info
                 .get_user_status()
-                .contains(UserStatus::PROD_OTHERS_READABLE) =>
-            {
-                true
-            }
-            _ => false,
-        } {
+                .contains(UserStatus::PROD_SELF_READABLE)))
+            || ((prod.seller_id.get_id() != user.info.get_id())
+                && (user
+                    .info
+                    .get_user_status()
+                    .contains(UserStatus::PROD_OTHERS_READABLE)))
+        {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
@@ -147,7 +127,7 @@ impl<'r> FromRequest<'r> for Auth<BookReadable> {
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for Auth<BookWritable> {
+impl<'r> FromRequest<'r> for Auth<ProdWritable> {
     type Error = ();
 
     async fn from_request(
@@ -156,55 +136,24 @@ impl<'r> FromRequest<'r> for Auth<BookWritable> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
 
         let db = try_outcome!(request.guard::<DbConn>().await);
-        let book = try_outcome!(request
-            .query_value::<BookGuard>("book_id")
+        let prod = try_outcome!(request
+            .query_value::<ProdGuard>("prod_id")
             .map(|x| x.ok())
             .flatten()
             .or_forward(()));
-        let book_id = try_outcome!(book.to_id(&db).await.ok().or_forward(()));
-        let book_info = try_outcome!(book.to_info(&db).await.ok().or_forward(()));
+        let prod = try_outcome!(prod.to_id(&db).await.ok().or_forward(()));
 
-        let product_permission = match (
-            book_id.operator_id.get_id() == user.info.get_id(),
-            book_id.seller_id.get_id() == user.info.get_id(),
-        ) {
-            // seller
-            (true, true)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::PROD_SELF_WRITABLE) =>
-            {
-                true
-            }
-            // delegator
-            (true, false)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::PROD_DELG_WRITABLE) =>
-            {
-                true
-            }
-            _ if user
+        if ((prod.seller_id.get_id() == user.info.get_id())
+            && (user
                 .info
                 .get_user_status()
-                .contains(UserStatus::PROD_OTHERS_WRITABLE) =>
-            {
-                true
-            }
-            _ => false,
-        };
-
-        if if book_info.tags.iter().any(|x| x.get_id() == "store") {
-            product_permission
+                .contains(UserStatus::PROD_SELF_WRITABLE)))
+            || ((prod.seller_id.get_id() != user.info.get_id())
                 && (user
                     .info
                     .get_user_status()
-                    .contains(UserStatus::STORE_MODIFIABLE))
-        } else {
-            product_permission
-        } {
+                    .contains(UserStatus::PROD_OTHERS_WRITABLE)))
+        {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
@@ -213,7 +162,7 @@ impl<'r> FromRequest<'r> for Auth<BookWritable> {
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for Auth<BookRemovable> {
+impl<'r> FromRequest<'r> for Auth<ProdRemovable> {
     type Error = ();
 
     async fn from_request(
@@ -222,55 +171,23 @@ impl<'r> FromRequest<'r> for Auth<BookRemovable> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
 
         let db = try_outcome!(request.guard::<DbConn>().await);
-        let book = try_outcome!(request
-            .query_value::<BookGuard>("book_id")
+        let prod = try_outcome!(request
+            .query_value::<ProdGuard>("prod_id")
             .map(|x| x.ok())
             .flatten()
             .or_forward(()));
-        let book_id = try_outcome!(book.to_id(&db).await.ok().or_forward(()));
-        let book_info = try_outcome!(book.to_info(&db).await.ok().or_forward(()));
-
-        let product_permission = match (
-            book_id.operator_id.get_id() == user.info.get_id(),
-            book_id.seller_id.get_id() == user.info.get_id(),
-        ) {
-            // seller
-            (true, true)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::PROD_SELF_REMOVABLE) =>
-            {
-                true
-            }
-            // delegator
-            (true, false)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::PROD_DELG_REMOVABLE) =>
-            {
-                true
-            }
-            _ if user
+        let prod = try_outcome!(prod.to_id(&db).await.ok().or_forward(()));
+        if ((prod.seller_id.get_id() == user.info.get_id())
+            && (user
                 .info
                 .get_user_status()
-                .contains(UserStatus::PROD_OTHERS_REMOVABLE) =>
-            {
-                true
-            }
-            _ => false,
-        };
-
-        if if book_info.tags.iter().any(|x| x.get_id() == "store") {
-            product_permission
+                .contains(UserStatus::PROD_SELF_REMOVABLE)))
+            || ((prod.seller_id.get_id() != user.info.get_id())
                 && (user
                     .info
                     .get_user_status()
-                    .contains(UserStatus::STORE_MODIFIABLE))
-        } else {
-            product_permission
-        } {
+                    .contains(UserStatus::PROD_OTHERS_REMOVABLE)))
+        {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())

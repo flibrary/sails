@@ -1,4 +1,4 @@
-{% extends "book_info_guest.html" %}
+{% extends "prod_info_guest.html" %}
 {% block seller_desc %}
     {% match seller.get_description() %}
     {% when Some with (desc) %}
@@ -29,5 +29,5 @@
 {% endblock seller %}
 
 {% block actions %}
-<a href="{{ uri!("/orders", crate::orders::checkout(self.book.get_id())) }}" class="btn btn-primary" role="button"><i class="bi bi-credit-card"></i> 购买</a>
+<a href="{{ uri!("/orders", crate::orders::checkout(self.prod.get_id())) }}" class="btn btn-primary" role="button"><i class="bi bi-credit-card"></i> 购买</a>
 {% endblock actions %}

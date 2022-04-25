@@ -1,22 +1,22 @@
 {% extends "base.html" %}
-{% block title %}更新书本{% endblock title %}
+{% block title %}更新 {{ prod.get_prodname() }}{% endblock title %}
 {% block content %}
   <main class="container">
   <div class="p-5 rounded shadow">
-    <h1>更新书本信息</h1>
-    <p class="lead">在这里您可以修改书本的相关信息，买家会在商店里看到您对书本的描述</p>
+    <h1>更新商品信息</h1>
+    <p class="lead">在这里您可以修改商品的相关信息，买家会在商店里看到您对商品的描述</p>
   </div>
   <br>
 
   <div class="p-5 rounded shadow">
-    <h1>书本信息</h1>
+    <h1>商品信息</h1>
     {% block form_link %}
-    <form action="{{ uri!("/market", crate::market::update_book(self.book.get_id())) }}" method="post">
+    <form action="{{ uri!("/store", crate::store::update_prod(self.prod.get_id())) }}" method="post">
     {% endblock form_link %}
     <div class="form-group row">
-      <label for="inputBook" class="col-sm-2 col-form-label">名称</label>
+      <label for="inputProd" class="col-sm-2 col-form-label">名称</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" id="inputBook" placeholder="Book name" value="{{ book.get_prodname() }}" name="prodname">
+        <input type="text" class="form-control" id="inputProd" placeholder="Product name" value="{{ prod.get_prodname() }}" name="prodname">
       </div>
     </div>
     <br>
@@ -25,7 +25,7 @@
       <div class="col-sm-4">
         <select class="form-select" aria-label="Default select example" name="category">
 	  {% for category in categories %}
-	    {% if book.get_category_id() == category.id() %}
+	    {% if prod.get_category_id() == category.id() %}
 	    <option value="{{category.id()}}" selected>{{category.name()}}</option>
 	    {% else %}
 	    <option value="{{category.id()}}">{{category.name()}}</option>
@@ -39,14 +39,14 @@
     <div class="form-group row">
       <label for="inputPrice" class="col-sm-2 col-form-label">价格</label>
       <div class="col-sm-4">
-        <input type="number" min="1" class="form-control" id="inputPrice" placeholder="Price" value="{{ book.get_price() }}" name="price">
+        <input type="number" min="1" class="form-control" id="inputPrice" placeholder="Price" value="{{ prod.get_price() }}" name="price">
       </div>
     </div>
     <br>
     <div class="form-group row">
       <label for="inputQuantity" class="col-sm-2 col-form-label">数量</label>
       <div class="col-sm-4">
-        <input type="number" min="1" class="form-control" id="inputQuantity" placeholder="Quantity" value="{{ book.get_quantity() }}" name="quantity">
+        <input type="number" min="1" class="form-control" id="inputQuantity" placeholder="Quantity" value="{{ prod.get_quantity() }}" name="quantity">
       </div>
     </div>
     <br>
@@ -54,11 +54,11 @@
     <div class="form-group row">
       <label for="inputDescription" class="col-sm-2 col-form-label">简介</label>
       <div class="col-sm-10">
-	<textarea class="form-control" id="summernote" rows="15" name="description">{{ book.get_description() }}</textarea>
+	<textarea class="form-control" id="summernote" rows="15" name="description">{{ prod.get_description() }}</textarea>
       </div>
     </div>
     <br>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">更新书本信息</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">更新商品信息</button>
   </form>
   </div>
   <br>

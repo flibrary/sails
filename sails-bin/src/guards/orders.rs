@@ -51,7 +51,7 @@ impl OrderGuard {
         let order = self.to_id(db).await?;
         db.run(move |c| -> Result<OrderInfo, SailsDbError> {
             let order_info = order.id.get_info(c)?;
-            let book_info = ProductFinder::new(c, None)
+            let prod_info = ProductFinder::new(c, None)
                 .id(order_info.get_product())
                 .first_info()?;
             let seller_info = UserFinder::new(c, None)
@@ -63,7 +63,7 @@ impl OrderGuard {
 
             Ok(OrderInfo {
                 order_info,
-                book_info,
+                prod_info,
                 seller_info,
                 buyer_info,
             })
@@ -79,7 +79,7 @@ impl OrderGuard {
 #[derive(Clone)]
 pub struct OrderInfo {
     pub order_info: TransactionInfo,
-    pub book_info: ProductInfo,
+    pub prod_info: ProductInfo,
     pub seller_info: UserInfo,
     pub buyer_info: UserInfo,
 }

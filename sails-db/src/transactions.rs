@@ -31,10 +31,8 @@ impl Transactions {
 
         let product_info = product_p.get_info(conn)?;
 
-        // Neither operator nor seller should be able to purchase their own products
-        if (product_info.get_seller_id() == buyer_p.get_id())
-            || (product_info.get_operator_id() == buyer_p.get_id())
-        {
+        // Seller should be able to purchase their own products
+        if product_info.get_seller_id() == buyer_p.get_id() {
             return Err(SailsDbError::SelfPurchaseNotAllowed);
         }
 
@@ -467,7 +465,7 @@ mod tests {
             "A very great book on the subject of Economics",
         )
         .unwrap()
-        .create(&conn, &seller, &seller)
+        .create(&conn, &seller)
         .unwrap();
 
         // Unverified products are not subjected to purchases.
@@ -522,10 +520,10 @@ mod tests {
         // There should be only one transaction entry
         assert_eq!(TransactionFinder::list(&conn).unwrap().len(), 1);
 
-        // The book status should be unverified now
+        // The book status should be disabled now
         assert_eq!(
             book_id.get_info(&conn).unwrap().get_product_status(),
-            &ProductStatus::Normal
+            &ProductStatus::Disabled
         );
 
         // ... and changing the price should not affect our already-placed order.
@@ -607,7 +605,7 @@ mod tests {
             "A very great book on the subject of Economics",
         )
         .unwrap()
-        .create(&conn, &seller, &seller)
+        .create(&conn, &seller)
         .unwrap();
 
         // Placed
@@ -619,7 +617,7 @@ mod tests {
             "A very great book on the subject of Economics",
         )
         .unwrap()
-        .create(&conn, &seller, &seller)
+        .create(&conn, &seller)
         .unwrap();
 
         // Paid
@@ -631,7 +629,7 @@ mod tests {
             "A very great book on the subject of Economics",
         )
         .unwrap()
-        .create(&conn, &seller, &seller)
+        .create(&conn, &seller)
         .unwrap();
 
         // Finished
@@ -643,7 +641,7 @@ mod tests {
             "A very great book on the subject of Economics",
         )
         .unwrap()
-        .create(&conn, &seller, &seller)
+        .create(&conn, &seller)
         .unwrap();
 
         // Refunded
@@ -655,7 +653,7 @@ mod tests {
             "A very great book on the subject of Economics",
         )
         .unwrap()
-        .create(&conn, &seller, &seller)
+        .create(&conn, &seller)
         .unwrap();
 
         // Verify the books

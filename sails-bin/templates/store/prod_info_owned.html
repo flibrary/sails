@@ -1,0 +1,27 @@
+{% extends "prod_info_user.html" %}
+
+{% block seller %}
+<h1>联系方式</h1>
+<table class="table table-hover">
+  <tbody>
+    <tr>
+      <th scope="row">邮箱</th>
+      <td><a href="mailto:{{seller.get_id()}}">{{ seller.get_id() }}</a></td>
+    </tr>
+    <tr>
+      <th scope="row">名称</th>
+      <td><a href="{{ uri!("/user", crate::user::portal_guest(self.seller.get_id())) }}">{{seller.get_name()}}</a></td>
+    </tr>
+    <tr>
+      <th scope="row">学校</th>
+      <td>{{ seller.get_school() }}</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock seller %}
+
+{% block actions %}
+<a href="{{ uri!("/store", crate::store::update_prod_page(self.prod.get_id())) }}" class="btn btn-primary" role="button">更新</a>
+<a href="{{ uri!("/store", crate::store::delete_prod(self.prod.get_id())) }}" class="btn btn-danger" role="button" onclick="return confirm('Please confirm your action');">删除</a>
+<a href="{{ uri!("/orders", crate::orders::checkout(self.prod.get_id())) }}" class="btn btn-primary" role="button"><i class="bi bi-credit-card"></i> 购买</a>
+{% endblock actions %}

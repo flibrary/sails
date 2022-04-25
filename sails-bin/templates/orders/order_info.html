@@ -48,7 +48,7 @@
       </div>
       <br>
       <h3>您已成功付款</h3>
-      感谢您的付款！接下来您只需要等待我们为您配送书本。或者您可以用订单 ID: <code>{{ order.get_shortid() }}</code> 来我们的仓库自提书本。
+      感谢您的付款！接下来您只需要等待我们为您配送您订购的商品。
       <br>
       <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger disabled" role="button" onclick="return confirm('您确认退款吗？这无法撤消。');">取消订单并退款</a>
 
@@ -58,7 +58,7 @@
       </div>
       <br>
       <h3>恭喜，您的订单已成功交付！</h2>
-      Enjoy your book! 如有任何疑问或需要售后服务，请<a href="mailto:admin@flibrary.info">联系我们</a>寻求帮助。
+      Enjoy your day! 如有任何疑问或需要售后服务，请<a href="mailto:admin@flibrary.info">联系我们</a>寻求帮助。
       {% endmatch %}
     </div>
 <br>
@@ -87,11 +87,11 @@
     </tr>
     <tr>
       <th scope="row">卖家</th>
-      <td>{{ book.get_seller_id() }}</td>
+      <td>{{ prod.get_seller_id() }}</td>
     </tr>
     <tr>
-      <th scope="row">书本 ID</th>
-      <td><a href="{{ uri!("/market", crate::market::book_page_owned(self.book.get_id())) }}">{{ book.get_shortid() }}</a></td>
+      <th scope="row">商品 ID</th>
+      <td><a href="{{ uri!("/store", crate::store::prod_page_owned(self.prod.get_id())) }}">{{ prod.get_shortid() }}</a></td>
     </tr>
     <tr>
       <th scope="row">时间戳</th>

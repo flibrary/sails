@@ -2,7 +2,7 @@
 // Use request guard whenever possible to let rocket simplify the boilerplate of the otherwise complicated flow control.
 // Don't use flash message everywhere, only use when needed
 // If flash message needs to be displayed in place, don't use redirection, just use the Context::msg. And in that case, don't accept flashmessage.
-// Handle general database errors by redirecting using flash message to some big pages like `/market`, `/user`. Flash message will only be used up when called.
+// Handle general database errors by redirecting using flash message to some big pages like `/store`, `/user`. Flash message will only be used up when called.
 // All for loops in templates should be able to handle empty vec.
 
 mod admin;
@@ -10,7 +10,6 @@ mod aead;
 mod alipay;
 mod guards;
 mod images;
-mod market;
 mod messages;
 mod orders;
 mod recaptcha;
@@ -40,10 +39,9 @@ use rocket::{
 };
 use rust_embed::RustEmbed;
 use sails_db::{
-    categories::{Categories, CtgBuilder, Value},
+    categories::{Categories, CtgBuilder},
     tags::{Tags, TagsBuilder},
 };
-use serde::{Deserialize, Serialize};
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 use telegram_bot::TelegramBot;
@@ -116,21 +114,6 @@ impl Msg {
     }
 }
 
-#[derive(Deserialize, Serialize, Clone)]
-struct CtgFramework {
-    market: CtgBuilder,
-    store: CtgBuilder,
-}
-
-impl CtgFramework {
-    fn into_builder(self) -> CtgBuilder {
-        CtgBuilder::new(maplit::hashmap! {
-            "书本市场".into() => Value::SubCategory(self.market.inner()),
-            "Store 在线商店".into() => Value::SubCategory(self.store.inner()),
-        })
-    }
-}
-
 async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     // This macro from `diesel_migrations` defines an `embedded_migrations`
     // module containing a function named `run`. This allows the example to be
@@ -139,7 +122,7 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
 
     let conn = DbConn::get_one(&rocket).await.expect("database connection");
 
-    let ctg = rocket.state::<CtgFramework>().cloned();
+    let ctg = rocket.state::<CtgBuilder>().cloned();
     let tags = rocket.state::<TagsBuilder>().cloned();
     // Initialize the database
     conn.run(|c| {
@@ -155,7 +138,7 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
         c.batch_execute("PRAGMA foreign_keys = ON;").unwrap();
 
         if let Some(x) = ctg {
-            x.into_builder().build(c).unwrap()
+            x.build(c).unwrap()
         }
         if let Some(x) = tags {
             x.build(c).unwrap()
@@ -236,7 +219,7 @@ async fn page500<'a>() -> Redirect {
 #[derive(Debug, StructOpt)]
 #[structopt(
     name = "sails-bin",
-    about = "The web server for FLibrary, an online second-hand book market"
+    about = "The web server for FLibrary, an online learning store"
 )]
 struct DcompassOpts {
     /// Path to the TOML configuration file.
@@ -256,7 +239,7 @@ fn rocket() -> Rocket<Build> {
     rocket::custom(figment)
         .attach(DbConn::fairing())
         .attach(Shield::new())
-        .attach(AdHoc::config::<CtgFramework>())
+        .attach(AdHoc::config::<CtgBuilder>())
         .attach(AdHoc::config::<TagsBuilder>())
         .attach(AdHoc::config::<RootPasswd>())
         .attach(AdHoc::config::<ReCaptcha>())
@@ -295,29 +278,19 @@ fn rocket() -> Rocket<Build> {
             ],
         )
         .mount(
-            "/market",
+            "/store",
             routes![
-                market::market,
-                market::explore_page,
-                market::post_book_page,
-                market::post_book_admin_page,
-                market::post_book_interim,
-                market::delegate_book_page,
-                market::delegate_book,
-                market::delegate_book_error_page,
-                market::update_book_page,
-                market::update_book_admin_page,
-                market::post_book_error_page,
-                market::update_book,
-                market::book_page_guest,
-                market::book_page_owned,
-                market::book_page_user,
-                market::book_page_error,
-                market::delete_book,
-                market::create_book,
-                market::instruction,
-                market::deposit_info,
-                market::deposit_progress,
+                store::home_page,
+                store::post_prod_page,
+                store::update_prod_page,
+                store::post_prod_error_page,
+                store::update_prod,
+                store::prod_page_guest,
+                store::prod_page_owned,
+                store::prod_page_user,
+                store::prod_page_error,
+                store::delete_prod,
+                store::create_prod,
             ],
         )
         .mount(
@@ -355,11 +328,10 @@ fn rocket() -> Rocket<Build> {
                 admin::admin_tags,
                 admin::add_tag,
                 admin::remove_tag,
-                admin::admin_books,
+                admin::admin_prods,
                 admin::admin_metrics,
-                admin::verify_book,
-                admin::disable_book,
-                admin::normalize_book,
+                admin::verify_prod,
+                admin::disable_prod,
                 admin::admin_orders,
                 admin::refund_order,
                 admin::finish_order,
@@ -381,6 +353,5 @@ fn rocket() -> Rocket<Build> {
             "/images",
             routes![images::upload, images::get, images::get_default],
         )
-        .mount("/store", routes![store::home_page])
         .register("/", catchers![page404, page422, page500])
 }

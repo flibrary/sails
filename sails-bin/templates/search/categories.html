@@ -46,13 +46,13 @@
 	  <div class="card">
 	    {% match product.1 %}
 	    {% when Some with (img) %}
-	    <a href="{{ uri!("/market", crate::market::book_page_owned(product.0.get_id())) }}">
+	    <a href="{{ uri!("/store", crate::store::prod_page_owned(product.0.get_id())) }}">
 	      <img src="{{img}}?size=thumbnail" loading="lazy" class="card-img-top">
             </a>
             {% when None %}
             {% endmatch %}
             <div class="card-body">
-              <h5 class="card-title"><a href="{{ uri!("/market", crate::market::book_page_owned(product.0.get_id())) }}">{{product.0.get_prodname()}}</a></h5>
+              <h5 class="card-title"><a href="{{ uri!("/store", crate::store::prod_page_owned(product.0.get_id())) }}">{{product.0.get_prodname()}}</a></h5>
 	      <h5 class="card-subtitle mb-2">
          	{% let tags = product.3.clone() %}
 		{% include "display_tag.html" %}

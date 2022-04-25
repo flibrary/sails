@@ -145,36 +145,10 @@ impl<'a> ProductFinder<'a> {
         self
     }
 
-    // User owns the product and operates it
+    // User owns the product
     pub fn seller(mut self, seller: &'a UserId) -> Self {
         use crate::schema::products::dsl::*;
-        self.query = self.query.filter(
-            seller_id
-                .eq(seller.get_id())
-                .and(operator_id.eq(seller.get_id())),
-        );
-        self
-    }
-
-    // User owns the product but delegated it to other users
-    pub fn owner(mut self, user: &'a UserId) -> Self {
-        use crate::schema::products::dsl::*;
-        self.query = self.query.filter(
-            seller_id
-                .eq(user.get_id())
-                .and(operator_id.ne(user.get_id())),
-        );
-        self
-    }
-
-    // User doesn't own the product but has the right to operate it.
-    pub fn delegator(mut self, user: &'a UserId) -> Self {
-        use crate::schema::products::dsl::*;
-        self.query = self.query.filter(
-            seller_id
-                .ne(user.get_id())
-                .and(operator_id.eq(user.get_id())),
-        );
+        self.query = self.query.filter(seller_id.eq(seller.get_id()));
         self
     }
 
@@ -296,12 +270,7 @@ impl IncompleteProductOwned {
         })
     }
 
-    pub fn create(
-        &self,
-        conn: &SqliteConnection,
-        seller: &UserId,
-        operator: &UserId,
-    ) -> Result<ProductId> {
+    pub fn create(&self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
         let refed = IncompleteProduct {
             category: &self.category,
             prodname: &self.prodname,
@@ -309,7 +278,7 @@ impl IncompleteProductOwned {
             quantity: self.quantity,
             description: &self.description,
         };
-        refed.create(conn, seller, operator)
+        refed.create(conn, seller)
     }
 }
 
@@ -342,12 +311,7 @@ impl<'a> ToSafe<SafeIncompleteProduct<'a>> for IncompleteProduct<'a> {
 }
 
 impl<'a> SafeIncompleteProduct<'a> {
-    pub fn create(
-        self,
-        conn: &SqliteConnection,
-        seller: &UserId,
-        operator: &UserId,
-    ) -> Result<ProductId> {
+    pub fn create(self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
         use crate::schema::products::dsl::*;
         let id_cloned = Uuid::new_v4();
         let shortid_str = id_cloned.as_fields().0.to_string();
@@ -356,13 +320,12 @@ impl<'a> SafeIncompleteProduct<'a> {
             id.eq(&id_cloned),
             shortid.eq(&shortid_str),
             seller_id.eq(seller.get_id()),
-            operator_id.eq(operator.get_id()),
             category.eq(self.category),
             prodname.eq(self.prodname),
             price.eq(self.price),
             quantity.eq(self.quantity),
             description.eq(self.description),
-            product_status.eq(ProductStatus::Normal),
+            product_status.eq(ProductStatus::default()),
         );
         diesel::insert_into(products).values(value).execute(conn)?;
         Ok(ProductId { id: id_cloned })
@@ -397,13 +360,8 @@ impl<'a> IncompleteProduct<'a> {
         })
     }
 
-    pub fn create(
-        self,
-        conn: &SqliteConnection,
-        seller: &UserId,
-        operator: &UserId,
-    ) -> Result<ProductId> {
-        self.verify(conn)?.create(conn, seller, operator)
+    pub fn create(self, conn: &SqliteConnection, seller: &UserId) -> Result<ProductId> {
+        self.verify(conn)?.create(conn, seller)
     }
 }
 
@@ -416,7 +374,6 @@ pub struct ProductInfo {
     id: String,
     shortid: String,
     seller_id: String,
-    operator_id: String,
     category: String,
     prodname: String,
     price: i64,
@@ -444,10 +401,6 @@ impl ProductInfo {
         &self.seller_id
     }
 
-    pub fn get_operator_id(&self) -> &str {
-        &self.operator_id
-    }
-
     pub fn get_description(&self) -> &str {
         &self.description
     }
@@ -471,12 +424,6 @@ impl ProductInfo {
     /// Set the product info's seller id.
     pub fn set_seller_id(mut self, seller_id: impl ToString) -> Self {
         self.seller_id = seller_id.to_string();
-        self
-    }
-
-    /// Set the product info's operator id.
-    pub fn set_operator_id(mut self, operator_id: impl ToString) -> Self {
-        self.operator_id = operator_id.to_string();
         self
     }
 
@@ -510,9 +457,9 @@ impl ProductInfo {
     pub(crate) fn sub_quantity(mut self, qty: u32) -> Result<Self> {
         if let Some(u) = (self.quantity as u32).checked_sub(qty) {
             self.quantity = u as i64;
-            // If quantity gets to zero, we normalize the product.
+            // If quantity gets to zero, we disable the product.
             if self.quantity == 0 {
-                Ok(self.set_product_status(ProductStatus::Normal))
+                Ok(self.set_product_status(ProductStatus::Disabled))
             } else {
                 Ok(self)
             }
