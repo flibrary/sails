@@ -38,6 +38,12 @@ pub enum SailsDbError {
     #[error("tag mapping already existed")]
     TagMappingExisted,
 
+    #[error("digicon already existed")]
+    DigiconExisted,
+
+    #[error("digicon mapping already existed")]
+    DigiconMappingExisted,
+
     #[error("category doesn't exist")]
     CategoryNotFound,
 

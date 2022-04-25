@@ -8,6 +8,7 @@ use sails_db::enums::UserStatus;
 use std::marker::PhantomData;
 
 // Misc
+pub struct DigiconWritable;
 pub struct TagWritable;
 pub struct StoreModifiable;
 
@@ -44,6 +45,27 @@ impl<'r> FromRequest<'r> for Auth<TagWritable> {
             .info
             .get_user_status()
             .contains(UserStatus::TAG_WRITABLE)
+        {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<DigiconWritable> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+
+        if user
+            .info
+            .get_user_status()
+            .contains(UserStatus::DIGICON_WRITABLE)
         {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {

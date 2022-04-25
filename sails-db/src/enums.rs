@@ -56,6 +56,8 @@ bitflags! {
 	const TAG_WRITABLE = 0b10_0000_0000_0000_0000000000;
        // Can create products in store;
 	const STORE_MODIFIABLE = 0b100_0000_0000_0000_0000000000;
+	// Can add or remove digicons to products;
+	const DIGICON_WRITABLE = 0b1000_0000_0000_0000_0000000000;
 
 	// Different role profiles
 	const DISABLED = 0;
@@ -68,7 +70,7 @@ bitflags! {
 	const STORE_KEEPER = Self::CUSTOMER_SERVICE.bits | Self::TX_OTHERS_FINISHABLE.bits;
 	// Content creators are allowed to create new products, but they are not able to verify them.
 	const CONTENT_CREATOR = Self::NORMAL.bits | Self::STORE_MODIFIABLE.bits;
-	const ADMIN = 0b111_1111_1111_1111_111111_1111;
+	const ADMIN = 0b1111_1111_1111_1111_111111_1111;
     }
 }
 

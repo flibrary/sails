@@ -9,6 +9,22 @@ table! {
 }
 
 table! {
+    digiconmappings (id) {
+        id -> Text,
+        digicon -> Text,
+        product -> Text,
+    }
+}
+
+table! {
+    digicons (id) {
+        id -> Text,
+        name -> Text,
+        link -> Text,
+    }
+}
+
+table! {
     messages (id) {
         id -> Text,
         send -> Text,
@@ -82,6 +98,8 @@ table! {
     }
 }
 
+joinable!(digiconmappings -> digicons (digicon));
+joinable!(digiconmappings -> products (product));
 joinable!(products -> categories (category));
 joinable!(products -> users (seller_id));
 joinable!(tagmappings -> products (product));
@@ -90,6 +108,8 @@ joinable!(transactions -> products (product));
 
 allow_tables_to_appear_in_same_query!(
     categories,
+    digiconmappings,
+    digicons,
     messages,
     products,
     tagmappings,

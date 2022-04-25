@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock title %}
+
+{% block content %}
+<main class="container">
+  <div class="p-5 rounded shadow">
+    <h1>You are now at the admin dashboard</h1>
+    <p class="lead">Please make sure every action you make has been well-thought.</p>
+  </div>
+  <br>
+
+  {% if digiconed.len() > 0 %}
+  <div class="shadow p-5 rounded border border-5 border-warning">
+    <h3>Prod with digicon "{{digicon.get_name()}}"</h3>
+    <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+      <thead>
+	<tr>
+	  <th data-field="id" data-sortable="true" scope="col">ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
+	  <th data-field="seller" data-sortable="true" scope="col">Seller</th>
+	  <th data-field="actions" scope="col">Actions</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for prod in digiconed %}
+	<tr>
+	  <th scope="row"><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
+	  <td>{{prod.get_prodname()}}</td>
+	  <td>{{prod.get_price()}}</td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(prod.get_seller_id())) }}">{{prod.get_seller_id()}}</a></td>
+	  <td><a href="{{ uri!("/admin", crate::admin::remove_digicon(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-warning" role="button">Remove</a></td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <br>
+  {% else %}
+    <div class="p-5 rounded shadow">
+      <h3>No prod has digicon "{{digicon.get_name()}}"</h3>
+    </div>
+    <br>
+  {% endif %}
+
+  {% if undigiconed.len() > 0 %}
+  <div class="shadow p-5 rounded border border-5 border-warning">
+    <h3>Prod without digicon "{{digicon.get_name()}}"</h3>
+    <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+      <thead>
+	<tr>
+	  <th data-field="id" data-sortable="true" scope="col">ID</th>
+	  <th data-field="name" data-sortable="true" scope="col">Name</th>
+	  <th data-field="price" data-sortable="true" scope="col">Price</th>
+	  <th data-field="seller" data-sortable="true" scope="col">Seller</th>
+	  <th data-field="actions" scope="col">Actions</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for prod in undigiconed %}
+	<tr>
+	  <th scope="row"><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
+	  <td>{{prod.get_prodname()}}</td>
+	  <td>{{prod.get_price()}}</td>
+	  <td><a href="{{ uri!("/user", crate::user::portal_guest(prod.get_seller_id())) }}">{{prod.get_seller_id()}}</a></td>
+	  <td><a href="{{ uri!("/admin", crate::admin::add_digicon(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-success" role="button">Add</a></td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <br>
+  {% else %}
+    <div class="p-5 rounded shadow">
+      <h3>All prods have digicon "{{digicon.get_name()}}"</h3>
+    </div>
+    <br>
+  {% endif %}
+
+</main>
+{% endblock content %}

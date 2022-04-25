@@ -57,8 +57,8 @@
 	<div class="progress-bar bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
       </div>
       <br>
-      <h3>恭喜，您的订单已成功交付！</h2>
-      Enjoy your day! 如有任何疑问或需要售后服务，请<a href="mailto:admin@flibrary.info">联系我们</a>寻求帮助。
+      <h3>恭喜您，您的订单已成功交付！</h2>
+      数字内容可通过<a href="{{ uri!("/store", crate::store::prod_page_owned(self.prod.get_id())) }}">商品简介</a>中的链接访问。如有任何疑问或需要售后服务，请<a href="mailto:admin@flibrary.info">联系我们</a>寻求帮助。
       {% endmatch %}
     </div>
 <br>

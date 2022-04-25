@@ -17,7 +17,7 @@ use std::{io::Cursor, str::FromStr};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ImageHosting {
-    gh_token: String,
+    image_gh_token: String,
 }
 
 pub struct Image {
@@ -153,7 +153,7 @@ pub async fn upload(
         ))
         .header(ACCEPT, "application/vnd.github.v3+json")
         // If we don't auth, probably we will get limited further
-        .bearer_auth(&hosting.gh_token)
+        .bearer_auth(&hosting.image_gh_token)
         .send()
         .await
         .map_err(|_| Status::new(503))?
@@ -171,7 +171,7 @@ pub async fn upload(
                 hash, ext
             ))
             .header(ACCEPT, "application/vnd.github.v3+json")
-            .bearer_auth(&hosting.gh_token)
+            .bearer_auth(&hosting.image_gh_token)
             .json(&params)
             .send()
             .await

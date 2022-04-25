@@ -1,4 +1,5 @@
 // Elementary guards for tables in database
+mod digicons;
 mod orders;
 mod prods;
 mod tags;
@@ -7,4 +8,4 @@ mod users;
 mod auths;
 mod roles;
 
-pub use self::{auths::*, orders::*, prods::*, roles::*, tags::*, users::*};
+pub use self::{auths::*, digicons::*, orders::*, prods::*, roles::*, tags::*, users::*};

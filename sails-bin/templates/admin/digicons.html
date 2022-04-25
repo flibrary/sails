@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock title %}
+
+{% block content %}
+<main class="container">
+  <div class="p-5 rounded shadow">
+    <h1>You are now at the admin dashboard</h1>
+    <p class="lead">Please make sure every action you make has been well-thought.</p>
+  </div>
+  <br>
+
+  <div class="shadow p-5 rounded border border-5 border-warning">
+  <h1>All digicons</h1>
+  {% if digicons.len() > 0 %}
+    <div class="list-group">
+      {% for digicon in digicons %}
+        <a href="{{ uri!("/admin", crate::admin::admin_digicon(digicon.get_id())) }}" class="list-group-item list-group-item-action">
+	  {{ digicon.get_name() }}
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <h3>在您的请求下没有找到任何数字内容。</h3>
+  {% endif %}
+  </div>
+
+</main>
+{% endblock content %}

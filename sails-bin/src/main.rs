@@ -8,6 +8,7 @@
 mod admin;
 mod aead;
 mod alipay;
+mod digicons;
 mod guards;
 mod images;
 mod messages;
@@ -40,6 +41,7 @@ use rocket::{
 use rust_embed::RustEmbed;
 use sails_db::{
     categories::{Categories, CtgBuilder},
+    digicons::{Digicons, DigiconsBuilder},
     tags::{Tags, TagsBuilder},
 };
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
@@ -48,6 +50,7 @@ use telegram_bot::TelegramBot;
 
 use crate::{
     alipay::{AlipayAppPrivKey, AlipayClient},
+    digicons::DigiconHosting,
     images::ImageHosting,
     recaptcha::ReCaptcha,
     root::RootPasswd,
@@ -124,6 +127,7 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
 
     let ctg = rocket.state::<CtgBuilder>().cloned();
     let tags = rocket.state::<TagsBuilder>().cloned();
+    let digicons = rocket.state::<DigiconsBuilder>().cloned();
     // Initialize the database
     conn.run(|c| {
         // Enforce foreign key relation
@@ -131,9 +135,10 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
 
         c.batch_execute("PRAGMA foreign_keys = OFF;").unwrap();
 
-        // Delete all the categories and tags, then we rebuild them.
+        // Delete all the categories, digicons, and tags, then we rebuild them.
         Categories::delete_all(c).unwrap();
         Tags::delete_all(c).unwrap();
+        Digicons::delete_all(c).unwrap();
 
         c.batch_execute("PRAGMA foreign_keys = ON;").unwrap();
 
@@ -141,6 +146,9 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
             x.build(c).unwrap()
         }
         if let Some(x) = tags {
+            x.build(c).unwrap()
+        }
+        if let Some(x) = digicons {
             x.build(c).unwrap()
         }
     })
@@ -241,11 +249,13 @@ fn rocket() -> Rocket<Build> {
         .attach(Shield::new())
         .attach(AdHoc::config::<CtgBuilder>())
         .attach(AdHoc::config::<TagsBuilder>())
+        .attach(AdHoc::config::<DigiconsBuilder>())
         .attach(AdHoc::config::<RootPasswd>())
         .attach(AdHoc::config::<ReCaptcha>())
         .attach(AdHoc::config::<SmtpCreds>())
         .attach(AdHoc::config::<AeadKey>())
         .attach(AdHoc::config::<ImageHosting>())
+        .attach(AdHoc::config::<DigiconHosting>())
         .attach(AdHoc::config::<AlipayAppPrivKey>())
         .attach(AdHoc::config::<AlipayClient>())
         .attach(AdHoc::config::<TelegramBot>())
@@ -328,6 +338,10 @@ fn rocket() -> Rocket<Build> {
                 admin::admin_tags,
                 admin::add_tag,
                 admin::remove_tag,
+                admin::admin_digicon,
+                admin::admin_digicons,
+                admin::add_digicon,
+                admin::remove_digicon,
                 admin::admin_prods,
                 admin::admin_metrics,
                 admin::verify_prod,
@@ -353,5 +367,6 @@ fn rocket() -> Rocket<Build> {
             "/images",
             routes![images::upload, images::get, images::get_default],
         )
+        .mount("/digicons", routes![digicons::get])
         .register("/", catchers![page404, page422, page500])
 }

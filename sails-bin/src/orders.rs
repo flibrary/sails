@@ -14,8 +14,7 @@ use rocket::{
     State,
 };
 use sails_db::{
-    enums::TransactionStatus, error::SailsDbError, products::*, tags::TagMappingFinder,
-    transactions::*,
+    digicons::*, enums::TransactionStatus, error::SailsDbError, products::*, transactions::*,
 };
 use std::num::NonZeroU32;
 
@@ -179,10 +178,10 @@ pub async fn progress(
     let prod_id = order.prod_info.to_id();
     let digicon: bool = db
         .run(move |c| -> Result<bool, SailsDbError> {
-            let tags = TagMappingFinder::new(c, None)
+            DigiconMappingFinder::new(c, None)
                 .product(&prod_id)
-                .search_tag()?;
-            Ok(tags.iter().any(|x| x.get_id() == "digicon"))
+                .count()
+                .map(|x| x > 0)
         })
         .await
         .into_flash(uri!("/"))?;

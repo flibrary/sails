@@ -9,6 +9,7 @@ use rocket::{
     State,
 };
 use sails_db::{
+    digicons::*,
     enums::{ProductStatus, TransactionStatus},
     error::SailsDbError,
     products::{ProductFinder, ProductInfo},
@@ -255,6 +256,118 @@ pub async fn admin_tag(
         tag: id,
         tagged,
         untagged,
+    })
+}
+
+#[get("/remove_digicon?<digicon_id>&<prod_id>")]
+pub async fn remove_digicon(
+    _guard: Auth<DigiconWritable>,
+    digicon_id: DigiconGuard,
+    prod_id: ProdGuard,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    let prod = prod_id.to_id(&conn).await.into_flash(uri!("/"))?;
+    let digicon = digicon_id.to_digicon(&conn).await.into_flash(uri!("/"))?;
+    let digicon_cloned = digicon.clone();
+    conn.run(move |c| {
+        DigiconMappingFinder::new(c, None)
+            .product(&prod.prod_id)
+            .digicon(&digicon)
+            .first()
+            .map(|x| x.delete(c))
+    })
+    .await
+    .into_flash(uri!("/"))?
+    .into_flash(uri!("/"))?;
+    Ok(Redirect::to(uri!(
+        "/admin",
+        admin_digicon(digicon_cloned.get_id())
+    )))
+}
+
+#[get("/add_digicon?<digicon_id>&<prod_id>")]
+pub async fn add_digicon(
+    _guard: Auth<DigiconWritable>,
+    digicon_id: DigiconGuard,
+    prod_id: ProdGuard,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    let prod = prod_id.to_id(&conn).await.into_flash(uri!("/"))?;
+    let digicon = digicon_id.to_digicon(&conn).await.into_flash(uri!("/"))?;
+    let digicon_cloned = digicon.clone();
+    conn.run(move |c| DigiconMapping::create(c, &digicon, &prod.prod_id))
+        .await
+        .into_flash(uri!("/"))?;
+    Ok(Redirect::to(uri!(
+        "/admin",
+        admin_digicon(digicon_cloned.get_id())
+    )))
+}
+
+#[derive(Template)]
+#[template(path = "admin/digicons.html")]
+pub struct AdminDigiconsPage {
+    digicons: Vec<Digicon>,
+}
+
+#[get("/digicons")]
+pub async fn admin_digicons(
+    _guard: Auth<DigiconWritable>,
+    conn: DbConn,
+) -> Result<AdminDigiconsPage, Flash<Redirect>> {
+    Ok(AdminDigiconsPage {
+        digicons: conn
+            .run(|c| Digicons::list_all(c))
+            .await
+            .into_flash(uri!("/"))?,
+    })
+}
+
+#[derive(Template)]
+#[template(path = "admin/digicon.html")]
+pub struct AdminDigiconPage {
+    digicon: Digicon,
+    digiconed: Vec<ProductInfo>,
+    undigiconed: Vec<ProductInfo>,
+}
+
+#[get("/digicon?<id>")]
+pub async fn admin_digicon(
+    _guard: Auth<DigiconWritable>,
+    id: DigiconGuard,
+    conn: DbConn,
+) -> Result<AdminDigiconPage, Flash<Redirect>> {
+    let id = id.to_digicon(&conn).await.into_flash(uri!("/"))?;
+    let digicon = id.clone();
+    let (digiconed, undigiconed) = conn
+        .run(
+            move |c| -> Result<(Vec<ProductInfo>, Vec<ProductInfo>), SailsDbError> {
+                let digiconed = ProductFinder::list_info(c).map(|x| {
+                    x.into_iter()
+                        .filter(|p| {
+                            DigiconMappingFinder::has_mapping(c, &digicon, &p.to_id())
+                                .unwrap_or(false)
+                        })
+                        .collect()
+                })?;
+                let undigiconed = ProductFinder::list_info(c).map(|x| {
+                    x.into_iter()
+                        .filter(|p| {
+                            !DigiconMappingFinder::has_mapping(c, &digicon, &p.to_id())
+                                .unwrap_or(false)
+                        })
+                        .collect()
+                })?;
+                Ok((digiconed, undigiconed))
+            },
+        )
+        .await
+        .into_flash(uri!("/"))?;
+
+    Ok(AdminDigiconPage {
+        digicon: id,
+        digiconed,
+        undigiconed,
     })
 }
 
