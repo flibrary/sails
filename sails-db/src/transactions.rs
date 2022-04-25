@@ -49,7 +49,12 @@ impl Transactions {
                 address: addr.to_string(),
                 buyer: buyer_p.get_id().to_string(),
                 time_sent: chrono::offset::Local::now().naive_utc(),
-                transaction_status: TransactionStatus::Placed,
+                transaction_status: if product_info.get_price() != 0 {
+                    TransactionStatus::Placed
+                } else {
+                    // If the product is free, we just finish the transaction
+                    TransactionStatus::Finished
+                },
             };
 
             // Create transaction record

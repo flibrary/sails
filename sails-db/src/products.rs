@@ -229,7 +229,7 @@ pub struct IncompleteProductOwned {
     // This is the ID (UUID) of the category
     pub category: String,
     pub prodname: String,
-    pub price: NonZeroU32,
+    pub price: u32,
     pub quantity: NonZeroU32,
     pub description: String,
 }
@@ -241,7 +241,7 @@ impl ToSafe<SafeIncompleteProductOwned> for IncompleteProductOwned {
             Ok(SafeIncompleteProductOwned {
                 category: self.category,
                 prodname: self.prodname,
-                price: self.price.get() as i64,
+                price: self.price as i64,
                 quantity: self.quantity.get() as i64,
                 description: self.description,
             })
@@ -259,7 +259,6 @@ impl IncompleteProductOwned {
         quantity: u32,
         description: T,
     ) -> Result<Self> {
-        let price = NonZeroU32::new(price).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
         let quantity = NonZeroU32::new(quantity).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
         Ok(Self {
             category: category.id().to_string(),
@@ -300,7 +299,7 @@ impl<'a> ToSafe<SafeIncompleteProduct<'a>> for IncompleteProduct<'a> {
             Ok(SafeIncompleteProduct {
                 category: self.category,
                 prodname: self.prodname,
-                price: self.price.get() as i64,
+                price: self.price as i64,
                 quantity: self.quantity.get() as i64,
                 description: self.description,
             })
@@ -336,7 +335,7 @@ impl<'a> SafeIncompleteProduct<'a> {
 pub struct IncompleteProduct<'a> {
     pub category: &'a str,
     pub prodname: &'a str,
-    pub price: NonZeroU32,
+    pub price: u32,
     pub quantity: NonZeroU32,
     pub description: &'a str,
 }
@@ -349,7 +348,6 @@ impl<'a> IncompleteProduct<'a> {
         quantity: u32,
         description: &'a str,
     ) -> Result<Self> {
-        let price = NonZeroU32::new(price).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
         let quantity = NonZeroU32::new(quantity).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
         Ok(Self {
             category: category.id(),
@@ -440,8 +438,8 @@ impl ProductInfo {
     }
 
     /// Set the product info's price.
-    pub fn set_price(mut self, price: NonZeroU32) -> Self {
-        self.price = price.get() as i64;
+    pub fn set_price(mut self, price: u32) -> Self {
+        self.price = price as i64;
         self
     }
 

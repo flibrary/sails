@@ -1,5 +1,3 @@
-use std::num::NonZeroU32;
-
 use crate::{
     alipay::{
         AlipayAppPrivKey, AlipayClient, CancelTrade, CancelTradeResp, Precreate, PrecreateResp,
@@ -15,7 +13,11 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
-use sails_db::{enums::TransactionStatus, products::*, transactions::*};
+use sails_db::{
+    enums::TransactionStatus, error::SailsDbError, products::*, tags::TagMappingFinder,
+    transactions::*,
+};
+use std::num::NonZeroU32;
 
 #[derive(Template)]
 #[template(path = "orders/order_info_seller.html")]
@@ -174,10 +176,27 @@ pub async fn progress(
         .into_flash(uri!("/"))?
         .into_flash(uri!("/"))?;
 
+    let prod_id = order.prod_info.to_id();
+    let digicon: bool = db
+        .run(move |c| -> Result<bool, SailsDbError> {
+            let tags = TagMappingFinder::new(c, None)
+                .product(&prod_id)
+                .search_tag()?;
+            Ok(tags.iter().any(|x| x.get_id() == "digicon"))
+        })
+        .await
+        .into_flash(uri!("/"))?;
+
     let status = match resp.trade_status.as_str() {
         // Both of these indicate that we have successfully finished the transaction.
         // TRADE_FINISHED indicates it has been well pass the refunding deadline.
-        "TRADE_SUCCESS" | "TRADE_FINISHED" => TransactionStatus::Paid,
+        "TRADE_SUCCESS" | "TRADE_FINISHED" => {
+            if !digicon {
+                TransactionStatus::Paid
+            } else {
+                TransactionStatus::Finished
+            }
+        }
         // Trade has been closed,
         "TRADE_CLOSED" => TransactionStatus::Refunded,
         "WAIT_BUYER_PAY" => TransactionStatus::Placed,
