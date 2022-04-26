@@ -56,7 +56,7 @@ pub async fn get(
     let link = digicon.get_link().to_string();
     let name = digicon.get_name().to_string();
     if !conn
-        .run(move |c| DigiconMappingFinder::is_authorized(&c, &user.id, &digicon))
+        .run(move |c| DigiconMappingFinder::is_authorized(c, &user.id, &digicon))
         .await
         .into_flash(uri!("/"))?
     {

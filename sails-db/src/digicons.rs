@@ -1,6 +1,7 @@
 use crate::{
+    enums::UserStatus,
     error::{SailsDbError, SailsDbResult as Result},
-    products::ProductId,
+    products::{ProductFinder, ProductId},
     schema::{digiconmappings, digicons},
     transactions::TransactionFinder,
     users::UserId,
@@ -21,6 +22,16 @@ impl Digicons {
     pub fn list_all(conn: &SqliteConnection) -> Result<Vec<Digicon>> {
         use crate::schema::digicons::dsl::*;
         Ok(digicons.load::<Digicon>(conn)?)
+    }
+
+    pub fn list_all_authorized(conn: &SqliteConnection, user: &UserId) -> Result<Vec<Digicon>> {
+        let mut authorized = Vec::new();
+        for x in Self::list_all(conn)? {
+            if DigiconMappingFinder::is_authorized(conn, user, &x)? {
+                authorized.push(x);
+            }
+        }
+        Ok(authorized)
     }
 
     pub fn find_by_id(conn: &SqliteConnection, id_provided: &str) -> Result<Digicon> {
@@ -225,7 +236,16 @@ impl<'a> DigiconMappingFinder<'a> {
         user: &'a UserId,
         digicon: &'a Digicon,
     ) -> Result<bool> {
-        let bought_products = TransactionFinder::new(conn, None)
+        // Admin gets to access all digicons
+        if user
+            .get_info(conn)?
+            .get_user_status()
+            .contains(UserStatus::ADMIN)
+        {
+            return Ok(true);
+        }
+
+        let mut bought_products = TransactionFinder::new(conn, None)
             .buyer(user)
             // Products with digicons don't have status paid
             // Only effective orders count and we don't need to care about duplication as HashSet takes care after it.
@@ -234,6 +254,12 @@ impl<'a> DigiconMappingFinder<'a> {
             .into_iter()
             .map(|t| t.get_product().to_string())
             .collect::<HashSet<String>>();
+        let owned_products = ProductFinder::new(conn, None)
+            .seller(user)
+            .search()?
+            .into_iter()
+            .map(|x| x.get_id().to_string())
+            .collect::<HashSet<String>>();
         let mapped_products = Self::new(conn, None)
             .digicon(digicon)
             .search()?
@@ -241,6 +267,8 @@ impl<'a> DigiconMappingFinder<'a> {
             .map(|x| x.get_product().to_string())
             .collect::<HashSet<String>>();
 
+        bought_products = owned_products.union(&bought_products).cloned().collect();
+        // If the user owned or bought the product which contains the digicon, he is allowed to access it
         Ok(bought_products.intersection(&mapped_products).count() > 0)
     }
 

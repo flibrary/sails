@@ -4,7 +4,7 @@ use rocket::{
     form::Form,
     response::{Flash, Redirect},
 };
-use sails_db::{error::SailsDbError, products::*, transactions::*, users::*};
+use sails_db::{digicons::*, error::SailsDbError, products::*, transactions::*, users::*};
 
 type OrderEntry = (ProductInfo, TransactionInfo);
 
@@ -58,6 +58,7 @@ pub struct PortalGuestPage {
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
     user: UserInfo,
+    digicons_owned: Vec<Digicon>,
     prods_owned: Vec<ProductInfo>,
     orders_placed: Vec<OrderEntry>,
     orders_received: Vec<OrderEntry>,
@@ -94,42 +95,42 @@ pub async fn portal(
 ) -> Result<PortalPage, Flash<Redirect>> {
     let uid = user.info.to_id();
     #[allow(clippy::type_complexity)]
-    let (prods_owned, orders_placed, orders_received) = conn
-        .run(
-            move |c| -> Result<(Vec<ProductInfo>, Vec<OrderEntry>, Vec<OrderEntry>), SailsDbError> {
-                let prods_owned = ProductFinder::new(c, None).seller(&uid).search_info()?;
+    let (digicons_owned, prods_owned, orders_placed, orders_received) = conn
+        .run(move |c| -> Result<_, SailsDbError> {
+            let prods_owned = ProductFinder::new(c, None).seller(&uid).search_info()?;
+            let digicons_owned = Digicons::list_all_authorized(c, &uid)?;
 
-                let orders_placed = TransactionFinder::new(c, None)
-                    .buyer(&uid)
-                    .search_info()?
-                    .into_iter()
-                    .map(|x| {
-                        let product = ProductFinder::new(c, None)
-                            .id(x.get_product())
-                            .first_info()?;
-                        Ok((product, x))
-                    })
-                    .collect::<Result<Vec<OrderEntry>, SailsDbError>>()?;
+            let orders_placed = TransactionFinder::new(c, None)
+                .buyer(&uid)
+                .search_info()?
+                .into_iter()
+                .map(|x| {
+                    let product = ProductFinder::new(c, None)
+                        .id(x.get_product())
+                        .first_info()?;
+                    Ok((product, x))
+                })
+                .collect::<Result<Vec<OrderEntry>, SailsDbError>>()?;
 
-                let orders_received = TransactionFinder::new(c, None)
-                    .seller(&uid)
-                    .search_info()?
-                    .into_iter()
-                    .map(|x| {
-                        let product = ProductFinder::new(c, None)
-                            .id(x.get_product())
-                            .first_info()?;
-                        Ok((product, x))
-                    })
-                    .collect::<Result<Vec<OrderEntry>, SailsDbError>>()?;
-                Ok((prods_owned, orders_placed, orders_received))
-            },
-        )
+            let orders_received = TransactionFinder::new(c, None)
+                .seller(&uid)
+                .search_info()?
+                .into_iter()
+                .map(|x| {
+                    let product = ProductFinder::new(c, None)
+                        .id(x.get_product())
+                        .first_info()?;
+                    Ok((product, x))
+                })
+                .collect::<Result<Vec<OrderEntry>, SailsDbError>>()?;
+            Ok((digicons_owned, prods_owned, orders_placed, orders_received))
+        })
         .await
         .into_flash(uri!("/"))?;
 
     Ok(PortalPage {
         user: user.info,
+        digicons_owned,
         orders_placed,
         orders_received,
         prods_owned,

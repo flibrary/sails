@@ -4,6 +4,28 @@
 {% block intro %}在这里您可以管理您上传的商品，也可以修改账号的基本信息。{% endblock intro %}
 {% block update_button %}<a href="/user/update_user_page" class="btn btn-primary" role="button">更新</a> <a href="/user/change_passwd" class="btn btn-warning" role="button">更改密码</a>{% endblock update_button %}
 {% block postprod_button %}<a href="/store/post_prod" class="btn btn-primary" role="button">上架商品</a>{% endblock postprod_button %}
+
+{% block digicons_owned %}
+<div class="p-5 rounded shadow">
+  <h3>您拥有的数字内容</h3>
+  <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+    <thead>
+      <tr>
+	<th data-field="name" data-sortable="true" scope="col">名称</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for digicon in digicons_owned %}
+      <tr>
+	<th scope="row"><a href="{{ uri!("/digicons", crate::digicons::get(digicon.get_id())) }}">{{digicon.get_name()}}</a></th>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<br>
+{% endblock digicons_owned %}
+
 {% block orders_placed %}
 <div class="p-5 rounded shadow">
   <h3>您购买的</h3>

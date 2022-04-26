@@ -11,7 +11,7 @@
 
   {% if digiconed.len() > 0 %}
   <div class="shadow p-5 rounded border border-5 border-warning">
-    <h3>Prod with digicon "{{digicon.get_name()}}"</h3>
+    <h3>Prod with digicon "<a href="{{ uri!("/digicons", crate::digicons::get(self.digicon.get_id())) }}">{{self.digicon.get_name()}}</a>"</h3>
     <table class="table" data-toggle="table" data-pagination="true" data-search="true">
       <thead>
 	<tr>
@@ -38,14 +38,14 @@
   <br>
   {% else %}
     <div class="p-5 rounded shadow">
-      <h3>No prod has digicon "{{digicon.get_name()}}"</h3>
+      <h3>No prod has digicon "<a href="{{ uri!("/digicons", crate::digicons::get(self.digicon.get_id())) }}">{{self.digicon.get_name()}}</a>"</h3>
     </div>
     <br>
   {% endif %}
 
   {% if undigiconed.len() > 0 %}
   <div class="shadow p-5 rounded border border-5 border-warning">
-    <h3>Prod without digicon "{{digicon.get_name()}}"</h3>
+    <h3>Prod without digicon "<a href="{{ uri!("/digicons", crate::digicons::get(self.digicon.get_id())) }}">{{self.digicon.get_name()}}</a>"</h3>
     <table class="table" data-toggle="table" data-pagination="true" data-search="true">
       <thead>
 	<tr>
@@ -72,7 +72,7 @@
   <br>
   {% else %}
     <div class="p-5 rounded shadow">
-      <h3>All prods have digicon "{{digicon.get_name()}}"</h3>
+      <h3>All prods have digicon "<a href="{{ uri!("/digicons", crate::digicons::get(self.digicon.get_id())) }}">{{self.digicon.get_name()}}</a>"</h3>
     </div>
     <br>
   {% endif %}
