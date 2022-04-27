@@ -15,6 +15,19 @@ pub struct DigiconHosting {
     digicon_gh_token: String,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct ReleaseAssets {
+    assets: Vec<Asset>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct Asset {
+    // The name of the release asset
+    name: String,
+    // Download endpoint
+    url: String,
+}
+
 pub struct DigiconFile {
     pub bytes: Bytes,
     pub ctt_type: ContentType,
@@ -28,6 +41,7 @@ impl DigiconFile {
             ctt_type: std::path::Path::new(&name)
                 .extension()
                 .map(|x| ContentType::from_extension(x.to_str().unwrap()).unwrap())
+                // If there is no extension, we set content type to any
                 .unwrap_or(ContentType::Any),
             bytes: resp.bytes().await?,
         })
@@ -62,12 +76,40 @@ pub async fn get(
     {
         return Ok(Err(Redirect::to(uri!("/static/404.html"))));
     }
+
+    let download_link = if let Some(filename) = link.strip_prefix("euler://") {
+        let client = reqwest::Client::builder()
+            .user_agent("curl")
+            .build()
+            .unwrap();
+        // TODO: don't make it hardcoded
+        let assets = client
+            .get("https://api.github.com/repos/flibrary/euler/releases/latest")
+            .header(ACCEPT, "application/vnd.github.v3+json")
+            .bearer_auth(&hosting.digicon_gh_token)
+            .send()
+            .await
+            .into_flash(uri!("/"))?
+            .json::<ReleaseAssets>()
+            .await
+            .into_flash(uri!("/"))?;
+        let asset = assets
+            .assets
+            .into_iter()
+            .find(|x| x.name == filename)
+            .ok_or("asset not found in release")
+            .into_flash(uri!("/"))?;
+        asset.url
+    } else {
+        link
+    };
+
     let client = reqwest::Client::builder()
         .user_agent("curl")
         .build()
         .unwrap();
     let resp = client
-        .get(link)
+        .get(download_link)
         .header(ACCEPT, "application/octet-stream")
         // If we don't auth, probably we will get limited further
         .bearer_auth(&hosting.digicon_gh_token)
