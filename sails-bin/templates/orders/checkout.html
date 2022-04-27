@@ -28,7 +28,8 @@
     <form action="{{ uri!("/orders", crate::orders::purchase(self.prod.get_id())) }}" method="post">
     <div class="form-group row">
       <label for="inputQuantity" class="col-sm-2 col-form-label">购买数量</label>
-      <input type="number" min="1" max="{{prod.get_quantity()}}" class="form-control" id="inputQuantity" placeholder="Quantity" value="1" name="quantity" required>
+      <!--<input type="number" min="1" max="{{prod.get_quantity()}}" class="form-control" id="inputQuantity" placeholder="Quantity" value="1" name="quantity" required>-->
+      <input type="number" min="1" max="3" class="form-control" id="inputQuantity" placeholder="Quantity" value="1" name="quantity" required>
     </div>
     <br>
 
