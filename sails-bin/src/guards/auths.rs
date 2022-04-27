@@ -125,8 +125,7 @@ impl<'r> FromRequest<'r> for Auth<ProdReadable> {
         let db = try_outcome!(request.guard::<DbConn>().await);
         let prod = try_outcome!(request
             .query_value::<ProdGuard>("prod_id")
-            .map(|x| x.ok())
-            .flatten()
+            .and_then(|x| x.ok())
             .or_forward(()));
         let prod = try_outcome!(prod.to_id(&db).await.ok().or_forward(()));
 
@@ -160,8 +159,7 @@ impl<'r> FromRequest<'r> for Auth<ProdWritable> {
         let db = try_outcome!(request.guard::<DbConn>().await);
         let prod = try_outcome!(request
             .query_value::<ProdGuard>("prod_id")
-            .map(|x| x.ok())
-            .flatten()
+            .and_then(|x| x.ok())
             .or_forward(()));
         let prod = try_outcome!(prod.to_id(&db).await.ok().or_forward(()));
 
@@ -195,8 +193,7 @@ impl<'r> FromRequest<'r> for Auth<ProdRemovable> {
         let db = try_outcome!(request.guard::<DbConn>().await);
         let prod = try_outcome!(request
             .query_value::<ProdGuard>("prod_id")
-            .map(|x| x.ok())
-            .flatten()
+            .and_then(|x| x.ok())
             .or_forward(()));
         let prod = try_outcome!(prod.to_id(&db).await.ok().or_forward(()));
         if ((prod.seller_id.get_id() == user.info.get_id())
@@ -230,8 +227,7 @@ impl<'r> FromRequest<'r> for Auth<UserReadable> {
         let db = try_outcome!(request.guard::<DbConn>().await);
         let user_param = try_outcome!(request
             .query_value::<UserGuard>("user_id")
-            .map(|x| x.ok())
-            .flatten()
+            .and_then(|x| x.ok())
             .or_forward(()));
 
         if match user_param.to_id_param(&db).await {
@@ -263,8 +259,7 @@ impl<'r> FromRequest<'r> for Auth<UserWritable> {
         let db = try_outcome!(request.guard::<DbConn>().await);
         let user_param = try_outcome!(request
             .query_value::<UserGuard>("user_id")
-            .map(|x| x.ok())
-            .flatten()
+            .and_then(|x| x.ok())
             .or_forward(()));
 
         if match user_param.to_id_param(&db).await {
@@ -297,8 +292,7 @@ impl<'r> FromRequest<'r> for Auth<OrderReadable> {
         let db = try_outcome!(request.guard::<DbConn>().await);
         let order = try_outcome!(request
             .query_value::<OrderGuard>("order_id")
-            .map(|x| x.ok())
-            .flatten()
+            .and_then(|x| x.ok())
             .or_forward(()));
         let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
@@ -350,8 +344,7 @@ impl<'r> FromRequest<'r> for Auth<OrderProgressable> {
         let db = try_outcome!(request.guard::<DbConn>().await);
         let order = try_outcome!(request
             .query_value::<OrderGuard>("order_id")
-            .map(|x| x.ok())
-            .flatten()
+            .and_then(|x| x.ok())
             .or_forward(()));
         let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
@@ -403,8 +396,7 @@ impl<'r> FromRequest<'r> for Auth<OrderFinishable> {
         let db = try_outcome!(request.guard::<DbConn>().await);
         let order = try_outcome!(request
             .query_value::<OrderGuard>("order_id")
-            .map(|x| x.ok())
-            .flatten()
+            .and_then(|x| x.ok())
             .or_forward(()));
         let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
@@ -456,8 +448,7 @@ impl<'r> FromRequest<'r> for Auth<OrderRefundable> {
         let db = try_outcome!(request.guard::<DbConn>().await);
         let order = try_outcome!(request
             .query_value::<OrderGuard>("order_id")
-            .map(|x| x.ok())
-            .flatten()
+            .and_then(|x| x.ok())
             .or_forward(()));
         let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 

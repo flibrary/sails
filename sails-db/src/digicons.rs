@@ -236,11 +236,11 @@ impl<'a> DigiconMappingFinder<'a> {
         user: &'a UserId,
         digicon: &'a Digicon,
     ) -> Result<bool> {
-        // Admin gets to access all digicons
+        // Admin who can manage the digicons gets to access all digicons
         if user
             .get_info(conn)?
             .get_user_status()
-            .contains(UserStatus::ADMIN)
+            .contains(UserStatus::DIGICON_WRITABLE)
         {
             return Ok(true);
         }
