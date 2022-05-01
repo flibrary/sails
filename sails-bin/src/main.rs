@@ -57,6 +57,8 @@ use crate::{
     smtp::SmtpCreds,
 };
 
+// #[macro_use]
+// extern crate lopdf;
 #[macro_use]
 extern crate rocket;
 #[macro_use]
@@ -367,6 +369,6 @@ fn rocket() -> Rocket<Build> {
             "/images",
             routes![images::upload, images::get, images::get_default],
         )
-        .mount("/digicons", routes![digicons::get])
+        .mount("/digicons", routes![digicons::get, digicons::trace])
         .register("/", catchers![page404, page422, page500])
 }

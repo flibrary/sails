@@ -1,5 +1,5 @@
 use crate::{aead::AeadKey, DbConn};
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chacha20poly1305::Nonce;
 use rocket::{
     form::{self, FromFormField, ValueField},
     http::uri::fmt::{FromUriParam, Query},
@@ -54,30 +54,26 @@ impl UserGuard {
     pub async fn to_id_aead(
         &self,
         db: &DbConn,
-        exp: i64,
+        nonce: String,
         aead: &State<AeadKey>,
     ) -> Result<UserIdGuard<Aead>, SailsDbError> {
-        if Utc::now() <= DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(exp, 0), Utc) {
-            let decode_fn = || -> Result<String, anyhow::Error> {
-                let decoded = base64::decode_config(&self.0, base64::URL_SAFE)?;
-                Ok(String::from_utf8(
-                    aead.decrypt(&decoded, &crate::user::timestamp_to_nonce(exp))
-                        .map_err(|_| anyhow::anyhow!("mailaddress decryption failed"))?,
-                )?)
-            };
+        let decode_fn = || -> Result<String, anyhow::Error> {
+            let nonce = Nonce::clone_from_slice(&base64::decode_config(&nonce, base64::URL_SAFE)?);
+            let decoded = base64::decode_config(&self.0, base64::URL_SAFE)?;
+            Ok(String::from_utf8(aead.decrypt(&decoded, &nonce).map_err(
+                |_| anyhow::anyhow!("mailaddress decryption failed"),
+            )?)?)
+        };
 
-            let uid = decode_fn();
+        let uid = decode_fn();
 
-            db.run(move |c| -> Result<UserIdGuard<Aead>, SailsDbError> {
-                Ok(UserIdGuard {
-                    id: UserFinder::new(c, None).id(&uid?).first()?,
-                    plhdr: PhantomData,
-                })
+        db.run(move |c| -> Result<UserIdGuard<Aead>, SailsDbError> {
+            Ok(UserIdGuard {
+                id: UserFinder::new(c, None).id(&uid?).first()?,
+                plhdr: PhantomData,
             })
-            .await
-        } else {
-            Err(SailsDbError::IllegalQuery)
-        }
+        })
+        .await
     }
 
     pub async fn to_info_param(&self, db: &DbConn) -> Result<UserInfoGuard<Param>, SailsDbError> {
@@ -94,10 +90,10 @@ impl UserGuard {
     pub async fn to_info_aead(
         &self,
         db: &DbConn,
-        exp: i64,
+        nonce: String,
         aead: &State<AeadKey>,
     ) -> Result<UserInfoGuard<Aead>, SailsDbError> {
-        let id = self.to_id_aead(db, exp, aead).await?;
+        let id = self.to_id_aead(db, nonce, aead).await?;
         db.run(move |c| -> Result<UserInfoGuard<Aead>, SailsDbError> {
             Ok(UserInfoGuard {
                 info: id.id.get_info(c)?,

@@ -1,8 +1,10 @@
+use super::generate_verification_link;
 use crate::{
     aead::AeadKey, guards::*, recaptcha::ReCaptcha, sanitize_html, smtp::SmtpCreds, DbConn,
     IntoFlash,
 };
 use askama::Template;
+use chacha20poly1305::Nonce;
 use chrono::{offset::Utc, DateTime, NaiveDateTime};
 use rand::{prelude::StdRng, RngCore, SeedableRng};
 use rocket::{
@@ -12,8 +14,7 @@ use rocket::{
     State,
 };
 use sails_db::users::*;
-
-use super::generate_verification_link;
+use std::convert::TryInto;
 
 #[derive(FromForm)]
 pub struct SignUpForm {
@@ -125,27 +126,33 @@ pub struct ResetPasswd {
 
 // We validate the challenge based on expiration time and the AEAD encrypted hashed password.
 // Then we reset the user password to a CSPRNG-generated u32 number.
-#[get("/reset_passwd?<user_id>&<exp>&<challenge>", rank = 1)]
+#[get("/reset_passwd?<user_id>&<nonce>&<challenge>", rank = 1)]
 pub async fn reset_passwd_now(
     conn: DbConn,
     user_id: UserGuard,
     aead: &State<AeadKey>,
-    exp: i64,
+    nonce: String,
     challenge: String,
 ) -> Result<ResetPasswdConfirmation, Flash<Redirect>> {
     let user_info = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
-    if Utc::now() <= DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(exp, 0), Utc) {
-        // Within expiration time
-        let decoded = base64::decode_config(&challenge, base64::URL_SAFE).into_flash(uri!("/"))?;
 
-        let extracted_hashed_passwd = String::from_utf8(
-            aead.decrypt(&decoded, &super::timestamp_to_nonce(exp))
-                .map_err(|_| anyhow::anyhow!("reset password link decryption failed"))
-                .into_flash(uri!("/"))?,
-        )
+    let challenge = base64::decode_config(&challenge, base64::URL_SAFE).into_flash(uri!("/"))?;
+    let nonce = Nonce::clone_from_slice(
+        &base64::decode_config(&nonce, base64::URL_SAFE).into_flash(uri!("/"))?,
+    );
+
+    let decrypted = aead
+        .decrypt(&challenge, &nonce)
+        .map_err(|_| anyhow::anyhow!("reset password link decryption failed"))
         .into_flash(uri!("/"))?;
+    let (exp, hashed_passwd) = decrypted.split_at(8);
 
-        if user_info.info.get_hashed_passwd() == extracted_hashed_passwd {
+    let exp = i64::from_be_bytes(exp.try_into().unwrap());
+    let hashed_passwd = String::from_utf8(hashed_passwd.to_vec()).into_flash(uri!("/"))?;
+
+    if Utc::now() <= DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(exp, 0), Utc) {
+        // Within the expiration date
+        if user_info.info.get_hashed_passwd() == hashed_passwd {
             // We can finally reset it.
             let rand_passwd = StdRng::from_entropy().next_u32().to_string();
             let rand_passwd_clone = rand_passwd.clone();
@@ -229,15 +236,15 @@ pub async fn email_verified() -> EmailVerified {
     EmailVerified
 }
 
-#[get("/activate?<enc_user_id>&<exp>")]
+#[get("/activate?<enc_user_id>&<nonce>")]
 pub async fn activate_user(
     enc_user_id: UserGuard,
-    exp: i64,
+    nonce: String,
     conn: DbConn,
     aead: &State<AeadKey>,
 ) -> Result<Redirect, Flash<Redirect>> {
     let info = enc_user_id
-        .to_info_aead(&conn, exp, aead)
+        .to_info_aead(&conn, nonce, aead)
         .await
         .into_flash(uri!("/"))?;
     conn.run(move |c| info.info.set_validated(true).update(c))
