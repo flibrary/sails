@@ -1,7 +1,9 @@
 use crate::{aead::AeadKey, guards::*, DbConn, IntoFlash};
 use bytes::Bytes;
 use chacha20poly1305::Nonce;
-use lopdf::{self, Document};
+use image::{DynamicImage, ImageOutputFormat, Rgb};
+use lopdf::{self, xobject, Document};
+use qrcode::QrCode;
 use rand::{prelude::StdRng, RngCore, SeedableRng};
 use reqwest::{header::ACCEPT, Response};
 use rocket::{
@@ -184,9 +186,22 @@ fn watermark_pdf(bytes: &[u8], aead: &AeadKey, trace: &str) -> anyhow::Result<Ve
     // Base64 encode nonce
     let nonce = base64::encode_config(&nonce, base64::URL_SAFE);
 
-    doc.change_producer(
-        &uri!("https://flibrary.info/digicons", trace(ciphertext, nonce)).to_string(),
+    let mut buf = Vec::new();
+    // IMPORTANT: Luma<u8> doesn't seem to work, while Rgb does
+    let qrcode = DynamicImage::ImageRgb8(
+        QrCode::new(uri!("https://flibrary.info/digicons", trace(ciphertext, nonce)).to_string())?
+            .render::<Rgb<u8>>()
+            .dark_color(Rgb([125u8, 125u8, 125u8]))
+            .quiet_zone(false) // disable quiet zone (white border)
+            .build(),
     );
+    qrcode.write_to(&mut buf, ImageOutputFormat::Png)?;
+
+    let stream = xobject::image_from(buf)?;
+
+    for (_, page_id) in doc.get_pages() {
+        doc.insert_image(page_id, stream.clone(), (10.0, 10.0), (75.0, 75.0))?;
+    }
 
     doc.compress();
     doc.save_to(&mut result)?;
