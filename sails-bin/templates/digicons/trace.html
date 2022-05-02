@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Digital Content Ownership Trace{% endblock title %}
+
+{% block content %}
+<main class="container">
+  <div class="p-5 rounded shadow">
+    <h1>Trace of this copy of "{{ digicon.get_name() }}"</h1>
+    <table class="table table-hover">
+    <tbody>
+    <tr>
+      <th scope="row">Created at</th>
+      <td>{{ time }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Digicon</th>
+      <td><a href="{{ uri!("/digicons", crate::digicons::get(self.digicon.get_id())) }}">{{self.digicon.get_name()}}</a></td>
+    </tr>
+    <tr>
+      <th scope="row">Ownership</th>
+      <td><a href="{{ uri!("/user", crate::user::portal_guest(self.user.get_id())) }}">{{ self.user.get_name() }}</a></td>
+    </tr>
+    </tbody>
+    </table>
+  </div>
+  <br>
+</main>
+{% endblock content %}

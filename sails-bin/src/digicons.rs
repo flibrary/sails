@@ -1,6 +1,8 @@
 use crate::{aead::AeadKey, guards::*, DbConn, IntoFlash};
+use askama::Template;
 use bytes::Bytes;
 use chacha20poly1305::Nonce;
+use chrono::{NaiveDateTime, Utc};
 use image::{DynamicImage, ImageOutputFormat, Rgb};
 use lopdf::{self, xobject, Document};
 use qrcode::QrCode;
@@ -11,7 +13,11 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
-use sails_db::digicons::*;
+use sails_db::{
+    digicons::*,
+    error::SailsDbError,
+    users::{UserFinder, UserInfo},
+};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
@@ -74,19 +80,51 @@ impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for DigiconFile {
     }
 }
 
+#[derive(Template)]
+#[template(path = "digicons/trace.html")]
+pub struct TraceInfo {
+    time: NaiveDateTime,
+    digicon: Digicon,
+    user: UserInfo,
+}
+
 #[get("/trace?<cipher>&<nonce>")]
 pub async fn trace(
     _auth: Role<Admin>,
     aead: &State<AeadKey>,
     cipher: String,
     nonce: String,
-) -> Result<String, Flash<Redirect>> {
+    db: DbConn,
+) -> Result<TraceInfo, Flash<Redirect>> {
     let cipher = base64::decode_config(&cipher, base64::URL_SAFE).into_flash(uri!("/"))?;
     let nonce = Nonce::clone_from_slice(
         &base64::decode_config(&nonce, base64::URL_SAFE).into_flash(uri!("/"))?,
     );
 
-    String::from_utf8(aead.decrypt(&cipher, &nonce).into_flash(uri!("/"))?).into_flash(uri!("/"))
+    let decrypted: Vec<String> =
+        String::from_utf8(aead.decrypt(&cipher, &nonce).into_flash(uri!("/"))?)
+            .into_flash(uri!("/"))?
+            .split(':')
+            .map(|x| x.to_string())
+            .collect();
+
+    let time = NaiveDateTime::from_timestamp(decrypted[0].parse().into_flash(uri!("/"))?, 0);
+
+    let (digicon, user) = db
+        .run(move |c| -> Result<_, SailsDbError> {
+            Ok((
+                Digicons::find_by_id(c, &decrypted[1])?,
+                UserFinder::new(c, None).id(&decrypted[2]).first_info()?,
+            ))
+        })
+        .await
+        .into_flash(uri!("/"))?;
+
+    Ok(TraceInfo {
+        time,
+        digicon,
+        user,
+    })
 }
 
 #[get("/get?<digicon_id>")]
@@ -98,9 +136,14 @@ pub async fn get(
     conn: DbConn,
 ) -> Result<Result<DigiconFile, Redirect>, Flash<Redirect>> {
     let digicon = digicon_id.to_digicon(&conn).await.into_flash(uri!("/"))?;
-    // Generate the trace string using digicon ID, and the user ID.
+    // Generate the trace string using UTC time, digicon ID, and the user ID.
     // These are the information that we don't want adversary to tamper with.
-    let trace = format!("{} - {}", digicon.get_id(), &user.id.get_id(),);
+    let trace = format!(
+        "{}:{}:{}",
+        Utc::now().timestamp(),
+        digicon.get_id(),
+        &user.id.get_id(),
+    );
     let link = digicon.get_link().to_string();
     let name = digicon.get_name().to_string();
     if !conn
@@ -161,7 +204,7 @@ pub async fn get(
     }
 }
 
-// Watermark the producer field with AEAD encrypted trace string.
+// Watermark using QRcode containing the AEAD encrypted trace string.
 //
 // What we are protecting against:
 // without obtaining another legiminate copy of the same digicon downloaded by another user A, the malicious user cannot pretend the copy is downloaded by user A.
