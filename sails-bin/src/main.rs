@@ -369,6 +369,9 @@ fn rocket() -> Rocket<Build> {
             "/images",
             routes![images::upload, images::get, images::get_default],
         )
-        .mount("/digicons", routes![digicons::get, digicons::trace])
+        .mount(
+            "/digicons",
+            routes![digicons::get, digicons::trace, digicons::trace_unauthorized],
+        )
         .register("/", catchers![page404, page422, page500])
 }

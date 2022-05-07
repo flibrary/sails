@@ -88,7 +88,12 @@ pub struct TraceInfo {
     user: UserInfo,
 }
 
-#[get("/trace?<cipher>&<nonce>")]
+#[get("/trace", rank = 2)]
+pub async fn trace_unauthorized() -> Redirect {
+    Redirect::to(uri!("https://flibrary.info/store", super::store::home_page))
+}
+
+#[get("/trace?<cipher>&<nonce>", rank = 1)]
 pub async fn trace(
     _auth: Role<Admin>,
     aead: &State<AeadKey>,

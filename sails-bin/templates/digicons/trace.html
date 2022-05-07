@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Digital Content Ownership Trace{% endblock title %}
+{% block title %}Digital Content Distribution Trace{% endblock title %}
 
 {% block content %}
 <main class="container">
@@ -16,7 +16,7 @@
       <td><a href="{{ uri!("/digicons", crate::digicons::get(self.digicon.get_id())) }}">{{self.digicon.get_name()}}</a></td>
     </tr>
     <tr>
-      <th scope="row">Ownership</th>
+      <th scope="row">Downloaded by</th>
       <td><a href="{{ uri!("/user", crate::user::portal_guest(self.user.get_id())) }}">{{ self.user.get_name() }}</a></td>
     </tr>
     </tbody>
