@@ -25,7 +25,7 @@ uuid = { version = "0.8", features = ["serde", "v4"] }
 thiserror = "^1"
 phonenumber = "^0.3"
 lettre = "0.10.0-rc.3"
-rocket = "0.5.0-rc.1"
+rocket = "0.5.0-rc.2"
 chrono = { version = "^0.4", features = ["serde"] }
 
 [dev-dependencies]
