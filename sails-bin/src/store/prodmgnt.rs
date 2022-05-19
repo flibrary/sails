@@ -1,10 +1,9 @@
-use crate::{guards::*, sanitize_html, DbConn, IntoFlash};
+use crate::{guards::*, i18n::I18n, sanitize_html, DbConn, IntoFlash};
 use askama::Template;
 use rocket::{
     form::Form,
     response::{Flash, Redirect},
 };
-use rocket_i18n::I18n;
 use sails_db::{categories::*, products::*, tags::*, users::*};
 
 // Delete can happen if and only if the user is authorized and the product is specified

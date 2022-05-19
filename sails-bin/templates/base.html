@@ -43,6 +43,15 @@
             <li class="nav-item"><a class="nav-link" href="/store">{{ i18n!(self.i18n.catalog, "Store") }}</a></li>
             <li class="nav-item"><a class="nav-link" href="/messages">{{ i18n!(self.i18n.catalog, "Messages") }}</a></li>
 	    <li class="nav-item"><a class="nav-link" href="/user">{{ i18n!(self.i18n.catalog, "Portal") }}</a></li>
+	    <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+		<i class="bi bi-translate"></i>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+		<li><a class="dropdown-item" href="{{uri!("/i18n", crate::i18n::set_lang("en"))}}">English</a></li>
+		<li><a class="dropdown-item" href="{{uri!("/i18n", crate::i18n::set_lang("zh"))}}">中文</a></li>
+              </ul>
+            </li>
 	    {% block navbutton %}{% endblock navbutton %}
           </ul>
         </div>
@@ -61,7 +70,7 @@
   <script src="/static/js//bootstrap-table.min.js"></script>
 
   <script>
-    $('.navbar-collapse a').click(() => {
+    $('.navbar-toggler').click(() => {
         $(".navbar-collapse").collapse('hide');
     });
     $(function () {

@@ -46,7 +46,7 @@ pkgs: [
     name = "sails-bin";
     overrideAttrs = drv: {
       propagatedNativeBuildInputs = drv.propagatedNativeBuildInputs or [ ]
-        ++ [ pkgs.sqlite ];
+        ++ [ pkgs.sqlite pkgs.gettext ];
     };
   })
 ]

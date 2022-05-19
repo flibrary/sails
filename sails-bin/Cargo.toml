@@ -7,7 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket_i18n = { git = "https://github.com/Plume-org/rocket_i18n", branch = "go-async", default-features= false, features = ["rocket"] }
 gettext-macros = "^0.6"
 gettext-utils = "0.1"
 gettext = "^0.4"

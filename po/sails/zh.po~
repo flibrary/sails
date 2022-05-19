@@ -12,14 +12,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid "Store"
-msgstr "Store 商店"
-
 msgid "Messages"
 msgstr "消息"
 
 msgid "Portal"
 msgstr "主页"
+
+msgid "Store"
+msgstr "Store 商店"
 
 msgid "Digital Content Distribution Trace"
 msgstr "数字内容分发追踪"
@@ -198,6 +198,15 @@ msgstr "如购买纯数字内容，您可以在这里填写任意内容。"
 msgid "Submit"
 msgstr "提交"
 
+msgid "Provide Credential"
+msgstr ""
+
+msgid "Password"
+msgstr "密码"
+
+msgid "Verify"
+msgstr ""
+
 msgid "Search by categories"
 msgstr "通过类别搜索"
 
@@ -309,9 +318,6 @@ msgstr "登录以查看创作者信息"
 
 msgid "Sign in"
 msgstr "登陆"
-
-msgid "Password"
-msgstr "密码"
 
 msgid "Sign up"
 msgstr "注册"

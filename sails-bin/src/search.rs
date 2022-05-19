@@ -1,11 +1,11 @@
 use crate::{
     guards::ProdGuard,
+    i18n::I18n,
     store::{cmp_product, find_first_image, ProductCard},
     DbConn, IntoFlash,
 };
 use askama::Template;
 use rocket::response::{Flash, Redirect};
-use rocket_i18n::I18n;
 use sails_db::{categories::*, error::SailsDbError, products::*, tags::*, Cmp};
 
 #[derive(Template)]

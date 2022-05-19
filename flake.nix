@@ -12,7 +12,8 @@
     };
 
     cargo2nix = {
-      url = "github:flibrary/cargo2nix/master";
+      # url = "github:flibrary/cargo2nix/master";
+      url = "github:cargo2nix/cargo2nix/master";
       inputs = {
         rust-overlay.follows = "rust-overlay";
         nixpkgs.follows = "nixpkgs";
@@ -34,13 +35,13 @@
         pkgs = system:
           import nixpkgs {
             system = "${system}";
-            overlays = [ rust-overlay.overlay cargo2nix.overlay."${system}" ];
+            overlays = [ rust-overlay.overlay cargo2nix.overlay ];
           };
         rustPkgs = system:
           with (pkgs system);
-          (rustBuilder.makePackageSet' {
-            # appended to "stable"
-            rustChannel = "latest";
+          (rustBuilder.makePackageSet {
+            rustChannel = "stable";
+            rustVersion = "latest";
             packageFun = import ./Cargo.nix;
             # packageOverrides = pkgs: pkgs.rustBuilder.overrides.all; # Implied, if not specified
             packageOverrides = pkgs:

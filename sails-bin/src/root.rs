@@ -1,4 +1,4 @@
-use crate::{guards::*, recaptcha::ReCaptcha, DbConn, IntoFlash};
+use crate::{guards::*, i18n::I18n, recaptcha::ReCaptcha, DbConn, IntoFlash};
 use askama::Template;
 use rocket::{
     form::Form,
@@ -6,7 +6,6 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
-use rocket_i18n::I18n;
 use sails_db::{
     enums::UserStatus,
     users::{UserFinder, UserInfo},

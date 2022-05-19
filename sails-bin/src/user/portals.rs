@@ -1,10 +1,9 @@
-use crate::{guards::*, sanitize_html, DbConn, IntoFlash};
+use crate::{guards::*, i18n::I18n, sanitize_html, DbConn, IntoFlash};
 use askama::Template;
 use rocket::{
     form::Form,
     response::{Flash, Redirect},
 };
-use rocket_i18n::I18n;
 use sails_db::{digicons::*, error::SailsDbError, products::*, transactions::*, users::*};
 
 type OrderEntry = (ProductInfo, TransactionInfo);

@@ -1,7 +1,7 @@
 use super::generate_verification_link;
 use crate::{
-    aead::AeadKey, guards::*, recaptcha::ReCaptcha, sanitize_html, smtp::SmtpCreds, DbConn,
-    IntoFlash,
+    aead::AeadKey, guards::*, i18n::I18n, recaptcha::ReCaptcha, sanitize_html, smtp::SmtpCreds,
+    DbConn, IntoFlash,
 };
 use askama::Template;
 use chacha20poly1305::Nonce;
@@ -13,7 +13,6 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
-use rocket_i18n::I18n;
 use sails_db::users::*;
 use std::convert::TryInto;
 

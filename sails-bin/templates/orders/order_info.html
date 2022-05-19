@@ -27,17 +27,17 @@
       {% match resp.as_ref().unwrap() %}
       {% when Ok with (resp) %}
       <div class="alert alert-warning" role="alert">
-	{{ i18n!(self.i18n.catalog, "Notice: <b>Please pay within three hours after you scan.</b>") }}
+	{{ i18n!(self.i18n.catalog, "Notice: <b>Please pay within three hours after you scan.</b>")|safe }}
       </div>
       <center><div id="qrcode"></div></center><br>
       <a href="alipays://platformapi/startapp?appId=20000067&url={{urlencoding::encode(resp.qr_code)}}" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Pay with AliPay") }}</a>
       {% when Err with (err) %}
       <div class="alert alert-warning" role="alert">
-	{{ i18n!(self.i18n.catalog, "<b>Failed to create order, please contact us</b>: {0}"; err) }}
+	{{ i18n!(self.i18n.catalog, "<b>Failed to create order, please contact us</b>: {0}"; err)|safe }}
       </div>
       {% endmatch %}
       <a href="{{ uri!("/orders", crate::orders::progress(self.order.get_id())) }}" class="btn btn-success" role="button">{{ i18n!(self.i18n.catalog, "Next") }}</a>
-      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger disabled" role="button" onclick="return confirm('{{ i18n!(self.i18n.catalog, "Cancel your order? This CANNOT be reverted") }}');">{{ i18n!(self.i18n.catalog, "Cancel order") }}</a>
+      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger" role="button" onclick="return confirm('{{ i18n!(self.i18n.catalog, "Cancel your order? This CANNOT be reverted") }}');">{{ i18n!(self.i18n.catalog, "Cancel order") }}</a>
 
       {% when sails_db::enums::TransactionStatus::Paid %}
       <div class="progress">
@@ -55,7 +55,7 @@
       </div>
       <br>
       <h3>{{ i18n!(self.i18n.catalog, "Congratulations, your order is completed!") }}</h2>
-      {{ i18n!(self.i18n.catalog, "For Digital Contents, please access them at <a href=\"/user\">your portal page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info\">Contact us</a>") }}
+      {{ i18n!(self.i18n.catalog, "For Digital Contents, please access them at <a href=\"/user\">your portal page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info\">Contact us</a>")|safe }}
       {% endmatch %}
     </div>
 <br>

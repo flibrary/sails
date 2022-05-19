@@ -14,6 +14,7 @@ extern crate diesel_migrations;
 #[macro_use]
 extern crate rocket_sync_db_pools;
 
+use crate::i18n::I18n;
 use aead::AeadKey;
 use ammonia::Builder;
 use askama::Template;
@@ -31,7 +32,6 @@ use rocket::{
     shield::Shield,
     Build, Rocket,
 };
-use rocket_i18n::I18n;
 use rust_embed::RustEmbed;
 use sails_db::{
     categories::{Categories, CtgBuilder},
@@ -50,6 +50,7 @@ mod aead;
 mod alipay;
 mod digicons;
 mod guards;
+mod i18n;
 mod images;
 mod messages;
 mod orders;
@@ -378,6 +379,7 @@ fn rocket() -> Rocket<Build> {
             "/images",
             routes![images::upload, images::get, images::get_default],
         )
+        .mount("/i18n", routes![i18n::set_lang])
         .mount(
             "/digicons",
             routes![digicons::get, digicons::trace, digicons::trace_unauthorized],

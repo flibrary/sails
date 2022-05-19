@@ -1,6 +1,7 @@
 use crate::{
     alipay::{AlipayAppPrivKey, AlipayClient, RefundTrade, RefundTradeResp},
     guards::*,
+    i18n::I18n,
     DbConn, IntoFlash,
 };
 use askama::Template;
@@ -8,7 +9,6 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
-use rocket_i18n::I18n;
 use sails_db::{
     digicons::*,
     enums::{ProductStatus, TransactionStatus},

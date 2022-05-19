@@ -2934,15 +2934,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rocket_i18n"
-version = "0.5.0"
-source = "git+https://github.com/Plume-org/rocket_i18n?branch=go-async#e81b6f1d49db11ab0296f1bffd3ce444d81806a4"
-dependencies = [
- "gettext",
- "rocket",
-]
-
-[[package]]
 name = "rocket_sync_db_pools"
 version = "0.1.0-rc.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3078,7 +3069,6 @@ dependencies = [
  "rand 0.8.5",
  "reqwest",
  "rocket",
- "rocket_i18n",
  "rocket_sync_db_pools",
  "rsa",
  "rust-embed",

@@ -1,10 +1,9 @@
-use crate::{guards::*, DbConn, IntoFlash};
+use crate::{guards::*, i18n::I18n, DbConn, IntoFlash};
 use askama::Template;
 use rocket::{
     form::Form,
     response::{Flash, Redirect},
 };
-use rocket_i18n::I18n;
 use sails_db::{
     messages::{Message, Messages},
     users::*,

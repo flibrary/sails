@@ -4,6 +4,7 @@ use crate::{
         RefundTrade, RefundTradeResp, SignedResponse, TradeQuery, TradeQueryResp,
     },
     guards::*,
+    i18n::I18n,
     telegram_bot::TelegramBot,
     DbConn, IntoFlash,
 };
@@ -13,7 +14,6 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
-use rocket_i18n::I18n;
 use sails_db::{
     digicons::*, enums::TransactionStatus, error::SailsDbError, products::*, transactions::*,
 };
