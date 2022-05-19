@@ -41,6 +41,7 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-check
+      - run: sudo apt-get install gettext
       - uses: actions-rs/install@v0.1
         with:
           crate: cargo-all-features
@@ -60,6 +61,7 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-test
+      - run: sudo apt-get install gettext
       - uses: actions-rs/install@v0.1
         with:
           crate: cargo-all-features
@@ -79,6 +81,7 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-bench
+      - run: sudo apt-get install gettext
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -101,6 +104,7 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-clippy
+      - run: sudo apt-get install gettext
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal

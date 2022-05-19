@@ -46,7 +46,7 @@ impl<'r> FromRequest<'r> for I18n {
         } else {
             req.headers()
                 .get_one(ACCEPT_LANG)
-                .unwrap_or("en".into())
+                .unwrap_or("en")
                 .split(',')
                 .filter_map(|lang| {
                     lang
@@ -56,7 +56,7 @@ impl<'r> FromRequest<'r> for I18n {
                 })
                 // Get the first requested locale we support
                 .find(|lang| langs.iter().any(|l| l.0 == *lang))
-                .unwrap_or("en".into())
+                .unwrap_or("en")
                 .into()
         };
 
