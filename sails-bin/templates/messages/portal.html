@@ -1,22 +1,22 @@
 {% extends "base.html" %}
-{% block title %}消息{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Messages") }}{% endblock title %}
 {% block content %}
 <main class="container">
   <div class="p-5 rounded shadow">
-    <h1>消息</h1>
-    <p class="lead">以下是所有发送给您的消息</p>
+    <h1>{{ i18n!(self.i18n.catalog, "Messages") }}</h1>
+    <p class="lead">{{ i18n!(self.i18n.catalog, "Below are all the messages you received") }}</p>
   </div>
   <br>
 
   {% if message_list.len() > 0 %}
     <div class="p-5 rounded shadow">
-      <h3>最近的消息</h3>
+      <h3>{{ i18n!(self.i18n.catalog, "Recent messages") }}</h3>
       <table class="table" data-toggle="table" data-pagination="true" data-search="true">
         <thead>
 	  <tr>
-	    <th data-field="id" scope="col">用户</th>
-	    <th data-field="body" scope="col">内容</th>
-	    <th data-field="time" data-sortable="true" scope="col">时间</th>
+	    <th data-field="id" scope="col">{{ i18n!(self.i18n.catalog, "User") }}</th>
+	    <th data-field="body" scope="col">{{ i18n!(self.i18n.catalog, "Message") }}</th>
+	    <th data-field="time" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Time") }}</th>
 	  </tr>
         </thead>
         <tbody>
@@ -33,7 +33,7 @@
     <br>
   {% else %}
     <div class="p-5 rounded shadow">
-      <h3>您还没有收到任何消息</h3>
+      <h3>{{ i18n!(self.i18n.catalog, "You haven't received any message.") }}</h3>
     </div>
     <br>
   {% endif %}

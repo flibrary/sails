@@ -1,13 +1,13 @@
 {% extends "portal_guest.html" %}
-{% block title %}用户中心{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Portal") }}{% endblock title %}
 
-{% block intro %}在这里您可以管理您上传的商品，也可以修改账号的基本信息。{% endblock intro %}
-{% block update_button %}<a href="/user/update_user_page" class="btn btn-primary" role="button">更新</a> <a href="/user/change_passwd" class="btn btn-warning" role="button">更改密码</a>{% endblock update_button %}
-{% block postprod_button %}<a href="/store/post_prod" class="btn btn-primary" role="button">上架商品</a>{% endblock postprod_button %}
+{% block intro %}{{ i18n!(self.i18n.catalog, "Here you can manage your products and account") }}{% endblock intro %}
+{% block update_button %}<a href="/user/update_user_page" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Update") }}</a> <a href="/user/change_passwd" class="btn btn-warning" role="button">{{ i18n!(self.i18n.catalog, "Change password") }}</a>{% endblock update_button %}
+{% block postprod_button %}<a href="/store/post_prod" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Create a product") }}</a>{% endblock postprod_button %}
 
 {% block digicons_owned %}
 <div class="p-5 rounded shadow">
-  <h3>您拥有的数字内容</h3>
+  <h3>{{ i18n!(self.i18n.catalog, "Digital Contents owned") }}</h3>
   <table class="table" data-toggle="table" data-pagination="true" data-search="true">
     <thead>
       <tr>
@@ -28,15 +28,15 @@
 
 {% block orders_placed %}
 <div class="p-5 rounded shadow">
-  <h3>您购买的</h3>
+  <h3>{{ i18n!(self.i18n.catalog, "Orders placed") }}</h3>
   <table class="table" data-toggle="table" data-pagination="true" data-search="true">
     <thead>
       <tr>
-	<th data-field="id" data-sortable="true" scope="col">ID</th>
-	<th data-field="name" data-sortable="true" scope="col">名称</th>
-	<th data-field="price" data-sortable="true" scope="col">价格</th>
-	<th data-field="seller" data-sortable="true" scope="col">卖家</th>
-	<th data-field="status" data-sortable="true" scope="col">状态</th>
+	<th data-field="id" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "ID") }}</th>
+	<th data-field="name" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Name") }}</th>
+	<th data-field="price" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Price") }}</th>
+	<th data-field="seller" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Seller") }}</th>
+	<th data-field="status" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Status") }}</th>
       </tr>
     </thead>
     <tbody>
@@ -57,14 +57,14 @@
 
 {% block orders_received %}
 <div class="p-5 rounded shadow">
-  <h3>您卖出的</h3>
+  <h3>{{ i18n!(self.i18n.catalog, "Orders received") }}</h3>
   <table class="table" data-toggle="table" data-pagination="true" data-search="true">
     <thead>
       <tr>
-	<th data-field="id" data-sortable="true" scope="col">ID</th>
-	<th data-field="name" data-sortable="true" scope="col">名称</th>
-	<th data-field="price" data-sortable="true" scope="col">价格</th>
-	<th data-field="status" data-sortable="true" scope="col">状态</th>
+	<th data-field="id" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "ID") }}</th>
+	<th data-field="name" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Name") }}</th>
+	<th data-field="price" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Price") }}</th>
+	<th data-field="status" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Status") }}</th>
       </tr>
     </thead>
     <tbody>

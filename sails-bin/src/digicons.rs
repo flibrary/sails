@@ -13,6 +13,7 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
+use rocket_i18n::I18n;
 use sails_db::{
     digicons::*,
     error::SailsDbError,
@@ -83,6 +84,7 @@ impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for DigiconFile {
 #[derive(Template)]
 #[template(path = "digicons/trace.html")]
 pub struct TraceInfo {
+    i18n: I18n,
     time: NaiveDateTime,
     digicon: Digicon,
     user: UserInfo,
@@ -95,6 +97,7 @@ pub async fn trace_unauthorized() -> Redirect {
 
 #[get("/trace?<cipher>&<nonce>", rank = 1)]
 pub async fn trace(
+    i18n: I18n,
     _auth: Role<Admin>,
     aead: &State<AeadKey>,
     cipher: String,
@@ -126,6 +129,7 @@ pub async fn trace(
         .into_flash(uri!("/"))?;
 
     Ok(TraceInfo {
+        i18n,
         time,
         digicon,
         user,

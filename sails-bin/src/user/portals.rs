@@ -4,6 +4,7 @@ use rocket::{
     form::Form,
     response::{Flash, Redirect},
 };
+use rocket_i18n::I18n;
 use sails_db::{digicons::*, error::SailsDbError, products::*, transactions::*, users::*};
 
 type OrderEntry = (ProductInfo, TransactionInfo);
@@ -39,17 +40,22 @@ pub async fn update_user(
 #[derive(Template)]
 #[template(path = "user/update_user_page.html")]
 pub struct UpdateUserPage {
+    i18n: I18n,
     user: UserInfo,
 }
 
 #[get("/update_user_page")]
-pub async fn update_user_page(user: UserInfoGuard<Cookie>) -> UpdateUserPage {
-    UpdateUserPage { user: user.info }
+pub async fn update_user_page(i18n: I18n, user: UserInfoGuard<Cookie>) -> UpdateUserPage {
+    UpdateUserPage {
+        i18n,
+        user: user.info,
+    }
 }
 
 #[derive(Template)]
 #[template(path = "user/portal_guest.html")]
 pub struct PortalGuestPage {
+    i18n: I18n,
     user: UserInfo,
     prods_owned: Vec<ProductInfo>,
 }
@@ -57,6 +63,7 @@ pub struct PortalGuestPage {
 #[derive(Template)]
 #[template(path = "user/portal.html")]
 pub struct PortalPage {
+    i18n: I18n,
     user: UserInfo,
     digicons_owned: Vec<Digicon>,
     prods_owned: Vec<ProductInfo>,
@@ -66,6 +73,7 @@ pub struct PortalPage {
 
 #[get("/?<user_id>", rank = 1)]
 pub async fn portal_guest(
+    i18n: I18n,
     _signedin: UserIdGuard<Cookie>,
     user_id: UserGuard,
     conn: DbConn,
@@ -82,6 +90,7 @@ pub async fn portal_guest(
         .into_flash(uri!("/"))?;
 
     Ok(PortalGuestPage {
+        i18n,
         user: user.info,
         prods_owned,
     })
@@ -90,6 +99,7 @@ pub async fn portal_guest(
 // The flash message is required here because we may get error from update_user
 #[get("/", rank = 2)]
 pub async fn portal(
+    i18n: I18n,
     user: UserInfoGuard<Cookie>,
     conn: DbConn,
 ) -> Result<PortalPage, Flash<Redirect>> {
@@ -129,6 +139,7 @@ pub async fn portal(
         .into_flash(uri!("/"))?;
 
     Ok(PortalPage {
+        i18n,
         user: user.info,
         digicons_owned,
         orders_placed,

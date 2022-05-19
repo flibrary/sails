@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}注册{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Sign up") }}{% endblock title %}
 {% block head %}
     {% call super() %}
     <!-- Custom styles for sign in page -->
@@ -15,27 +15,27 @@
 {% block body %}
 <main class="form-signin text-center">
   <form action="create_user" method="post" class="submit-once" id="signup-form">
-    <h1 class="h3 mb-3 fw-normal">注册账号</h1>
+    <h1 class="h3 mb-3 fw-normal">{{ i18n!(self.i18n.catalog, "Sign up") }}</h1>
 
     <div class="form-floating">
       <input type="email" class="form-control" id="floatingEmail" placeholder="Email" name="user_info[email]">
-      <label for="floatingInput">邮箱</label>
+      <label for="floatingInput">{{ i18n!(self.i18n.catalog, "Email") }}</label>
     </div>
     <div class="form-floating">
       <input type="text" class="form-control" id="floatingName" placeholder="Name" name="user_info[name]">
-      <label for="floatingInput">中文姓名</label>
+      <label for="floatingInput">{{ i18n!(self.i18n.catalog, "Name") }}</label>
     </div>
     <div class="form-floating">
       <input type="text" class="form-control" id="floatingSchool" placeholder="School" name="user_info[school]">
-      <label for="floatingInput">学校</label>
+      <label for="floatingInput">{{ i18n!(self.i18n.catalog, "Institution") }}</label>
     </div>
     <div class="form-floating">
       <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="user_info[password]">
-      <label for="floatingPassword">密码</label>
+      <label for="floatingPassword">{{ i18n!(self.i18n.catalog, "Password") }}</label>
     </div>
     <div class="g-recaptcha" data-sitekey="{{ recaptcha_key }}" data-callback="enableBtn"></div>
     <br/>
-    <button class="w-100 btn btn-lg btn-primary" type="submit" id="signup-submit" onclick="onSubmit()" disabled="disabled">注册</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit" id="signup-submit" onclick="onSubmit()" disabled="disabled">{{ i18n!(self.i18n.catalog, "Sign up") }}</button>
   </form>
 </main>
 

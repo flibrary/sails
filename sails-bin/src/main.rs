@@ -5,21 +5,14 @@
 // Handle general database errors by redirecting using flash message to some big pages like `/store`, `/user`. Flash message will only be used up when called.
 // All for loops in templates should be able to handle empty vec.
 
-mod admin;
-mod aead;
-mod alipay;
-mod digicons;
-mod guards;
-mod images;
-mod messages;
-mod orders;
-mod recaptcha;
-mod root;
-mod search;
-mod smtp;
-mod store;
-mod telegram_bot;
-mod user;
+#[macro_use]
+extern crate gettext_macros;
+#[macro_use]
+extern crate rocket;
+#[macro_use]
+extern crate diesel_migrations;
+#[macro_use]
+extern crate rocket_sync_db_pools;
 
 use aead::AeadKey;
 use ammonia::Builder;
@@ -38,6 +31,7 @@ use rocket::{
     shield::Shield,
     Build, Rocket,
 };
+use rocket_i18n::I18n;
 use rust_embed::RustEmbed;
 use sails_db::{
     categories::{Categories, CtgBuilder},
@@ -48,6 +42,25 @@ use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
 use telegram_bot::TelegramBot;
 
+init_i18n!("sails", en, zh);
+
+// Following modules may use i18n! or t!, they are required to be called before compile_i18n! per https://github.com/Plume-org/gettext-macros#order-of-the-macros
+mod admin;
+mod aead;
+mod alipay;
+mod digicons;
+mod guards;
+mod images;
+mod messages;
+mod orders;
+mod recaptcha;
+mod root;
+mod search;
+mod smtp;
+mod store;
+mod telegram_bot;
+mod user;
+
 use crate::{
     alipay::{AlipayAppPrivKey, AlipayClient},
     digicons::DigiconHosting,
@@ -56,15 +69,6 @@ use crate::{
     root::RootPasswd,
     smtp::SmtpCreds,
 };
-
-// #[macro_use]
-// extern crate lopdf;
-#[macro_use]
-extern crate rocket;
-#[macro_use]
-extern crate diesel_migrations;
-#[macro_use]
-extern crate rocket_sync_db_pools;
 
 pub fn sanitize_html(html: &str) -> String {
     SANITIZER.clean(html).to_string()
@@ -161,12 +165,14 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
 #[derive(Template)]
 #[template(path = "index.html")]
 struct Index {
+    i18n: I18n,
     inner: Msg,
 }
 
 #[get("/")]
-async fn index<'a>(flash: Option<FlashMessage<'_>>) -> Index {
+async fn index<'a>(i18n: I18n, flash: Option<FlashMessage<'_>>) -> Index {
     Index {
+        i18n,
         inner: Msg::from_flash(flash),
     }
 }
@@ -237,6 +243,8 @@ struct DcompassOpts {
     config: PathBuf,
 }
 
+compile_i18n!();
+
 #[launch]
 fn rocket() -> Rocket<Build> {
     let args: DcompassOpts = DcompassOpts::from_args();
@@ -262,6 +270,7 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<AlipayClient>())
         .attach(AdHoc::config::<TelegramBot>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
+        .manage(include_i18n!())
         .mount("/", routes![index, get_icon])
         .mount("/static", routes![get_file])
         // Mount user namespace

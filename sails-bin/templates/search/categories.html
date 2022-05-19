@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block title %}通过类别搜索{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Search by categories") }}{% endblock title %}
 {% block content %}
 <main class="container">
   <div class="p-5 rounded shadow">
-    <h1>按照类别搜索您想要的产品</h1>
+    <h1>{{ i18n!(self.i18n.catalog, "Search products by categories") }}</h1>
 
 
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ uri!("/search", crate::search::categories_all) }}">所有类别</a></li>
+        <li class="breadcrumb-item"><a href="{{ uri!("/search", crate::search::categories_all) }}">{{ i18n!(self.i18n.catalog, "All") }}</a></li>
 	{% for parent in parent_ctgs %}
 	  <li class="breadcrumb-item"><a href="{{ uri!("/search", crate::search::categories(parent.id())) }}">{{parent.name()}}</a></li>
         {% endfor %}
@@ -29,10 +29,10 @@
         {% endfor %}
       </div>
       {% else %}
-      <h3>在您的请求下没有找到任何类别，这将被视为一个错误。请联系管理员。</h3>
+      <h3>{{ i18n!(self.i18n.catalog, "No category under your request, this is an ERROR. Please contact admins.") }}</h3>
       {% endif %}
     {% when None %}
-      <h4>没有更多子类别</h4>
+      <h4>{{ i18n!(self.i18n.catalog, "No more subcategories") }}</h4>
     {% endmatch %}
   </div>
   <br>
@@ -57,7 +57,7 @@
          	{% let tags = product.3.clone() %}
 		{% include "display_tag.html" %}
 	      </h5>
-              <p class="card-text"><b>价格: ¥{{product.0.get_price()}}</b></p>
+              <p class="card-text"><b>{{ i18n!(self.i18n.catalog, "Price: USD {0}"; product.0.get_price()) }}</b></p>
             </div>
 	  </div>
 	</div>
@@ -68,7 +68,7 @@
     <br>
   {% else %}
     <div class="p-5 rounded shadow">
-     <h3>此类别下没有产品</h3>
+     <h3>{{ i18n!(self.i18n.catalog, "No products under this category") }}</h3>
     </div>
     <br>
   {% endif %}

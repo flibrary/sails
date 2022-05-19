@@ -13,6 +13,7 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
+use rocket_i18n::I18n;
 use sails_db::users::*;
 use std::convert::TryInto;
 
@@ -32,23 +33,27 @@ pub struct Validation {
 
 #[derive(Template)]
 #[template(path = "user/signin.html")]
-pub struct SignInPage;
+pub struct SignInPage {
+    i18n: I18n,
+}
 
 // This would be mounted under namespace `user` and eventually become `/user/signin`
 #[get("/signin")]
-pub async fn signin<'a>() -> SignInPage {
-    SignInPage
+pub async fn signin<'a>(i18n: I18n) -> SignInPage {
+    SignInPage { i18n }
 }
 
 #[derive(Template)]
 #[template(path = "user/signup.html")]
 pub struct SignUpPage {
+    i18n: I18n,
     recaptcha_key: String,
 }
 
 #[get("/signup")]
-pub async fn signup<'a>(recaptcha: &State<ReCaptcha>) -> SignUpPage {
+pub async fn signup<'a>(i18n: I18n, recaptcha: &State<ReCaptcha>) -> SignUpPage {
     SignUpPage {
+        i18n,
         recaptcha_key: recaptcha.recaptcha_site_key().to_string(),
     }
 }
@@ -96,31 +101,37 @@ pub async fn create_user(
 
 #[derive(Template)]
 #[template(path = "user/signup_instruction.html")]
-pub struct SignUpInstruction;
+pub struct SignUpInstruction {
+    i18n: I18n,
+}
 
 #[get("/signup_instruction")]
-pub async fn signup_instruction() -> SignUpInstruction {
-    SignUpInstruction
+pub async fn signup_instruction(i18n: I18n) -> SignUpInstruction {
+    SignUpInstruction { i18n }
 }
 
 #[derive(Template)]
 #[template(path = "user/reset_passwd_instruction.html")]
-pub struct ResetPasswdInstruction;
+pub struct ResetPasswdInstruction {
+    i18n: I18n,
+}
 
 #[get("/reset_passwd_instruction")]
-pub async fn reset_passwd_instruction() -> ResetPasswdInstruction {
-    ResetPasswdInstruction
+pub async fn reset_passwd_instruction(i18n: I18n) -> ResetPasswdInstruction {
+    ResetPasswdInstruction { i18n }
 }
 
 #[derive(Template)]
 #[template(path = "user/reset_passwd_confirmation.html")]
 pub struct ResetPasswdConfirmation {
+    i18n: I18n,
     reset_passwd: String,
 }
 
 #[derive(Template)]
 #[template(path = "user/reset_passwd.html")]
 pub struct ResetPasswd {
+    i18n: I18n,
     recaptcha_key: String,
 }
 
@@ -128,6 +139,7 @@ pub struct ResetPasswd {
 // Then we reset the user password to a CSPRNG-generated u32 number.
 #[get("/reset_passwd?<user_id>&<nonce>&<challenge>", rank = 1)]
 pub async fn reset_passwd_now(
+    i18n: I18n,
     conn: DbConn,
     user_id: UserGuard,
     aead: &State<AeadKey>,
@@ -160,6 +172,7 @@ pub async fn reset_passwd_now(
                 .await
                 .into_flash(uri!("/"))?;
             Ok(ResetPasswdConfirmation {
+                i18n,
                 reset_passwd: rand_passwd,
             })
         } else {
@@ -177,8 +190,9 @@ pub async fn reset_passwd_now(
 }
 
 #[get("/reset_passwd", rank = 2)]
-pub async fn reset_passwd_page(recaptcha: &State<ReCaptcha>) -> ResetPasswd {
+pub async fn reset_passwd_page(i18n: I18n, recaptcha: &State<ReCaptcha>) -> ResetPasswd {
     ResetPasswd {
+        i18n,
         recaptcha_key: recaptcha.recaptcha_site_key().to_string(),
     }
 }
@@ -229,11 +243,13 @@ pub async fn reset_passwd_post(
 
 #[derive(Template)]
 #[template(path = "user/email_verified.html")]
-pub struct EmailVerified;
+pub struct EmailVerified {
+    i18n: I18n,
+}
 
 #[get("/email_verified")]
-pub async fn email_verified() -> EmailVerified {
-    EmailVerified
+pub async fn email_verified(i18n: I18n) -> EmailVerified {
+    EmailVerified { i18n }
 }
 
 #[get("/activate?<enc_user_id>&<nonce>")]
@@ -285,11 +301,13 @@ pub async fn logout(jar: &CookieJar<'_>) -> Redirect {
 
 #[derive(Template)]
 #[template(path = "user/change_passwd.html")]
-pub struct ChangePassword;
+pub struct ChangePassword {
+    i18n: I18n,
+}
 
 #[get("/change_passwd")]
-pub async fn change_passwd_page() -> ChangePassword {
-    ChangePassword
+pub async fn change_passwd_page(i18n: I18n) -> ChangePassword {
+    ChangePassword { i18n }
 }
 
 #[post("/change_passwd", data = "<password>")]

@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}邮箱验证{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Verify your email") }}{% endblock title %}
 {% block content %}
 <main class="container">
     <div class="p-5 rounded shadow">
-      <h1>请验证您的账号</h1>
+      <h1>{{ i18n!(self.i18n.catalog, "Please complete email verification") }}</h1>
       <p class="lead">
-        我们已经向您的邮箱发送了确认邮件。
-      <br>
-        请去邮箱检查您的收件箱或垃圾文件夹以查看验证邮件。点击邮件中的网址即可完成验证。
-      <br>
-        如果您没有在您的收件箱或垃圾文件夹中收到我们的电子邮件，请<a href="mailto:admin@flibrary.info">联系我们</a>寻求帮助。
+        {{ i18n!(self.i18n.catalog, "We have already sent confirmation email to your inbox.") }}
+	<br>
+	{{ i18n!(self.i18n.catalog, "Please check your inbox or junk folder to see the confirmation. Click the link in the middle to complete verification.") }}
+	<br>
+	{{ i18n!(self.i18n.catalog, "If you haven't received any confirmation email from us, please <a href=\"mailto:admin@flibrary.info\">reach us</a> for help.") }}
       </p>
     </div>
     <br>

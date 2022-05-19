@@ -6,6 +6,7 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
+use rocket_i18n::I18n;
 use sails_db::{
     enums::UserStatus,
     users::{UserFinder, UserInfo},
@@ -68,12 +69,14 @@ pub async fn validate(
 #[derive(Template)]
 #[template(path = "root/root_verify.html")]
 pub struct RootVerifyPage {
+    i18n: I18n,
     recaptcha_key: String,
 }
 
 #[get("/root_verify")]
-pub async fn root_verify<'a>(recaptcha: &State<ReCaptcha>) -> RootVerifyPage {
+pub async fn root_verify<'a>(i18n: I18n, recaptcha: &State<ReCaptcha>) -> RootVerifyPage {
     RootVerifyPage {
+        i18n,
         recaptcha_key: recaptcha.recaptcha_site_key().to_string(),
     }
 }
@@ -81,14 +84,15 @@ pub async fn root_verify<'a>(recaptcha: &State<ReCaptcha>) -> RootVerifyPage {
 #[derive(Template)]
 #[template(path = "root/root.html")]
 pub struct RootPage {
+    i18n: I18n,
     users: Vec<UserInfo>,
 }
 
 // If the user has already been verified, show him the root dashboard
 #[get("/", rank = 1)]
-pub async fn root(_guard: Role<Root>, conn: DbConn) -> Result<RootPage, Redirect> {
+pub async fn root(i18n: I18n, _guard: Role<Root>, conn: DbConn) -> Result<RootPage, Redirect> {
     let users = conn.run(|c| UserFinder::list_info(c)).await.unwrap(); // No error should be tolerated here (database error). 500 is expected
-    Ok(RootPage { users })
+    Ok(RootPage { i18n, users })
 }
 
 // If the visitor has not yet been verified, redirect them to verification page
@@ -100,18 +104,23 @@ pub async fn unverified_root() -> Redirect {
 #[derive(Template)]
 #[template(path = "root/user_status.html")]
 pub struct UserStatusPage {
+    i18n: I18n,
     user: UserInfo,
 }
 
 #[get("/user_status?<user_id>")]
 pub async fn user_status(
+    i18n: I18n,
     _guard: Role<Root>,
     user_id: UserGuard,
     conn: DbConn,
 ) -> Result<UserStatusPage, Flash<Redirect>> {
     let user = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
 
-    Ok(UserStatusPage { user: user.info })
+    Ok(UserStatusPage {
+        i18n,
+        user: user.info,
+    })
 }
 
 #[derive(Debug, FromForm, Clone)]

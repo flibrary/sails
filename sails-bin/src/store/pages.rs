@@ -1,6 +1,7 @@
 use crate::{guards::*, DbConn, IntoFlash};
 use askama::Template;
 use rocket::response::{Flash, Redirect};
+use rocket_i18n::I18n;
 use sails_db::{
     categories::*, enums::ProductStatus, error::SailsDbError, products::*, tags::*, Cmp,
 };
@@ -37,11 +38,12 @@ pub fn find_first_image(fragment: &str) -> Option<String> {
 #[derive(Template)]
 #[template(path = "store/home.html")]
 pub struct StoreHomePage {
+    i18n: I18n,
     pub entries: Vec<(LeafCategory, Vec<ProductCard>)>,
 }
 
 #[get("/")]
-pub async fn home_page(conn: DbConn) -> Result<StoreHomePage, Flash<Redirect>> {
+pub async fn home_page(i18n: I18n, conn: DbConn) -> Result<StoreHomePage, Flash<Redirect>> {
     let entries = conn
         .run(
             move |c| -> Result<Vec<(LeafCategory, Vec<ProductCard>)>, SailsDbError> {
@@ -77,5 +79,5 @@ pub async fn home_page(conn: DbConn) -> Result<StoreHomePage, Flash<Redirect>> {
         )
         .await
         .into_flash(uri!("/"))?;
-    Ok(StoreHomePage { entries })
+    Ok(StoreHomePage { entries, i18n })
 }

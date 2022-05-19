@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}密码重置确认{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Reset password confirmation") }}{% endblock title %}
 {% block content %}
 <main class="container">
     <div class="p-5 rounded shadow">
-      <h1>您的密码已经被重置了</h1>
+      <h1>{{ i18n!(self.i18n.catalog, "Your password has been reset") }}</h1>
       <p class="lead">
-      新密码是 <code>{{reset_passwd}}</code>.
+      {{ i18n!(self.i18n.catalog, "Your new password is <code>{0}</code>"; self.reset_passwd.clone()) }}
       <br>
-      请您用上面的新密码登录账号，注意及时修改默认密码。
+      {{ i18n!(self.i18n.catalog, "Please sign in using the new password above and remember to change your password soon.") }}
     </p>
     </div>
     <br>

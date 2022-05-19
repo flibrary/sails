@@ -4,6 +4,7 @@ use rocket::{
     form::Form,
     response::{Flash, Redirect},
 };
+use rocket_i18n::I18n;
 use sails_db::{
     messages::{Message, Messages},
     users::*,
@@ -38,6 +39,7 @@ pub async fn send(
 #[derive(Template)]
 #[template(path = "messages/chat.html")]
 pub struct ChatPage {
+    i18n: I18n,
     messages: Vec<Message>,
     receiver: UserInfo,
 }
@@ -52,6 +54,7 @@ pub async fn chat_error() -> Flash<Redirect> {
 
 #[get("/chat?<user_id>", rank = 1)]
 pub async fn chat(
+    i18n: I18n,
     conn: DbConn,
     user: UserIdGuard<Cookie>,
     user_id: UserGuard,
@@ -64,6 +67,7 @@ pub async fn chat(
         .await
         .into_flash(uri!("/"))?;
     Ok(ChatPage {
+        i18n,
         messages,
         receiver: receiver.info,
     })
@@ -72,11 +76,13 @@ pub async fn chat(
 #[derive(Template)]
 #[template(path = "messages/portal.html")]
 pub struct PortalPage {
+    i18n: I18n,
     message_list: Vec<Message>,
 }
 
 #[get("/")]
 pub async fn portal(
+    i18n: I18n,
     user: Option<UserIdGuard<Cookie>>,
     conn: DbConn,
 ) -> Result<PortalPage, Flash<Redirect>> {
@@ -85,7 +91,7 @@ pub async fn portal(
             .run(move |c| Messages::get_list(c, &user))
             .await
             .into_flash(uri!("/"))?;
-        Ok(PortalPage { message_list })
+        Ok(PortalPage { i18n, message_list })
     } else {
         Err(Flash::error(
             Redirect::to(uri!("/")),

@@ -8,6 +8,7 @@ use rocket::{
     response::{Flash, Redirect},
     State,
 };
+use rocket_i18n::I18n;
 use sails_db::{
     digicons::*,
     enums::{ProductStatus, TransactionStatus},
@@ -22,6 +23,7 @@ use sails_db::{
 #[derive(Template)]
 #[template(path = "admin/metrics.html")]
 pub struct AdminMetricsPage {
+    i18n: I18n,
     pub order: TxStats,
     pub user: UserStats,
 }
@@ -29,10 +31,12 @@ pub struct AdminMetricsPage {
 // To prevent deadlock, redirect all errors back to index as this is the default route for `/admin`
 #[get("/metrics")]
 pub async fn admin_metrics(
+    i18n: I18n,
     _guard: Role<Admin>,
     conn: DbConn,
 ) -> Result<AdminMetricsPage, Flash<Redirect>> {
     Ok(AdminMetricsPage {
+        i18n,
         order: conn
             .run(|c| TransactionFinder::stats(c, None))
             .await
@@ -47,6 +51,7 @@ pub async fn admin_metrics(
 #[derive(Template)]
 #[template(path = "admin/orders.html")]
 pub struct AdminOrdersPage {
+    i18n: I18n,
     paid_tx: Vec<(ProductInfo, TransactionInfo)>,
     placed_tx: Vec<(ProductInfo, TransactionInfo)>,
     refunded_tx: Vec<(ProductInfo, TransactionInfo)>,
@@ -56,6 +61,7 @@ pub struct AdminOrdersPage {
 // CustomerService or above can READ all orders
 #[get("/orders")]
 pub async fn admin_orders(
+    i18n: I18n,
     _guard: Role<CustomerService>,
     conn: DbConn,
 ) -> Result<AdminOrdersPage, Flash<Redirect>> {
@@ -148,6 +154,7 @@ pub async fn admin_orders(
         .into_flash(uri!("/"))?;
 
     Ok(AdminOrdersPage {
+        i18n,
         paid_tx,
         placed_tx,
         refunded_tx,
@@ -197,15 +204,18 @@ pub async fn add_tag(
 #[derive(Template)]
 #[template(path = "admin/tags.html")]
 pub struct AdminTagsPage {
+    i18n: I18n,
     tags: Vec<Tag>,
 }
 
 #[get("/tags")]
 pub async fn admin_tags(
+    i18n: I18n,
     _guard: Auth<TagWritable>,
     conn: DbConn,
 ) -> Result<AdminTagsPage, Flash<Redirect>> {
     Ok(AdminTagsPage {
+        i18n,
         tags: conn
             .run(|c| Tags::list_all(c))
             .await
@@ -216,6 +226,7 @@ pub async fn admin_tags(
 #[derive(Template)]
 #[template(path = "admin/tag.html")]
 pub struct AdminTagPage {
+    i18n: I18n,
     tag: Tag,
     tagged: Vec<ProductInfo>,
     untagged: Vec<ProductInfo>,
@@ -223,6 +234,7 @@ pub struct AdminTagPage {
 
 #[get("/tag?<id>")]
 pub async fn admin_tag(
+    i18n: I18n,
     _guard: Auth<TagWritable>,
     id: TagGuard,
     conn: DbConn,
@@ -253,6 +265,7 @@ pub async fn admin_tag(
         .into_flash(uri!("/"))?;
 
     Ok(AdminTagPage {
+        i18n,
         tag: id,
         tagged,
         untagged,
@@ -307,15 +320,18 @@ pub async fn add_digicon(
 #[derive(Template)]
 #[template(path = "admin/digicons.html")]
 pub struct AdminDigiconsPage {
+    i18n: I18n,
     digicons: Vec<Digicon>,
 }
 
 #[get("/digicons")]
 pub async fn admin_digicons(
+    i18n: I18n,
     _guard: Auth<DigiconWritable>,
     conn: DbConn,
 ) -> Result<AdminDigiconsPage, Flash<Redirect>> {
     Ok(AdminDigiconsPage {
+        i18n,
         digicons: conn
             .run(|c| Digicons::list_all(c))
             .await
@@ -326,6 +342,7 @@ pub async fn admin_digicons(
 #[derive(Template)]
 #[template(path = "admin/digicon.html")]
 pub struct AdminDigiconPage {
+    i18n: I18n,
     digicon: Digicon,
     digiconed: Vec<ProductInfo>,
     undigiconed: Vec<ProductInfo>,
@@ -333,6 +350,7 @@ pub struct AdminDigiconPage {
 
 #[get("/digicon?<id>")]
 pub async fn admin_digicon(
+    i18n: I18n,
     _guard: Auth<DigiconWritable>,
     id: DigiconGuard,
     conn: DbConn,
@@ -365,6 +383,7 @@ pub async fn admin_digicon(
         .into_flash(uri!("/"))?;
 
     Ok(AdminDigiconPage {
+        i18n,
         digicon: id,
         digiconed,
         undigiconed,
@@ -374,6 +393,7 @@ pub async fn admin_digicon(
 #[derive(Template)]
 #[template(path = "admin/prods.html")]
 pub struct AdminProdsPage {
+    i18n: I18n,
     verified_prods: Vec<ProductInfo>,
     disabled_prods: Vec<ProductInfo>,
 }
@@ -381,6 +401,7 @@ pub struct AdminProdsPage {
 // If the user has already been verified, show him the root dashboard
 #[get("/prods")]
 pub async fn admin_prods(
+    i18n: I18n,
     _guard: Auth<ProdAdmin>,
     conn: DbConn,
 ) -> Result<AdminProdsPage, Flash<Redirect>> {
@@ -403,6 +424,7 @@ pub async fn admin_prods(
         .into_flash(uri!("/"))?;
 
     Ok(AdminProdsPage {
+        i18n,
         disabled_prods,
         verified_prods,
     })
@@ -494,12 +516,14 @@ pub async fn finish_order(
 #[derive(Template)]
 #[template(path = "admin/order_info_admin.html")]
 pub struct OrderInfoAdmin {
+    i18n: I18n,
     prod: ProductInfo,
     order: TransactionInfo,
 }
 
 #[get("/order_info?<order_id>")]
 pub async fn order_info(
+    i18n: I18n,
     // CustomerService imply OrderOthersReadable, which is what this admin page is for.
     _auth: Role<CustomerService>,
     order_id: OrderGuard,
@@ -507,6 +531,7 @@ pub async fn order_info(
 ) -> Result<OrderInfoAdmin, Flash<Redirect>> {
     let order = order_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(OrderInfoAdmin {
+        i18n,
         prod: order.prod_info,
         order: order.order_info,
     })

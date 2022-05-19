@@ -4,6 +4,7 @@ use rocket::{
     form::Form,
     response::{Flash, Redirect},
 };
+use rocket_i18n::I18n;
 use sails_db::{categories::*, products::*, tags::*, users::*};
 
 // Delete can happen if and only if the user is authorized and the product is specified
@@ -65,6 +66,7 @@ pub async fn create_prod(
 #[derive(Template)]
 #[template(path = "store/update_prod.html")]
 pub struct UpdateProd {
+    i18n: I18n,
     prod: ProductInfo,
     categories: Vec<LeafCategory>,
 }
@@ -72,18 +74,21 @@ pub struct UpdateProd {
 #[derive(Template)]
 #[template(path = "store/post_prod.html")]
 pub struct PostProd {
+    i18n: I18n,
     categories: Vec<LeafCategory>,
 }
 
 // If there is a prod specified, we then use the default value of that specified prod for update
 #[get("/post_prod?<prod_id>", rank = 1)]
 pub async fn update_prod_page(
+    i18n: I18n,
     conn: DbConn,
     _auth: Auth<ProdWritable>,
     prod_id: ProdGuard,
 ) -> Result<UpdateProd, Flash<Redirect>> {
     let prod = prod_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(UpdateProd {
+        i18n,
         // If there is no leaves, user cannot create any prods, a message should be displayed inside the template
         // TODO: categories should only be fetched once
         categories: conn
@@ -97,11 +102,13 @@ pub async fn update_prod_page(
 // No prod specified
 #[get("/post_prod", rank = 2)]
 pub async fn post_prod_page(
+    i18n: I18n,
     conn: DbConn,
     _guard: Auth<StoreModifiable>,
     _user: UserIdGuard<Cookie>,
 ) -> Result<PostProd, Flash<Redirect>> {
     Ok(PostProd {
+        i18n,
         // If there is no leaves, user cannot create any prods, a message should be displayed inside the template
         // TODO: categories should only be fetched once
         categories: conn
@@ -122,6 +129,7 @@ pub async fn post_prod_error_page() -> Flash<Redirect> {
 #[derive(Template)]
 #[template(path = "store/prod_info_owned.html")]
 pub struct ProdPageOwned {
+    i18n: I18n,
     prod: ProductInfo,
     category: Option<LeafCategory>,
     seller: UserInfo,
@@ -131,6 +139,7 @@ pub struct ProdPageOwned {
 #[derive(Template)]
 #[template(path = "store/prod_info_user.html")]
 pub struct ProdPageUser {
+    i18n: I18n,
     prod: ProductInfo,
     category: Option<LeafCategory>,
     seller: UserInfo,
@@ -140,6 +149,7 @@ pub struct ProdPageUser {
 #[derive(Template)]
 #[template(path = "store/prod_info_guest.html")]
 pub struct ProdPageGuest {
+    i18n: I18n,
     prod: ProductInfo,
     category: Option<LeafCategory>,
     tags: Vec<Tag>,
@@ -148,12 +158,14 @@ pub struct ProdPageGuest {
 // If the seller is the user, buttons like update and delete are displayed
 #[get("/prod_info?<prod_id>", rank = 1)]
 pub async fn prod_page_owned(
+    i18n: I18n,
     prod_id: ProdGuard,
     conn: DbConn,
     _auth: Auth<ProdWritable>,
 ) -> Result<ProdPageOwned, Flash<Redirect>> {
     let prod = prod_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(ProdPageOwned {
+        i18n,
         prod: prod.prod_info,
         tags: prod.tags,
         category: prod
@@ -167,12 +179,14 @@ pub async fn prod_page_owned(
 // If the user is signed in but not authorized, prod information and seller information will be displayed
 #[get("/prod_info?<prod_id>", rank = 2)]
 pub async fn prod_page_user(
+    i18n: I18n,
     prod_id: ProdGuard,
     conn: DbConn,
     _auth: Auth<ProdReadable>,
 ) -> Result<ProdPageUser, Flash<Redirect>> {
     let prod = prod_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(ProdPageUser {
+        i18n,
         prod: prod.prod_info,
         tags: prod.tags,
         category: prod
@@ -186,11 +200,13 @@ pub async fn prod_page_user(
 // If the user is not signed in, only prod information will be displayed
 #[get("/prod_info?<prod_id>", rank = 3)]
 pub async fn prod_page_guest(
+    i18n: I18n,
     prod_id: ProdGuard,
     conn: DbConn,
 ) -> Result<ProdPageGuest, Flash<Redirect>> {
     let prod = prod_id.to_info(&conn).await.into_flash(uri!("/"))?;
     Ok(ProdPageGuest {
+        i18n,
         prod: prod.prod_info,
         tags: prod.tags,
         category: prod

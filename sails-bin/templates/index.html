@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Homepage{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Homepage") }}{% endblock title %}
 {% block content %}
 <main class="container">
     {% include "display_flash.html" %}
@@ -8,8 +8,8 @@
     <h1 class="display-4 fw-bold">FLibrary</h1>
     <div class="col-lg-6 mx-auto">
       <p class="lead mb-4">A Community Where Knowledge Values</p>
-      <a href="/store" class="btn btn-primary" role="button">Store 商店</a>
-      <a href="https://circle.flibrary.info" class="btn btn-warning" role="button">Circle 社区</a>
+      <a href="/store" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Store") }}</a>
+      <a href="https://circle.flibrary.info" class="btn btn-warning" role="button">{{ i18n!(self.i18n.catalog, "FLibrary Circle") }}</a>
     </div>
     </div>
 

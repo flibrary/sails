@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block title %}邮箱验证完成{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Email verified") }}{% endblock title %}
 {% block content %}
 <main class="container">
     <div class="p-5 rounded shadow">
-      <h1>您已经完成验证！</h1>
+      <h1>{{ i18n!(self.i18n.catalog, "Your have successfully completed email verification!") }}</h1>
       <p class="lead">
-      您的电子邮件已成功验证，您的帐户已被激活。
+	{{ i18n!(self.i18n.catalog, "Your email is verified, and your account is now activated.") }}
       </p>
       <hr>
-      <a href="/user/signin" class="btn btn-primary" role="button">登录</a>
+      <a href="/user/signin" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Sign in") }}</a>
     </div>
     <br>
 </main>

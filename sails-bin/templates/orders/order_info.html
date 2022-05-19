@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Order Details{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Order Details") }}{% endblock title %}
 {% block content %}
 <main class="container">
     <div class="p-5 rounded shadow">
-      <h1>您的订单 #{{ order.get_shortid() }} 的细节</h1>
+      <h1>{{ i18n!(self.i18n.catalog, "Details of order #{0}"; self.order.get_shortid()) }}</h1>
       <br>
       {% match order.get_transaction_status() %}
       {% when sails_db::enums::TransactionStatus::Refunded %}
@@ -11,54 +11,51 @@
 	<div class="progress-bar bg-secondary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
       </div>
       <br>
-      <h3>订单已退款（已取消）</h3>
-      如果您认为订单信息有误，请点击下方“更新”按钮<br>
-      <a href="{{ uri!("/orders", crate::orders::progress(self.order.get_id())) }}" class="btn btn-primary" role="button">更新</a>
+      <h3>{{ i18n!(self.i18n.catalog, "Order has been refunded or canceled") }}</h3>
+      {{ i18n!(self.i18n.catalog, "If you don't agree with the order details, please click the \"update\" button below.") }}<br>
+      <a href="{{ uri!("/orders", crate::orders::progress(self.order.get_id())) }}" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Update") }}</a>
 
       {% when sails_db::enums::TransactionStatus::Placed %}
       <div class="progress">
 	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" style="width: 33%"></div>
       </div>
       <br>
-      <h3>您已成功下单</h3>
-      使用支付宝扫描下方二维码或点击下方按钮来付款，然后请点击下一步<br>
+      <h3>{{ i18n!(self.i18n.catalog, "Your order is placed") }}</h3>
+      {{ i18n!(self.i18n.catalog, "Scan QR code using AliPay or click the button below to pay. Click next when you finished.") }}<br>
       <br>
 
       {% match resp.as_ref().unwrap() %}
       {% when Ok with (resp) %}
       <div class="alert alert-warning" role="alert">
-	注意：<b>请在扫码后三小时内付款。</b>
-      </div>
-      <div class="alert alert-warning" role="alert">
-	超过订单取消时限，订单信息已冻结。<b>您可继续付款以完成订单</b>，如需取消订单请联系客服。
+	{{ i18n!(self.i18n.catalog, "Notice: <b>Please pay within three hours after you scan.</b>") }}
       </div>
       <center><div id="qrcode"></div></center><br>
-      <a href="alipays://platformapi/startapp?appId=20000067&url={{urlencoding::encode(resp.qr_code)}}" class="btn btn-primary" role="button">使用支付宝支付</a>
+      <a href="alipays://platformapi/startapp?appId=20000067&url={{urlencoding::encode(resp.qr_code)}}" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Pay with AliPay") }}</a>
       {% when Err with (err) %}
       <div class="alert alert-warning" role="alert">
-	<b>创建交易错误，请联系客服</b>: {{ err }}
+	{{ i18n!(self.i18n.catalog, "<b>Failed to create order, please contact us</b>: {0}"; err) }}
       </div>
       {% endmatch %}
-      <a href="{{ uri!("/orders", crate::orders::progress(self.order.get_id())) }}" class="btn btn-success" role="button">下一步</a>
-      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger disabled" role="button" onclick="return confirm('您确认取消订单吗？这无法撤消。');">取消订单</a>
+      <a href="{{ uri!("/orders", crate::orders::progress(self.order.get_id())) }}" class="btn btn-success" role="button">{{ i18n!(self.i18n.catalog, "Next") }}</a>
+      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger disabled" role="button" onclick="return confirm('{{ i18n!(self.i18n.catalog, "Cancel your order? This CANNOT be reverted") }}');">{{ i18n!(self.i18n.catalog, "Cancel order") }}</a>
 
       {% when sails_db::enums::TransactionStatus::Paid %}
       <div class="progress">
 	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" style="width: 66%"></div>
       </div>
       <br>
-      <h3>您已成功付款</h3>
-      感谢您的付款！接下来您只需要等待我们为您配送您订购的商品。
+      <h3>{{ i18n!(self.i18n.catalog, "Your order is successfully paid!") }}</h3>
+      {{ i18n!(self.i18n.catalog, "Thanks for your order! Stay tuned as we arrange shipment.") }}
       <br>
-      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger disabled" role="button" onclick="return confirm('您确认退款吗？这无法撤消。');">取消订单并退款</a>
+      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger disabled" role="button" onclick="return confirm('{{ i18n!(self.i18n.catalog, "Refund your order? This CANNOT be reverted") }}');">{{ i18n!(self.i18n.catalog, "Refund") }}</a>
 
       {% when sails_db::enums::TransactionStatus::Finished %}
       <div class="progress">
 	<div class="progress-bar bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
       </div>
       <br>
-      <h3>恭喜您，您的订单已成功交付！</h2>
-      如购买了数字内容，您可在<a href="/user">用户主页</a>中访问。如有任何疑问或需要售后服务，请<a href="mailto:admin@flibrary.info">联系我们</a>寻求帮助。
+      <h3>{{ i18n!(self.i18n.catalog, "Congratulations, your order is completed!") }}</h2>
+      {{ i18n!(self.i18n.catalog, "For Digital Contents, please access them at <a href=\"/user\">your portal page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info\">Contact us</a>") }}
       {% endmatch %}
     </div>
 <br>
@@ -66,39 +63,39 @@
     <table class="table table-hover">
     <tbody>
     <tr>
-      <th scope="row">总价</th>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Total") }}</th>
       <td>CN¥ {{ order.get_total() }}</td>
     </tr>
     <tr>
-      <th scope="row">单价</th>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Price per unit") }}</th>
       <td>CN¥ {{ order.get_price() }}</td>
     </tr>
     <tr>
-      <th scope="row">购买数量</th>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Quantity purchased") }}</th>
       <td>{{ order.get_quantity() }}</td>
     </tr>
     <tr>
-      <th scope="row">买家收货地址</th>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Address") }}</th>
       <td>{{ order.get_address() }}</td>
     </tr>
     <tr>
-      <th scope="row">买家</th>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Buyer") }}</th>
       <td>{{ order.get_buyer() }}</td>
     </tr>
     <tr>
-      <th scope="row">卖家</th>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Seller") }}</th>
       <td>{{ prod.get_seller_id() }}</td>
     </tr>
     <tr>
-      <th scope="row">商品 ID</th>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Product ID") }}</th>
       <td><a href="{{ uri!("/store", crate::store::prod_page_owned(self.prod.get_id())) }}">{{ prod.get_shortid() }}</a></td>
     </tr>
     <tr>
-      <th scope="row">时间戳</th>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Timestamp") }}</th>
       <td>{{ order.get_time_sent() }}</td>
     </tr>
     <tr>
-      <th scope="row">订单状态</th>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Order Status") }}</th>
       <td>{{ "{:?}"|format(order.get_transaction_status()) }}</td>
     </tr>
     </tbody>

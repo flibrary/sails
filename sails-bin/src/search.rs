@@ -5,11 +5,13 @@ use crate::{
 };
 use askama::Template;
 use rocket::response::{Flash, Redirect};
+use rocket_i18n::I18n;
 use sails_db::{categories::*, error::SailsDbError, products::*, tags::*, Cmp};
 
 #[derive(Template)]
 #[template(path = "search/categories.html")]
 pub struct CategoriesPage {
+    i18n: I18n,
     categories: Option<Vec<Category>>,
     current_ctg: Option<Category>,
     parent_ctgs: Vec<Category>,
@@ -18,7 +20,7 @@ pub struct CategoriesPage {
 
 // Browse all categories
 #[get("/categories", rank = 2)]
-pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redirect>> {
+pub async fn categories_all(i18n: I18n, conn: DbConn) -> Result<CategoriesPage, Flash<Redirect>> {
     let products = conn
         .run(move |c| -> Result<Vec<ProductCard>, SailsDbError> {
             // We only display allowed prods
@@ -47,6 +49,7 @@ pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redire
         .into_flash(uri!("/"))?;
 
     Ok(CategoriesPage {
+        i18n,
         current_ctg: None,
         // We are required to list all
         categories: Some(
@@ -61,7 +64,11 @@ pub async fn categories_all(conn: DbConn) -> Result<CategoriesPage, Flash<Redire
 
 // Category browsing
 #[get("/categories?<category>", rank = 1)]
-pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage, Flash<Redirect>> {
+pub async fn categories(
+    i18n: I18n,
+    conn: DbConn,
+    category: String,
+) -> Result<CategoriesPage, Flash<Redirect>> {
     // We didn't use map for that we want to throw out errors.
     let (category, parent_ctgs, products) = conn
         .run(
@@ -109,6 +116,7 @@ pub async fn categories(conn: DbConn, category: String) -> Result<CategoriesPage
         .into_flash(uri!("/"))?;
 
     Ok(CategoriesPage {
+        i18n,
         current_ctg: Some(category.clone()),
         categories: if category.is_leaf() {
             None

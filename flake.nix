@@ -58,6 +58,8 @@
               rust-bin.stable.latest.clippy
               rust-analyzer
               diesel-cli
+              # required by gettext-macro to create PO files
+              gettext
             ];
             shellHook = if hook == null then "" else hook;
           });

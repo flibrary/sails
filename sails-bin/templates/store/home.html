@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Store 在线商店{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Store") }}{% endblock title %}
 
 {% block content %}
 <main class="container">
   <div class="p-5 rounded shadow">
-    <h1><b>FLibrary Store <span class = "text-muted">让好奇心为您赋能</span></b></h1>
+    <h1><b>FLibrary Store <span class = "text-muted">{{ i18n!(self.i18n.catalog, "Empowered By Your Curiosity") }}</span></b></h1>
   </div>
   <br>
 
@@ -29,7 +29,7 @@
 		{% let tags = product.3.clone() %}
 		{% include "display_tag.html" %}
 	      </h5>
-              <p class="card-text"><b>价格: ¥{{product.0.get_price()}}</b></p>
+              <p class="card-text"><b>{{ i18n!(self.i18n.catalog, "Price: USD {0}"; product.0.get_price()) }}</b></p>
             </div>
 	  </div>
 	</div>

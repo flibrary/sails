@@ -4,30 +4,30 @@
     {% when Some with (desc) %}
     {{ desc|safe }}
     {% when None %}
-    <h3>{{ seller.get_name() }} 没有简介</h3>
+    <h3>{{ i18n!(self.i18n.catalog, "{0} has no description"; self.seller.get_name()) }}</h3>
     {% endmatch %}
 {% endblock seller_desc %}
 {% block seller %}
-    <h1>联系卖家</h1>
+    <h1>{{ i18n!(self.i18n.catalog, "Contact the creator") }}</h1>
     <table class="table table-hover">
       <tbody>
 	<tr>
-	  <th scope="row">卖家邮箱</th>
+	  <th scope="row">{{ i18n!(self.i18n.catalog, "Email") }}</th>
 	  <td><a href="mailto:{{seller.get_id()}}">{{ seller.get_id() }}</a></td>
 	</tr>
 	<tr>
-	  <th scope="row">卖家姓名</th>
+	  <th scope="row">{{ i18n!(self.i18n.catalog, "Name") }}</th>
 	  <td><a href="{{ uri!("/user", crate::user::portal_guest(self.seller.get_id())) }}">{{seller.get_name()}}</a></td>
 	</tr>
 	<tr>
-	  <th scope="row">卖家学校</th>
+	  <th scope="row">{{ i18n!(self.i18n.catalog, "Institution") }}</th>
 	  <td>{{ seller.get_school() }}</td>
 	</tr>
       </tbody>
     </table>
-    <a href="{{ uri!("/messages", crate::messages::chat(self.seller.get_id())) }}" class="btn btn-primary" role="button">发送消息</a>
+    <a href="{{ uri!("/messages", crate::messages::chat(self.seller.get_id())) }}" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Send message") }}</a>
 {% endblock seller %}
 
 {% block actions %}
-<a href="{{ uri!("/orders", crate::orders::checkout(self.prod.get_id())) }}" class="btn btn-primary" role="button"><i class="bi bi-credit-card"></i> 购买</a>
+<a href="{{ uri!("/orders", crate::orders::checkout(self.prod.get_id())) }}" class="btn btn-primary" role="button"><i class="bi bi-credit-card"></i> {{ i18n!(self.i18n.catalog, "Purchase") }}</a>
 {% endblock actions %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}修改密码{% endblock title %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Change password") }}{% endblock title %}
 {% block head %}
     {% call super() %}
     <!-- Custom styles for sign in page -->
@@ -9,13 +9,13 @@
 {% block body %}
 <main class="form-signin text-center">
   <form action="change_passwd" method="post">
-    <h1 class="h3 mb-3 fw-normal">新密码</h1>
+    <h1 class="h3 mb-3 fw-normal">{{ i18n!(self.i18n.catalog, "New password") }}</h1>
 
     <div class="form-floating">
       <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password">
-      <label for="floatingPassword">密码</label>
+      <label for="floatingPassword">{{ i18n!(self.i18n.catalog, "Password") }}</label>
     </div>
-    <button class="w-100 btn btn-lg btn-warning" type="submit">更改</button>
+    <button class="w-100 btn btn-lg btn-warning" type="submit">{{ i18n!(self.i18n.catalog, "Change password") }}</button>
   </form>
 </main>
 {% endblock body %}

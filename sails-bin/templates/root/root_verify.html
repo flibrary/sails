@@ -10,15 +10,15 @@
 {% block body %}
 <main class="form-signin text-center">
   <form action="validate" method="post">
-    <h1 class="h3 mb-3 fw-normal">Provide credential</h1>
+    <h1 class="h3 mb-3 fw-normal">{{ i18n!(self.i18n.catalog, "Provide Credential") }}</h1>
 
     <div class="form-floating">
       <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password">
-      <label for="floatingPassword">Password</label>
+      <label for="floatingPassword">{{ i18n!(self.i18n.catalog, "Password") }}</label>
     </div>
     <div class="g-recaptcha" data-sitekey="{{ recaptcha_key }}"></div>
     <br/>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Verify</button>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">{{ i18n!(self.i18n.catalog, "Verify") }}</button>
   </form>
 </main>
 {% endblock body %}
