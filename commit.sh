@@ -4,6 +4,7 @@ find . -type f -name '*.nix' -exec nixfmt {} +
 cargo update
 cargo2nix -f
 ./sync-migrations.sh
+./sync-gettext.sh
 cargo fmt -- --check
 cargo build --all-features
 cargo test
