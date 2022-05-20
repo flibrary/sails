@@ -2449,11 +2449,11 @@ in
     };
   });
   
-  "registry+https://github.com/rust-lang/crates.io-index".loom."0.5.5" = overridableMkRustCrate (profileName: rec {
+  "registry+https://github.com/rust-lang/crates.io-index".loom."0.5.6" = overridableMkRustCrate (profileName: rec {
     name = "loom";
-    version = "0.5.5";
+    version = "0.5.6";
     registry = "registry+https://github.com/rust-lang/crates.io-index";
-    src = fetchCratesIo { inherit name version; sha256 = "85eb735cf3c8ebac6cc3655c5da2f4a088b6a19133aa482471a21ba0eb5d83ab"; };
+    src = fetchCratesIo { inherit name version; sha256 = "ff50ecb28bb86013e935fb6683ab1f6d3a20016f123c76fd4c27470076ac30f5"; };
     features = builtins.concatLists [
       [ "checkpoint" ]
       [ "default" ]
@@ -4759,7 +4759,7 @@ in
     registry = "registry+https://github.com/rust-lang/crates.io-index";
     src = fetchCratesIo { inherit name version; sha256 = "dbe866e1e51e8260c9eed836a042a5e7f6726bb2b411dffeaa712e19c388f23b"; };
     dependencies = {
-      ${ if false then "loom" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".loom."0.5.5" { inherit profileName; };
+      ${ if false then "loom" else null } = rustPackages."registry+https://github.com/rust-lang/crates.io-index".loom."0.5.6" { inherit profileName; };
     };
   });
   
