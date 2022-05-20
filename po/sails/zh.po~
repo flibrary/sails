@@ -12,14 +12,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "Store"
+msgstr "Store 商店"
+
 msgid "Messages"
 msgstr "消息"
 
 msgid "Portal"
 msgstr "主页"
-
-msgid "Store"
-msgstr "Store 商店"
 
 msgid "Digital Content Distribution Trace"
 msgstr "数字内容分发追踪"

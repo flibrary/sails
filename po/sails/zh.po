@@ -229,7 +229,7 @@ msgstr "价格：CN￥ {0}"
 msgid "No products under this category"
 msgstr "此类别下无产品"
 
-msgid "Empowered By Your Curiosity"
+msgid "Power Your Curiosity"
 msgstr "让好奇心为您赋能"
 
 msgid "Update {0}"

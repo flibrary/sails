@@ -4,7 +4,7 @@
 {% block content %}
 <main class="container">
   <div class="p-5 rounded shadow">
-    <h1><b>FLibrary Store <span class = "text-muted">{{ i18n!(self.i18n.catalog, "Empowered By Your Curiosity") }}</span></b></h1>
+    <h1><b>FLibrary Store <span class = "text-muted">{{ i18n!(self.i18n.catalog, "Power Your Curiosity") }}</span></b></h1>
   </div>
   <br>
 
@@ -15,7 +15,7 @@
     <div class="row grid">
        {% for product in entry.1 %}
        <div class="col-sm-6 col-lg-4 mb-4 grid-item">
-	  <div class="card h-100">
+	  <div class="card">
 	    {% match product.1 %}
 	    {% when Some with (img) %}
 	    <a href="{{ uri!("/store", crate::store::prod_page_owned(product.0.get_id())) }}">
