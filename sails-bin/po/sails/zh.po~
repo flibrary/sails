@@ -229,7 +229,7 @@ msgstr "价格：CN￥ {0}"
 msgid "No products under this category"
 msgstr "此类别下无产品"
 
-msgid "Empowered By Your Curiosity"
+msgid "Power Your Curiosity"
 msgstr "让好奇心为您赋能"
 
 msgid "Update {0}"
@@ -428,6 +428,14 @@ msgstr "收到的订单"
 
 msgid "Homepage"
 msgstr "首页"
+
+msgid ""
+"FLibrary is the ultimate destination for discovering, discussing, and "
+"distributing learning guides."
+msgstr "FLibrary 是发现、讨论、创作学习内容的终极选择。"
+
+msgid "Discover Store"
+msgstr "探索 Store 商店"
 
 msgid "FLibrary Circle"
 msgstr "Circle 社区"

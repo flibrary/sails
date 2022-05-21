@@ -411,5 +411,50 @@ msgstr ""
 msgid "Homepage"
 msgstr ""
 
+msgid "FLibrary is the ultimate destination for discovering, discussing, and distributing learning guides."
+msgstr ""
+
+msgid "Discover Store"
+msgstr ""
+
 msgid "FLibrary Circle"
+msgstr ""
+
+msgid "Features"
+msgstr ""
+
+msgid "All Cloud"
+msgstr ""
+
+msgid "FLibrary is your personalized learning hub. From notes to past papers, everything subscribed on cloud for your access anytime, anywhere."
+msgstr ""
+
+msgid "Streamlined Updates"
+msgstr ""
+
+msgid "As a content creator, you are enabled to distribute and push content updates to your subscribers with no effort."
+msgstr ""
+
+msgid "Curated Contents"
+msgstr ""
+
+msgid "Only discover the best-in-class. Spend more time to dive in but not to wander through."
+msgstr ""
+
+msgid "You are Protected"
+msgstr ""
+
+msgid "From account security to content distribution fingerprinting, FLibrary strives for security in every fine detail."
+msgstr ""
+
+msgid "Multilingual Support"
+msgstr ""
+
+msgid "A global learner's community is at heart to our vision, that's why we have built-in multilingual supports."
+msgstr ""
+
+msgid "No Ads Forever"
+msgstr ""
+
+msgid "Ads are simply incompatible with our curiosity. Take our commitment: no ads forever."
 msgstr ""

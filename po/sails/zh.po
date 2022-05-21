@@ -429,5 +429,64 @@ msgstr "收到的订单"
 msgid "Homepage"
 msgstr "首页"
 
+msgid ""
+"FLibrary is the ultimate destination for discovering, discussing, and "
+"distributing learning guides."
+msgstr "FLibrary 是发现、讨论、创作学习内容的终极选择。"
+
+msgid "Discover Store"
+msgstr "探索 Store 商店"
+
 msgid "FLibrary Circle"
 msgstr "Circle 社区"
+
+msgid "Features"
+msgstr "特性"
+
+msgid "All Cloud"
+msgstr "全云端"
+
+msgid ""
+"FLibrary is your personalized learning hub. From notes to past papers, "
+"everything subscribed on cloud for your access anytime, anywhere."
+msgstr "FLibrary 是您个性化的内容收藏馆。从笔记到解析，您可以随时随地从云端访问所有您订阅的内容。"
+
+msgid "Streamlined Updates"
+msgstr "轻松分发"
+
+msgid ""
+"As a content creator, you are enabled to distribute and push content updates "
+"to your subscribers with no effort."
+msgstr "通过 FLibrary，创作者们可以轻松分发学习内容并向用户推送后续更新。"
+
+msgid "Curated Contents"
+msgstr "精心挑选"
+
+msgid ""
+"Only discover the best-in-class. Spend more time to dive in but not to "
+"wander through."
+msgstr "只有最好的内容才值得您去探索。我们的精心挑选让您专注学习和探索，而不是搜集无用的资源。"
+
+msgid "You are Protected"
+msgstr "安全无虞"
+
+msgid ""
+"From account security to content distribution fingerprinting, FLibrary "
+"strives for security in every fine detail."
+msgstr "FLibrary 在每一个细节上都追求安全：从您的账户到内容分发。"
+
+msgid "Multilingual Support"
+msgstr "多语言支持"
+
+msgid ""
+"A global learner's community is at heart to our vision, that's why we have "
+"built-in multilingual supports."
+msgstr "全球化的学习内容社区是我们愿景的核心，为此在设计之初我们就融入了多语言支持。"
+
+msgid "No Ads Forever"
+msgstr "没有广告"
+
+msgid ""
+"Ads are simply incompatible with our curiosity. Take our commitment: no ads "
+"forever."
+msgstr "广告和我们的好奇心格格不入，就这么简单。我们的承诺：永远没有广告。"

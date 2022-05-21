@@ -5,15 +5,58 @@
     {% include "display_flash.html" %}
 
     <div class="p-5 text-center">
-    <h1 class="display-4 fw-bold">FLibrary</h1>
+    <h1 class="display-4 fw-bold"><img src="/static/logo.png" alt="FLibrary" height="70" width="70">FLibrary</h1>
     <div class="col-lg-6 mx-auto">
-      <p class="lead mb-4">A Community Where Knowledge Values</p>
-      <a href="/store" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Store") }}</a>
+      <p class="lead mb-4">{{ i18n!(self.i18n.catalog, "FLibrary is the ultimate destination for discovering, discussing, and distributing learning guides.") }}</p>
+      <a href="/store" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Discover Store") }}</a>
       <a href="https://circle.flibrary.info" class="btn btn-warning" role="button">{{ i18n!(self.i18n.catalog, "FLibrary Circle") }}</a>
     </div>
     </div>
 
     <br>
+
+    <div class="container px-4 pb-3" id="features">
+      <h2 class="pb-2 border-bottom">{{ i18n!(self.i18n.catalog, "Features") }}</h2>
+
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 g-4 pt-4 pb-5">
+        <div class="col d-flex align-items-start">
+          <div>
+            <h4 class="fw-bold mb-0"><i class="bi bi-cloud-check-fill"></i> {{ i18n!(self.i18n.catalog, "All Cloud") }}</h4>
+            <p>{{ i18n!(self.i18n.catalog, "FLibrary is your personalized learning hub. From notes to past papers, everything subscribed on cloud for your access anytime, anywhere.") }}</p>
+          </div>
+        </div>
+        <div class="col d-flex align-items-start">
+          <div>
+            <h4 class="fw-bold mb-0"><i class="bi bi-broadcast"></i> {{ i18n!(self.i18n.catalog, "Streamlined Updates") }}</h4>
+            <p>{{ i18n!(self.i18n.catalog, "As a content creator, you are enabled to distribute and push content updates to your subscribers with no effort.") }}</p>
+          </div>
+        </div>
+        <div class="col d-flex align-items-start">
+          <div>
+            <h4 class="fw-bold mb-0"><i class="bi bi-signpost-fill"></i> {{ i18n!(self.i18n.catalog, "Curated Contents") }}</h4>
+            <p>{{ i18n!(self.i18n.catalog, "Only discover the best-in-class. Spend more time to dive in but not to wander through.") }}</p>
+          </div>
+        </div>
+        <div class="col d-flex align-items-start">
+          <div>
+            <h4 class="fw-bold mb-0"><i class="bi bi-shield-fill-check"></i> {{ i18n!(self.i18n.catalog, "You are Protected") }}</h4>
+            <p>{{ i18n!(self.i18n.catalog, "From account security to content distribution fingerprinting, FLibrary strives for security in every fine detail.") }}</p>
+          </div>
+        </div>
+        <div class="col d-flex align-items-start">
+          <div>
+            <h4 class="fw-bold mb-0"><i class="bi bi-globe"></i> {{ i18n!(self.i18n.catalog, "Multilingual Support") }}</h4>
+            <p>{{ i18n!(self.i18n.catalog, "A global learner's community is at heart to our vision, that's why we have built-in multilingual supports.") }}</p>
+          </div>
+        </div>
+        <div class="col d-flex align-items-start">
+          <div>
+            <h4 class="fw-bold mb-0"><i class="bi bi-arrow-counterclockwise"></i> {{ i18n!(self.i18n.catalog, "No Ads Forever") }}</h4>
+            <p>{{ i18n!(self.i18n.catalog, "Ads are simply incompatible with our curiosity. Take our commitment: no ads forever.") }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!--
     <div class="p-5 rounded shadow">
