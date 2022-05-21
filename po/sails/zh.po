@@ -473,7 +473,7 @@ msgstr "全云端"
 
 msgid ""
 "FLibrary is your personalized learning hub. From notes to past papers, "
-"everything subscribed on cloud for your access anytime, anywhere."
+"everything subscribed is on cloud for your access anytime, anywhere."
 msgstr ""
 "FLibrary 是您个性化的内容收藏馆。从笔记到解析，您可以随时随地从云端访问所有您"
 "订阅的内容。"
