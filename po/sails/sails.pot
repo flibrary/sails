@@ -12,6 +12,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
+msgid "FLibrary is the ultimate destination for discovering, discussing, and distributing learning guides."
+msgstr ""
+
 msgid "Store"
 msgstr ""
 
@@ -409,9 +412,6 @@ msgid "Orders received"
 msgstr ""
 
 msgid "Homepage"
-msgstr ""
-
-msgid "FLibrary is the ultimate destination for discovering, discussing, and distributing learning guides."
 msgstr ""
 
 msgid "Discover Store"
