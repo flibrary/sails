@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Join Us") }}{% endblock title %}
+{% block content %}
+<main class="container">
+
+    <div class="p-5 text-center">
+    <h1 class="fw-bold">{{ i18n!(self.i18n.catalog, "We make contents, FLibrary, and the community. Join us as") }}</h1>
+    </div>
+
+    <br>
+
+    <div class="row flex-lg-row-reverse align-items-center px-4 pb-3">
+      <div class="col-lg-6">
+        <h2 class="display-5 fw-bold lh-1 mb-3">{{ i18n!(self.i18n.catalog, "Creators") }}</h1>
+        <p class="lead">{{ i18n!(self.i18n.catalog, "Skilled at certain fields or courses? Create learning guides on subjects or anything creative (like building a rocket), either independent or based on a course taught at your university, and receive rewards to your knowledge and contribution.") }}</p>
+        <ul class="list-group my-1">
+         <li class="list-group-item">{{ i18n!(self.i18n.catalog, "Working proficiency in LaTeX") }}</li>
+         <li class="list-group-item">{{ i18n!(self.i18n.catalog, "Concrete knowledge in certain fields") }}</li>
+         <li class="list-group-item">{{ i18n!(self.i18n.catalog, "Stick to our principles and standards") }}</li>
+       </ul>
+	<a href="/store" class="btn btn-primary btn-lg my-1" role="button">{{ i18n!(self.i18n.catalog, "Apply") }}</a>
+      </div>
+    </div>
+
+   <br>
+
+    <div class="row flex-lg-row align-items-center px-4 pb-3">
+      <div class="col-lg-6">
+        <h2 class="display-5 fw-bold lh-1 mb-3">{{ i18n!(self.i18n.catalog, "Developers") }}</h1>
+<p class="lead">{{ i18n!(self.i18n.catalog, "Our code is what builds our dreams. Join us as a developer, help inform what's the next feature, and make dreams true with your unique skills.") }}</p>
+        <ul class="list-group my-1">
+         <li class="list-group-item">{{ i18n!(self.i18n.catalog, "Working proficiency in Rust / JavaScript") }}</li>
+         <li class="list-group-item">{{ i18n!(self.i18n.catalog, "Basic knowledge in network programming") }}</li>
+         <li class="list-group-item">{{ i18n!(self.i18n.catalog, "Strive for perfection.") }}</li>
+       </ul>
+        <a href="https://circle.flibrary.info" class="btn btn-primary btn-lg my-1" role="button">{{ i18n!(self.i18n.catalog, "Apply") }}</a>
+      </div>
+    </div>
+
+   <br>
+</main>
+{% endblock content %}

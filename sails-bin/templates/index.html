@@ -8,15 +8,43 @@
     <h1 class="display-4 fw-bold"><img src="/static/logo.png" alt="FLibrary" height="70" width="70">FLibrary</h1>
     <div class="col-lg-6 mx-auto">
       <p class="lead mb-4">{{ i18n!(self.i18n.catalog, "FLibrary is the ultimate destination for discovering, discussing, and distributing learning guides.") }}</p>
-      <a href="/store" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Discover Store") }}</a>
-      <a href="https://circle.flibrary.info" class="btn btn-warning" role="button">{{ i18n!(self.i18n.catalog, "FLibrary Circle") }}</a>
+      <a href="/store" class="btn btn-primary my-1" role="button">{{ i18n!(self.i18n.catalog, "Discover Store") }}</a>
+      <a href="https://circle.flibrary.info" class="btn btn-warning my-1" role="button">{{ i18n!(self.i18n.catalog, "FLibrary Circle") }}</a>
     </div>
     </div>
 
     <br>
 
+    <div class="row flex-lg-row-reverse align-items-center px-4 pb-3">
+      <div class="col-10 col-sm-8 col-lg-6">
+        <img src="https://flibrary.info/images/get/27466077cfcef9505d3704a01d1b7f339a62c612424e46ed602aa3b188904cd5/png" class="d-block mx-lg-auto" alt="Learning Guides Example" loading="lazy" width="350">
+      </div>
+      <div class="col-lg-6">
+        <h2 class="display-5 fw-bold lh-1 mb-3">{{ i18n!(self.i18n.catalog, "We create learning guides") }}</h1>
+        <p class="lead">{{ i18n!(self.i18n.catalog, "Tired of duplicated descriptions and hard-to-locate key-points in textbooks? Frustrated with short but impossible-to-understand others' notes lacking coherent logic? We strike a balance in between: learning guides. They are coherent on first read and always to-the-point, providing an enjoyable learning or referencing experience.") }}</p>
+	<a href="/store" class="btn btn-primary btn-lg my-1" role="button">{{ i18n!(self.i18n.catalog, "Discover Store") }}</a>
+      </div>
+    </div>
+
+   <br>
+
+    <div class="row flex-lg-row align-items-center px-4 pb-3">
+      <div class="col-10 col-sm-8 col-lg-6">
+        <img src="https://flibrary.info/images/get/27466077cfcef9505d3704a01d1b7f339a62c612424e46ed602aa3b188904cd5/png" class="d-block mx-lg-auto" alt="Learning Guides Example" loading="lazy" width="350">
+      </div>
+      <div class="col-lg-6">
+        <h2 class="display-5 fw-bold lh-1 mb-3">{{ i18n!(self.i18n.catalog, "Join the community") }}</h1>
+        <p class="lead">{{ i18n!(self.i18n.catalog, "At FLibrary, you can effortlessly connect to minds behind masterpieces. Join the community, meet creators, and collaborate on new contents. Contribute your curiosity today!") }}</p>
+        <a href="https://circle.flibrary.info" class="btn btn-warning btn-lg my-1" role="button">{{ i18n!(self.i18n.catalog, "FLibrary Circle") }}</a>
+      </div>
+    </div>
+
+   <br>
+
+   <hr>
+
     <div class="container px-4 pb-3" id="features">
-      <h2 class="pb-2 border-bottom">{{ i18n!(self.i18n.catalog, "Features") }}</h2>
+      <!--<h2 class="pb-2 border-bottom">{{ i18n!(self.i18n.catalog, "Features") }}</h2>-->
 
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 g-4 pt-4 pb-5">
         <div class="col d-flex align-items-start">
@@ -58,40 +86,7 @@
       </div>
     </div>
 
-    <!--
-    <div class="p-5 rounded shadow">
-      <h1>让好奇心为您赋能</h1>
-      <div class="row">
-	<div class="col-sm mt-3">
-	  <div class="card h-100">
-	    <div class="card-body">
-	      <h3 class="card-title">高效</h3>
-              <p class="card-text">您只需要上架或下单书本，一切都会准备就续。FLibrary 会帮您确认收款并运送书本。同时所有您购买的书本都在仓库即刻可取，无需等待几个月的海运。</p>
-	    </div>
-	  </div>
-	</div>
-
-	<div class="col-sm mt-3">
-	  <div class="card h-100">
-	    <div class="card-body">
-	      <h3 class="card-title">低价</h3>
-              <p class="card-text">大部分的书本价格都在原价的 70% 甚至更低，同时内页完整崭新。与订购新书新书相比，我们的书本能为您节省大量开支。</p>
-	    </div>
-	  </div>
-	</div>
-
-	<div class="col-sm mt-3">
-	  <div class="card h-100">
-	    <div class="card-body">
-	      <h3 class="card-title">安全</h3>
-              <p class="card-text">所有的书本都包装完整贴有封条并安全地存放在学校的仓库内。同时我们的系统拥有高标准的密码学保护并接入了支付宝，竭尽全力保障您的账号和钱款安全。</p>
-	    </div>
-	  </div>
-	</div>
-
-      </div>
-    </div>
-    -->
+    <h3 class="fw-bold text-center">{{ i18n!(self.i18n.catalog, "We are just getting started.") }} <a href="/joinus" class="text-decoration-none">{{ i18n!(self.i18n.catalog, "Join Us.") }}</a></h3>
 </main>
 {% endblock content %}
 

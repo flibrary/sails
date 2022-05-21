@@ -420,6 +420,18 @@ msgstr ""
 msgid "FLibrary Circle"
 msgstr ""
 
+msgid "We create learning guides"
+msgstr ""
+
+msgid "Tired of duplicated descriptions and hard-to-locate key-points in textbooks? Frustrated with short but impossible-to-understand others' notes lacking coherent logic? We strike a balance in between: learning guides. They are coherent on first read and always to-the-point, providing an enjoyable learning or referencing experience."
+msgstr ""
+
+msgid "Join the community"
+msgstr ""
+
+msgid "At FLibrary, you can effortlessly connect to minds behind masterpieces. Join the community, meet creators, and collaborate on new contents. Contribute your curiosity today!"
+msgstr ""
+
 msgid "Features"
 msgstr ""
 
@@ -457,4 +469,49 @@ msgid "No Ads Forever"
 msgstr ""
 
 msgid "Ads are simply incompatible with our curiosity. Take our commitment: no ads forever."
+msgstr ""
+
+msgid "We are just getting started."
+msgstr ""
+
+msgid "Join Us."
+msgstr ""
+
+msgid "Join Us"
+msgstr ""
+
+msgid "We make contents, FLibrary, and the community. Join us as"
+msgstr ""
+
+msgid "Creators"
+msgstr ""
+
+msgid "Skilled at certain fields or courses? Create learning guides on subjects or anything creative (like building a rocket), either independent or based on a course taught at your university, and receive rewards to your knowledge and contribution."
+msgstr ""
+
+msgid "Working proficiency in LaTeX"
+msgstr ""
+
+msgid "Concrete knowledge in certain fields"
+msgstr ""
+
+msgid "Stick to our principles and standards"
+msgstr ""
+
+msgid "Apply"
+msgstr ""
+
+msgid "Developers"
+msgstr ""
+
+msgid "Our code is what builds our dreams. Join us as a developer, help inform what's the next feature, and make dreams true with your unique skills."
+msgstr ""
+
+msgid "Working proficiency in Rust / JavaScript"
+msgstr ""
+
+msgid "Basic knowledge in network programming"
+msgstr ""
+
+msgid "Strive for perfection."
 msgstr ""

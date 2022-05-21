@@ -178,6 +178,17 @@ async fn index<'a>(i18n: I18n, flash: Option<FlashMessage<'_>>) -> Index {
     }
 }
 
+#[derive(Template)]
+#[template(path = "joinus.html")]
+struct JoinUs {
+    i18n: I18n,
+}
+
+#[get("/joinus")]
+async fn joinus(i18n: I18n) -> JoinUs {
+    JoinUs { i18n }
+}
+
 #[derive(RustEmbed)]
 #[folder = "static/"]
 struct Asset;
@@ -272,7 +283,7 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<TelegramBot>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .manage(include_i18n!())
-        .mount("/", routes![index, get_icon])
+        .mount("/", routes![index, get_icon, joinus])
         .mount("/static", routes![get_file])
         // Mount user namespace
         .mount(
