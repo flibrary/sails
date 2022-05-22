@@ -5,9 +5,9 @@ use uuid::Uuid;
 #[test]
 fn create_category() {
     let conn = establish_connection();
-    let id = Category::create(&conn, "Economics", 490).unwrap();
+    let id = Category::create(&conn, "Economics", 1).unwrap();
     // Already created
-    assert!(Category::create_with_id(&conn, "Economics", 490, id.id()).is_err());
+    assert!(Category::create_with_id(&conn, "Economics", 1, id.id()).is_err());
 }
 
 #[test]
@@ -15,29 +15,36 @@ fn category_build_and_search() {
     let conn = establish_connection();
     #[rustfmt::skip]
     CtgBuilder::new(maplit::hashmap! {
-	"High School".into() => Value::SubCategory(maplit::hashmap!{
-    	    "AP".into() => Value::SubCategory(maplit::hashmap!{
-		"AP Physics I".into() => Value::Id { id: Uuid::new_v4(), price: 630 },
-		"AP Physics II".into() => Value::Id { id: Uuid::new_v4(), price: 630 },
-		"AP Physics C".into() => Value::Id { id: Uuid::new_v4(), price: 1630 }
-	    }),
-	    "A Level".into() => Value::SubCategory(maplit::hashmap!{
-		"AS Physics".into() => Value::Id { id: Uuid::new_v4(), price: 300 },
-		"A2 Physics".into() => Value::Id { id: Uuid::new_v4(), price: 100 }
-	    }),
-	}),
-	"University Math".into() => Value::Id { id: Uuid::new_v4(), price: 2000 },
+	"High School".into() => Value::SubCategory{priority: 3, subs: maplit::hashmap!{
+    	    "AP".into() => Value::SubCategory{priority: 1, subs: maplit::hashmap!{
+		"AP Physics I".into() => Value::Id { id: Uuid::new_v4(), priority: 3 },
+		"AP Physics II".into() => Value::Id { id: Uuid::new_v4(), priority: 2 },
+		"AP Physics C".into() => Value::Id { id: Uuid::new_v4(), priority: 1 }
+	    }},
+	    "A Level".into() => Value::SubCategory{priority: 2, subs: maplit::hashmap!{
+		"AS Physics".into() => Value::Id { id: Uuid::new_v4(), priority: 2 },
+		"A2 Physics".into() => Value::Id { id: Uuid::new_v4(), priority: 1 }
+	    }},
+	}},
+	"University Math".into() => Value::Id { id: Uuid::new_v4(), priority: 1 },
     })
     .build(&conn).unwrap();
 
     // General testing
     assert_eq!(Categories::list_all(&conn).unwrap().len(), 9);
     assert_eq!(Categories::list_top(&conn).unwrap().len(), 2);
+
+    // Priority should be honored
     assert_eq!(
         Categories::list_leaves::<Category>(&conn, None)
             .unwrap()
             .len(),
         6
+    );
+
+    assert_eq!(
+        Categories::list_leaves::<Category>(&conn, None).unwrap()[2].name(),
+        "AP Physics II"
     );
 
     // Leaf nodes should have itself upon search

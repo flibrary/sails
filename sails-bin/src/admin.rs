@@ -274,7 +274,8 @@ pub async fn admin_tag(
 
 #[get("/remove_digicon?<digicon_id>&<prod_id>")]
 pub async fn remove_digicon(
-    _guard: Auth<DigiconWritable>,
+    _digicon_guard: Auth<DigiconWritable>,
+    _prod_guard: Auth<ProdWritable>,
     digicon_id: DigiconGuard,
     prod_id: ProdGuard,
     conn: DbConn,
@@ -300,7 +301,8 @@ pub async fn remove_digicon(
 
 #[get("/add_digicon?<digicon_id>&<prod_id>")]
 pub async fn add_digicon(
-    _guard: Auth<DigiconWritable>,
+    _digicon_guard: Auth<DigiconWritable>,
+    _prod_guard: Auth<ProdWritable>,
     digicon_id: DigiconGuard,
     prod_id: ProdGuard,
     conn: DbConn,
@@ -327,7 +329,7 @@ pub struct AdminDigiconsPage {
 #[get("/digicons")]
 pub async fn admin_digicons(
     i18n: I18n,
-    _guard: Auth<DigiconWritable>,
+    // _guard: Auth<DigiconWritable>,
     conn: DbConn,
 ) -> Result<AdminDigiconsPage, Flash<Redirect>> {
     Ok(AdminDigiconsPage {

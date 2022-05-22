@@ -12,13 +12,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Portal"
+msgstr ""
+
+msgid ""
+"FLibrary is the ultimate destination for discovering, discussing, and "
+"distributing learning guides."
+msgstr ""
+
 msgid "Store"
 msgstr ""
 
 msgid "Messages"
-msgstr ""
-
-msgid "Portal"
 msgstr ""
 
 msgid "Digital Content Distribution Trace"
@@ -269,12 +274,6 @@ msgstr ""
 msgid "{0} - Product details"
 msgstr ""
 
-msgid "Regular price"
-msgstr ""
-
-msgid "Unavailable"
-msgstr ""
-
 msgid "Not categorized"
 msgstr ""
 
@@ -425,11 +424,6 @@ msgstr ""
 msgid "Homepage"
 msgstr ""
 
-msgid ""
-"FLibrary is the ultimate destination for discovering, discussing, and "
-"distributing learning guides."
-msgstr ""
-
 msgid "Discover Store"
 msgstr ""
 
@@ -464,7 +458,7 @@ msgstr ""
 
 msgid ""
 "FLibrary is your personalized learning hub. From notes to past papers, "
-"everything subscribed on cloud for your access anytime, anywhere."
+"everything subscribed is on cloud for your access anytime, anywhere."
 msgstr ""
 
 msgid "Streamlined Updates"

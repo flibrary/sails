@@ -138,6 +138,7 @@ pub async fn trace(
 #[get("/get?<digicon_id>")]
 pub async fn get(
     user: UserIdGuard<Cookie>,
+    _auth: Auth<DigiconReadable>,
     hosting: &State<DigiconHosting>,
     digicon_id: DigiconGuard,
     aead: &State<AeadKey>,
@@ -154,13 +155,6 @@ pub async fn get(
     );
     let link = digicon.get_link().to_string();
     let name = digicon.get_name().to_string();
-    if !conn
-        .run(move |c| DigiconMappingFinder::is_authorized(c, &user.id, &digicon))
-        .await
-        .into_flash(uri!("/"))?
-    {
-        return Ok(Err(Redirect::to(uri!("/static/404.html"))));
-    }
 
     let download_link = if let Some(filename) = link.strip_prefix("euler://") {
         let client = reqwest::Client::builder()

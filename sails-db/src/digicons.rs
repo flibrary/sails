@@ -4,7 +4,7 @@ use crate::{
     products::{ProductFinder, ProductId},
     schema::{digiconmappings, digicons},
     transactions::TransactionFinder,
-    users::UserId,
+    users::{UserFinder, UserId},
 };
 use diesel::{dsl::count, prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
@@ -24,10 +24,20 @@ impl Digicons {
         Ok(digicons.load::<Digicon>(conn)?)
     }
 
-    pub fn list_all_authorized(conn: &SqliteConnection, user: &UserId) -> Result<Vec<Digicon>> {
+    pub fn list_all_readable(conn: &SqliteConnection, user: &UserId) -> Result<Vec<Digicon>> {
         let mut authorized = Vec::new();
         for x in Self::list_all(conn)? {
-            if DigiconMappingFinder::is_authorized(conn, user, &x)? {
+            if x.readable(conn, user)? {
+                authorized.push(x);
+            }
+        }
+        Ok(authorized)
+    }
+
+    pub fn list_all_writable(conn: &SqliteConnection, user: &UserId) -> Result<Vec<Digicon>> {
+        let mut authorized = Vec::new();
+        for x in Self::list_all(conn)? {
+            if x.writable(conn, user)? {
                 authorized.push(x);
             }
         }
@@ -61,6 +71,7 @@ impl Digicons {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Value {
     pub name: Arc<str>,
+    pub creator_id: Arc<str>,
     pub link: Arc<str>,
 }
 
@@ -77,7 +88,13 @@ impl DigiconsBuilder {
 
     pub fn build(self, conn: &SqliteConnection) -> Result<()> {
         for (id, value) in self.inner {
-            Digicon::create(conn, id, value.name, value.link)?;
+            Digicon::create(
+                conn,
+                id,
+                &UserFinder::new(conn, None).id(&value.creator_id).first()?,
+                value.name,
+                value.link,
+            )?;
         }
         Ok(())
     }
@@ -89,14 +106,21 @@ impl DigiconsBuilder {
 #[table_name = "digicons"]
 pub struct Digicon {
     id: String,
+    creator_id: String,
     name: String,
     link: String,
 }
 
 impl Digicon {
-    pub fn new(id: impl ToString, name: impl ToString, link: impl ToString) -> Self {
+    pub fn new(
+        id: impl ToString,
+        creator_id: &UserId,
+        name: impl ToString,
+        link: impl ToString,
+    ) -> Self {
         Self {
             id: id.to_string(),
+            creator_id: creator_id.get_id().to_string(),
             name: name.to_string(),
             link: link.to_string(),
         }
@@ -106,11 +130,17 @@ impl Digicon {
     pub fn create(
         conn: &SqliteConnection,
         id_provided: impl ToString,
+        creator_id_provided: &UserId,
         name_provided: impl ToString,
         link_provided: impl ToString,
     ) -> Result<Self> {
         use crate::schema::digicons::dsl::*;
-        let digicon = Digicon::new(id_provided, name_provided, link_provided);
+        let digicon = Digicon::new(
+            id_provided,
+            creator_id_provided,
+            name_provided,
+            link_provided,
+        );
 
         if let Ok(0) = digicons
             .filter(id.eq(digicon.get_id()))
@@ -132,6 +162,45 @@ impl Digicon {
         Ok(diesel::delete(digicons.filter(id.eq(self.id))).execute(conn)?)
     }
 
+    pub fn readable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
+        Ok(
+            DigiconMappingFinder::authorized_to_read_by_purchase(conn, user, &self)?
+                || if self.creator_id == user.get_id() {
+                    user.get_info(conn)?
+                        .get_user_status()
+                        .contains(UserStatus::DIGICON_SELF_READABLE)
+                } else {
+                    user.get_info(conn)?
+                        .get_user_status()
+                        .contains(UserStatus::DIGICON_OTHERS_READABLE)
+                },
+        )
+    }
+
+    pub fn writable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
+        Ok(if self.creator_id == user.get_id() {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::DIGICON_SELF_WRITABLE)
+        } else {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::DIGICON_OTHERS_WRITABLE)
+        })
+    }
+
+    pub fn removable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
+        Ok(if self.creator_id == user.get_id() {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::DIGICON_SELF_REMOVABLE)
+        } else {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::DIGICON_OTHERS_REMOVABLE)
+        })
+    }
+
     pub fn update(self, conn: &SqliteConnection) -> Result<Self> {
         Ok(self.save_changes::<Digicon>(conn)?)
     }
@@ -142,6 +211,10 @@ impl Digicon {
 
     pub fn get_name(&self) -> &str {
         &self.name
+    }
+
+    pub fn get_creator_id(&self) -> &str {
+        &self.creator_id
     }
 
     pub fn get_link(&self) -> &str {
@@ -231,20 +304,11 @@ impl<'a> DigiconMappingFinder<'a> {
             > 0)
     }
 
-    pub fn is_authorized(
+    pub fn authorized_to_read_by_purchase(
         conn: &'a SqliteConnection,
         user: &'a UserId,
         digicon: &'a Digicon,
     ) -> Result<bool> {
-        // Admin who can manage the digicons gets to access all digicons
-        if user
-            .get_info(conn)?
-            .get_user_status()
-            .contains(UserStatus::DIGICON_WRITABLE)
-        {
-            return Ok(true);
-        }
-
         let mut bought_products = TransactionFinder::new(conn, None)
             .buyer(user)
             // Products with digicons don't have status paid
@@ -343,3 +407,6 @@ impl DigiconMapping {
         Ok(self.save_changes::<DigiconMapping>(conn)?)
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -274,12 +274,6 @@ msgstr ""
 msgid "{0} - Product details"
 msgstr ""
 
-msgid "Regular price"
-msgstr ""
-
-msgid "Unavailable"
-msgstr ""
-
 msgid "Not categorized"
 msgstr ""
 

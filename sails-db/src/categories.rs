@@ -15,6 +15,7 @@ pub struct Categories;
 impl Categories {
     pub fn list_all(conn: &SqliteConnection) -> Result<Vec<Category>> {
         use crate::schema::categories::dsl::*;
+        // We don't do sort as priority is local
         Ok(categories.load::<Category>(conn)?)
     }
 
@@ -22,6 +23,7 @@ impl Categories {
         use crate::schema::categories::dsl::*;
         Ok(categories
             .filter(parent_id.is_null())
+            .order(priority.asc())
             .load::<Category>(conn)?)
     }
 
@@ -30,28 +32,38 @@ impl Categories {
         root: Option<&T>,
     ) -> Result<Vec<LeafCategory>> {
         use crate::schema::categories::dsl::*;
-        if let Some(root) = root {
-            if root.is_leaf() {
-                // This means we are at the bottom of the search
-                // ... and we shall return the leaf
-                Ok(vec![root.clone().into_leaf()?])
-            } else {
-                let mut v = Vec::new();
-                for child in categories
-                    .filter(parent_id.eq(CtgTrait::id(root)))
-                    .load::<Category>(conn)?
-                {
-                    v = [v, Categories::list_leaves(conn, Some(&child))?].concat();
-                }
-                Ok(v)
-            }
+        // Quick shortcut to get unsorted leaves starting from root
+        // Ok(categories
+        //    .filter(is_leaf.eq(true))
+        //    .load::<Category>(conn)?
+        //    .into_iter()
+        //    .map(|x| x.into_leaf().unwrap())
+        //    .collect())
+
+        if root.map(|x| x.is_leaf()).unwrap_or(false) {
+            // This means we are at the bottom of the search
+            // ... and we shall return the leaf
+            //
+            // Unwrap is safe here because None always corresponds to false
+            Ok(vec![root.unwrap().clone().into_leaf()?])
         } else {
-            Ok(categories
-                .filter(is_leaf.eq(true))
-                .load::<Category>(conn)?
-                .into_iter()
-                .map(|x| x.into_leaf().unwrap())
-                .collect())
+            let children = if let Some(root) = root {
+                categories
+                    .filter(parent_id.eq(root.id()))
+                    .order(priority.asc())
+                    .load::<Category>(conn)?
+            } else {
+                categories
+                    .filter(parent_id.is_null())
+                    .order(priority.asc())
+                    .load::<Category>(conn)?
+            };
+
+            let mut v = Vec::new();
+            for child in children {
+                v = [v, Categories::list_leaves(conn, Some(&child))?].concat();
+            }
+            Ok(v)
         }
     }
 
@@ -101,9 +113,9 @@ impl LeafCategory {
         self.0
     }
 
-    // Only price at leaf category is meaningful
-    pub fn get_price(&self) -> u32 {
-        self.0.price as u32
+    // priority is local - it is only used in sorting categories at the same level
+    pub fn get_priority(&self) -> u32 {
+        self.0.priority as u32
     }
 }
 
@@ -140,17 +152,18 @@ impl CtgTrait for LeafCategory {
 pub struct Category {
     id: String,
     name: String,
-    price: i64,
+    // Lower value represents a higher priority (e.g. lower value makes the category appear first)
+    priority: i64,
     parent_id: Option<String>,
     is_leaf: bool,
 }
 
 impl Category {
-    fn new(name: impl ToString, id: impl ToString, price: NonZeroU32) -> Self {
+    fn new(name: impl ToString, id: impl ToString, priority: NonZeroU32) -> Self {
         Self {
             id: id.to_string(),
             name: name.to_string(),
-            price: price.get() as i64,
+            priority: priority.get() as i64,
             parent_id: None,
             is_leaf: true,
         }
@@ -160,12 +173,12 @@ impl Category {
     pub fn create(
         conn: &SqliteConnection,
         name_provided: impl ToString,
-        price_provided: u32,
+        priority_provided: u32,
     ) -> Result<Self> {
         Self::create_with_id(
             conn,
             name_provided,
-            price_provided,
+            priority_provided,
             Uuid::new_v4().to_string(),
         )
     }
@@ -174,14 +187,14 @@ impl Category {
     pub fn create_with_id(
         conn: &SqliteConnection,
         name_provided: impl ToString,
-        price_provided: u32,
+        priority_provided: u32,
         id_provided: impl ToString,
     ) -> Result<Self> {
-        let price_provided =
-            NonZeroU32::new(price_provided).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
+        let priority_provided =
+            NonZeroU32::new(priority_provided).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
 
         use crate::schema::categories::dsl::*;
-        let category = Category::new(name_provided, id_provided, price_provided);
+        let category = Category::new(name_provided, id_provided, priority_provided);
 
         if let Ok(0) = categories
             .filter(id.eq(&category.id))
@@ -259,8 +272,15 @@ impl CtgTrait for Category {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
-    Id { id: Uuid, price: u32 },
-    SubCategory(CategoryBuilderInner),
+    Id {
+        id: Uuid,
+        priority: u32,
+    },
+    SubCategory {
+        priority: u32,
+        subs: CategoryBuilderInner,
+    },
+    SubCategoryNoPriority(CategoryBuilderInner),
 }
 
 pub type CategoryBuilderInner = HashMap<Arc<str>, Value>;
@@ -288,23 +308,29 @@ impl CtgBuilder {
         ) -> Result<()> {
             for (name, value) in current {
                 match value {
-                    Value::Id { id, price } => {
+                    Value::Id { id, priority } => {
                         // Create the node
-                        let mut self_ctg = Category::create_with_id(c, name, *price, id)?;
+                        let mut self_ctg = Category::create_with_id(c, name, *priority, id)?;
 
                         // If there is a parent, link it back
                         if let Some(mut parent) = parent.clone() {
                             self_ctg.insert(c, &mut parent)?;
                         }
                     }
-                    Value::SubCategory(sub) => {
-                        // Price here is meaningless as it is not the leaf category
-                        // And it cannot be retrieved as well
+                    Value::SubCategory { priority, subs } => {
+                        let mut self_ctg = Category::create(c, name, *priority).unwrap();
+                        if let Some(mut parent) = parent.clone() {
+                            self_ctg.insert(c, &mut parent)?;
+                        }
+                        walk(c, Some(self_ctg), subs)?
+                    }
+                    Value::SubCategoryNoPriority(subs) => {
+                        // We on default set the priority the same
                         let mut self_ctg = Category::create(c, name, 1).unwrap();
                         if let Some(mut parent) = parent.clone() {
                             self_ctg.insert(c, &mut parent)?;
                         }
-                        walk(c, Some(self_ctg), sub)?
+                        walk(c, Some(self_ctg), subs)?
                     }
                 }
             }

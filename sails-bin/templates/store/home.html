@@ -12,7 +12,7 @@
   {% for entry in entries %}
   <div class="p-5 rounded shadow">
     <h3><b>{{entry.0.name()}}</b></h3>
-    <div class="row grid">
+    <div class="row grid" id="{{entry.0.id()}}">
        {% for product in entry.1 %}
        <div class="col-sm-6 col-lg-4 mb-4 grid-item">
 	  <div class="card">
@@ -42,3 +42,24 @@
   {% endif %}
 </main>
 {% endblock content %}
+
+{% block script %}
+  {% call super()%}
+  <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/imagesloaded@4.1.4/imagesloaded.min.js"></script>
+  <script>
+    var elements = document.getElementsByClassName('grid');
+    var msnry;
+
+    imagesLoaded( document.querySelector('body'), function() {
+      // init Isotope after all images have loaded
+      var n = elements.length;
+      for(var i = 0; i < n; i++){
+        msnry = new Masonry( elements[i], {
+          itemSelector: '.grid-item',
+          percentPosition: true
+        });
+      }
+    });
+  </script>
+{% endblock script %}

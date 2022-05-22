@@ -276,12 +276,6 @@ msgstr "上架商品"
 msgid "{0} - Product details"
 msgstr "{0} - 商品细节"
 
-msgid "Regular price"
-msgstr "原价"
-
-msgid "Unavailable"
-msgstr "不可用"
-
 msgid "Not categorized"
 msgstr "未分类"
 

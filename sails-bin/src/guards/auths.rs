@@ -1,4 +1,4 @@
-use super::{orders::*, prods::*, users::*};
+use super::{digicons::*, orders::*, prods::*, users::*};
 use crate::DbConn;
 use rocket::{
     outcome::{try_outcome, IntoOutcome, Outcome},
@@ -8,7 +8,6 @@ use sails_db::enums::UserStatus;
 use std::marker::PhantomData;
 
 // Misc
-pub struct DigiconWritable;
 pub struct TagWritable;
 pub struct StoreModifiable;
 
@@ -27,6 +26,11 @@ pub struct OrderReadable;
 pub struct OrderProgressable;
 pub struct OrderFinishable;
 pub struct OrderRefundable;
+
+// For digicons
+pub struct DigiconReadable;
+pub struct DigiconWritable;
+pub struct DigiconRemovable;
 
 pub struct Auth<T> {
     plhdr: PhantomData<T>,
@@ -54,27 +58,6 @@ impl<'r> FromRequest<'r> for Auth<TagWritable> {
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for Auth<DigiconWritable> {
-    type Error = ();
-
-    async fn from_request(
-        request: &'r rocket::Request<'_>,
-    ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
-
-        if user
-            .info
-            .get_user_status()
-            .contains(UserStatus::DIGICON_WRITABLE)
-        {
-            Outcome::Success(Auth { plhdr: PhantomData })
-        } else {
-            Outcome::Forward(())
-        }
-    }
-}
-
-#[rocket::async_trait]
 impl<'r> FromRequest<'r> for Auth<StoreModifiable> {
     type Error = ();
 
@@ -86,7 +69,7 @@ impl<'r> FromRequest<'r> for Auth<StoreModifiable> {
         if user
             .info
             .get_user_status()
-            .contains(UserStatus::STORE_MODIFIABLE)
+            .contains(UserStatus::PROD_SELF_WRITABLE)
         {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
@@ -106,6 +89,90 @@ impl<'r> FromRequest<'r> for Auth<ProdAdmin> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
 
         if user.info.get_user_status().contains(UserStatus::PROD_ADMIN) {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<DigiconReadable> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let digicon = try_outcome!(request
+            .query_value::<DigiconGuard>("digicon_id")
+            .and_then(|x| x.ok())
+            .or_forward(()));
+        let digicon = try_outcome!(digicon.to_digicon(&db).await.ok().or_forward(()));
+
+        if db
+            .run(move |c| digicon.readable(c, &user.id))
+            .await
+            .unwrap_or(false)
+        {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<DigiconWritable> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let digicon = try_outcome!(request
+            .query_value::<DigiconGuard>("digicon_id")
+            .and_then(|x| x.ok())
+            .or_forward(()));
+        let digicon = try_outcome!(digicon.to_digicon(&db).await.ok().or_forward(()));
+
+        if db
+            .run(move |c| digicon.writable(c, &user.id))
+            .await
+            .unwrap_or(false)
+        {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<DigiconRemovable> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let digicon = try_outcome!(request
+            .query_value::<DigiconGuard>("digicon_id")
+            .and_then(|x| x.ok())
+            .or_forward(()));
+        let digicon = try_outcome!(digicon.to_digicon(&db).await.ok().or_forward(()));
+
+        if db
+            .run(move |c| digicon.removable(c, &user.id))
+            .await
+            .unwrap_or(false)
+        {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())

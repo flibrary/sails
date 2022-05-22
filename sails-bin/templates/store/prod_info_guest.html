@@ -39,15 +39,6 @@
       <td>{{ prod.get_quantity() }}</td>
     </tr>
     <tr>
-      <th scope="row">{{ i18n!(self.i18n.catalog, "Regular price") }}</th>
-      	{% match category %}
-	{% when Some with (ctg) %}
-        <td>{{ i18n!(self.i18n.catalog, "USD") }} {{ ctg.get_price() }}</td>
-        {% when None %}
-	<td>{{ i18n!(self.i18n.catalog, "Unavailable") }}</td>
-        {% endmatch %}
-    </tr>
-    <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Category") }}</th>
       	{% match category %}
 	{% when Some with (ctg) %}

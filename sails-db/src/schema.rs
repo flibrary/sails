@@ -2,7 +2,7 @@ table! {
     categories (id) {
         id -> Text,
         name -> Text,
-        price -> BigInt,
+        priority -> BigInt,
         parent_id -> Nullable<Text>,
         is_leaf -> Bool,
     }
@@ -19,6 +19,7 @@ table! {
 table! {
     digicons (id) {
         id -> Text,
+        creator_id -> Text,
         name -> Text,
         link -> Text,
     }
@@ -100,6 +101,7 @@ table! {
 
 joinable!(digiconmappings -> digicons (digicon));
 joinable!(digiconmappings -> products (product));
+joinable!(digicons -> users (creator_id));
 joinable!(products -> categories (category));
 joinable!(products -> users (seller_id));
 joinable!(tagmappings -> products (product));
