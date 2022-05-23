@@ -419,6 +419,9 @@ msgstr "上架商品"
 msgid "Digital Contents owned"
 msgstr "拥有的数字内容"
 
+msgid "Lat Modified"
+msgstr "修改时间"
+
 msgid "Orders placed"
 msgstr "创建的订单"
 

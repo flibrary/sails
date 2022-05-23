@@ -11,13 +11,15 @@
   <table class="table" data-toggle="table" data-pagination="true" data-search="true">
     <thead>
       <tr>
-	<th data-field="name" data-sortable="true" scope="col">名称</th>
+	<th data-field="name" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Name") }}</th>
+	<th data-field="timestamp" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Lat Modified") }}</th>
       </tr>
     </thead>
     <tbody>
       {% for digicon in digicons_owned %}
       <tr>
 	<th scope="row"><a href="{{ uri!("/digicons", crate::digicons::get(digicon.get_id())) }}">{{digicon.get_name()}}</a></th>
+	<th scope="row">{{digicon.get_time_modified().format("%Y-%m-%d %H:%M:%S")}}</th>
       </tr>
       {% endfor %}
     </tbody>

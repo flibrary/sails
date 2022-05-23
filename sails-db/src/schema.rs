@@ -22,6 +22,8 @@ table! {
         creator_id -> Text,
         name -> Text,
         link -> Text,
+        time_created -> Timestamp,
+        time_modified -> Timestamp,
     }
 }
 

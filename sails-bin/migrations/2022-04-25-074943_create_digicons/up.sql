@@ -4,5 +4,7 @@ CREATE TABLE IF NOT EXISTS digicons (
   creator_id CHAR(36) NOT NULL,
   name VARCHAR(300) NOT NULL,
   link VARCHAR(400) NOT NULL,
+  time_created TIMESTAMP NOT NULL,
+  time_modified TIMESTAMP NOT NULL,
   FOREIGN KEY (creator_id) REFERENCES users(id)
 );

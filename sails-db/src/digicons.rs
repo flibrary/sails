@@ -6,6 +6,7 @@ use crate::{
     transactions::TransactionFinder,
     users::{UserFinder, UserId},
 };
+use chrono::naive::NaiveDateTime;
 use diesel::{dsl::count, prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
@@ -101,7 +102,7 @@ impl DigiconsBuilder {
 }
 
 #[derive(
-    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone, FromForm,
+    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
 )]
 #[table_name = "digicons"]
 pub struct Digicon {
@@ -109,6 +110,8 @@ pub struct Digicon {
     creator_id: String,
     name: String,
     link: String,
+    time_created: NaiveDateTime,
+    time_modified: NaiveDateTime,
 }
 
 impl Digicon {
@@ -123,6 +126,8 @@ impl Digicon {
             creator_id: creator_id.get_id().to_string(),
             name: name.to_string(),
             link: link.to_string(),
+            time_created: chrono::offset::Local::now().naive_utc(),
+            time_modified: chrono::offset::Local::now().naive_utc(),
         }
     }
 
@@ -164,7 +169,7 @@ impl Digicon {
 
     pub fn readable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
         Ok(
-            DigiconMappingFinder::authorized_to_read_by_purchase(conn, user, &self)?
+            DigiconMappingFinder::authorized_to_read_by_purchase(conn, user, self)?
                 || if self.creator_id == user.get_id() {
                     user.get_info(conn)?
                         .get_user_status()
@@ -201,7 +206,8 @@ impl Digicon {
         })
     }
 
-    pub fn update(self, conn: &SqliteConnection) -> Result<Self> {
+    pub fn update(mut self, conn: &SqliteConnection) -> Result<Self> {
+        self.time_modified = chrono::offset::Local::now().naive_utc();
         Ok(self.save_changes::<Digicon>(conn)?)
     }
 
@@ -211,6 +217,14 @@ impl Digicon {
 
     pub fn get_name(&self) -> &str {
         &self.name
+    }
+
+    pub fn get_time_created(&self) -> &NaiveDateTime {
+        &self.time_created
+    }
+
+    pub fn get_time_modified(&self) -> &NaiveDateTime {
+        &self.time_modified
     }
 
     pub fn get_creator_id(&self) -> &str {
