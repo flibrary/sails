@@ -12,19 +12,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid ""
-"FLibrary is the ultimate destination for discovering, discussing, and "
-"distributing learning guides."
-msgstr "FLibrary 是发现、讨论、创作学习内容的终极选择。"
-
 msgid "Store"
 msgstr "Store 商店"
 
 msgid "Messages"
 msgstr "消息"
 
+msgid "Creator Center"
+msgstr "创作者中心"
+
 msgid "Portal"
 msgstr "主页"
+
+msgid ""
+"FLibrary is the ultimate destination for discovering, discussing, and "
+"distributing learning guides."
+msgstr "FLibrary 是发现、讨论、创作学习内容的终极选择。"
 
 msgid "Digital Content Distribution Trace"
 msgstr "数字内容分发追踪"
@@ -41,9 +44,8 @@ msgstr "名称"
 msgid "Downloaded by"
 msgstr "下载者"
 
-#, fuzzy
 msgid "Digital Content Creator Center"
-msgstr "数字内容信息"
+msgstr "数字内容创作者中心"
 
 msgid "Create a Digital Content"
 msgstr "创建数字内容"
@@ -54,9 +56,8 @@ msgstr "管理数字内容"
 msgid "Last Modified"
 msgstr "修改时间"
 
-#, fuzzy
 msgid "Digital Content \"{}\""
-msgstr "拥有的数字内容"
+msgstr "数字内容 \"{}\""
 
 msgid "Info"
 msgstr "信息"
@@ -496,15 +497,16 @@ msgstr "探索 Store 商店"
 msgid "FLibrary Circle"
 msgstr "Circle 社区"
 
-msgid "We create learning guides"
-msgstr "我们创作学习指南"
+msgid "We create study guides for your courses"
+msgstr ""
 
+#, fuzzy
 msgid ""
 "Tired of duplicated descriptions and hard-to-locate key-points in textbooks? "
 "Frustrated with short but impossible-to-understand others' notes lacking "
-"coherent logic? We strike a balance in between: learning guides. They are "
-"coherent on first read and always to-the-point, providing an enjoyable "
-"learning or referencing experience."
+"coherent logic? We strike a balance in between: study guides targeting "
+"specific courses you needed. They are coherent on first read and always to-"
+"the-point, providing an enjoyable learning or referencing experience."
 msgstr ""
 "对内容冗长且难以翻阅的教科书感到厌倦？他人书写的笔记难以理解且逻辑跳跃？我们"
 "衷于找到教材和笔记间的平衡：学习指南。它们精简但不失逻辑，深度和示例并存，无"
@@ -631,3 +633,6 @@ msgstr "基本的网络编程知识"
 
 msgid "Strive for perfection."
 msgstr "追求优秀的代码质量"
+
+#~ msgid "We create learning guides"
+#~ msgstr "我们创作学习指南"

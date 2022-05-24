@@ -64,6 +64,7 @@ pub struct AllDigiconsPage {
 #[get("/", rank = 2)]
 pub async fn all_digicons(
     i18n: I18n,
+    user: UserIdGuard<Cookie>,
     // TODO: granular permission
     _guard: Auth<CanCreateDigicon>,
     conn: DbConn,
@@ -71,7 +72,7 @@ pub async fn all_digicons(
     Ok(AllDigiconsPage {
         i18n,
         digicons: conn
-            .run(|c| Digicons::list_all(c))
+            .run(move |c| Digicons::list_all_readable(c, &user.id))
             .await
             .into_flash(uri!("/"))?,
     })
@@ -95,7 +96,8 @@ pub struct DigiconPage {
 pub async fn digicon_page(
     i18n: I18n,
     user: UserIdGuard<Cookie>,
-    _guard: Auth<DigiconWritable>,
+    _guard_read: Auth<DigiconReadable>,
+    _guard_write: Auth<DigiconWritable>,
     digicon_id: DigiconGuard,
     conn: DbConn,
 ) -> Result<DigiconPage, Flash<Redirect>> {
