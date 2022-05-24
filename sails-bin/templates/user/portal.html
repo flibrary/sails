@@ -12,7 +12,7 @@
     <thead>
       <tr>
 	<th data-field="name" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Name") }}</th>
-	<th data-field="timestamp" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Lat Modified") }}</th>
+	<th data-field="timestamp" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Last Modified") }}</th>
       </tr>
     </thead>
     <tbody>
@@ -24,6 +24,8 @@
       {% endfor %}
     </tbody>
   </table>
+  <br>
+  <a href="/digicons" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Manage Digital Contents") }}</a>
 </div>
 <br>
 {% endblock digicons_owned %}

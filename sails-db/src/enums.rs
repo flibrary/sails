@@ -1,6 +1,7 @@
 #![allow(clippy::unusual_byte_groupings)]
 use bitflags::bitflags;
 use diesel_derive_enum::DbEnum;
+use rocket::FromFormField;
 use serde::{Deserialize, Serialize};
 
 // A trait that defines the status of a user / product, this typically can progress
@@ -68,9 +69,9 @@ bitflags! {
 	const TX_OTHERS_REFUNDABLE = 0b1000_0000_0000_0000000000000000;
 
 	// Can verify, disable, normalize products;
-	const PROD_ADMIN = 0b1_0000_0000_0000_00000000000000;
+	const PROD_ADMIN = 0b1_0000_0000_0000_0000000000000000;
 	// Can add tag to or remove tag from products;
-	const TAG_WRITABLE = 0b10_0000_0000_0000_00000000000000;
+	const TAG_WRITABLE = 0b10_0000_0000_0000_0000000000000000;
 
 	// Different role profiles
 	const DISABLED = 0;
@@ -159,4 +160,12 @@ impl Status for TransactionStatus {
             Self::Finished => Self::Paid,
         }
     }
+}
+
+#[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, FromFormField)]
+pub enum StorageType {
+    // Store files in github release asset
+    ReleaseAsset,
+    // Store files in github repository
+    GitRepo,
 }

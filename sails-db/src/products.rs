@@ -5,7 +5,7 @@ use std::num::NonZeroU32;
 
 use crate::{
     categories::{Categories, CtgTrait, LeafCategory},
-    enums::ProductStatus,
+    enums::{ProductStatus, UserStatus},
     error::{SailsDbError, SailsDbResult as Result},
     schema::products,
     tags::TagMappingFinder,
@@ -501,6 +501,42 @@ impl ProductInfo {
     pub fn set_product_status(mut self, product_status: ProductStatus) -> Self {
         self.product_status = product_status;
         self
+    }
+
+    pub fn readable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
+        Ok(if self.seller_id == user.get_id() {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::PROD_SELF_READABLE)
+        } else {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::PROD_OTHERS_READABLE)
+        })
+    }
+
+    pub fn writable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
+        Ok(if self.seller_id == user.get_id() {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::PROD_SELF_WRITABLE)
+        } else {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::PROD_OTHERS_WRITABLE)
+        })
+    }
+
+    pub fn removable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
+        Ok(if self.seller_id == user.get_id() {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::PROD_SELF_REMOVABLE)
+        } else {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::PROD_OTHERS_REMOVABLE)
+        })
     }
 }
 

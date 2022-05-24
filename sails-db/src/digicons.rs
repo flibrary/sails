@@ -1,19 +1,16 @@
 use crate::{
-    enums::UserStatus,
+    enums::{StorageType, UserStatus},
     error::{SailsDbError, SailsDbResult as Result},
     products::{ProductFinder, ProductId},
     schema::{digiconmappings, digicons},
     transactions::TransactionFinder,
-    users::{UserFinder, UserId},
+    users::UserId,
 };
 use chrono::naive::NaiveDateTime;
 use diesel::{dsl::count, prelude::*, sqlite::Sqlite};
 use rocket::FromForm;
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::{HashMap, HashSet},
-    sync::Arc,
-};
+use std::collections::HashSet;
 use uuid::Uuid;
 
 // A pseudo struct for managing the digicons table.
@@ -52,52 +49,25 @@ impl Digicons {
             .filter(id.eq(id_provided))
             .first::<Digicon>(conn)?)
     }
-
-    /// Note: this returns the first category matching the name.
-    /// Name is NOT guaranteed to be unique. Whenever possible, use find_by_id instead.
-    pub fn find_by_link(conn: &SqliteConnection, link_provided: &str) -> Result<Digicon> {
-        use crate::schema::digicons::dsl::*;
-        Ok(digicons
-            .into_boxed()
-            .filter(link.eq(link_provided))
-            .first::<Digicon>(conn)?)
-    }
-
-    pub fn delete_all(conn: &SqliteConnection) -> Result<usize> {
-        use crate::schema::digicons::dsl::*;
-        Ok(diesel::delete(digicons).execute(conn)?)
-    }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Value {
-    pub name: Arc<str>,
-    pub creator_id: Arc<str>,
-    pub link: Arc<str>,
+#[derive(Debug, Clone, AsChangeset, Serialize, Deserialize, FromForm)]
+#[table_name = "digicons"]
+pub struct DigiconUpdate {
+    pub name: String,
+    pub storage_detail: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct DigiconsBuilder {
-    #[serde(rename = "digicons")]
-    inner: HashMap<Arc<str>, Value>,
+#[derive(Debug, Clone, AsChangeset, Serialize, Deserialize, FromForm)]
+#[table_name = "digicons"]
+pub struct IncompleteDigicon {
+    pub name: String,
+    pub storage_type: StorageType,
 }
 
-impl DigiconsBuilder {
-    pub fn new(inner: HashMap<Arc<str>, Value>) -> Self {
-        Self { inner }
-    }
-
-    pub fn build(self, conn: &SqliteConnection) -> Result<()> {
-        for (id, value) in self.inner {
-            Digicon::create(
-                conn,
-                id,
-                &UserFinder::new(conn, None).id(&value.creator_id).first()?,
-                value.name,
-                value.link,
-            )?;
-        }
-        Ok(())
+impl IncompleteDigicon {
+    pub fn create(self, conn: &SqliteConnection, creator: &UserId) -> Result<Digicon> {
+        Digicon::create(conn, Uuid::new_v4(), creator, self.name, self.storage_type)
     }
 }
 
@@ -109,7 +79,8 @@ pub struct Digicon {
     id: String,
     creator_id: String,
     name: String,
-    link: String,
+    storage_type: StorageType,
+    storage_detail: Option<String>,
     time_created: NaiveDateTime,
     time_modified: NaiveDateTime,
 }
@@ -119,13 +90,14 @@ impl Digicon {
         id: impl ToString,
         creator_id: &UserId,
         name: impl ToString,
-        link: impl ToString,
+        storage_type: StorageType,
     ) -> Self {
         Self {
             id: id.to_string(),
             creator_id: creator_id.get_id().to_string(),
             name: name.to_string(),
-            link: link.to_string(),
+            storage_type,
+            storage_detail: None,
             time_created: chrono::offset::Local::now().naive_utc(),
             time_modified: chrono::offset::Local::now().naive_utc(),
         }
@@ -137,14 +109,14 @@ impl Digicon {
         id_provided: impl ToString,
         creator_id_provided: &UserId,
         name_provided: impl ToString,
-        link_provided: impl ToString,
+        storage_type_provided: StorageType,
     ) -> Result<Self> {
         use crate::schema::digicons::dsl::*;
         let digicon = Digicon::new(
             id_provided,
             creator_id_provided,
             name_provided,
-            link_provided,
+            storage_type_provided,
         );
 
         if let Ok(0) = digicons
@@ -164,6 +136,8 @@ impl Digicon {
 
     pub fn delete(self, conn: &SqliteConnection) -> Result<usize> {
         use crate::schema::digicons::dsl::*;
+        // Delete all about-to-be dangling mappings
+        DigiconMappingFinder::new(conn, None).delete_by_digicon(&self)?;
         Ok(diesel::delete(digicons.filter(id.eq(self.id))).execute(conn)?)
     }
 
@@ -211,6 +185,14 @@ impl Digicon {
         Ok(self.save_changes::<Digicon>(conn)?)
     }
 
+    pub fn update_info(mut self, conn: &SqliteConnection, info: DigiconUpdate) -> Result<Self> {
+        self.time_modified = chrono::offset::Local::now().naive_utc();
+        Ok(self
+            .set_name(info.name)
+            .set_storage_detail(info.storage_detail)
+            .save_changes::<Digicon>(conn)?)
+    }
+
     pub fn get_id(&self) -> &str {
         &self.id
     }
@@ -231,12 +213,16 @@ impl Digicon {
         &self.creator_id
     }
 
-    pub fn get_link(&self) -> &str {
-        &self.link
+    pub fn get_storage_type(&self) -> &StorageType {
+        &self.storage_type
     }
 
-    pub fn set_link(mut self, link: impl ToString) -> Self {
-        self.link = link.to_string();
+    pub fn get_storage_detail(&self) -> Option<&str> {
+        self.storage_detail.as_deref()
+    }
+
+    pub fn set_storage_detail(mut self, storage_detail: Option<impl ToString>) -> Self {
+        self.storage_detail = storage_detail.map(|s| s.to_string());
         self
     }
 
@@ -279,6 +265,13 @@ impl<'a> DigiconMappingFinder<'a> {
     pub fn delete_by_product(self, product_id: &'a ProductId) -> Result<()> {
         use crate::schema::digiconmappings::dsl::*;
         diesel::delete(digiconmappings.filter(product.eq(product_id.get_id())))
+            .execute(self.conn)?;
+        Ok(())
+    }
+
+    pub fn delete_by_digicon(self, digicon_id: &'a Digicon) -> Result<()> {
+        use crate::schema::digiconmappings::dsl::*;
+        diesel::delete(digiconmappings.filter(digicon.eq(digicon_id.get_id())))
             .execute(self.conn)?;
         Ok(())
     }

@@ -23,6 +23,9 @@ msgstr "Store 商店"
 msgid "Messages"
 msgstr "消息"
 
+msgid "Creator Center"
+msgstr "创作者中心"
+
 msgid "Portal"
 msgstr "主页"
 
@@ -40,6 +43,66 @@ msgstr "名称"
 
 msgid "Downloaded by"
 msgstr "下载者"
+
+msgid "Digital Content Creator Center"
+msgstr "数字内容创作者中心"
+
+msgid "Create a Digital Content"
+msgstr "创建数字内容"
+
+msgid "Manage your Digital Contents"
+msgstr "管理数字内容"
+
+msgid "Last Modified"
+msgstr "修改时间"
+
+msgid "Digital Content \"{}\""
+msgstr "数字内容 \"{}\""
+
+msgid "Info"
+msgstr "信息"
+
+msgid "Manage"
+msgstr "管理"
+
+msgid "Apply to products"
+msgstr "应用"
+
+msgid "Storage Type"
+msgstr "存储类型"
+
+msgid "Storage Detail"
+msgstr "存储细节"
+
+msgid "Time Created"
+msgstr "创建于"
+
+msgid "Path to release asset"
+msgstr "对应 Release Asset 的路径"
+
+msgid "Update the Digital Content"
+msgstr "更新数字内容"
+
+msgid "Upload file"
+msgstr "上传文件"
+
+msgid "Create product"
+msgstr "上架商品"
+
+msgid "Create the Digital Content"
+msgstr "创建数字内容"
+
+msgid "Fill in relevant information to create a digital content"
+msgstr "填写数字内容相关信息"
+
+msgid "Storage Type (cannot be changed afterwards)"
+msgstr "存储类型（后续无法修改）"
+
+msgid "Manually upload file"
+msgstr "手动上传文件"
+
+msgid "Use Release Asset"
+msgstr "使用 Release Asset"
 
 msgid "Chat"
 msgstr "对话"
@@ -204,13 +267,13 @@ msgid "Submit"
 msgstr "提交"
 
 msgid "Provide Credential"
-msgstr ""
+msgstr "提供凭证"
 
 msgid "Password"
 msgstr "密码"
 
 msgid "Verify"
-msgstr ""
+msgstr "验证"
 
 msgid "Search by categories"
 msgstr "通过类别搜索"
@@ -260,9 +323,6 @@ msgstr "数量"
 
 msgid "Description"
 msgstr "简介"
-
-msgid "Create product"
-msgstr "上架商品"
 
 msgid "Fill in relevant information which users see in the store"
 msgstr "填写商品相关信息，买家会在商店里看到您对商品的描述"
@@ -419,8 +479,8 @@ msgstr "上架商品"
 msgid "Digital Contents owned"
 msgstr "拥有的数字内容"
 
-msgid "Lat Modified"
-msgstr "修改时间"
+msgid "Manage Digital Contents"
+msgstr "管理数字内容"
 
 msgid "Orders placed"
 msgstr "创建的订单"

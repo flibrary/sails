@@ -25,7 +25,7 @@ fn create_digicons() {
         "eea1dc23-5494-4293-8c48-e03c168aad8e",
         &user_id,
         "GitHub",
-        "https://github.com",
+        crate::enums::StorageType::ReleaseAsset,
     )
     .unwrap();
 
@@ -35,7 +35,7 @@ fn create_digicons() {
             "eea1dc23-5494-4293-8c48-e03c168aad8e",
             &user_id,
             "GitHub",
-            "https://github.com",
+            crate::enums::StorageType::ReleaseAsset,
         )
         .err()
         .unwrap(),
@@ -47,7 +47,7 @@ fn create_digicons() {
     );
     assert_eq!(physics_done_wrong.get_creator_id(), "TestUser@example.org");
     assert_eq!(physics_done_wrong.get_name(), "GitHub");
-    assert_eq!(physics_done_wrong.get_link(), "https://github.com");
+    assert_eq!(physics_done_wrong.get_storage_detail().is_none(), true);
 }
 
 #[test]
@@ -83,7 +83,7 @@ fn mapping() {
         "eea1dc23-5494-4293-8c48-e03c168aad8e",
         &user_id,
         "GitHub",
-        "https://github.com",
+        crate::enums::StorageType::ReleaseAsset,
     )
     .unwrap();
 

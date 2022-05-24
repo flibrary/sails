@@ -17,11 +17,15 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::enums::*;
+
     digicons (id) {
         id -> Text,
         creator_id -> Text,
         name -> Text,
-        link -> Text,
+        storage_type -> StorageTypeMapping,
+        storage_detail -> Nullable<Text>,
         time_created -> Timestamp,
         time_modified -> Timestamp,
     }

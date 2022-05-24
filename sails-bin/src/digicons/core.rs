@@ -2,13 +2,15 @@ use crate::{aead::AeadKey, guards::*, i18n::I18n, DbConn, IntoFlash};
 use askama::Template;
 use bytes::Bytes;
 use chacha20poly1305::Nonce;
-use chrono::{NaiveDateTime, Utc};
+use chrono::NaiveDateTime;
 use image::{DynamicImage, ImageOutputFormat, Rgb};
 use lopdf::{self, xobject, Document};
 use qrcode::QrCode;
 use rand::{prelude::StdRng, RngCore, SeedableRng};
-use reqwest::{header::ACCEPT, Response};
+use reqwest::Response;
 use rocket::{
+    data::ToByteUnit,
+    form::{self, error::ErrorKind, DataField, FromFormField},
     http::{ContentType, Header},
     response::{Flash, Redirect},
     State,
@@ -23,20 +25,7 @@ use std::io::Cursor;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DigiconHosting {
-    digicon_gh_token: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-struct ReleaseAssets {
-    assets: Vec<Asset>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-struct Asset {
-    // The name of the release asset
-    name: String,
-    // Download endpoint
-    url: String,
+    pub digicon_gh_token: String,
 }
 
 pub struct DigiconFile {
@@ -44,18 +33,43 @@ pub struct DigiconFile {
     pub ctt_type: ContentType,
 }
 
+#[rocket::async_trait]
+impl<'r> FromFormField<'r> for DigiconFile {
+    async fn from_data(field: DataField<'r, '_>) -> form::Result<'r, Self> {
+        // Picture, PDF, or zip archive
+        if !(field.content_type.is_jpeg()
+            || field.content_type.is_png()
+            || field.content_type.is_pdf()
+            || field.content_type.is_zip())
+        {
+            return Err(ErrorKind::Unexpected.into());
+        }
+
+        let limit = field
+            .request
+            .limits()
+            .get("file")
+            .unwrap_or_else(|| 5.mebibytes());
+
+        let bytes = field.data.open(limit).into_bytes().await?;
+        if !bytes.is_complete() {
+            return Err((None, Some(limit)).into());
+        }
+        let bytes = bytes.into_inner();
+        Ok(Self {
+            bytes: bytes.into(),
+            ctt_type: field.content_type,
+        })
+    }
+}
+
 impl DigiconFile {
     pub async fn from_response(
         resp: Response,
-        name: String,
+        ctt_type: ContentType,
         aead: &AeadKey,
         trace: &str,
     ) -> anyhow::Result<Self> {
-        let ctt_type = std::path::Path::new(&name)
-            .extension()
-            .map(|x| ContentType::from_extension(x.to_str().unwrap()).unwrap())
-            // If there is no extension, we set content type to any
-            .unwrap_or(ContentType::Any);
         Ok(Self {
             bytes: if ctt_type == ContentType::PDF {
                 watermark_pdf(&resp.bytes().await?, aead, trace)?.into()
@@ -73,8 +87,8 @@ impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for DigiconFile {
     fn respond_to(self, _: &'r rocket::request::Request<'_>) -> rocket::response::Result<'o> {
         rocket::response::Response::build()
             .header(self.ctt_type)
-            // One day
-            .header(Header::new("Cache-Control", "max-age=86400"))
+            // 2 minutes
+            .header(Header::new("Cache-Control", "max-age=120"))
             .sized_body(self.bytes.len(), Cursor::new(self.bytes))
             .ok()
     }
@@ -91,7 +105,7 @@ pub struct TraceInfo {
 
 #[get("/trace", rank = 2)]
 pub async fn trace_unauthorized() -> Redirect {
-    Redirect::to(uri!("https://flibrary.info/store", super::store::home_page))
+    Redirect::to(uri!("https://flibrary.info/store", crate::store::home_page))
 }
 
 #[get("/trace?<cipher>&<nonce>", rank = 1)]
@@ -133,77 +147,6 @@ pub async fn trace(
         digicon,
         user,
     })
-}
-
-#[get("/get?<digicon_id>")]
-pub async fn get(
-    user: UserIdGuard<Cookie>,
-    _auth: Auth<DigiconReadable>,
-    hosting: &State<DigiconHosting>,
-    digicon_id: DigiconGuard,
-    aead: &State<AeadKey>,
-    conn: DbConn,
-) -> Result<Result<DigiconFile, Redirect>, Flash<Redirect>> {
-    let digicon = digicon_id.to_digicon(&conn).await.into_flash(uri!("/"))?;
-    // Generate the trace string using UTC time, digicon ID, and the user ID.
-    // These are the information that we don't want adversary to tamper with.
-    let trace = format!(
-        "{}:{}:{}",
-        Utc::now().timestamp(),
-        digicon.get_id(),
-        &user.id.get_id(),
-    );
-    let link = digicon.get_link().to_string();
-    let name = digicon.get_name().to_string();
-
-    let download_link = if let Some(filename) = link.strip_prefix("euler://") {
-        let client = reqwest::Client::builder()
-            .user_agent("curl")
-            .build()
-            .unwrap();
-        // TODO: don't make it hardcoded
-        let assets = client
-            .get("https://api.github.com/repos/flibrary/euler/releases/latest")
-            .header(ACCEPT, "application/vnd.github.v3+json")
-            .bearer_auth(&hosting.digicon_gh_token)
-            .send()
-            .await
-            .into_flash(uri!("/"))?
-            .json::<ReleaseAssets>()
-            .await
-            .into_flash(uri!("/"))?;
-        let asset = assets
-            .assets
-            .into_iter()
-            .find(|x| x.name == filename)
-            .ok_or("asset not found in release")
-            .into_flash(uri!("/"))?;
-        asset.url
-    } else {
-        link
-    };
-
-    let client = reqwest::Client::builder()
-        .user_agent("curl")
-        .build()
-        .unwrap();
-    let resp = client
-        .get(download_link)
-        .header(ACCEPT, "application/octet-stream")
-        // If we don't auth, probably we will get limited further
-        .bearer_auth(&hosting.digicon_gh_token)
-        .send()
-        .await
-        .into_flash(uri!("/"))?;
-
-    if resp.status().is_success() {
-        // If we have successfully retrieved the file
-        Ok(Ok(DigiconFile::from_response(resp, name, aead, &trace)
-            .await
-            .into_flash(uri!("/"))?))
-    } else {
-        Ok(Err(Redirect::to(uri!("/static/404.html"))))
-    }
 }
 
 // Watermark using QRcode containing the AEAD encrypted trace string.

@@ -9,7 +9,8 @@ use std::marker::PhantomData;
 
 // Misc
 pub struct TagWritable;
-pub struct StoreModifiable;
+pub struct CanCreateProduct;
+pub struct CanCreateDigicon;
 
 // For prods
 pub struct ProdReadable;
@@ -58,7 +59,7 @@ impl<'r> FromRequest<'r> for Auth<TagWritable> {
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for Auth<StoreModifiable> {
+impl<'r> FromRequest<'r> for Auth<CanCreateProduct> {
     type Error = ();
 
     async fn from_request(
@@ -70,6 +71,27 @@ impl<'r> FromRequest<'r> for Auth<StoreModifiable> {
             .info
             .get_user_status()
             .contains(UserStatus::PROD_SELF_WRITABLE)
+        {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<CanCreateDigicon> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+
+        if user
+            .info
+            .get_user_status()
+            .contains(UserStatus::DIGICON_SELF_WRITABLE)
         {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {

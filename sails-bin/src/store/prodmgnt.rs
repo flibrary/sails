@@ -47,7 +47,7 @@ pub async fn update_prod(
 #[post("/cow_prod", data = "<info>", rank = 2)]
 pub async fn create_prod(
     user: UserIdGuard<Cookie>,
-    _auth: Auth<StoreModifiable>,
+    _auth: Auth<CanCreateProduct>,
     mut info: Form<IncompleteProductOwned>,
     conn: DbConn,
 ) -> Result<Redirect, Flash<Redirect>> {
@@ -103,7 +103,7 @@ pub async fn update_prod_page(
 pub async fn post_prod_page(
     i18n: I18n,
     conn: DbConn,
-    _guard: Auth<StoreModifiable>,
+    _guard: Auth<CanCreateProduct>,
     _user: UserIdGuard<Cookie>,
 ) -> Result<PostProd, Flash<Redirect>> {
     Ok(PostProd {

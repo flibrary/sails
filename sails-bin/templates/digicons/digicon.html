@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock title %}
+
+{% block content %}
+<main class="container">
+  <div class="p-5 rounded shadow">
+    <h1>{{ i18n!(self.i18n.catalog, "Digital Content \"{}\""; self.digicon.get_name()) }}</h1>
+
+    <nav>
+      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+	<button class="nav-link active" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="true">{{ i18n!(self.i18n.catalog, "Info") }}</button>
+	<button class="nav-link" id="nav-manage-tab" data-bs-toggle="tab" data-bs-target="#nav-manage" type="button" role="tab" aria-controls="nav-manage" aria-selected="true">{{ i18n!(self.i18n.catalog, "Manage") }}</button>
+	<button class="nav-link" id="nav-mapping-tab" data-bs-toggle="tab" data-bs-target="#nav-mapping" type="button" role="tab" aria-controls="nav-mapping" aria-selected="false">{{ i18n!(self.i18n.catalog, "Apply to products") }}</button>
+      </div>
+    </nav>
+    <br>
+
+    <div class="tab-content" id="nav-tabContent">
+      <div class="tab-pane fade show active" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab">
+	    <table class="table table-hover">
+	      <tbody>
+		<tr>
+		  <th scope="row">{{ i18n!(self.i18n.catalog, "Name") }}</th>
+		  <td>{{ digicon.get_name() }}</td>
+		</tr>
+		<tr>
+		  <th scope="row">{{ i18n!(self.i18n.catalog, "Storage Type") }}</th>
+		  <td>{{ "{:?}"|format(digicon.get_storage_type()) }}</td>
+		</tr>
+		<tr>
+		  <th scope="row">{{ i18n!(self.i18n.catalog, "Storage Detail") }}</th>
+		  {% match digicon.get_storage_detail() %}
+		  {% when Some with (detail) %}
+		  <td><code>{{ detail }}</code></td>
+		  {% when None %}
+		  <td>Not available</td>
+		  {% endmatch %}
+		</tr>
+		<tr>
+		  <th scope="row">{{ i18n!(self.i18n.catalog, "Time Created") }}</th>
+		  <td>{{digicon.get_time_created().format("%Y-%m-%d %H:%M:%S")}}</td>
+		</tr>
+		<tr>
+		  <th scope="row">{{ i18n!(self.i18n.catalog, "Last Modified") }}</th>
+		  <td>{{digicon.get_time_modified().format("%Y-%m-%d %H:%M:%S")}}</td>
+		</tr>
+	      </tbody>
+	    </table>
+      </div>
+
+    <div class="tab-pane fade" id="nav-manage" role="tabpanel" aria-labelledby="nav-manage-tab">
+    {% match digicon.get_storage_type() %}
+    {% when sails_db::enums::StorageType::ReleaseAsset %}
+
+    <form action="{{uri!("/digicons", crate::digicons::update_digicon(self.digicon.get_id()))}}" method="post">
+    <div class="form-group row">
+      <label for="inputName" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Name") }}</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="inputProd" placeholder="name" value="{{ digicon.get_name() }}" name="name">
+      </div>
+    </div>
+    <br>
+    <div class="form-group row">
+      <label for="inputPath" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Path to release asset") }}</label>
+      <div class="col-sm-10">
+    	{% match digicon.get_storage_detail() %}
+	{% when Some with (path) %}
+        <input type="text" class="form-control" id="inputPath" placeholder="path to asset" value="{{ path.to_string() }}" name="storage_detail">
+	{% when None %}
+        <input type="text" class="form-control" id="inputPath" placeholder="path to asset" name="storage_detail">
+	{% endmatch %}
+      </div>
+    </div>
+    <br>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">{{ i18n!(self.i18n.catalog, "Update the Digital Content") }}</button>
+    </form>
+
+    {% when sails_db::enums::StorageType::GitRepo %}
+    <form action="{{uri!("/digicons", crate::digicons::update_digicon(self.digicon.get_id()))}}" method="post">
+    <div class="form-group row">
+      <label for="inputName" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Name") }}</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="inputProd" placeholder="name" value="{{ digicon.get_name() }}" name="name">
+      </div>
+    </div>
+    <br>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">{{ i18n!(self.i18n.catalog, "Update the Digital Content") }}</button>
+    </form>
+    <br>
+
+    <form action="{{uri!("/digicons", crate::digicons::upload(self.digicon.get_id()))}}" enctype="multipart/form-data" method="post">
+      <div class="form-group row">
+        <label for="inputFile" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Upload file") }}</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="file" id="inputFile" name="file">
+	</div>
+      </div>
+      <br>
+      <button class="w-100 btn btn-lg btn-primary" type="submit">{{ i18n!(self.i18n.catalog, "Upload file") }}</button>
+    </form>
+    {% endmatch %}
+    </div>
+
+    <div class="tab-pane fade" id="nav-mapping" role="tabpanel" aria-labelledby="nav-mapping-tab">
+      <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+	<thead>
+	  <tr>
+	    <th data-field="id" data-sortable="true" scope="col">ID</th>
+	    <th data-field="name" data-sortable="true" scope="col">Name</th>
+	    <th data-field="price" data-sortable="true" scope="col">Price</th>
+	    <th data-field="seller" data-sortable="true" scope="col">Seller</th>
+	    <th data-field="actions" scope="col">Actions</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  {% for (prod, mapped) in prods %}
+	  <tr>
+	    <th scope="row"><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
+	    <td>{{prod.get_prodname()}}</td>
+	    <td>{{prod.get_price()}}</td>
+	    <td><a href="{{ uri!("/user", crate::user::portal_guest(prod.get_seller_id())) }}">{{prod.get_seller_id()}}</a></td>
+	    <td>
+	      {% if mapped %}
+	      <a href="{{ uri!("/digicons", crate::digicons::remove_digicon(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-warning" role="button">Remove</a>
+	      {% else %}
+	      <a href="{{ uri!("/digicons", crate::digicons::add_digicon(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-success" role="button">Add</a>
+	      {% endif %}
+	    </td>
+	  </tr>
+	  {% endfor %}
+	</tbody>
+      </table>
+    </div>
+
+    </div>
+
+  </div>
+  <br>
+
+</main>
+{% endblock content %}

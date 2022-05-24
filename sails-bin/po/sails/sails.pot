@@ -21,6 +21,9 @@ msgstr ""
 msgid "Messages"
 msgstr ""
 
+msgid "Creator Center"
+msgstr ""
+
 msgid "Portal"
 msgstr ""
 
@@ -37,6 +40,66 @@ msgid "Name"
 msgstr ""
 
 msgid "Downloaded by"
+msgstr ""
+
+msgid "Digital Content Creator Center"
+msgstr ""
+
+msgid "Create a Digital Content"
+msgstr ""
+
+msgid "Manage your Digital Contents"
+msgstr ""
+
+msgid "Last Modified"
+msgstr ""
+
+msgid "Digital Content \"{}\""
+msgstr ""
+
+msgid "Info"
+msgstr ""
+
+msgid "Manage"
+msgstr ""
+
+msgid "Apply to products"
+msgstr ""
+
+msgid "Storage Type"
+msgstr ""
+
+msgid "Storage Detail"
+msgstr ""
+
+msgid "Time Created"
+msgstr ""
+
+msgid "Path to release asset"
+msgstr ""
+
+msgid "Update the Digital Content"
+msgstr ""
+
+msgid "Upload file"
+msgstr ""
+
+msgid "Create product"
+msgstr ""
+
+msgid "Create the Digital Content"
+msgstr ""
+
+msgid "Fill in relevant information to create a digital content"
+msgstr ""
+
+msgid "Storage Type (cannot be changed afterwards)"
+msgstr ""
+
+msgid "Manually upload file"
+msgstr ""
+
+msgid "Use Release Asset"
 msgstr ""
 
 msgid "Chat"
@@ -249,9 +312,6 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-msgid "Create product"
-msgstr ""
-
 msgid "Fill in relevant information which users see in the store"
 msgstr ""
 
@@ -399,7 +459,7 @@ msgstr ""
 msgid "Digital Contents owned"
 msgstr ""
 
-msgid "Lat Modified"
+msgid "Manage Digital Contents"
 msgstr ""
 
 msgid "Orders placed"
