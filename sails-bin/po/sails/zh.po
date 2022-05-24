@@ -86,6 +86,9 @@ msgstr "更新数字内容"
 msgid "Upload file"
 msgstr "上传文件"
 
+msgid "Delete"
+msgstr "删除"
+
 msgid "Create product"
 msgstr "上架商品"
 
@@ -342,9 +345,6 @@ msgstr "未分类"
 msgid "Status"
 msgstr "状态"
 
-msgid "Delete"
-msgstr "删除"
-
 msgid "Purchase"
 msgstr "购买"
 
@@ -508,8 +508,8 @@ msgid ""
 "the-point, providing an enjoyable learning or referencing experience."
 msgstr ""
 "对内容冗长且难以翻阅的教科书感到厌倦？他人书写的笔记难以理解且逻辑跳跃？我们"
-"衷于找到教材和笔记间的平衡：专门为您所需课程设计的学习指南。它们精简但不失逻辑，深度和示例并存，无"
-"论是第一次阅读还是快速查阅都非常高效。"
+"衷于找到教材和笔记间的平衡：专门为您所需课程设计的学习指南。它们精简但不失逻"
+"辑，深度和示例并存，无论是第一次阅读还是快速查阅都非常高效。"
 
 msgid "Join the community"
 msgstr "加入社区"

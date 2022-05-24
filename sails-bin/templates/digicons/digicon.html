@@ -56,7 +56,7 @@
     <div class="form-group row">
       <label for="inputName" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Name") }}</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" id="inputProd" placeholder="name" value="{{ digicon.get_name() }}" name="name">
+        <input type="text" class="form-control" id="inputProd" placeholder="name" value="{{ digicon.get_name() }}" name="name" required>
       </div>
     </div>
     <br>
@@ -65,9 +65,9 @@
       <div class="col-sm-10">
     	{% match digicon.get_storage_detail() %}
 	{% when Some with (path) %}
-        <input type="text" class="form-control" id="inputPath" placeholder="path to asset" value="{{ path.to_string() }}" name="storage_detail">
+        <input type="text" class="form-control" id="inputPath" placeholder="path to asset" value="{{ path.to_string() }}" name="storage_detail" required>
 	{% when None %}
-        <input type="text" class="form-control" id="inputPath" placeholder="path to asset" name="storage_detail">
+        <input type="text" class="form-control" id="inputPath" placeholder="path to asset" name="storage_detail" required>
 	{% endmatch %}
       </div>
     </div>
@@ -80,7 +80,7 @@
     <div class="form-group row">
       <label for="inputName" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Name") }}</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" id="inputProd" placeholder="name" value="{{ digicon.get_name() }}" name="name">
+        <input type="text" class="form-control" id="inputProd" placeholder="name" value="{{ digicon.get_name() }}" name="name" required>
       </div>
     </div>
     <br>
@@ -92,13 +92,16 @@
       <div class="form-group row">
         <label for="inputFile" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Upload file") }}</label>
         <div class="col-sm-10">
-          <input class="form-control" type="file" id="inputFile" name="file">
+          <input class="form-control" type="file" id="inputFile" name="file" required>
 	</div>
       </div>
       <br>
       <button class="w-100 btn btn-lg btn-primary" type="submit">{{ i18n!(self.i18n.catalog, "Upload file") }}</button>
     </form>
     {% endmatch %}
+    <br>
+
+    <a href="{{ uri!("/digicons", crate::digicons::delete(self.digicon.get_id())) }}" class="btn btn-danger" role="button">{{ i18n!(self.i18n.catalog, "Delete") }}</a>
     </div>
 
     <div class="tab-pane fade" id="nav-mapping" role="tabpanel" aria-labelledby="nav-mapping-tab">

@@ -84,6 +84,9 @@ msgstr ""
 msgid "Upload file"
 msgstr ""
 
+msgid "Delete"
+msgstr ""
+
 msgid "Create product"
 msgstr ""
 
@@ -328,9 +331,6 @@ msgid "Not categorized"
 msgstr ""
 
 msgid "Status"
-msgstr ""
-
-msgid "Delete"
 msgstr ""
 
 msgid "Purchase"
