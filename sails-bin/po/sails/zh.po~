@@ -12,11 +12,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid ""
-"FLibrary is the ultimate destination for discovering, discussing, and "
-"distributing learning guides."
-msgstr "FLibrary 是发现、讨论、创作学习内容的终极选择。"
-
 msgid "Store"
 msgstr "Store 商店"
 
@@ -28,6 +23,11 @@ msgstr "创作者中心"
 
 msgid "Portal"
 msgstr "主页"
+
+msgid ""
+"FLibrary is the ultimate destination for discovering, discussing, and "
+"distributing learning guides."
+msgstr "FLibrary 是发现、讨论、创作学习内容的终极选择。"
 
 msgid "Digital Content Distribution Trace"
 msgstr "数字内容分发追踪"
@@ -85,6 +85,9 @@ msgstr "更新数字内容"
 
 msgid "Upload file"
 msgstr "上传文件"
+
+msgid "Delete"
+msgstr "删除"
 
 msgid "Create product"
 msgstr "上架商品"
@@ -341,9 +344,6 @@ msgstr "未分类"
 
 msgid "Status"
 msgstr "状态"
-
-msgid "Delete"
-msgstr "删除"
 
 msgid "Purchase"
 msgstr "购买"

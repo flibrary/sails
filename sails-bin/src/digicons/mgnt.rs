@@ -56,7 +56,7 @@ pub async fn create_digicon(
 #[get("/get?<digicon_id>")]
 pub async fn get(
     user: UserIdGuard<Cookie>,
-    _auth: Auth<DigiconReadable>,
+    _auth: Auth<DigiconContentReadable>,
     hosting: &State<DigiconHosting>,
     digicon_id: DigiconGuard,
     aead: &State<AeadKey>,
@@ -182,7 +182,7 @@ pub async fn delete(
 
 #[post("/upload?<digicon_id>", data = "<file>")]
 pub async fn upload(
-    _auth: Auth<CanCreateDigicon>,
+    _auth: Auth<DigiconWritable>,
     db: DbConn,
     digicon_id: DigiconGuard,
     hosting: &State<DigiconHosting>,
@@ -255,4 +255,51 @@ pub async fn upload(
     // Internal Server Error
     .map_err(|_| Status::new(500))?;
     Ok(Redirect::to(uri!("/digicons", super::digicon_page(id))))
+}
+
+#[get("/remove_digicon_mapping?<digicon_id>&<prod_id>")]
+pub async fn remove_digicon_mapping(
+    _digicon_guard: Auth<DigiconWritable>,
+    _prod_guard: Auth<ProdWritable>,
+    digicon_id: DigiconGuard,
+    prod_id: ProdGuard,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    let prod = prod_id.to_id(&conn).await.into_flash(uri!("/"))?;
+    let digicon = digicon_id.to_digicon(&conn).await.into_flash(uri!("/"))?;
+    let digicon_cloned = digicon.clone();
+    conn.run(move |c| {
+        DigiconMappingFinder::new(c, None)
+            .product(&prod.prod_id)
+            .digicon(&digicon)
+            .first()
+            .map(|x| x.delete(c))
+    })
+    .await
+    .into_flash(uri!("/"))?
+    .into_flash(uri!("/"))?;
+    Ok(Redirect::to(uri!(
+        "/digicons",
+        digicon_page(digicon_cloned.get_id())
+    )))
+}
+
+#[get("/add_digicon_mapping?<digicon_id>&<prod_id>")]
+pub async fn add_digicon_mapping(
+    _digicon_guard: Auth<DigiconWritable>,
+    _prod_guard: Auth<ProdWritable>,
+    digicon_id: DigiconGuard,
+    prod_id: ProdGuard,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    let prod = prod_id.to_id(&conn).await.into_flash(uri!("/"))?;
+    let digicon = digicon_id.to_digicon(&conn).await.into_flash(uri!("/"))?;
+    let digicon_cloned = digicon.clone();
+    conn.run(move |c| DigiconMapping::create(c, &digicon, &prod.prod_id))
+        .await
+        .into_flash(uri!("/"))?;
+    Ok(Redirect::to(uri!(
+        "/digicons",
+        digicon_page(digicon_cloned.get_id())
+    )))
 }

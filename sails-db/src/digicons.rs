@@ -1,3 +1,12 @@
+// A few words on the permission management of digicon
+// Readable: all information, including the actual content of the digicon, is accessible by a certain user
+// Writable: all information is changable by a certain user. When granted this permission, user is also enabled to CREATE new digicon.
+// Removable: user is enabled to remove the digicon
+
+// All three of these are independent, meaning any permission combination out of these three is considered meaningful.
+// There is an extra permission: content readable. It means a certain user is enabled to access ONLY the content of the digicon but not the metadata.
+// According to above definition of readable, content readable is implied by readable but NOT the reverse.
+
 use crate::{
     enums::{StorageType, UserStatus},
     error::{SailsDbError, SailsDbResult as Result},
@@ -20,6 +29,19 @@ impl Digicons {
     pub fn list_all(conn: &SqliteConnection) -> Result<Vec<Digicon>> {
         use crate::schema::digicons::dsl::*;
         Ok(digicons.load::<Digicon>(conn)?)
+    }
+
+    pub fn list_all_content_readable(
+        conn: &SqliteConnection,
+        user: &UserId,
+    ) -> Result<Vec<Digicon>> {
+        let mut authorized = Vec::new();
+        for x in Self::list_all(conn)? {
+            if DigiconMappingFinder::content_readable(conn, user, &x)? {
+                authorized.push(x);
+            }
+        }
+        Ok(authorized)
     }
 
     pub fn list_all_readable(conn: &SqliteConnection, user: &UserId) -> Result<Vec<Digicon>> {
@@ -51,6 +73,7 @@ impl Digicons {
     }
 }
 
+// Form used to update the digicon
 #[derive(Debug, Clone, AsChangeset, Serialize, Deserialize, FromForm)]
 #[table_name = "digicons"]
 pub struct DigiconUpdate {
@@ -58,6 +81,7 @@ pub struct DigiconUpdate {
     pub storage_detail: Option<String>,
 }
 
+// Form used to create the digicon
 #[derive(Debug, Clone, AsChangeset, Serialize, Deserialize, FromForm)]
 #[table_name = "digicons"]
 pub struct IncompleteDigicon {
@@ -142,18 +166,15 @@ impl Digicon {
     }
 
     pub fn readable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
-        Ok(
-            DigiconMappingFinder::authorized_to_read_by_purchase(conn, user, self)?
-                || if self.creator_id == user.get_id() {
-                    user.get_info(conn)?
-                        .get_user_status()
-                        .contains(UserStatus::DIGICON_SELF_READABLE)
-                } else {
-                    user.get_info(conn)?
-                        .get_user_status()
-                        .contains(UserStatus::DIGICON_OTHERS_READABLE)
-                },
-        )
+        Ok(if self.creator_id == user.get_id() {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::DIGICON_SELF_READABLE)
+        } else {
+            user.get_info(conn)?
+                .get_user_status()
+                .contains(UserStatus::DIGICON_OTHERS_READABLE)
+        })
     }
 
     pub fn writable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
@@ -311,11 +332,17 @@ impl<'a> DigiconMappingFinder<'a> {
             > 0)
     }
 
-    pub fn authorized_to_read_by_purchase(
+    // Whether a specific user is authorized to obtain the content of a digicon
+    pub fn content_readable(
         conn: &'a SqliteConnection,
         user: &'a UserId,
         digicon: &'a Digicon,
     ) -> Result<bool> {
+        // Readable implies readability on all information: storage type, storage detail, and the actual content of it.
+        if digicon.readable(conn, user)? {
+            return Ok(true);
+        }
+
         let mut bought_products = TransactionFinder::new(conn, None)
             .buyer(user)
             // Products with digicons don't have status paid

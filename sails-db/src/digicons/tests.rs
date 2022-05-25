@@ -113,8 +113,7 @@ fn mapping() {
     DigiconMapping::create(&conn, &physics_done_wrong, &subscription).unwrap();
 
     assert_eq!(
-        DigiconMappingFinder::authorized_to_read_by_purchase(&conn, &another, &physics_done_wrong)
-            .unwrap(),
+        DigiconMappingFinder::content_readable(&conn, &another, &physics_done_wrong).unwrap(),
         false
     );
 
@@ -134,16 +133,14 @@ fn mapping() {
         .unwrap();
 
     assert_eq!(
-        DigiconMappingFinder::authorized_to_read_by_purchase(&conn, &another, &physics_done_wrong)
-            .unwrap(),
+        DigiconMappingFinder::content_readable(&conn, &another, &physics_done_wrong).unwrap(),
         true
     );
 
     tx.refund(&conn).unwrap();
 
     assert_eq!(
-        DigiconMappingFinder::authorized_to_read_by_purchase(&conn, &another, &physics_done_wrong)
-            .unwrap(),
+        DigiconMappingFinder::content_readable(&conn, &another, &physics_done_wrong).unwrap(),
         false
     );
 }

@@ -47,6 +47,8 @@ impl Tags {
             .first::<Tag>(conn)?)
     }
 
+    // We intentionally don't clean up tagmapping because tags are created in configuration files.
+    // Cleaning up the tagmapping renders tags useless as during every startup tags are deleted and recreated.
     pub fn delete_all(conn: &SqliteConnection) -> Result<usize> {
         use crate::schema::tags::dsl::*;
         Ok(diesel::delete(tags).execute(conn)?)

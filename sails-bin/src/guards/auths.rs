@@ -4,7 +4,7 @@ use rocket::{
     outcome::{try_outcome, IntoOutcome, Outcome},
     request::FromRequest,
 };
-use sails_db::enums::UserStatus;
+use sails_db::{digicons::DigiconMappingFinder, enums::UserStatus};
 use std::marker::PhantomData;
 
 // Misc
@@ -32,6 +32,7 @@ pub struct OrderRefundable;
 pub struct DigiconReadable;
 pub struct DigiconWritable;
 pub struct DigiconRemovable;
+pub struct DigiconContentReadable;
 
 pub struct Auth<T> {
     plhdr: PhantomData<T>,
@@ -111,6 +112,34 @@ impl<'r> FromRequest<'r> for Auth<ProdAdmin> {
         let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
 
         if user.info.get_user_status().contains(UserStatus::PROD_ADMIN) {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<DigiconContentReadable> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
+
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let digicon = try_outcome!(request
+            .query_value::<DigiconGuard>("digicon_id")
+            .and_then(|x| x.ok())
+            .or_forward(()));
+        let digicon = try_outcome!(digicon.to_digicon(&db).await.ok().or_forward(()));
+
+        if db
+            .run(move |c| DigiconMappingFinder::content_readable(c, &user.id, &digicon))
+            .await
+            .unwrap_or(false)
+        {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
@@ -209,25 +238,19 @@ impl<'r> FromRequest<'r> for Auth<ProdReadable> {
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
 
         let db = try_outcome!(request.guard::<DbConn>().await);
         let prod = try_outcome!(request
             .query_value::<ProdGuard>("prod_id")
             .and_then(|x| x.ok())
             .or_forward(()));
-        let prod = try_outcome!(prod.to_id(&db).await.ok().or_forward(()));
+        let prod = try_outcome!(prod.to_info(&db).await.ok().or_forward(()));
 
-        if ((prod.seller_id.get_id() == user.info.get_id())
-            && (user
-                .info
-                .get_user_status()
-                .contains(UserStatus::PROD_SELF_READABLE)))
-            || ((prod.seller_id.get_id() != user.info.get_id())
-                && (user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::PROD_OTHERS_READABLE)))
+        if db
+            .run(move |c| prod.prod_info.readable(c, &user.id))
+            .await
+            .unwrap_or(false)
         {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
@@ -243,25 +266,19 @@ impl<'r> FromRequest<'r> for Auth<ProdWritable> {
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
 
         let db = try_outcome!(request.guard::<DbConn>().await);
         let prod = try_outcome!(request
             .query_value::<ProdGuard>("prod_id")
             .and_then(|x| x.ok())
             .or_forward(()));
-        let prod = try_outcome!(prod.to_id(&db).await.ok().or_forward(()));
+        let prod = try_outcome!(prod.to_info(&db).await.ok().or_forward(()));
 
-        if ((prod.seller_id.get_id() == user.info.get_id())
-            && (user
-                .info
-                .get_user_status()
-                .contains(UserStatus::PROD_SELF_WRITABLE)))
-            || ((prod.seller_id.get_id() != user.info.get_id())
-                && (user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::PROD_OTHERS_WRITABLE)))
+        if db
+            .run(move |c| prod.prod_info.writable(c, &user.id))
+            .await
+            .unwrap_or(false)
         {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
@@ -277,24 +294,19 @@ impl<'r> FromRequest<'r> for Auth<ProdRemovable> {
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
 
         let db = try_outcome!(request.guard::<DbConn>().await);
         let prod = try_outcome!(request
             .query_value::<ProdGuard>("prod_id")
             .and_then(|x| x.ok())
             .or_forward(()));
-        let prod = try_outcome!(prod.to_id(&db).await.ok().or_forward(()));
-        if ((prod.seller_id.get_id() == user.info.get_id())
-            && (user
-                .info
-                .get_user_status()
-                .contains(UserStatus::PROD_SELF_REMOVABLE)))
-            || ((prod.seller_id.get_id() != user.info.get_id())
-                && (user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::PROD_OTHERS_REMOVABLE)))
+        let prod = try_outcome!(prod.to_info(&db).await.ok().or_forward(()));
+
+        if db
+            .run(move |c| prod.prod_info.removable(c, &user.id))
+            .await
+            .unwrap_or(false)
         {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
@@ -376,7 +388,7 @@ impl<'r> FromRequest<'r> for Auth<OrderReadable> {
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
 
         let db = try_outcome!(request.guard::<DbConn>().await);
         let order = try_outcome!(request
@@ -385,35 +397,11 @@ impl<'r> FromRequest<'r> for Auth<OrderReadable> {
             .or_forward(()));
         let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
-        if match (
-            user.info.get_id() == order.order_info.get_buyer(),
-            user.info.get_id() == order.order_info.get_seller(),
-        ) {
-            (true, false)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::TX_BUYER_READABLE) =>
-            {
-                true
-            }
-            (false, true)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::TX_SELLER_READABLE) =>
-            {
-                true
-            }
-            _ if user
-                .info
-                .get_user_status()
-                .contains(UserStatus::TX_OTHERS_READABLE) =>
-            {
-                true
-            }
-            _ => false,
-        } {
+        if db
+            .run(move |c| order.order_info.readable(c, &user.id))
+            .await
+            .unwrap_or(false)
+        {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
@@ -428,7 +416,7 @@ impl<'r> FromRequest<'r> for Auth<OrderProgressable> {
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
 
         let db = try_outcome!(request.guard::<DbConn>().await);
         let order = try_outcome!(request
@@ -437,35 +425,11 @@ impl<'r> FromRequest<'r> for Auth<OrderProgressable> {
             .or_forward(()));
         let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
-        if match (
-            user.info.get_id() == order.order_info.get_buyer(),
-            user.info.get_id() == order.order_info.get_seller(),
-        ) {
-            (true, false)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::TX_BUYER_PROGRESSABLE) =>
-            {
-                true
-            }
-            (false, true)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::TX_SELLER_PROGRESSABLE) =>
-            {
-                true
-            }
-            _ if user
-                .info
-                .get_user_status()
-                .contains(UserStatus::TX_OTHERS_PROGRESSABLE) =>
-            {
-                true
-            }
-            _ => false,
-        } {
+        if db
+            .run(move |c| order.order_info.progressable(c, &user.id))
+            .await
+            .unwrap_or(false)
+        {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
@@ -480,7 +444,7 @@ impl<'r> FromRequest<'r> for Auth<OrderFinishable> {
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
 
         let db = try_outcome!(request.guard::<DbConn>().await);
         let order = try_outcome!(request
@@ -489,35 +453,11 @@ impl<'r> FromRequest<'r> for Auth<OrderFinishable> {
             .or_forward(()));
         let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
-        if match (
-            user.info.get_id() == order.order_info.get_buyer(),
-            user.info.get_id() == order.order_info.get_seller(),
-        ) {
-            (true, false)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::TX_BUYER_FINISHABLE) =>
-            {
-                true
-            }
-            (false, true)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::TX_SELLER_FINISHABLE) =>
-            {
-                true
-            }
-            _ if user
-                .info
-                .get_user_status()
-                .contains(UserStatus::TX_OTHERS_FINISHABLE) =>
-            {
-                true
-            }
-            _ => false,
-        } {
+        if db
+            .run(move |c| order.order_info.finishable(c, &user.id))
+            .await
+            .unwrap_or(false)
+        {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
@@ -532,7 +472,7 @@ impl<'r> FromRequest<'r> for Auth<OrderRefundable> {
     async fn from_request(
         request: &'r rocket::Request<'_>,
     ) -> rocket::request::Outcome<Self, Self::Error> {
-        let user = try_outcome!(request.guard::<UserInfoGuard<Cookie>>().await);
+        let user = try_outcome!(request.guard::<UserIdGuard<Cookie>>().await);
 
         let db = try_outcome!(request.guard::<DbConn>().await);
         let order = try_outcome!(request
@@ -541,35 +481,11 @@ impl<'r> FromRequest<'r> for Auth<OrderRefundable> {
             .or_forward(()));
         let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
 
-        if match (
-            user.info.get_id() == order.order_info.get_buyer(),
-            user.info.get_id() == order.order_info.get_seller(),
-        ) {
-            (true, false)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::TX_BUYER_REFUNDABLE) =>
-            {
-                true
-            }
-            (false, true)
-                if user
-                    .info
-                    .get_user_status()
-                    .contains(UserStatus::TX_SELLER_REFUNDABLE) =>
-            {
-                true
-            }
-            _ if user
-                .info
-                .get_user_status()
-                .contains(UserStatus::TX_OTHERS_REFUNDABLE) =>
-            {
-                true
-            }
-            _ => false,
-        } {
+        if db
+            .run(move |c| order.order_info.refundable(c, &user.id))
+            .await
+            .unwrap_or(false)
+        {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())

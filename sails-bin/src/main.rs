@@ -394,8 +394,8 @@ fn rocket() -> Rocket<Build> {
                 digicons::all_digicons,
                 digicons::digicon_page,
                 digicons::digicons_center_not_permitted,
-                digicons::add_digicon,
-                digicons::remove_digicon,
+                digicons::add_digicon_mapping,
+                digicons::remove_digicon_mapping,
             ],
         )
         .register("/", catchers![page404, page422, page500])

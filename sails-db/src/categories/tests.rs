@@ -77,8 +77,8 @@ fn manipulate_category() {
     let conn = establish_connection();
     let mut knowledge = Category::create(&conn, "Knowledge", 1).unwrap();
     let mut books = Category::create(&conn, "Books", 1).unwrap();
-    let mut economics = Category::create(&conn, "Economics", 300).unwrap();
-    let mut physics = Category::create(&conn, "Physics", 300).unwrap();
+    let mut economics = Category::create(&conn, "Economics", 1).unwrap();
+    let mut physics = Category::create(&conn, "Physics", 1).unwrap();
 
     // Knowledge, Books -> (Econ, Phys)
     economics.insert(&conn, &mut books).unwrap();

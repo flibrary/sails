@@ -1,7 +1,5 @@
-use std::num::NonZeroU32;
-
 use crate::{
-    enums::{ProductStatus, TransactionStatus},
+    enums::{ProductStatus, TransactionStatus, UserStatus},
     error::{SailsDbError, SailsDbResult as Result},
     products::{ProductFinder, ProductId},
     schema::transactions,
@@ -12,6 +10,7 @@ use chrono::naive::NaiveDateTime;
 use diesel::{dsl::count, prelude::*, sqlite::Sqlite};
 use num_bigint::{BigUint, ToBigUint};
 use serde::{Deserialize, Serialize};
+use std::num::NonZeroU32;
 use uuid::Uuid;
 
 // A psuedo struct for managing transactions
@@ -214,6 +213,138 @@ impl TransactionInfo {
     /// Get a reference to the transaction info's seller.
     pub fn get_seller(&self) -> &str {
         self.seller.as_str()
+    }
+
+    pub fn readable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
+        let info = user.get_info(conn)?;
+
+        Ok(
+            match (
+                info.get_id() == self.get_buyer(),
+                info.get_id() == self.get_seller(),
+            ) {
+                (true, false)
+                    if info
+                        .get_user_status()
+                        .contains(UserStatus::TX_BUYER_READABLE) =>
+                {
+                    true
+                }
+                (false, true)
+                    if info
+                        .get_user_status()
+                        .contains(UserStatus::TX_SELLER_READABLE) =>
+                {
+                    true
+                }
+                _ if info
+                    .get_user_status()
+                    .contains(UserStatus::TX_OTHERS_READABLE) =>
+                {
+                    true
+                }
+                _ => false,
+            },
+        )
+    }
+
+    pub fn progressable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
+        let info = user.get_info(conn)?;
+
+        Ok(
+            match (
+                info.get_id() == self.get_buyer(),
+                info.get_id() == self.get_seller(),
+            ) {
+                (true, false)
+                    if info
+                        .get_user_status()
+                        .contains(UserStatus::TX_BUYER_PROGRESSABLE) =>
+                {
+                    true
+                }
+                (false, true)
+                    if info
+                        .get_user_status()
+                        .contains(UserStatus::TX_SELLER_PROGRESSABLE) =>
+                {
+                    true
+                }
+                _ if info
+                    .get_user_status()
+                    .contains(UserStatus::TX_OTHERS_PROGRESSABLE) =>
+                {
+                    true
+                }
+                _ => false,
+            },
+        )
+    }
+
+    pub fn finishable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
+        let info = user.get_info(conn)?;
+
+        Ok(
+            match (
+                info.get_id() == self.get_buyer(),
+                info.get_id() == self.get_seller(),
+            ) {
+                (true, false)
+                    if info
+                        .get_user_status()
+                        .contains(UserStatus::TX_BUYER_FINISHABLE) =>
+                {
+                    true
+                }
+                (false, true)
+                    if info
+                        .get_user_status()
+                        .contains(UserStatus::TX_SELLER_FINISHABLE) =>
+                {
+                    true
+                }
+                _ if info
+                    .get_user_status()
+                    .contains(UserStatus::TX_OTHERS_FINISHABLE) =>
+                {
+                    true
+                }
+                _ => false,
+            },
+        )
+    }
+
+    pub fn refundable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {
+        let info = user.get_info(conn)?;
+
+        Ok(
+            match (
+                info.get_id() == self.get_buyer(),
+                info.get_id() == self.get_seller(),
+            ) {
+                (true, false)
+                    if info
+                        .get_user_status()
+                        .contains(UserStatus::TX_BUYER_REFUNDABLE) =>
+                {
+                    true
+                }
+                (false, true)
+                    if info
+                        .get_user_status()
+                        .contains(UserStatus::TX_SELLER_REFUNDABLE) =>
+                {
+                    true
+                }
+                _ if info
+                    .get_user_status()
+                    .contains(UserStatus::TX_OTHERS_REFUNDABLE) =>
+                {
+                    true
+                }
+                _ => false,
+            },
+        )
     }
 }
 
@@ -459,7 +590,7 @@ mod tests {
         .unwrap();
 
         // The book category
-        let econ = Category::create(&conn, "Economics Books", 490)
+        let econ = Category::create(&conn, "Economics Books", 1)
             .and_then(Category::into_leaf)
             .unwrap();
         let book_id = IncompleteProduct::new(
@@ -597,7 +728,7 @@ mod tests {
         .unwrap();
 
         // The book category
-        let econ = Category::create(&conn, "Economics Books", 490)
+        let econ = Category::create(&conn, "Economics Books", 1)
             .and_then(Category::into_leaf)
             .unwrap();
 

@@ -111,7 +111,7 @@ fn delete_user() {
     .create(&conn)
     .unwrap();
 
-    let econ = Category::create(&conn, "Economics", 490)
+    let econ = Category::create(&conn, "Economics", 1)
         .and_then(Category::into_leaf)
         .unwrap();
     let id = IncompleteProduct::new(&econ, "Economics", 1, 1, "A horrible book")

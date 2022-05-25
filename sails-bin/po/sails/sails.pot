@@ -1,8 +1,7 @@
-msgid ""
+
+msgid "FLibrary is the ultimate destination for discovering, discussing, and distributing learning guides."
 msgstr ""
-"Project-Id-Version: sails\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-15 16:33-0700\n"
+"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,9 +10,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
-
-msgid "FLibrary is the ultimate destination for discovering, discussing, and distributing learning guides."
-msgstr ""
 
 msgid "Store"
 msgstr ""

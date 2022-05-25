@@ -107,7 +107,7 @@ pub async fn portal(
     let (digicons_owned, prods_owned, orders_placed, orders_received) = conn
         .run(move |c| -> Result<_, SailsDbError> {
             let prods_owned = ProductFinder::new(c, None).seller(&uid).search_info()?;
-            let digicons_owned = Digicons::list_all_readable(c, &uid)?;
+            let digicons_owned = Digicons::list_all_content_readable(c, &uid)?;
 
             let orders_placed = TransactionFinder::new(c, None)
                 .buyer(&uid)

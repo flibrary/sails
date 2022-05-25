@@ -124,9 +124,9 @@
 	    <td><a href="{{ uri!("/user", crate::user::portal_guest(prod.get_seller_id())) }}">{{prod.get_seller_id()}}</a></td>
 	    <td>
 	      {% if mapped %}
-	      <a href="{{ uri!("/digicons", crate::digicons::remove_digicon(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-warning" role="button">Remove</a>
+	      <a href="{{ uri!("/digicons", crate::digicons::remove_digicon_mapping(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-warning" role="button">Remove</a>
 	      {% else %}
-	      <a href="{{ uri!("/digicons", crate::digicons::add_digicon(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-success" role="button">Add</a>
+	      <a href="{{ uri!("/digicons", crate::digicons::add_digicon_mapping(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-success" role="button">Add</a>
 	      {% endif %}
 	    </td>
 	  </tr>

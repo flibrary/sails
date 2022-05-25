@@ -65,7 +65,7 @@ fn mapping() {
     .unwrap();
 
     // The book category
-    let econ = Category::create(&conn, "Economics Books", 490)
+    let econ = Category::create(&conn, "Economics Books", 1)
         .and_then(Category::into_leaf)
         .unwrap();
     let store = Category::create(&conn, "Store", 1)

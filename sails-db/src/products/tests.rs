@@ -19,7 +19,7 @@ fn create_product() {
     .unwrap();
 
     // The book category
-    let econ = Category::create(&conn, "Economics Books", 490)
+    let econ = Category::create(&conn, "Economics Books", 1)
         .and_then(Category::into_leaf)
         .unwrap();
     IncompleteProduct::new(
@@ -53,7 +53,7 @@ fn search_products() {
 
     // The book category
     let mut books = Category::create(&conn, "Books", 1).unwrap();
-    let mut econ = Category::create(&conn, "Economics Books", 2)
+    let mut econ = Category::create(&conn, "Economics Books", 1)
         .and_then(Category::into_leaf)
         .unwrap();
     let mut phys = Category::create(&conn, "Physics Books", 1)

@@ -7,53 +7,6 @@ use sails_db::{
     products::{ProductFinder, ProductInfo},
 };
 
-#[get("/remove_digicon?<digicon_id>&<prod_id>")]
-pub async fn remove_digicon(
-    _digicon_guard: Auth<DigiconWritable>,
-    _prod_guard: Auth<ProdWritable>,
-    digicon_id: DigiconGuard,
-    prod_id: ProdGuard,
-    conn: DbConn,
-) -> Result<Redirect, Flash<Redirect>> {
-    let prod = prod_id.to_id(&conn).await.into_flash(uri!("/"))?;
-    let digicon = digicon_id.to_digicon(&conn).await.into_flash(uri!("/"))?;
-    let digicon_cloned = digicon.clone();
-    conn.run(move |c| {
-        DigiconMappingFinder::new(c, None)
-            .product(&prod.prod_id)
-            .digicon(&digicon)
-            .first()
-            .map(|x| x.delete(c))
-    })
-    .await
-    .into_flash(uri!("/"))?
-    .into_flash(uri!("/"))?;
-    Ok(Redirect::to(uri!(
-        "/digicons",
-        digicon_page(digicon_cloned.get_id())
-    )))
-}
-
-#[get("/add_digicon?<digicon_id>&<prod_id>")]
-pub async fn add_digicon(
-    _digicon_guard: Auth<DigiconWritable>,
-    _prod_guard: Auth<ProdWritable>,
-    digicon_id: DigiconGuard,
-    prod_id: ProdGuard,
-    conn: DbConn,
-) -> Result<Redirect, Flash<Redirect>> {
-    let prod = prod_id.to_id(&conn).await.into_flash(uri!("/"))?;
-    let digicon = digicon_id.to_digicon(&conn).await.into_flash(uri!("/"))?;
-    let digicon_cloned = digicon.clone();
-    conn.run(move |c| DigiconMapping::create(c, &digicon, &prod.prod_id))
-        .await
-        .into_flash(uri!("/"))?;
-    Ok(Redirect::to(uri!(
-        "/digicons",
-        digicon_page(digicon_cloned.get_id())
-    )))
-}
-
 #[derive(Template)]
 #[template(path = "digicons/digicons.html")]
 pub struct AllDigiconsPage {
