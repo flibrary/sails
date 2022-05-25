@@ -836,7 +836,7 @@ dependencies = [
  "diesel_derives",
  "libsqlite3-sys",
  "r2d2",
- "uuid",
+ "uuid 0.8.2",
 ]
 
 [[package]]
@@ -3082,7 +3082,7 @@ dependencies = [
  "teloxide",
  "tokio",
  "urlencoding",
- "uuid",
+ "uuid 1.1.0",
 ]
 
 [[package]]
@@ -3107,7 +3107,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "uuid",
+ "uuid 1.1.0",
 ]
 
 [[package]]
@@ -3639,7 +3639,7 @@ dependencies = [
  "tokio",
  "tokio-util 0.6.10",
  "url",
- "uuid",
+ "uuid 0.8.2",
 ]
 
 [[package]]
@@ -4094,6 +4094,15 @@ name = "uuid"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
+dependencies = [
+ "getrandom 0.2.6",
+]
+
+[[package]]
+name = "uuid"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93bbc61e655a4833cf400d0d15bf3649313422fa7572886ad6dab16d79886365"
 dependencies = [
  "getrandom 0.2.6",
  "serde",

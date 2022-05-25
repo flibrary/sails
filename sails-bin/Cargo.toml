@@ -25,7 +25,7 @@ rocket = { version = "0.5.0-rc.1", features = ["secrets"] }
 serde = { version = "^1", features = ["derive"] }
 serde_json = "^1"
 diesel = { version = "^1.4", features = ["sqlite", "r2d2"] }
-uuid = { version = "0.8", features = ["serde", "v4"] }
+uuid = { version = "1.1", features = ["serde", "v4"] }
 diesel_migrations = "^1.4"
 sails-db = { path = "../sails-db" }
 rust-embed="^6.0"
