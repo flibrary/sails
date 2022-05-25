@@ -366,6 +366,9 @@ msgstr "联系创作者"
 msgid "Send message"
 msgstr "发送消息"
 
+msgid "Sign in to purchase"
+msgstr "登录以购买"
+
 msgid "Sign in to contact the creator"
 msgstr "登录以联系创作者"
 
@@ -376,7 +379,7 @@ msgid "Sign in to view creator's information"
 msgstr "登录以查看创作者信息"
 
 msgid "Sign in"
-msgstr "登陆"
+msgstr "登录"
 
 msgid "Sign up"
 msgstr "注册"

@@ -12,6 +12,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid ""
+"FLibrary is the ultimate destination for discovering, discussing, and "
+"distributing learning guides."
+msgstr ""
+
 msgid "Store"
 msgstr ""
 
@@ -22,11 +27,6 @@ msgid "Creator Center"
 msgstr ""
 
 msgid "Portal"
-msgstr ""
-
-msgid ""
-"FLibrary is the ultimate destination for discovering, discussing, and "
-"distributing learning guides."
 msgstr ""
 
 msgid "Digital Content Distribution Trace"

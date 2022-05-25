@@ -354,6 +354,9 @@ msgstr ""
 msgid "Send message"
 msgstr ""
 
+msgid "Sign in to purchase"
+msgstr ""
+
 msgid "Sign in to contact the creator"
 msgstr ""
 

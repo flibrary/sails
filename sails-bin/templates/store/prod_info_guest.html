@@ -54,7 +54,9 @@
     </tbody>
     </table>
     {% endblock prod %}
-    {% block actions %}{% endblock actions %}
+    {% block actions %}
+    <a href="/user" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Sign in to purchase") }}</a>
+    {% endblock actions %}
     </div>
     <br>
 

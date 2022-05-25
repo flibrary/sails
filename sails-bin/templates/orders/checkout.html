@@ -37,7 +37,7 @@
       <label for="inputAddress" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Address") }}</label>
       {% match recent_address %}
       {% when Some with (addr) %}
-      <input type="text" class="form-control" id="inputAddress" name="address" value="{{addr}}" placeholder="{{ i18n!(self.i18n.catalog, "If content is completely digital, you may leave it blank.") }}" required>
+      <input type="text" class="form-control" id="inputAddress" name="address" value="{{addr}}" placeholder="{{ i18n!(self.i18n.catalog, "If content is completely digital, you may leave it blank.") }}">
       {% when None %}
       <input type="text" class="form-control" id="inputAddress" name="address" placeholder="{{ i18n!(self.i18n.catalog, "If content is completely digital, you may leave it blank.") }}" required>
       {% endmatch %}
