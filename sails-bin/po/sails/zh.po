@@ -12,9 +12,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid "Verify your email"
-msgstr "验证您的邮箱"
-
 msgid ""
 "FLibrary is the ultimate destination for discovering, discussing, and "
 "distributing learning guides."
@@ -31,6 +28,373 @@ msgstr "创作者中心"
 
 msgid "Portal"
 msgstr "主页"
+
+msgid "Digital Content Distribution Trace"
+msgstr "数字内容分发追踪"
+
+msgid "Trace of this copy of \"{0}\""
+msgstr "此份 \"{0}\" 的跟踪信息"
+
+msgid "Created at"
+msgstr "创建于"
+
+msgid "Name"
+msgstr "名称"
+
+msgid "Downloaded by"
+msgstr "下载者"
+
+msgid "Digital Content Creator Center"
+msgstr "数字内容创作者中心"
+
+msgid "Create a Digital Content"
+msgstr "创建数字内容"
+
+msgid "Manage your Digital Contents"
+msgstr "管理数字内容"
+
+msgid "Last Modified"
+msgstr "修改时间"
+
+msgid "Digital Content \"{}\""
+msgstr "数字内容 \"{}\""
+
+msgid "Info"
+msgstr "信息"
+
+msgid "Manage"
+msgstr "管理"
+
+msgid "Apply to products"
+msgstr "应用"
+
+msgid "Storage Type"
+msgstr "存储类型"
+
+msgid "Storage Detail"
+msgstr "存储细节"
+
+msgid "Time Created"
+msgstr "创建于"
+
+msgid "Path to release asset"
+msgstr "对应 Release Asset 的路径"
+
+msgid "Update the Digital Content"
+msgstr "更新数字内容"
+
+msgid "Upload file"
+msgstr "上传文件"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Create product"
+msgstr "上架商品"
+
+msgid "Create the Digital Content"
+msgstr "创建数字内容"
+
+msgid "Fill in relevant information to create a digital content"
+msgstr "填写数字内容相关信息"
+
+msgid "Storage Type (cannot be changed afterwards)"
+msgstr "存储类型（后续无法修改）"
+
+msgid "Manually upload file"
+msgstr "手动上传文件"
+
+msgid "Use Release Asset"
+msgstr "使用 Release Asset"
+
+msgid "Chat"
+msgstr "对话"
+
+msgid "Chat with {0}"
+msgstr "与 {0} 对话"
+
+msgid "No chat with {0}"
+msgstr "没有和 {0} 的对话"
+
+msgid "Type your message here"
+msgstr "请输入您要发送的消息"
+
+msgid "Send"
+msgstr "发送"
+
+msgid "Below are all the messages you received"
+msgstr "以下是您收到的所有信息"
+
+msgid "Recent messages"
+msgstr "最近信息"
+
+msgid "User"
+msgstr "用户"
+
+msgid "Message"
+msgstr "消息"
+
+msgid "Time"
+msgstr "时间"
+
+msgid "You haven't received any message."
+msgstr "您还没有收到任何消息"
+
+msgid "Order Details"
+msgstr "订单细节"
+
+msgid "Details of order #{0}"
+msgstr "订单 #{0} 的细节"
+
+msgid "Order has been refunded or canceled"
+msgstr "订单已被退款或取消"
+
+msgid ""
+"If you don't agree with the order details, please click the \"update\" "
+"button below."
+msgstr "如对订单状态有疑问，请点击下方 \"更新\" 按钮来刷新订单状态。"
+
+msgid "Update"
+msgstr "更新"
+
+msgid "Your order is placed"
+msgstr "您的订单已创建"
+
+msgid ""
+"Scan QR code using AliPay or click the button below to pay. Click next when "
+"you finished."
+msgstr "支付宝扫描二维码或点击下方按钮来支付。支付完成请点击下一步。"
+
+msgid "Notice: <b>Please pay within three hours after you scan.</b>"
+msgstr "注意: <b>请在扫码后三小时内完成支付。</b>"
+
+msgid "Pay with AliPay"
+msgstr "支付宝支付"
+
+msgid "<b>Failed to create order, please contact us</b>: {0}"
+msgstr "<b>创建订单遇到错误，请联系我们</b>: {0}"
+
+msgid "Next"
+msgstr "下一步"
+
+msgid "Cancel your order? This CANNOT be reverted"
+msgstr "确认取消您的订单？这不可以撤销"
+
+msgid "Cancel order"
+msgstr "取消订单"
+
+msgid "Your order is successfully paid!"
+msgstr "您的订单已成功支付！"
+
+msgid "Thanks for your order! Stay tuned as we arrange shipment."
+msgstr "感谢您的付款！我们会尽快安排发货。"
+
+msgid "Refund your order? This CANNOT be reverted"
+msgstr "确认退款？这不可以撤回"
+
+msgid "Refund"
+msgstr "退款"
+
+msgid "Congratulations, your order is completed!"
+msgstr "您的订单已完成！"
+
+msgid ""
+"For Digital Contents, please access them at <a href=\"/user\">your portal "
+"page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info"
+"\">Contact us</a>"
+msgstr ""
+"如需访问数字内容，请前往<a href=\"/user\">您的主页</a>。 如有疑问或需要帮助，"
+"请<a href=\"mailto:admin@flibrary.info\">联系我们</a>"
+
+msgid "Total"
+msgstr "总价"
+
+msgid "Price per unit"
+msgstr "单价"
+
+msgid "Quantity purchased"
+msgstr "购买数量"
+
+msgid "Address"
+msgstr "收货地址"
+
+msgid "Buyer"
+msgstr "买家"
+
+msgid "Seller"
+msgstr "卖家"
+
+msgid "Product ID"
+msgstr "商品 ID"
+
+msgid "Timestamp"
+msgstr "时间戳"
+
+msgid "Order Status"
+msgstr "订单状态"
+
+msgid "Checkout"
+msgstr "提交订单"
+
+msgid "Please review and submit your order"
+msgstr "请核对并提交您的订单"
+
+msgid "ID"
+msgstr ""
+
+msgid "Quantity in stock"
+msgstr "库存数量"
+
+msgid "Quantity to purchase"
+msgstr "购买数量"
+
+msgid "If content is completely digital, you may leave it blank."
+msgstr "如购买纯数字内容，您可以在这里填写任意内容。"
+
+msgid "Payment method"
+msgstr "支付方式"
+
+msgid "AliPay (supports CNY only)"
+msgstr "AliPay（仅支持人民币）"
+
+msgid "PayPal (supports all currency)"
+msgstr "PayPal（支持所有币种）"
+
+msgid "Submit"
+msgstr "提交"
+
+msgid "No actions needed"
+msgstr "无需更多操作"
+
+msgid "Order placed"
+msgstr "订单已创建"
+
+msgid "Order paid"
+msgstr "订单已支付"
+
+msgid "Order completed"
+msgstr "订单已完成"
+
+msgid "Provide Credential"
+msgstr "提供凭证"
+
+msgid "Password"
+msgstr "密码"
+
+msgid "Verify"
+msgstr "验证"
+
+msgid "Search by categories"
+msgstr "通过类别搜索"
+
+msgid "Search products by categories"
+msgstr "通过类别搜索产品"
+
+msgid "All"
+msgstr "所有类别"
+
+msgid ""
+"No category under your request, this is an ERROR. Please contact admins."
+msgstr "在您的请求下我们没有找到类别，这是一个错误。请联系管理员。"
+
+msgid "No more subcategories"
+msgstr "无更多子分类"
+
+msgid "No products under this category"
+msgstr "此类别下无产品"
+
+msgid "Power Your Curiosity"
+msgstr "让好奇心为您赋能"
+
+msgid "Update {0}"
+msgstr "更新 {0}"
+
+msgid "Update product details"
+msgstr "更新商品信息"
+
+msgid "Change relevant information which users see in the store"
+msgstr "修改商品相关信息，买家会在商店里看到您对商品的描述"
+
+msgid "Product details"
+msgstr "商品信息"
+
+msgid "Category"
+msgstr "分类"
+
+msgid "Currency"
+msgstr "币种"
+
+msgid "Price"
+msgstr "价格"
+
+msgid "Quantity"
+msgstr "数量"
+
+msgid "Description"
+msgstr "简介"
+
+msgid "Fill in relevant information which users see in the store"
+msgstr "填写商品相关信息，买家会在商店里看到您对商品的描述"
+
+msgid "Product information"
+msgstr "商品基本信息"
+
+msgid "Create the product"
+msgstr "上架商品"
+
+msgid "{0} - Product details"
+msgstr "{0} - 商品细节"
+
+msgid "Not categorized"
+msgstr "未分类"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Purchase"
+msgstr "购买"
+
+msgid "Contact information"
+msgstr "创作者信息"
+
+msgid "Email"
+msgstr "电子邮箱"
+
+msgid "Institution"
+msgstr "学校"
+
+msgid "{0} has no description"
+msgstr "{0} 没有填写简介"
+
+msgid "Contact the creator"
+msgstr "联系创作者"
+
+msgid "Send message"
+msgstr "发送消息"
+
+msgid "Sign in to purchase"
+msgstr "登录以购买"
+
+msgid "Sign in to contact the creator"
+msgstr "登录以联系创作者"
+
+msgid "Creator's information"
+msgstr "创作者信息"
+
+msgid "Sign in to view creator's information"
+msgstr "登录以查看创作者信息"
+
+msgid "Sign in"
+msgstr "登录"
+
+msgid "Sign up"
+msgstr "注册"
+
+msgid "Reset password"
+msgstr "重置密码"
+
+msgid "Verify your email"
+msgstr "验证您的邮箱"
 
 msgid "Please complete email verification"
 msgstr "请完成邮箱验证"
@@ -64,14 +428,8 @@ msgid ""
 "password soon."
 msgstr "请通过您的新密码登录并记得即使修改密码。"
 
-msgid "Reset password"
-msgstr "重置密码"
-
 msgid "Type your email below"
 msgstr "请输入您的邮箱"
-
-msgid "Email"
-msgstr "电子邮箱"
 
 msgid "Email verified"
 msgstr "邮箱已验证"
@@ -82,17 +440,11 @@ msgstr "您成功完成了邮箱验证！"
 msgid "Your email is verified, and your account is now activated."
 msgstr "您的邮箱已被验证且您的帐号已被激活。"
 
-msgid "Sign in"
-msgstr "登录"
-
 msgid "Change password"
 msgstr "更改密码"
 
 msgid "New password"
 msgstr "新密码"
-
-msgid "Password"
-msgstr "密码"
 
 msgid "Update your information"
 msgstr "更新基本信息"
@@ -102,18 +454,6 @@ msgstr "在这里您可以更新您的帐号信息"
 
 msgid "User information"
 msgstr "帐号信息"
-
-msgid "Name"
-msgstr "名称"
-
-msgid "Institution"
-msgstr "学校"
-
-msgid "Description"
-msgstr "简介"
-
-msgid "Update"
-msgstr "更新"
 
 msgid "{0}'s portal page"
 msgstr "{0} 的用户主页"
@@ -136,12 +476,6 @@ msgstr "无简介"
 msgid "Products created"
 msgstr "此用户上架的商品"
 
-msgid "ID"
-msgstr ""
-
-msgid "Price"
-msgstr "价格"
-
 msgid "No product created"
 msgstr "此用户没有上架商品"
 
@@ -154,20 +488,11 @@ msgstr "上架商品"
 msgid "Digital Contents owned"
 msgstr "拥有的数字内容"
 
-msgid "Last Modified"
-msgstr "修改时间"
-
 msgid "Manage Digital Contents"
 msgstr "管理数字内容"
 
 msgid "Orders placed"
 msgstr "创建的订单"
-
-msgid "Seller"
-msgstr "卖家"
-
-msgid "Status"
-msgstr "状态"
 
 msgid "Orders received"
 msgstr "收到的订单"
@@ -268,20 +593,8 @@ msgstr "我们才刚刚开始"
 msgid "Join Us."
 msgstr "加入我们"
 
-msgid "Digital Content Distribution Trace"
-msgstr "数字内容分发追踪"
-
-msgid "Trace of this copy of \"{0}\""
-msgstr "此份 \"{0}\" 的跟踪信息"
-
-msgid "Created at"
-msgstr "创建于"
-
 msgid "Join Us"
 msgstr "加入我们"
-
-msgid "Downloaded by"
-msgstr "下载者"
 
 msgid "We make contents, FLibrary, and the community. Join us as"
 msgstr "我们创作内容，搭建 FLibrary 和社区，加入我们。"
@@ -328,319 +641,6 @@ msgstr "基本的网络编程知识"
 
 msgid "Strive for perfection."
 msgstr "追求优秀的代码质量"
-
-msgid "Digital Content Creator Center"
-msgstr "数字内容创作者中心"
-
-msgid "Create a Digital Content"
-msgstr "创建数字内容"
-
-msgid "Manage your Digital Contents"
-msgstr "管理数字内容"
-
-msgid "Digital Content \"{}\""
-msgstr "数字内容 \"{}\""
-
-msgid "Info"
-msgstr "信息"
-
-msgid "Manage"
-msgstr "管理"
-
-msgid "Apply to products"
-msgstr "应用"
-
-msgid "Storage Type"
-msgstr "存储类型"
-
-msgid "Storage Detail"
-msgstr "存储细节"
-
-msgid "Time Created"
-msgstr "创建于"
-
-msgid "Path to release asset"
-msgstr "对应 Release Asset 的路径"
-
-msgid "Update the Digital Content"
-msgstr "更新数字内容"
-
-msgid "Upload file"
-msgstr "上传文件"
-
-msgid "Delete"
-msgstr "删除"
-
-msgid "Create product"
-msgstr "上架商品"
-
-msgid "Create the Digital Content"
-msgstr "创建数字内容"
-
-msgid "Fill in relevant information to create a digital content"
-msgstr "填写数字内容相关信息"
-
-msgid "Storage Type (cannot be changed afterwards)"
-msgstr "存储类型（后续无法修改）"
-
-msgid "Manually upload file"
-msgstr "手动上传文件"
-
-msgid "Use Release Asset"
-msgstr "使用 Release Asset"
-
-msgid "Chat"
-msgstr "对话"
-
-msgid "Chat with {0}"
-msgstr "与 {0} 对话"
-
-msgid "No chat with {0}"
-msgstr "没有和 {0} 的对话"
-
-msgid "Type your message here"
-msgstr "请输入您要发送的消息"
-
-msgid "Send"
-msgstr "发送"
-
-msgid "Below are all the messages you received"
-msgstr "以下是您收到的所有信息"
-
-msgid "Recent messages"
-msgstr "最近信息"
-
-msgid "User"
-msgstr "用户"
-
-msgid "Message"
-msgstr "消息"
-
-msgid "Time"
-msgstr "时间"
-
-msgid "You haven't received any message."
-msgstr "您还没有收到任何消息"
-
-msgid "Order Details"
-msgstr "订单细节"
-
-msgid "Details of order #{0}"
-msgstr "订单 #{0} 的细节"
-
-msgid "Order has been refunded or canceled"
-msgstr "订单已被退款或取消"
-
-msgid ""
-"If you don't agree with the order details, please click the \"update\" "
-"button below."
-msgstr "如对订单状态有疑问，请点击下方 \"更新\" 按钮来刷新订单状态。"
-
-msgid "Your order is placed"
-msgstr "您的订单已创建"
-
-msgid ""
-"Scan QR code using AliPay or click the button below to pay. Click next when "
-"you finished."
-msgstr "支付宝扫描二维码或点击下方按钮来支付。支付完成请点击下一步。"
-
-msgid "Notice: <b>Please pay within three hours after you scan.</b>"
-msgstr "注意: <b>请在扫码后三小时内完成支付。</b>"
-
-msgid "Pay with AliPay"
-msgstr "支付宝支付"
-
-msgid "<b>Failed to create order, please contact us</b>: {0}"
-msgstr "<b>创建订单遇到错误，请联系我们</b>: {0}"
-
-msgid "Next"
-msgstr "下一步"
-
-msgid "Cancel your order? This CANNOT be reverted"
-msgstr "确认取消您的订单？这不可以撤销"
-
-msgid "Cancel order"
-msgstr "取消订单"
-
-msgid "Your order is successfully paid!"
-msgstr "您的订单已成功支付！"
-
-msgid "Thanks for your order! Stay tuned as we arrange shipment."
-msgstr "感谢您的付款！我们会尽快安排发货。"
-
-msgid "Refund your order? This CANNOT be reverted"
-msgstr "确认退款？这不可以撤回"
-
-msgid "Refund"
-msgstr "退款"
-
-msgid "Congratulations, your order is completed!"
-msgstr "您的订单已完成！"
-
-msgid ""
-"For Digital Contents, please access them at <a href=\"/user\">your portal "
-"page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info"
-"\">Contact us</a>"
-msgstr ""
-"如需访问数字内容，请前往<a href=\"/user\">您的主页</a>。 如有疑问或需要帮助，"
-"请<a href=\"mailto:admin@flibrary.info\">联系我们</a>"
-
-msgid "Total"
-msgstr "总价"
-
-msgid "Price per unit"
-msgstr "单价"
-
-msgid "Quantity purchased"
-msgstr "购买数量"
-
-msgid "Address"
-msgstr "收货地址"
-
-msgid "Buyer"
-msgstr "买家"
-
-msgid "Product ID"
-msgstr "商品 ID"
-
-msgid "Timestamp"
-msgstr "时间戳"
-
-msgid "Order Status"
-msgstr "订单状态"
-
-msgid "Checkout"
-msgstr "提交订单"
-
-msgid "Please review and submit your order"
-msgstr "请核对并提交您的订单"
-
-msgid "Quantity in stock"
-msgstr "库存数量"
-
-msgid "Quantity to purchase"
-msgstr "购买数量"
-
-msgid "If content is completely digital, you may leave it blank."
-msgstr "如购买纯数字内容，您可以在这里填写任意内容。"
-
-msgid "Payment method"
-msgstr "支付方式"
-
-msgid "AliPay (supports CNY only)"
-msgstr "AliPay（仅支持人民币）"
-
-msgid "PayPal (supports all currency)"
-msgstr "PayPal（支持所有币种）"
-
-msgid "Submit"
-msgstr "提交"
-
-msgid "No actions needed"
-msgstr "无需更多操作"
-
-msgid "Order placed"
-msgstr "订单已创建"
-
-msgid "Order paid"
-msgstr "订单已支付"
-
-msgid "Order completed"
-msgstr "订单已完成"
-
-msgid "Provide Credential"
-msgstr "提供凭证"
-
-msgid "Verify"
-msgstr "验证"
-
-msgid "Search by categories"
-msgstr "通过类别搜索"
-
-msgid "Search products by categories"
-msgstr "通过类别搜索产品"
-
-msgid "All"
-msgstr "所有类别"
-
-msgid ""
-"No category under your request, this is an ERROR. Please contact admins."
-msgstr "在您的请求下我们没有找到类别，这是一个错误。请联系管理员。"
-
-msgid "No more subcategories"
-msgstr "无更多子分类"
-
-msgid "No products under this category"
-msgstr "此类别下无产品"
-
-msgid "Power Your Curiosity"
-msgstr "让好奇心为您赋能"
-
-msgid "Update {0}"
-msgstr "更新 {0}"
-
-msgid "Update product details"
-msgstr "更新商品信息"
-
-msgid "Change relevant information which users see in the store"
-msgstr "修改商品相关信息，买家会在商店里看到您对商品的描述"
-
-msgid "Product details"
-msgstr "商品信息"
-
-msgid "Category"
-msgstr "分类"
-
-msgid "Currency"
-msgstr "币种"
-
-msgid "Quantity"
-msgstr "数量"
-
-msgid "Fill in relevant information which users see in the store"
-msgstr "填写商品相关信息，买家会在商店里看到您对商品的描述"
-
-msgid "Product information"
-msgstr "商品基本信息"
-
-msgid "Create the product"
-msgstr "上架商品"
-
-msgid "{0} - Product details"
-msgstr "{0} - 商品细节"
-
-msgid "Not categorized"
-msgstr "未分类"
-
-msgid "Purchase"
-msgstr "购买"
-
-msgid "Contact information"
-msgstr "创作者信息"
-
-msgid "{0} has no description"
-msgstr "{0} 没有填写简介"
-
-msgid "Contact the creator"
-msgstr "联系创作者"
-
-msgid "Send message"
-msgstr "发送消息"
-
-msgid "Sign in to purchase"
-msgstr "登录以购买"
-
-msgid "Sign in to contact the creator"
-msgstr "登录以联系创作者"
-
-msgid "Creator's information"
-msgstr "创作者信息"
-
-msgid "Sign in to view creator's information"
-msgstr "登录以查看创作者信息"
-
-msgid "Sign up"
-msgstr "注册"
 
 #~ msgid "Price: USD {0}"
 #~ msgstr "价格：CN￥ {0}"

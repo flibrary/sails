@@ -98,8 +98,10 @@ pub async fn capture_paypal_order(
     let capture = CaptureOrder::new(&paypal_info.paypal_order_id);
 
     // Without the body, reqwest doesn't automatically append needed header.
-    let mut header = HeaderParams::default();
-    header.content_type = Some("application/json".to_string());
+    let header = HeaderParams {
+        content_type: Some("application/json".to_string()),
+        ..Default::default()
+    };
 
     let resp = client
         .execute_ext(&capture, header)

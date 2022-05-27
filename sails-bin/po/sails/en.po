@@ -12,9 +12,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Verify your email"
-msgstr ""
-
 msgid ""
 "FLibrary is the ultimate destination for discovering, discussing, and "
 "distributing learning guides."
@@ -32,230 +29,6 @@ msgstr ""
 msgid "Portal"
 msgstr ""
 
-msgid "Please complete email verification"
-msgstr ""
-
-msgid "We have already sent confirmation email to your inbox."
-msgstr ""
-
-msgid ""
-"Please check your inbox or junk folder to see the confirmation. Click the "
-"link in the middle to complete verification."
-msgstr ""
-
-msgid ""
-"If you haven't received any confirmation email from us, please <a href="
-"\"mailto:admin@flibrary.info\">reach us</a> for help."
-msgstr ""
-
-msgid "Reset password confirmation"
-msgstr ""
-
-msgid "Your password has been reset"
-msgstr ""
-
-msgid "Your new password is <code>{0}</code>"
-msgstr ""
-
-msgid ""
-"Please sign in using the new password above and remember to change your "
-"password soon."
-msgstr ""
-
-msgid "Reset password"
-msgstr ""
-
-msgid "Type your email below"
-msgstr ""
-
-msgid "Email"
-msgstr ""
-
-msgid "Email verified"
-msgstr ""
-
-msgid "Your have successfully completed email verification!"
-msgstr ""
-
-msgid "Your email is verified, and your account is now activated."
-msgstr ""
-
-msgid "Sign in"
-msgstr ""
-
-msgid "Change password"
-msgstr ""
-
-msgid "New password"
-msgstr ""
-
-msgid "Password"
-msgstr ""
-
-msgid "Update your information"
-msgstr ""
-
-msgid "Here you can update your account details"
-msgstr ""
-
-msgid "User information"
-msgstr ""
-
-msgid "Name"
-msgstr ""
-
-msgid "Institution"
-msgstr ""
-
-msgid "Description"
-msgstr ""
-
-msgid "Update"
-msgstr ""
-
-msgid "{0}'s portal page"
-msgstr ""
-
-msgid "Log out"
-msgstr ""
-
-msgid "Welcome to {0}'s portal page"
-msgstr ""
-
-msgid "Here details {0}'s information"
-msgstr ""
-
-msgid "Basic information"
-msgstr ""
-
-msgid "No description"
-msgstr ""
-
-msgid "Products created"
-msgstr ""
-
-msgid "ID"
-msgstr ""
-
-msgid "Price"
-msgstr ""
-
-msgid "No product created"
-msgstr ""
-
-msgid "Here you can manage your products and account"
-msgstr ""
-
-msgid "Create a product"
-msgstr ""
-
-msgid "Digital Contents owned"
-msgstr ""
-
-msgid "Last Modified"
-msgstr ""
-
-msgid "Manage Digital Contents"
-msgstr ""
-
-msgid "Orders placed"
-msgstr ""
-
-msgid "Seller"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid "Orders received"
-msgstr ""
-
-msgid "Homepage"
-msgstr ""
-
-msgid "Discover Store"
-msgstr ""
-
-msgid "FLibrary Circle"
-msgstr ""
-
-msgid "Study guides for your courses"
-msgstr ""
-
-msgid ""
-"Tired of duplicated descriptions and hard-to-locate key-points in textbooks? "
-"Frustrated with short but impossible-to-understand others' notes lacking "
-"coherent logic? We strike a balance in between: study guides targeting "
-"specific courses you needed. They are coherent on first read and always to-"
-"the-point, providing an enjoyable learning or referencing experience."
-msgstr ""
-
-msgid "Join the community"
-msgstr ""
-
-msgid ""
-"At FLibrary, you can effortlessly connect to minds behind masterpieces. Join "
-"the community, meet creators, and collaborate on new contents. Contribute "
-"your curiosity today!"
-msgstr ""
-
-msgid "Features"
-msgstr ""
-
-msgid "All Cloud"
-msgstr ""
-
-msgid ""
-"FLibrary is your personalized learning hub. From notes to past papers, "
-"everything subscribed is on cloud for your access anytime, anywhere."
-msgstr ""
-
-msgid "Streamlined Updates"
-msgstr ""
-
-msgid ""
-"As a content creator, you are enabled to distribute and push content updates "
-"to your subscribers with no effort."
-msgstr ""
-
-msgid "Curated Contents"
-msgstr ""
-
-msgid ""
-"Only discover the best-in-class. Spend more time to dive in but not to "
-"wander through."
-msgstr ""
-
-msgid "You are Protected"
-msgstr ""
-
-msgid ""
-"From account security to content distribution fingerprinting, FLibrary "
-"strives for security in every fine detail."
-msgstr ""
-
-msgid "Multilingual Support"
-msgstr ""
-
-msgid ""
-"A global learner's community is at heart to our vision, that's why we have "
-"built-in multilingual supports."
-msgstr ""
-
-msgid "No Ads Forever"
-msgstr ""
-
-msgid ""
-"Ads are simply incompatible with our curiosity. Take our commitment: no ads "
-"forever."
-msgstr ""
-
-msgid "We are just getting started."
-msgstr ""
-
-msgid "Join Us."
-msgstr ""
-
 msgid "Digital Content Distribution Trace"
 msgstr ""
 
@@ -265,52 +38,10 @@ msgstr ""
 msgid "Created at"
 msgstr ""
 
-msgid "Join Us"
+msgid "Name"
 msgstr ""
 
 msgid "Downloaded by"
-msgstr ""
-
-msgid "We make contents, FLibrary, and the community. Join us as"
-msgstr ""
-
-msgid "Creators"
-msgstr ""
-
-msgid ""
-"Skilled at certain fields or courses? Create learning guides on subjects or "
-"anything creative (like building a rocket), either independent or based on a "
-"course taught at your university, and receive rewards to your knowledge and "
-"contribution."
-msgstr ""
-
-msgid "Working proficiency in LaTeX"
-msgstr ""
-
-msgid "Concrete knowledge in certain fields"
-msgstr ""
-
-msgid "Stick to our principles and standards"
-msgstr ""
-
-msgid "Apply"
-msgstr ""
-
-msgid "Developers"
-msgstr ""
-
-msgid ""
-"Our code is what builds our dreams. Join us as a developer, help inform "
-"what's the next feature, and make dreams true with your unique skills."
-msgstr ""
-
-msgid "Working proficiency in Rust / JavaScript"
-msgstr ""
-
-msgid "Basic knowledge in network programming"
-msgstr ""
-
-msgid "Strive for perfection."
 msgstr ""
 
 msgid "Digital Content Creator Center"
@@ -320,6 +51,9 @@ msgid "Create a Digital Content"
 msgstr ""
 
 msgid "Manage your Digital Contents"
+msgstr ""
+
+msgid "Last Modified"
 msgstr ""
 
 msgid "Digital Content \"{}\""
@@ -420,6 +154,9 @@ msgid ""
 "button below."
 msgstr ""
 
+msgid "Update"
+msgstr ""
+
 msgid "Your order is placed"
 msgstr ""
 
@@ -482,6 +219,9 @@ msgstr ""
 msgid "Buyer"
 msgstr ""
 
+msgid "Seller"
+msgstr ""
+
 msgid "Product ID"
 msgstr ""
 
@@ -495,6 +235,9 @@ msgid "Checkout"
 msgstr ""
 
 msgid "Please review and submit your order"
+msgstr ""
+
+msgid "ID"
 msgstr ""
 
 msgid "Quantity in stock"
@@ -531,6 +274,9 @@ msgid "Order completed"
 msgstr ""
 
 msgid "Provide Credential"
+msgstr ""
+
+msgid "Password"
 msgstr ""
 
 msgid "Verify"
@@ -576,7 +322,13 @@ msgstr ""
 msgid "Currency"
 msgstr ""
 
+msgid "Price"
+msgstr ""
+
 msgid "Quantity"
+msgstr ""
+
+msgid "Description"
 msgstr ""
 
 msgid "Fill in relevant information which users see in the store"
@@ -594,10 +346,19 @@ msgstr ""
 msgid "Not categorized"
 msgstr ""
 
+msgid "Status"
+msgstr ""
+
 msgid "Purchase"
 msgstr ""
 
 msgid "Contact information"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Institution"
 msgstr ""
 
 msgid "{0} has no description"
@@ -621,5 +382,244 @@ msgstr ""
 msgid "Sign in to view creator's information"
 msgstr ""
 
+msgid "Sign in"
+msgstr ""
+
 msgid "Sign up"
+msgstr ""
+
+msgid "Reset password"
+msgstr ""
+
+msgid "Verify your email"
+msgstr ""
+
+msgid "Please complete email verification"
+msgstr ""
+
+msgid "We have already sent confirmation email to your inbox."
+msgstr ""
+
+msgid ""
+"Please check your inbox or junk folder to see the confirmation. Click the "
+"link in the middle to complete verification."
+msgstr ""
+
+msgid ""
+"If you haven't received any confirmation email from us, please <a href="
+"\"mailto:admin@flibrary.info\">reach us</a> for help."
+msgstr ""
+
+msgid "Reset password confirmation"
+msgstr ""
+
+msgid "Your password has been reset"
+msgstr ""
+
+msgid "Your new password is <code>{0}</code>"
+msgstr ""
+
+msgid ""
+"Please sign in using the new password above and remember to change your "
+"password soon."
+msgstr ""
+
+msgid "Type your email below"
+msgstr ""
+
+msgid "Email verified"
+msgstr ""
+
+msgid "Your have successfully completed email verification!"
+msgstr ""
+
+msgid "Your email is verified, and your account is now activated."
+msgstr ""
+
+msgid "Change password"
+msgstr ""
+
+msgid "New password"
+msgstr ""
+
+msgid "Update your information"
+msgstr ""
+
+msgid "Here you can update your account details"
+msgstr ""
+
+msgid "User information"
+msgstr ""
+
+msgid "{0}'s portal page"
+msgstr ""
+
+msgid "Log out"
+msgstr ""
+
+msgid "Welcome to {0}'s portal page"
+msgstr ""
+
+msgid "Here details {0}'s information"
+msgstr ""
+
+msgid "Basic information"
+msgstr ""
+
+msgid "No description"
+msgstr ""
+
+msgid "Products created"
+msgstr ""
+
+msgid "No product created"
+msgstr ""
+
+msgid "Here you can manage your products and account"
+msgstr ""
+
+msgid "Create a product"
+msgstr ""
+
+msgid "Digital Contents owned"
+msgstr ""
+
+msgid "Manage Digital Contents"
+msgstr ""
+
+msgid "Orders placed"
+msgstr ""
+
+msgid "Orders received"
+msgstr ""
+
+msgid "Homepage"
+msgstr ""
+
+msgid "Discover Store"
+msgstr ""
+
+msgid "FLibrary Circle"
+msgstr ""
+
+msgid "Study guides for your courses"
+msgstr ""
+
+msgid ""
+"Tired of duplicated descriptions and hard-to-locate key-points in textbooks? "
+"Frustrated with short but impossible-to-understand others' notes lacking "
+"coherent logic? We strike a balance in between: study guides targeting "
+"specific courses you needed. They are coherent on first read and always to-"
+"the-point, providing an enjoyable learning or referencing experience."
+msgstr ""
+
+msgid "Join the community"
+msgstr ""
+
+msgid ""
+"At FLibrary, you can effortlessly connect to minds behind masterpieces. Join "
+"the community, meet creators, and collaborate on new contents. Contribute "
+"your curiosity today!"
+msgstr ""
+
+msgid "Features"
+msgstr ""
+
+msgid "All Cloud"
+msgstr ""
+
+msgid ""
+"FLibrary is your personalized learning hub. From notes to past papers, "
+"everything subscribed is on cloud for your access anytime, anywhere."
+msgstr ""
+
+msgid "Streamlined Updates"
+msgstr ""
+
+msgid ""
+"As a content creator, you are enabled to distribute and push content updates "
+"to your subscribers with no effort."
+msgstr ""
+
+msgid "Curated Contents"
+msgstr ""
+
+msgid ""
+"Only discover the best-in-class. Spend more time to dive in but not to "
+"wander through."
+msgstr ""
+
+msgid "You are Protected"
+msgstr ""
+
+msgid ""
+"From account security to content distribution fingerprinting, FLibrary "
+"strives for security in every fine detail."
+msgstr ""
+
+msgid "Multilingual Support"
+msgstr ""
+
+msgid ""
+"A global learner's community is at heart to our vision, that's why we have "
+"built-in multilingual supports."
+msgstr ""
+
+msgid "No Ads Forever"
+msgstr ""
+
+msgid ""
+"Ads are simply incompatible with our curiosity. Take our commitment: no ads "
+"forever."
+msgstr ""
+
+msgid "We are just getting started."
+msgstr ""
+
+msgid "Join Us."
+msgstr ""
+
+msgid "Join Us"
+msgstr ""
+
+msgid "We make contents, FLibrary, and the community. Join us as"
+msgstr ""
+
+msgid "Creators"
+msgstr ""
+
+msgid ""
+"Skilled at certain fields or courses? Create learning guides on subjects or "
+"anything creative (like building a rocket), either independent or based on a "
+"course taught at your university, and receive rewards to your knowledge and "
+"contribution."
+msgstr ""
+
+msgid "Working proficiency in LaTeX"
+msgstr ""
+
+msgid "Concrete knowledge in certain fields"
+msgstr ""
+
+msgid "Stick to our principles and standards"
+msgstr ""
+
+msgid "Apply"
+msgstr ""
+
+msgid "Developers"
+msgstr ""
+
+msgid ""
+"Our code is what builds our dreams. Join us as a developer, help inform "
+"what's the next feature, and make dreams true with your unique skills."
+msgstr ""
+
+msgid "Working proficiency in Rust / JavaScript"
+msgstr ""
+
+msgid "Basic knowledge in network programming"
+msgstr ""
+
+msgid "Strive for perfection."
 msgstr ""

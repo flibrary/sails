@@ -3310,7 +3310,7 @@ in
       url = https://github.com/flibrary/paypal-rs;
       name = "paypal-rs";
       version = "0.2.0-alpha.7";
-      rev = "d9889f01e18fa0306bbac45a5b070734476daa6d";};
+      rev = "0b03154d4e4ee0efe54935300d326bd14dd6c9cd";};
     features = builtins.concatLists [
       [ "default" ]
     ];
