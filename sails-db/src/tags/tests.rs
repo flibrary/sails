@@ -77,6 +77,7 @@ fn mapping() {
         700, // CNY 700 each
         1,   // Only one book available
         "A very great book on the subject of Economics",
+        crate::enums::Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -88,6 +89,7 @@ fn mapping() {
         10, // CNY 10 each
         999,
         "Everything you love in FLibrary at an unbelievable price",
+        crate::enums::Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)

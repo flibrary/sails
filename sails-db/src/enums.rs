@@ -1,6 +1,7 @@
 #![allow(clippy::unusual_byte_groupings)]
 use bitflags::bitflags;
 use diesel_derive_enum::DbEnum;
+use paypal_rs::data::common::Currency as PayPalCurrency;
 use rocket::FromFormField;
 use serde::{Deserialize, Serialize};
 
@@ -168,4 +169,69 @@ pub enum StorageType {
     ReleaseAsset,
     // Store files in github repository
     GitRepo,
+}
+
+#[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, FromFormField)]
+pub enum Payment {
+    Alipay,
+    Paypal,
+}
+
+impl Payment {
+    pub fn compatible_with(&self, currency: &Currency) -> bool {
+        match (self, currency) {
+            // AliPay doesn't support multi-currency transaction
+            (Self::Alipay, Currency::CNY) => true,
+            (Self::Alipay, _) => false,
+            // Paypal cannot receive CNY
+            (Self::Paypal, Currency::CNY) => false,
+            (Self::Paypal, _) => true,
+        }
+    }
+}
+
+#[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, FromFormField)]
+pub enum Currency {
+    /// Chinese renminbi
+    CNY,
+    /// Euro
+    EUR,
+    /// Hong Kong dollar
+    HKD,
+    /// Japanese yen, does not support decimals.
+    JPY,
+    /// Pound sterling
+    GBP,
+    /// Swiss franc
+    CHF,
+    /// United States dollar
+    USD,
+}
+
+impl From<Currency> for PayPalCurrency {
+    fn from(currency: Currency) -> Self {
+        match currency {
+            Currency::CNY => PayPalCurrency::CNY,
+            Currency::EUR => PayPalCurrency::EUR,
+            Currency::HKD => PayPalCurrency::HKD,
+            Currency::JPY => PayPalCurrency::JPY,
+            Currency::GBP => PayPalCurrency::GBP,
+            Currency::CHF => PayPalCurrency::CHF,
+            Currency::USD => PayPalCurrency::USD,
+        }
+    }
+}
+
+impl From<&Currency> for PayPalCurrency {
+    fn from(currency: &Currency) -> Self {
+        match currency {
+            Currency::CNY => PayPalCurrency::CNY,
+            Currency::EUR => PayPalCurrency::EUR,
+            Currency::HKD => PayPalCurrency::HKD,
+            Currency::JPY => PayPalCurrency::JPY,
+            Currency::GBP => PayPalCurrency::GBP,
+            Currency::CHF => PayPalCurrency::CHF,
+            Currency::USD => PayPalCurrency::USD,
+        }
+    }
 }

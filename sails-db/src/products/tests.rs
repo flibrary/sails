@@ -28,6 +28,7 @@ fn create_product() {
         700, // CNY 700 each
         1,   // Only one book available
         "A very great book on the subject of Economics",
+        Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -80,6 +81,7 @@ fn search_products() {
         700,
         1,
         "A very great book on the subject of Economics",
+        Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -92,6 +94,7 @@ fn search_products() {
         500,
         1,
         "A very great book on the subject of Economics",
+        Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -104,6 +107,7 @@ fn search_products() {
         600,
         1,
         "That is a bad book though",
+        Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -116,6 +120,7 @@ fn search_products() {
         600,
         1,
         "I finally had got a different econ textbook!",
+        Currency::USD,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -128,6 +133,7 @@ fn search_products() {
         900,
         1,
         "A very masterpiece on the theory of the universe",
+        Currency::JPY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -219,6 +225,7 @@ fn delete_product() {
         600,
         1,
         "That is a bad book though",
+        Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -260,6 +267,7 @@ fn product_status() {
         600,
         1,
         "That is a bad book though",
+        Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)

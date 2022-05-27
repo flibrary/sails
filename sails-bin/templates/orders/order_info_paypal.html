@@ -1,0 +1,48 @@
+{% extends "order_info.html" %}
+{% block placed_details %}
+    <script src="https://www.paypal.com/sdk/js?client-id={{client_id}}&currency={{ "{:?}"|format(prod.get_currency()) }}"></script>
+    <!-- Set up a container element for the button -->
+    <div id="paypal-button-container"></div>
+    <br>
+    <a href="{{ uri!("/orders", crate::orders::cancel_order_paypal(self.order.get_id())) }}" class="btn btn-danger" role="button" onclick="return confirm('{{ i18n!(self.i18n.catalog, "Cancel your order? This CANNOT be reverted") }}');">{{ i18n!(self.i18n.catalog, "Cancel order") }}</a>
+
+    <script>
+      paypal
+        .Buttons({
+          // Sets up the transaction when a payment button is clicked
+            createOrder: function (data, actions) {
+            return fetch("/orders/create_paypal_order?order_id={{self.order.get_id()}}", {
+		method: "post",
+            })
+              .then((response) => response.json())
+              .then((order) => order.id);
+          },
+          // Finalize the transaction after payer approval
+            onApprove: function (data, actions) {
+		var payload = {};
+		payload["paypal_order_id"]=data.orderID;
+              return fetch(`/orders/capture_paypal_order?order_id={{self.order.get_id()}}`, {
+		  method: "post",
+		  headers: {
+		      'Accept': 'application/json',
+		      'Content-Type': 'application/json'
+		  },
+		  body: JSON.stringify(payload)
+            })
+              .then((response) => response.json())
+              .then((orderData) => {
+                // Successful capture! For dev/demo purposes:
+                console.log(
+                  "Capture result",
+                  orderData,
+                  JSON.stringify(orderData, null, 2)
+                );
+		// Reload page to see updated order status
+		location.reload();
+              });
+          },
+        })
+        .render("#paypal-button-container");
+    </script>
+
+{% endblock placed_details %}

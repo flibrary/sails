@@ -4,10 +4,15 @@ use rocket::{
     outcome::{try_outcome, IntoOutcome, Outcome},
     request::FromRequest,
 };
-use sails_db::{digicons::DigiconMappingFinder, enums::UserStatus};
+use sails_db::{
+    digicons::DigiconMappingFinder,
+    enums::{Payment, UserStatus},
+};
 use std::marker::PhantomData;
 
 // Misc
+pub struct OrderWithPaypal;
+pub struct OrderWithAlipay;
 pub struct TagWritable;
 pub struct CanCreateProduct;
 pub struct CanCreateDigicon;
@@ -36,6 +41,50 @@ pub struct DigiconContentReadable;
 
 pub struct Auth<T> {
     plhdr: PhantomData<T>,
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<OrderWithAlipay> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let order = try_outcome!(request
+            .query_value::<OrderGuard>("order_id")
+            .and_then(|x| x.ok())
+            .or_forward(()));
+        let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
+
+        if *order.order_info.get_payment() == Payment::Alipay {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<OrderWithPaypal> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let order = try_outcome!(request
+            .query_value::<OrderGuard>("order_id")
+            .and_then(|x| x.ok())
+            .or_forward(()));
+        let order = try_outcome!(order.to_info(&db).await.ok().or_forward(()));
+
+        if *order.order_info.get_payment() == Payment::Paypal {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
 }
 
 #[rocket::async_trait]

@@ -55,6 +55,7 @@ table! {
         quantity -> BigInt,
         description -> Text,
         product_status -> ProductStatusMapping,
+        currency -> CurrencyMapping,
     }
 }
 
@@ -90,6 +91,8 @@ table! {
         address -> Text,
         time_sent -> Timestamp,
         transaction_status -> TransactionStatusMapping,
+        payment -> PaymentMapping,
+        currency -> CurrencyMapping,
     }
 }
 

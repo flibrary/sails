@@ -1,5 +1,5 @@
 use crate::{
-    enums::{ProductStatus, TransactionStatus, UserStatus},
+    enums::{Currency, Payment, ProductStatus, TransactionStatus, UserStatus},
     error::{SailsDbError, SailsDbResult as Result},
     products::{ProductFinder, ProductId},
     schema::transactions,
@@ -23,6 +23,7 @@ impl Transactions {
         buyer_p: &UserId,
         qty: u32,
         addr: impl ToString,
+        payment_p: Payment,
     ) -> Result<TransactionId> {
         let qty = NonZeroU32::new(qty).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
 
@@ -33,6 +34,11 @@ impl Transactions {
         // Seller should be able to purchase their own products
         if product_info.get_seller_id() == buyer_p.get_id() {
             return Err(SailsDbError::SelfPurchaseNotAllowed);
+        }
+
+        // If payment is incompatible with the currency indicated, we shall not proceed
+        if !payment_p.compatible_with(product_info.get_currency()) {
+            return Err(SailsDbError::PaymentIncompatible);
         }
 
         if product_info.get_product_status() == &ProductStatus::Verified {
@@ -46,8 +52,10 @@ impl Transactions {
                 price: product_info.get_price() as i64,
                 quantity: qty.get() as i64,
                 address: addr.to_string(),
+                payment: payment_p,
                 buyer: buyer_p.get_id().to_string(),
                 time_sent: chrono::offset::Local::now().naive_utc(),
+                currency: product_info.get_currency().clone(),
                 transaction_status: if product_info.get_price() != 0 {
                     TransactionStatus::Placed
                 } else {
@@ -134,6 +142,8 @@ pub struct TransactionInfo {
     address: String,
     time_sent: NaiveDateTime,
     transaction_status: TransactionStatus,
+    payment: Payment,
+    currency: Currency,
 }
 
 impl TransactionInfo {
@@ -192,6 +202,14 @@ impl TransactionInfo {
 
     pub fn get_address(&self) -> &str {
         &self.address
+    }
+
+    pub fn get_payment(&self) -> &Payment {
+        &self.payment
+    }
+
+    pub fn get_currency(&self) -> &Currency {
+        &self.currency
     }
 
     /// Get a reference to the transaction info's time sent.
@@ -599,6 +617,7 @@ mod tests {
             700,
             1,
             "A very great book on the subject of Economics",
+            crate::enums::Currency::USD,
         )
         .unwrap()
         .create(&conn, &seller)
@@ -611,7 +630,8 @@ mod tests {
                 &book_id,
                 &buyer,
                 1,
-                "258 Huanhu South Road, Dongqian Lake, Ningbo, China"
+                "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+                Payment::Paypal,
             )
             .err()
             .unwrap(),
@@ -626,6 +646,21 @@ mod tests {
             .update(&conn)
             .unwrap();
 
+        // Alipay is incompatible with USD
+        assert!(matches!(
+            Transactions::buy(
+                &conn,
+                &book_id,
+                &buyer,
+                1,
+                "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+                Payment::Alipay,
+            )
+            .err()
+            .unwrap(),
+            SailsDbError::PaymentIncompatible
+        ));
+
         // We cannot purchase more than available.
         assert!(matches!(
             Transactions::buy(
@@ -633,7 +668,8 @@ mod tests {
                 &book_id,
                 &buyer,
                 2,
-                "258 Huanhu South Road, Dongqian Lake, Ningbo, China"
+                "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+                Payment::Paypal,
             )
             .err()
             .unwrap(),
@@ -650,6 +686,7 @@ mod tests {
             &buyer,
             1,
             "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+            Payment::Paypal,
         )
         .unwrap();
 
@@ -672,6 +709,7 @@ mod tests {
                     600,
                     2,
                     "That is a bad book though",
+                    crate::enums::Currency::CNY
                 )
                 .unwrap()
                 .verify(&conn)
@@ -739,6 +777,7 @@ mod tests {
             400,
             1,
             "A very great book on the subject of Economics",
+            crate::enums::Currency::CNY,
         )
         .unwrap()
         .create(&conn, &seller)
@@ -751,6 +790,7 @@ mod tests {
             300,
             1,
             "A very great book on the subject of Economics",
+            crate::enums::Currency::CNY,
         )
         .unwrap()
         .create(&conn, &seller)
@@ -763,6 +803,7 @@ mod tests {
             u32::MAX,
             2,
             "A very great book on the subject of Economics",
+            crate::enums::Currency::CNY,
         )
         .unwrap()
         .create(&conn, &seller)
@@ -775,6 +816,7 @@ mod tests {
             700,
             1,
             "A very great book on the subject of Economics",
+            crate::enums::Currency::CNY,
         )
         .unwrap()
         .create(&conn, &seller)
@@ -787,6 +829,7 @@ mod tests {
             1000,
             1,
             "A very great book on the subject of Economics",
+            crate::enums::Currency::CNY,
         )
         .unwrap()
         .create(&conn, &seller)
@@ -837,6 +880,7 @@ mod tests {
             &buyer,
             1,
             "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+            Payment::Alipay,
         )
         .unwrap();
         // Last address updated
@@ -853,10 +897,18 @@ mod tests {
             &buyer,
             1,
             "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+            Payment::Alipay,
         )
         .unwrap();
-        let tx_3_id =
-            Transactions::buy(&conn, &book_3_id, &buyer, 2, "宁波外国语学校 S2202").unwrap();
+        let tx_3_id = Transactions::buy(
+            &conn,
+            &book_3_id,
+            &buyer,
+            2,
+            "宁波外国语学校 S2202",
+            Payment::Alipay,
+        )
+        .unwrap();
         // Last address updated
         assert_eq!(
             TransactionFinder::most_recent_order(&conn, &buyer)
@@ -864,8 +916,15 @@ mod tests {
                 .get_address(),
             "宁波外国语学校 S2202"
         );
-        let tx_4_id =
-            Transactions::buy(&conn, &book_4_id, &buyer, 1, "宁波外国语学校 S2301").unwrap();
+        let tx_4_id = Transactions::buy(
+            &conn,
+            &book_4_id,
+            &buyer,
+            1,
+            "宁波外国语学校 S2301",
+            Payment::Alipay,
+        )
+        .unwrap();
         // Last order updated
         assert_eq!(
             TransactionFinder::most_recent_order(&conn, &buyer)
@@ -873,8 +932,15 @@ mod tests {
                 .get_id(),
             tx_4_id.get_id()
         );
-        let tx_5_id =
-            Transactions::buy(&conn, &book_5_id, &buyer, 1, "宁波市海曙区天一广场").unwrap();
+        let tx_5_id = Transactions::buy(
+            &conn,
+            &book_5_id,
+            &buyer,
+            1,
+            "宁波市海曙区天一广场",
+            Payment::Alipay,
+        )
+        .unwrap();
         assert_eq!(
             TransactionFinder::most_recent_order(&conn, &buyer)
                 .unwrap()

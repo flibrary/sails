@@ -138,49 +138,13 @@ msgstr ""
 msgid "You haven't received any message."
 msgstr ""
 
+msgid "Order Details"
+msgstr ""
+
 msgid "Details of order #{0}"
 msgstr ""
 
 msgid "Order has been refunded or canceled"
-msgstr ""
-
-msgid "No actions needed"
-msgstr ""
-
-msgid "Order placed"
-msgstr ""
-
-msgid "Order paid"
-msgstr ""
-
-msgid "Order completed"
-msgstr ""
-
-msgid "Total"
-msgstr ""
-
-msgid "Price per unit"
-msgstr ""
-
-msgid "Quantity purchased"
-msgstr ""
-
-msgid "Address"
-msgstr ""
-
-msgid "Seller"
-msgstr ""
-
-msgid "Product ID"
-msgstr ""
-
-msgid "Timestamp"
-msgstr ""
-
-msgid "Order Status"
-msgstr ""
-
-msgid "Order Details"
 msgstr ""
 
 msgid "If you don't agree with the order details, please click the \"update\" button below."
@@ -231,7 +195,31 @@ msgstr ""
 msgid "For Digital Contents, please access them at <a href=\"/user\">your portal page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info\">Contact us</a>"
 msgstr ""
 
+msgid "Total"
+msgstr ""
+
+msgid "Price per unit"
+msgstr ""
+
+msgid "Quantity purchased"
+msgstr ""
+
+msgid "Address"
+msgstr ""
+
 msgid "Buyer"
+msgstr ""
+
+msgid "Seller"
+msgstr ""
+
+msgid "Product ID"
+msgstr ""
+
+msgid "Timestamp"
+msgstr ""
+
+msgid "Order Status"
 msgstr ""
 
 msgid "Checkout"
@@ -243,9 +231,6 @@ msgstr ""
 msgid "ID"
 msgstr ""
 
-msgid "USD"
-msgstr ""
-
 msgid "Quantity in stock"
 msgstr ""
 
@@ -255,7 +240,28 @@ msgstr ""
 msgid "If content is completely digital, you may leave it blank."
 msgstr ""
 
+msgid "Payment method"
+msgstr ""
+
+msgid "AliPay (supports CNY only)"
+msgstr ""
+
+msgid "PayPal (supports all currency)"
+msgstr ""
+
 msgid "Submit"
+msgstr ""
+
+msgid "No actions needed"
+msgstr ""
+
+msgid "Order placed"
+msgstr ""
+
+msgid "Order paid"
+msgstr ""
+
+msgid "Order completed"
 msgstr ""
 
 msgid "Provide Credential"
@@ -282,9 +288,6 @@ msgstr ""
 msgid "No more subcategories"
 msgstr ""
 
-msgid "Price: USD {0}"
-msgstr ""
-
 msgid "No products under this category"
 msgstr ""
 
@@ -304,6 +307,9 @@ msgid "Product details"
 msgstr ""
 
 msgid "Category"
+msgstr ""
+
+msgid "Currency"
 msgstr ""
 
 msgid "Price"

@@ -20,6 +20,7 @@ use ammonia::Builder;
 use askama::Template;
 use diesel::connection::SimpleConnection;
 use once_cell::sync::Lazy;
+use orders::PaypalAuth;
 use rocket::{
     fairing::AdHoc,
     figment::{
@@ -273,6 +274,7 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<DigiconHosting>())
         .attach(AdHoc::config::<AlipayAppPrivKey>())
         .attach(AdHoc::config::<AlipayClient>())
+        .attach(AdHoc::config::<PaypalAuth>())
         .attach(AdHoc::config::<TelegramBot>())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .manage(include_i18n!())
@@ -369,10 +371,14 @@ fn rocket() -> Rocket<Build> {
             routes![
                 orders::purchase,
                 orders::checkout,
-                orders::progress,
-                orders::order_info_buyer,
                 orders::order_info_seller,
-                orders::cancel_order,
+                orders::progress_alipay,
+                orders::order_info_alipay,
+                orders::cancel_order_alipay,
+                orders::create_paypal_order,
+                orders::capture_paypal_order,
+                orders::order_info_paypal,
+                orders::cancel_order_paypal,
             ],
         )
         .mount(

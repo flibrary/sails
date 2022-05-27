@@ -5,6 +5,9 @@ pub type SailsDbResult<T> = Result<T, SailsDbError>;
 
 #[derive(Error, Debug)]
 pub enum SailsDbError {
+    #[error("selected payment is not compatible with the currency indicated by the product")]
+    PaymentIncompatible,
+
     #[error("errored on hashing using bcrypt: {0}")]
     HashError(#[from] BcryptError),
 

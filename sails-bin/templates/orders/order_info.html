@@ -12,8 +12,8 @@
       </div>
       <br>
       <h3>{{ i18n!(self.i18n.catalog, "Order has been refunded or canceled") }}</h3>
-      {{ i18n!(self.i18n.catalog, "If you don't agree with the order details, please click the \"update\" button below.") }}<br>
-      <a href="{{ uri!("/orders", crate::orders::progress(self.order.get_id())) }}" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Update") }}</a>
+      {% block refunded_details %}
+      {% endblock refunded_details %}
 
       {% when sails_db::enums::TransactionStatus::Placed %}
       <div class="progress">
@@ -21,23 +21,8 @@
       </div>
       <br>
       <h3>{{ i18n!(self.i18n.catalog, "Your order is placed") }}</h3>
-      {{ i18n!(self.i18n.catalog, "Scan QR code using AliPay or click the button below to pay. Click next when you finished.") }}<br>
-      <br>
-
-      {% match resp.as_ref().unwrap() %}
-      {% when Ok with (resp) %}
-      <div class="alert alert-warning" role="alert">
-	{{ i18n!(self.i18n.catalog, "Notice: <b>Please pay within three hours after you scan.</b>")|safe }}
-      </div>
-      <center><div id="qrcode"></div></center><br>
-      <a href="alipays://platformapi/startapp?appId=20000067&url={{urlencoding::encode(resp.qr_code)}}" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Pay with AliPay") }}</a>
-      {% when Err with (err) %}
-      <div class="alert alert-warning" role="alert">
-	{{ i18n!(self.i18n.catalog, "<b>Failed to create order, please contact us</b>: {0}"; err)|safe }}
-      </div>
-      {% endmatch %}
-      <a href="{{ uri!("/orders", crate::orders::progress(self.order.get_id())) }}" class="btn btn-success" role="button">{{ i18n!(self.i18n.catalog, "Next") }}</a>
-      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger" role="button" onclick="return confirm('{{ i18n!(self.i18n.catalog, "Cancel your order? This CANNOT be reverted") }}');">{{ i18n!(self.i18n.catalog, "Cancel order") }}</a>
+      {% block placed_details %}
+      {% endblock placed_details %}
 
       {% when sails_db::enums::TransactionStatus::Paid %}
       <div class="progress">
@@ -47,7 +32,8 @@
       <h3>{{ i18n!(self.i18n.catalog, "Your order is successfully paid!") }}</h3>
       {{ i18n!(self.i18n.catalog, "Thanks for your order! Stay tuned as we arrange shipment.") }}
       <br>
-      <a href="{{ uri!("/orders", crate::orders::cancel_order(self.order.get_id(), uri!("/orders", crate::orders::order_info_buyer(self.order.get_id())).to_string())) }}" class="btn btn-danger disabled" role="button" onclick="return confirm('{{ i18n!(self.i18n.catalog, "Refund your order? This CANNOT be reverted") }}');">{{ i18n!(self.i18n.catalog, "Refund") }}</a>
+      {% block paid_details %}
+      {% endblock paid_details %}
 
       {% when sails_db::enums::TransactionStatus::Finished %}
       <div class="progress">
@@ -64,11 +50,11 @@
     <tbody>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Total") }}</th>
-      <td>CN¥ {{ order.get_total() }}</td>
+      <td>{{ "{:?}"|format(prod.get_currency()) }} {{ order.get_total() }}</td>
     </tr>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Price per unit") }}</th>
-      <td>CN¥ {{ order.get_price() }}</td>
+      <td>{{ "{:?}"|format(prod.get_currency()) }} {{ order.get_price() }}</td>
     </tr>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Quantity purchased") }}</th>
@@ -103,15 +89,3 @@
   </div>
 </main>
 {% endblock content %}
-
-{% block script %}
-{% call super()%}
-  {% if resp.is_some() %}
-  {% if resp.as_ref().unwrap().is_ok() %}
-  <script type="text/javascript">
-    var qrcode = new QRCode("qrcode");
-    qrcode.makeCode("{{resp.as_ref().unwrap().as_ref().unwrap().qr_code}}");
-  </script>
-  {% endif %}
-  {% endif %}
-{% endblock script %}

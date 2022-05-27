@@ -114,20 +114,41 @@ fn delete_user() {
     let econ = Category::create(&conn, "Economics", 1)
         .and_then(Category::into_leaf)
         .unwrap();
-    let id = IncompleteProduct::new(&econ, "Economics", 1, 1, "A horrible book")
-        .unwrap()
-        .create(&conn, &user)
-        .unwrap();
+    let id = IncompleteProduct::new(
+        &econ,
+        "Economics",
+        1,
+        1,
+        "A horrible book",
+        crate::enums::Currency::CNY,
+    )
+    .unwrap()
+    .create(&conn, &user)
+    .unwrap();
 
-    IncompleteProduct::new(&econ, "The Economics", 1, 1, "Another horrible book")
-        .unwrap()
-        .create(&conn, &user)
-        .unwrap();
+    IncompleteProduct::new(
+        &econ,
+        "The Economics",
+        1,
+        1,
+        "Another horrible book",
+        crate::enums::Currency::CNY,
+    )
+    .unwrap()
+    .create(&conn, &user)
+    .unwrap();
 
-    IncompleteProduct::new(&econ, "Economics Principle", 1, 1, "Another horrible book")
-        .unwrap()
-        .create(&conn, &another_user)
-        .unwrap();
+    IncompleteProduct::new(
+        &econ,
+        "Economics Principle",
+        1,
+        1,
+        "Another horrible book",
+        crate::enums::Currency::CNY,
+    )
+    .unwrap()
+    .create(&conn, &another_user)
+    .unwrap();
 
     let sales = Tags::find_by_id(&conn, "sales").unwrap();
     TagMapping::create(&conn, &sales, &id).unwrap();

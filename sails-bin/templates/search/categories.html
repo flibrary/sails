@@ -57,7 +57,7 @@
          	{% let tags = product.3.clone() %}
 		{% include "display_tag.html" %}
 	      </h5>
-              <p class="card-text"><b>{{ i18n!(self.i18n.catalog, "Price: USD {0}"; product.0.get_price()) }}</b></p>
+              <p class="card-text"><b>{{ "{:?}"|format(product.0.get_currency()) }} {{ product.0.get_price() }}</b></p>
             </div>
 	  </div>
 	</div>

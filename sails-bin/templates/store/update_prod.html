@@ -37,6 +37,22 @@
     <br>
 
     <div class="form-group row">
+      <label for="inputCurrency" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Currency") }}</label>
+      <div class="col-sm-4">
+        <select class="form-select" aria-label="Default select example" name="currency">
+	  <option value="usd">USD</option>
+	  <option value="cny">CNY</option>
+	  <option value="gbp">GBP</option>
+	  <option value="eur">EUR</option>
+	  <option value="chf">CHF</option>
+	  <option value="hkd">HKD</option>
+	  <option value="jpy">JPY</option>
+	</select>
+      </div>
+    </div>
+    <br>
+
+    <div class="form-group row">
       <label for="inputPrice" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Price") }}</label>
       <div class="col-sm-4">
         <input type="number" min="0" class="form-control" id="inputPrice" placeholder="Price" value="{{ prod.get_price() }}" name="price">

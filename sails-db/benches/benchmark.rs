@@ -1,6 +1,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use sails_db::{
     categories::{Category, CtgTrait},
+    enums::*,
     products::*,
     test_utils::establish_connection,
     users::*,
@@ -65,6 +66,7 @@ fn products(c: &mut Criterion) {
         700,
         4,
         "A very great book on the subject of Economics",
+        Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -77,6 +79,7 @@ fn products(c: &mut Criterion) {
         500,
         3,
         "A very great book on the subject of Economics",
+        Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -89,6 +92,7 @@ fn products(c: &mut Criterion) {
         600,
         3,
         "A very great book on the subject of Economics",
+        Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -101,6 +105,7 @@ fn products(c: &mut Criterion) {
         600,
         1,
         "I finally had got a different econ textbook!",
+        Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -114,6 +119,7 @@ fn products(c: &mut Criterion) {
             900,
             100,
             "A very masterpiece on the theory of the universe",
+            Currency::CNY,
         )
         .unwrap()
         .create(&conn, &user_id)

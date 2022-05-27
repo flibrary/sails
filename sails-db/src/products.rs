@@ -5,7 +5,7 @@ use std::num::NonZeroU32;
 
 use crate::{
     categories::{Categories, CtgTrait, LeafCategory},
-    enums::{ProductStatus, UserStatus},
+    enums::{Currency, ProductStatus, UserStatus},
     error::{SailsDbError, SailsDbResult as Result},
     schema::products,
     tags::TagMappingFinder,
@@ -221,6 +221,7 @@ pub struct SafeIncompleteProductOwned {
     pub price: i64,
     pub quantity: i64,
     pub description: String,
+    pub currency: Currency,
 }
 
 // TODO: We can ensure that category does exist, but we cannot ensure that category is the leaf
@@ -232,6 +233,7 @@ pub struct IncompleteProductOwned {
     pub price: u32,
     pub quantity: NonZeroU32,
     pub description: String,
+    pub currency: Currency,
 }
 
 impl ToSafe<SafeIncompleteProductOwned> for IncompleteProductOwned {
@@ -244,6 +246,7 @@ impl ToSafe<SafeIncompleteProductOwned> for IncompleteProductOwned {
                 price: self.price as i64,
                 quantity: self.quantity.get() as i64,
                 description: self.description,
+                currency: self.currency,
             })
         } else {
             Err(SailsDbError::NonLeafCategory)
@@ -258,6 +261,7 @@ impl IncompleteProductOwned {
         price: u32,
         quantity: u32,
         description: T,
+        currency: Currency,
     ) -> Result<Self> {
         let quantity = NonZeroU32::new(quantity).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
         Ok(Self {
@@ -266,6 +270,7 @@ impl IncompleteProductOwned {
             price,
             quantity,
             description: description.to_string(),
+            currency,
         })
     }
 
@@ -276,6 +281,7 @@ impl IncompleteProductOwned {
             price: self.price,
             quantity: self.quantity,
             description: &self.description,
+            currency: self.currency.clone(),
         };
         refed.create(conn, seller)
     }
@@ -290,6 +296,7 @@ pub struct SafeIncompleteProduct<'a> {
     pub price: i64,
     pub quantity: i64,
     pub description: &'a str,
+    pub currency: Currency,
 }
 
 impl<'a> ToSafe<SafeIncompleteProduct<'a>> for IncompleteProduct<'a> {
@@ -302,6 +309,7 @@ impl<'a> ToSafe<SafeIncompleteProduct<'a>> for IncompleteProduct<'a> {
                 price: self.price as i64,
                 quantity: self.quantity.get() as i64,
                 description: self.description,
+                currency: self.currency,
             })
         } else {
             Err(SailsDbError::NonLeafCategory)
@@ -325,6 +333,7 @@ impl<'a> SafeIncompleteProduct<'a> {
             quantity.eq(self.quantity),
             description.eq(self.description),
             product_status.eq(ProductStatus::default()),
+            currency.eq(self.currency),
         );
         diesel::insert_into(products).values(value).execute(conn)?;
         Ok(ProductId { id: id_cloned })
@@ -338,6 +347,7 @@ pub struct IncompleteProduct<'a> {
     pub price: u32,
     pub quantity: NonZeroU32,
     pub description: &'a str,
+    pub currency: Currency,
 }
 
 impl<'a> IncompleteProduct<'a> {
@@ -347,6 +357,7 @@ impl<'a> IncompleteProduct<'a> {
         price: u32,
         quantity: u32,
         description: &'a str,
+        currency: Currency,
     ) -> Result<Self> {
         let quantity = NonZeroU32::new(quantity).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
         Ok(Self {
@@ -355,6 +366,7 @@ impl<'a> IncompleteProduct<'a> {
             price,
             quantity,
             description,
+            currency,
         })
     }
 
@@ -378,6 +390,7 @@ pub struct ProductInfo {
     quantity: i64,
     description: String,
     product_status: ProductStatus,
+    currency: Currency,
 }
 
 impl ProductInfo {
@@ -419,6 +432,10 @@ impl ProductInfo {
         self.quantity as u32
     }
 
+    pub fn get_currency(&self) -> &Currency {
+        &self.currency
+    }
+
     /// Set the product info's seller id.
     pub fn set_seller_id(mut self, seller_id: impl ToString) -> Self {
         self.seller_id = seller_id.to_string();
@@ -440,6 +457,11 @@ impl ProductInfo {
     /// Set the product info's price.
     pub fn set_price(mut self, price: u32) -> Self {
         self.price = price as i64;
+        self
+    }
+
+    pub fn set_currency(mut self, currency: Currency) -> Self {
+        self.currency = currency;
         self
     }
 

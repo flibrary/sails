@@ -12,6 +12,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Verify your email"
+msgstr ""
+
 msgid ""
 "FLibrary is the ultimate destination for discovering, discussing, and "
 "distributing learning guides."
@@ -27,362 +30,6 @@ msgid "Creator Center"
 msgstr ""
 
 msgid "Portal"
-msgstr ""
-
-msgid "Digital Content Distribution Trace"
-msgstr ""
-
-msgid "Trace of this copy of \"{0}\""
-msgstr ""
-
-msgid "Created at"
-msgstr ""
-
-msgid "Name"
-msgstr ""
-
-msgid "Downloaded by"
-msgstr ""
-
-msgid "Digital Content Creator Center"
-msgstr ""
-
-msgid "Create a Digital Content"
-msgstr ""
-
-msgid "Manage your Digital Contents"
-msgstr ""
-
-msgid "Last Modified"
-msgstr ""
-
-msgid "Digital Content \"{}\""
-msgstr ""
-
-msgid "Info"
-msgstr ""
-
-msgid "Manage"
-msgstr ""
-
-msgid "Apply to products"
-msgstr ""
-
-msgid "Storage Type"
-msgstr ""
-
-msgid "Storage Detail"
-msgstr ""
-
-msgid "Time Created"
-msgstr ""
-
-msgid "Path to release asset"
-msgstr ""
-
-msgid "Update the Digital Content"
-msgstr ""
-
-msgid "Upload file"
-msgstr ""
-
-msgid "Delete"
-msgstr ""
-
-msgid "Create product"
-msgstr ""
-
-msgid "Create the Digital Content"
-msgstr ""
-
-msgid "Fill in relevant information to create a digital content"
-msgstr ""
-
-msgid "Storage Type (cannot be changed afterwards)"
-msgstr ""
-
-msgid "Manually upload file"
-msgstr ""
-
-msgid "Use Release Asset"
-msgstr ""
-
-msgid "Chat"
-msgstr ""
-
-msgid "Chat with {0}"
-msgstr ""
-
-msgid "No chat with {0}"
-msgstr ""
-
-msgid "Type your message here"
-msgstr ""
-
-msgid "Send"
-msgstr ""
-
-msgid "Below are all the messages you received"
-msgstr ""
-
-msgid "Recent messages"
-msgstr ""
-
-msgid "User"
-msgstr ""
-
-msgid "Message"
-msgstr ""
-
-msgid "Time"
-msgstr ""
-
-msgid "You haven't received any message."
-msgstr ""
-
-msgid "Details of order #{0}"
-msgstr ""
-
-msgid "Order has been refunded or canceled"
-msgstr ""
-
-msgid "No actions needed"
-msgstr ""
-
-msgid "Order placed"
-msgstr ""
-
-msgid "Order paid"
-msgstr ""
-
-msgid "Order completed"
-msgstr ""
-
-msgid "Total"
-msgstr ""
-
-msgid "Price per unit"
-msgstr ""
-
-msgid "Quantity purchased"
-msgstr ""
-
-msgid "Address"
-msgstr ""
-
-msgid "Seller"
-msgstr ""
-
-msgid "Product ID"
-msgstr ""
-
-msgid "Timestamp"
-msgstr ""
-
-msgid "Order Status"
-msgstr ""
-
-msgid "Order Details"
-msgstr ""
-
-msgid ""
-"If you don't agree with the order details, please click the \"update\" "
-"button below."
-msgstr ""
-
-msgid "Update"
-msgstr ""
-
-msgid "Your order is placed"
-msgstr ""
-
-msgid ""
-"Scan QR code using AliPay or click the button below to pay. Click next when "
-"you finished."
-msgstr ""
-
-msgid "Notice: <b>Please pay within three hours after you scan.</b>"
-msgstr ""
-
-msgid "Pay with AliPay"
-msgstr ""
-
-msgid "<b>Failed to create order, please contact us</b>: {0}"
-msgstr ""
-
-msgid "Next"
-msgstr ""
-
-msgid "Cancel your order? This CANNOT be reverted"
-msgstr ""
-
-msgid "Cancel order"
-msgstr ""
-
-msgid "Your order is successfully paid!"
-msgstr ""
-
-msgid "Thanks for your order! Stay tuned as we arrange shipment."
-msgstr ""
-
-msgid "Refund your order? This CANNOT be reverted"
-msgstr ""
-
-msgid "Refund"
-msgstr ""
-
-msgid "Congratulations, your order is completed!"
-msgstr ""
-
-msgid ""
-"For Digital Contents, please access them at <a href=\"/user\">your portal "
-"page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info"
-"\">Contact us</a>"
-msgstr ""
-
-msgid "Buyer"
-msgstr ""
-
-msgid "Checkout"
-msgstr ""
-
-msgid "Please review and submit your order"
-msgstr ""
-
-msgid "ID"
-msgstr ""
-
-msgid "USD"
-msgstr ""
-
-msgid "Quantity in stock"
-msgstr ""
-
-msgid "Quantity to purchase"
-msgstr ""
-
-msgid "If content is completely digital, you may leave it blank."
-msgstr ""
-
-msgid "Submit"
-msgstr ""
-
-msgid "Provide Credential"
-msgstr ""
-
-msgid "Password"
-msgstr ""
-
-msgid "Verify"
-msgstr ""
-
-msgid "Search by categories"
-msgstr ""
-
-msgid "Search products by categories"
-msgstr ""
-
-msgid "All"
-msgstr ""
-
-msgid ""
-"No category under your request, this is an ERROR. Please contact admins."
-msgstr ""
-
-msgid "No more subcategories"
-msgstr ""
-
-msgid "Price: USD {0}"
-msgstr ""
-
-msgid "No products under this category"
-msgstr ""
-
-msgid "Power Your Curiosity"
-msgstr ""
-
-msgid "Update {0}"
-msgstr ""
-
-msgid "Update product details"
-msgstr ""
-
-msgid "Change relevant information which users see in the store"
-msgstr ""
-
-msgid "Product details"
-msgstr ""
-
-msgid "Category"
-msgstr ""
-
-msgid "Price"
-msgstr ""
-
-msgid "Quantity"
-msgstr ""
-
-msgid "Description"
-msgstr ""
-
-msgid "Fill in relevant information which users see in the store"
-msgstr ""
-
-msgid "Product information"
-msgstr ""
-
-msgid "Create the product"
-msgstr ""
-
-msgid "{0} - Product details"
-msgstr ""
-
-msgid "Not categorized"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid "Purchase"
-msgstr ""
-
-msgid "Contact information"
-msgstr ""
-
-msgid "Email"
-msgstr ""
-
-msgid "Institution"
-msgstr ""
-
-msgid "{0} has no description"
-msgstr ""
-
-msgid "Contact the creator"
-msgstr ""
-
-msgid "Send message"
-msgstr ""
-
-msgid "Sign in to contact the creator"
-msgstr ""
-
-msgid "Creator's information"
-msgstr ""
-
-msgid "Sign in to view creator's information"
-msgstr ""
-
-msgid "Sign in"
-msgstr ""
-
-msgid "Sign up"
-msgstr ""
-
-msgid "Reset password"
-msgstr ""
-
-msgid "Verify your email"
 msgstr ""
 
 msgid "Please complete email verification"
@@ -415,7 +62,13 @@ msgid ""
 "password soon."
 msgstr ""
 
+msgid "Reset password"
+msgstr ""
+
 msgid "Type your email below"
+msgstr ""
+
+msgid "Email"
 msgstr ""
 
 msgid "Email verified"
@@ -427,10 +80,16 @@ msgstr ""
 msgid "Your email is verified, and your account is now activated."
 msgstr ""
 
+msgid "Sign in"
+msgstr ""
+
 msgid "Change password"
 msgstr ""
 
 msgid "New password"
+msgstr ""
+
+msgid "Password"
 msgstr ""
 
 msgid "Update your information"
@@ -440,6 +99,18 @@ msgid "Here you can update your account details"
 msgstr ""
 
 msgid "User information"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Institution"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Update"
 msgstr ""
 
 msgid "{0}'s portal page"
@@ -463,6 +134,12 @@ msgstr ""
 msgid "Products created"
 msgstr ""
 
+msgid "ID"
+msgstr ""
+
+msgid "Price"
+msgstr ""
+
 msgid "No product created"
 msgstr ""
 
@@ -475,10 +152,19 @@ msgstr ""
 msgid "Digital Contents owned"
 msgstr ""
 
+msgid "Last Modified"
+msgstr ""
+
 msgid "Manage Digital Contents"
 msgstr ""
 
 msgid "Orders placed"
+msgstr ""
+
+msgid "Seller"
+msgstr ""
+
+msgid "Status"
 msgstr ""
 
 msgid "Orders received"
@@ -570,7 +256,19 @@ msgstr ""
 msgid "Join Us."
 msgstr ""
 
+msgid "Digital Content Distribution Trace"
+msgstr ""
+
+msgid "Trace of this copy of \"{0}\""
+msgstr ""
+
+msgid "Created at"
+msgstr ""
+
 msgid "Join Us"
+msgstr ""
+
+msgid "Downloaded by"
 msgstr ""
 
 msgid "We make contents, FLibrary, and the community. Join us as"
@@ -613,4 +311,227 @@ msgid "Basic knowledge in network programming"
 msgstr ""
 
 msgid "Strive for perfection."
+msgstr ""
+
+msgid "Digital Content Creator Center"
+msgstr ""
+
+msgid "Create a Digital Content"
+msgstr ""
+
+msgid "Manage your Digital Contents"
+msgstr ""
+
+msgid "Digital Content \"{}\""
+msgstr ""
+
+msgid "Info"
+msgstr ""
+
+msgid "Manage"
+msgstr ""
+
+msgid "Apply to products"
+msgstr ""
+
+msgid "Storage Type"
+msgstr ""
+
+msgid "Storage Detail"
+msgstr ""
+
+msgid "Time Created"
+msgstr ""
+
+msgid "Path to release asset"
+msgstr ""
+
+msgid "Update the Digital Content"
+msgstr ""
+
+msgid "Upload file"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Create product"
+msgstr ""
+
+msgid "Create the Digital Content"
+msgstr ""
+
+msgid "Fill in relevant information to create a digital content"
+msgstr ""
+
+msgid "Storage Type (cannot be changed afterwards)"
+msgstr ""
+
+msgid "Manually upload file"
+msgstr ""
+
+msgid "Use Release Asset"
+msgstr ""
+
+msgid "Chat"
+msgstr ""
+
+msgid "Chat with {0}"
+msgstr ""
+
+msgid "No chat with {0}"
+msgstr ""
+
+msgid "Type your message here"
+msgstr ""
+
+msgid "Send"
+msgstr ""
+
+msgid "Below are all the messages you received"
+msgstr ""
+
+msgid "Recent messages"
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Time"
+msgstr ""
+
+msgid "You haven't received any message."
+msgstr ""
+
+msgid "Order Details"
+msgstr ""
+
+msgid "Details of order #{0}"
+msgstr ""
+
+msgid "Order has been refunded or canceled"
+msgstr ""
+
+msgid ""
+"If you don't agree with the order details, please click the \"update\" "
+"button below."
+msgstr ""
+
+msgid "Your order is placed"
+msgstr ""
+
+msgid ""
+"Scan QR code using AliPay or click the button below to pay. Click next when "
+"you finished."
+msgstr ""
+
+msgid "Notice: <b>Please pay within three hours after you scan.</b>"
+msgstr ""
+
+msgid "Pay with AliPay"
+msgstr ""
+
+msgid "<b>Failed to create order, please contact us</b>: {0}"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Cancel your order? This CANNOT be reverted"
+msgstr ""
+
+msgid "Cancel order"
+msgstr ""
+
+msgid "Your order is successfully paid!"
+msgstr ""
+
+msgid "Thanks for your order! Stay tuned as we arrange shipment."
+msgstr ""
+
+msgid "Refund your order? This CANNOT be reverted"
+msgstr ""
+
+msgid "Refund"
+msgstr ""
+
+msgid "Congratulations, your order is completed!"
+msgstr ""
+
+msgid ""
+"For Digital Contents, please access them at <a href=\"/user\">your portal "
+"page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info"
+"\">Contact us</a>"
+msgstr ""
+
+msgid "Total"
+msgstr ""
+
+msgid "Price per unit"
+msgstr ""
+
+msgid "Quantity purchased"
+msgstr ""
+
+msgid "Address"
+msgstr ""
+
+msgid "Buyer"
+msgstr ""
+
+msgid "Product ID"
+msgstr ""
+
+msgid "Timestamp"
+msgstr ""
+
+msgid "Order Status"
+msgstr ""
+
+msgid "Checkout"
+msgstr ""
+
+msgid "Please review and submit your order"
+msgstr ""
+
+msgid "Quantity in stock"
+msgstr ""
+
+msgid "Quantity to purchase"
+msgstr ""
+
+msgid "If content is completely digital, you may leave it blank."
+msgstr ""
+
+msgid "Payment method"
+msgstr ""
+
+msgid "AliPay (supports CNY only)"
+msgstr ""
+
+msgid "PayPal (supports all currency)"
+msgstr ""
+
+msgid "Submit"
+msgstr ""
+
+msgid "No actions needed"
+msgstr ""
+
+msgid "Order placed"
+msgstr ""
+
+msgid "Order paid"
+msgstr ""
+
+msgid "Order completed"
+msgstr ""
+
+msgid "Provide Credential"
+msgstr ""
+
+msgid "Verify"
 msgstr ""

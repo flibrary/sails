@@ -98,6 +98,7 @@ fn mapping() {
         10, // CNY 10 each
         999,
         "Everything you love in FLibrary at an unbelievable price",
+        crate::enums::Currency::CNY,
     )
     .unwrap()
     .create(&conn, &user_id)
@@ -123,6 +124,7 @@ fn mapping() {
         &another,
         1,
         "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+        crate::enums::Payment::Alipay,
     )
     .unwrap();
 

@@ -140,50 +140,14 @@ msgstr "时间"
 msgid "You haven't received any message."
 msgstr "您还没有收到任何消息"
 
+msgid "Order Details"
+msgstr "订单细节"
+
 msgid "Details of order #{0}"
 msgstr "订单 #{0} 的细节"
 
 msgid "Order has been refunded or canceled"
 msgstr "订单已被退款或取消"
-
-msgid "No actions needed"
-msgstr "无需更多操作"
-
-msgid "Order placed"
-msgstr "订单已创建"
-
-msgid "Order paid"
-msgstr "订单已支付"
-
-msgid "Order completed"
-msgstr "订单已完成"
-
-msgid "Total"
-msgstr "总价"
-
-msgid "Price per unit"
-msgstr "单价"
-
-msgid "Quantity purchased"
-msgstr "购买数量"
-
-msgid "Address"
-msgstr "收货地址"
-
-msgid "Seller"
-msgstr "卖家"
-
-msgid "Product ID"
-msgstr "商品 ID"
-
-msgid "Timestamp"
-msgstr "时间戳"
-
-msgid "Order Status"
-msgstr "订单状态"
-
-msgid "Order Details"
-msgstr "订单细节"
 
 msgid ""
 "If you don't agree with the order details, please click the \"update\" "
@@ -242,8 +206,32 @@ msgstr ""
 "如需访问数字内容，请前往<a href=\"/user\">您的主页</a>。 如有疑问或需要帮助，"
 "请<a href=\"mailto:admin@flibrary.info\">联系我们</a>"
 
+msgid "Total"
+msgstr "总价"
+
+msgid "Price per unit"
+msgstr "单价"
+
+msgid "Quantity purchased"
+msgstr "购买数量"
+
+msgid "Address"
+msgstr "收货地址"
+
 msgid "Buyer"
 msgstr "买家"
+
+msgid "Seller"
+msgstr "卖家"
+
+msgid "Product ID"
+msgstr "商品 ID"
+
+msgid "Timestamp"
+msgstr "时间戳"
+
+msgid "Order Status"
+msgstr "订单状态"
 
 msgid "Checkout"
 msgstr "提交订单"
@@ -254,9 +242,6 @@ msgstr "请核对并提交您的订单"
 msgid "ID"
 msgstr ""
 
-msgid "USD"
-msgstr "CN￥"
-
 msgid "Quantity in stock"
 msgstr "库存数量"
 
@@ -266,8 +251,29 @@ msgstr "购买数量"
 msgid "If content is completely digital, you may leave it blank."
 msgstr "如购买纯数字内容，您可以在这里填写任意内容。"
 
+msgid "Payment method"
+msgstr "支付方式"
+
+msgid "AliPay (supports CNY only)"
+msgstr "AliPay（仅支持人民币）"
+
+msgid "PayPal (supports all currency)"
+msgstr "PayPal（支持所有币种）"
+
 msgid "Submit"
 msgstr "提交"
+
+msgid "No actions needed"
+msgstr "无需更多操作"
+
+msgid "Order placed"
+msgstr "订单已创建"
+
+msgid "Order paid"
+msgstr "订单已支付"
+
+msgid "Order completed"
+msgstr "订单已完成"
 
 msgid "Provide Credential"
 msgstr "提供凭证"
@@ -294,9 +300,6 @@ msgstr "在您的请求下我们没有找到类别，这是一个错误。请联
 msgid "No more subcategories"
 msgstr "无更多子分类"
 
-msgid "Price: USD {0}"
-msgstr "价格：CN￥ {0}"
-
 msgid "No products under this category"
 msgstr "此类别下无产品"
 
@@ -317,6 +320,9 @@ msgstr "商品信息"
 
 msgid "Category"
 msgstr "分类"
+
+msgid "Currency"
+msgstr "币种"
 
 msgid "Price"
 msgstr "价格"
@@ -635,3 +641,9 @@ msgstr "基本的网络编程知识"
 
 msgid "Strive for perfection."
 msgstr "追求优秀的代码质量"
+
+#~ msgid "Price: USD {0}"
+#~ msgstr "价格：CN￥ {0}"
+
+#~ msgid "USD"
+#~ msgstr "CN￥"

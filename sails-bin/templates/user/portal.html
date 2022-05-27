@@ -46,7 +46,7 @@
     <tbody>
       {% for order in orders_placed %}
       <tr>
-	<th scope="row"><a href="{{ uri!("/orders", crate::orders::order_info_buyer(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
+	<th scope="row"><a href="{{ uri!("/orders", crate::orders::order_info_alipay(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
 	<td>{{order.0.get_prodname()}}</td>
 	<td>{{order.0.get_price()}}</td>
 	<td>{{order.0.get_seller_id()}}</td>
@@ -74,7 +74,7 @@
     <tbody>
       {% for order in orders_received %}
       <tr>
-	<th scope="row"><a href="{{ uri!("/orders", crate::orders::order_info_buyer(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
+	<th scope="row"><a href="{{ uri!("/orders", crate::orders::order_info_alipay(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
 	<td>{{order.0.get_prodname()}}</td>
 	<td>{{order.0.get_price()}}</td>
 	<td>{{ "{:?}"|format(order.1.get_transaction_status()) }}</td>

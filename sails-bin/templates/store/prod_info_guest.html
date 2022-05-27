@@ -32,7 +32,7 @@
     </tr>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Price") }}</th>
-      <td>{{ i18n!(self.i18n.catalog, "USD") }} {{ prod.get_price() }}</td>
+      <td>{{ "{:?}"|format(prod.get_currency()) }} {{ prod.get_price() }}</td>
     </tr>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Quantity in stock") }}</th>
