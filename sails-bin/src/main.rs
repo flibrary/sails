@@ -375,6 +375,7 @@ fn rocket() -> Rocket<Build> {
                 orders::progress_alipay,
                 orders::order_info_alipay,
                 orders::cancel_order_alipay,
+                orders::progress_paypal,
                 orders::create_paypal_order,
                 orders::capture_paypal_order,
                 orders::order_info_paypal,

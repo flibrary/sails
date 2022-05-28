@@ -275,6 +275,16 @@ msgstr "订单已支付"
 msgid "Order completed"
 msgstr "订单已完成"
 
+msgid ""
+"Use PayPal to complete your order. If you are not automatically redirected "
+"after approving the order, click \"Manual update\" button below."
+msgstr ""
+"使用 PayPal 来完成您的支付。如果您在支付后没有被自动重定向到新的页面，请点击"
+"下方\"手动更新\"按钮。"
+
+msgid "Manual update"
+msgstr "手动更新"
+
 msgid "Provide Credential"
 msgstr "提供凭证"
 
@@ -641,9 +651,3 @@ msgstr "基本的网络编程知识"
 
 msgid "Strive for perfection."
 msgstr "追求优秀的代码质量"
-
-#~ msgid "Price: USD {0}"
-#~ msgstr "价格：CN￥ {0}"
-
-#~ msgid "USD"
-#~ msgstr "CN￥"

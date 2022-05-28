@@ -93,6 +93,7 @@ table! {
         transaction_status -> TransactionStatusMapping,
         payment -> PaymentMapping,
         currency -> CurrencyMapping,
+        payment_detail -> Nullable<Text>,
     }
 }
 

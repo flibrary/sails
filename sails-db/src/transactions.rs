@@ -53,6 +53,7 @@ impl Transactions {
                 quantity: qty.get() as i64,
                 address: addr.to_string(),
                 payment: payment_p,
+                payment_detail: None,
                 buyer: buyer_p.get_id().to_string(),
                 time_sent: chrono::offset::Local::now().naive_utc(),
                 currency: product_info.get_currency().clone(),
@@ -144,6 +145,7 @@ pub struct TransactionInfo {
     transaction_status: TransactionStatus,
     payment: Payment,
     currency: Currency,
+    payment_detail: Option<String>,
 }
 
 impl TransactionInfo {
@@ -208,6 +210,10 @@ impl TransactionInfo {
         &self.payment
     }
 
+    pub fn get_payment_detail(&self) -> Option<&str> {
+        self.payment_detail.as_deref()
+    }
+
     pub fn get_currency(&self) -> &Currency {
         &self.currency
     }
@@ -222,15 +228,20 @@ impl TransactionInfo {
         &self.transaction_status
     }
 
+    /// Get a reference to the transaction info's seller.
+    pub fn get_seller(&self) -> &str {
+        self.seller.as_str()
+    }
+
     /// Set the transaction info's transaction status.
     pub fn set_transaction_status(mut self, transaction_status: TransactionStatus) -> Self {
         self.transaction_status = transaction_status;
         self
     }
 
-    /// Get a reference to the transaction info's seller.
-    pub fn get_seller(&self) -> &str {
-        self.seller.as_str()
+    pub fn set_payment_detail(mut self, payment_detail: Option<String>) -> Self {
+        self.payment_detail = payment_detail;
+        self
     }
 
     pub fn readable(&self, conn: &SqliteConnection, user: &UserId) -> Result<bool> {

@@ -264,6 +264,12 @@ msgstr ""
 msgid "Order completed"
 msgstr ""
 
+msgid "Use PayPal to complete your order. If you are not automatically redirected after approving the order, click \"Manual update\" button below."
+msgstr ""
+
+msgid "Manual update"
+msgstr ""
+
 msgid "Provide Credential"
 msgstr ""
 
