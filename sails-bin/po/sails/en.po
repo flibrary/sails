@@ -312,6 +312,9 @@ msgstr ""
 msgid "Power Your Curiosity"
 msgstr ""
 
+msgid "Browse by categories"
+msgstr ""
+
 msgid "Update {0}"
 msgstr ""
 

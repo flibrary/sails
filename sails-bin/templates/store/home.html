@@ -5,6 +5,7 @@
 <main class="container">
   <div class="p-5 rounded shadow">
     <h1><b>FLibrary Store <span class = "text-muted">{{ i18n!(self.i18n.catalog, "Power Your Curiosity") }}</span></b></h1>
+    <a href="{{ uri!("/search", crate::search::categories_all) }}" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Browse by categories") }}</a>
   </div>
   <br>
 

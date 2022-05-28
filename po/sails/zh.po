@@ -316,6 +316,9 @@ msgstr "此类别下无产品"
 msgid "Power Your Curiosity"
 msgstr "让好奇心为您赋能"
 
+msgid "Browse by categories"
+msgstr "通过类别浏览"
+
 msgid "Update {0}"
 msgstr "更新 {0}"
 
