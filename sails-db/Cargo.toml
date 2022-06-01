@@ -21,7 +21,7 @@ bitflags = "^1"
 diesel_migrations = "^1.4"
 # Verify users in a secure manner
 bcrypt = "^0.10"
-uuid = { version = "0.8", features = ["serde", "v4"] }
+uuid = { version = "1.1", features = ["serde", "v4"] }
 thiserror = "^1"
 phonenumber = "^0.3"
 lettre = "0.10.0-rc.3"
