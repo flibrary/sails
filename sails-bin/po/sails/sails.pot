@@ -294,6 +294,9 @@ msgstr ""
 msgid "No more subcategories"
 msgstr ""
 
+msgid "Search Results"
+msgstr ""
+
 msgid "No products under this category"
 msgstr ""
 
@@ -505,6 +508,24 @@ msgid "Join the community"
 msgstr ""
 
 msgid "At FLibrary, you can effortlessly connect to minds behind masterpieces. Join the community, meet creators, and collaborate on new contents. Contribute your curiosity today!"
+msgstr ""
+
+msgid "Monthly update on everything FLibrary directly from our creators and developers."
+msgstr ""
+
+msgid "Your email address"
+msgstr ""
+
+msgid "Subscribe"
+msgstr ""
+
+msgid "Subscribe to our newsletter"
+msgstr ""
+
+msgid "Witness how curiosity progresses with <span class=\"text-info text-gradient fw-bold\">FLibrary Connect</span>, our monthly newsletter composed directly by our developers and creators. Get everything FLibrary delivered now."
+msgstr ""
+
+msgid "Subscribe on  <i class=\"bi bi-telegram\"></i> Telegram"
 msgstr ""
 
 msgid "Features"

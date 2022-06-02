@@ -4,12 +4,18 @@
 }
 
 #content-wrap {
-  padding-bottom: 7rem;    /* Footer height */
+  padding-bottom: 10rem;    /* Footer height */
 }
 
 #footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 7rem;
+}
+
+.text-gradient.text-info {
+    background: -webkit-linear-gradient(45deg, #09009f, #00ff95 80%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
 }

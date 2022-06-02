@@ -316,6 +316,9 @@ msgstr "此类别下无产品"
 msgid "Power Your Curiosity"
 msgstr "让好奇心为您赋能"
 
+msgid "Browse by categories"
+msgstr "通过类别浏览"
+
 msgid "Update {0}"
 msgstr "更新 {0}"
 
@@ -541,6 +544,32 @@ msgstr ""
 "在 FLibrary Circle，你可以发现优秀的内容，更可以遇见内容背后优秀的创作者。加"
 "入社区，和作者面对面，一起创作新的内容。探索好奇心从今天开始！"
 
+msgid ""
+"Monthly update on everything FLibrary directly from our creators and "
+"developers."
+msgstr "来自我们的创作者和开发者的 FLibrary 每月要闻更新。"
+
+msgid "Your email address"
+msgstr "您的邮箱"
+
+msgid "Subscribe"
+msgstr "订阅"
+
+msgid "Subscribe to our newsletter"
+msgstr "订阅我们的要闻推送"
+
+msgid ""
+"Witness how curiosity progresses with <span class=\"text-info text-gradient "
+"fw-bold\">FLibrary Connect</span>, our monthly newsletter composed directly "
+"by our developers and creators. Get everything FLibrary delivered now."
+msgstr ""
+"订阅 <span class=\"text-info text-gradient fw-bold\">FLibrary Connect</span> "
+"每月更新，见证好奇心成长。每月更新的编辑们直接来自我们的开发者和创作者；现在"
+"订阅，听听内行人怎么说。"
+
+msgid "Subscribe on  <i class=\"bi bi-telegram\"></i> Telegram"
+msgstr "通过  <i class=\"bi bi-telegram\"></i> Telegram 订阅"
+
 msgid "Features"
 msgstr "特性"
 
@@ -551,8 +580,8 @@ msgid ""
 "FLibrary is your personalized learning hub. From notes to past papers, "
 "everything subscribed is on cloud for your access anytime, anywhere."
 msgstr ""
-"FLibrary 是您个性化的内容收藏馆。从笔记到解析，您可以随时随地从云端访问所有您"
-"订阅的内容。"
+"FLibrary 是您个性化的图书馆。从笔记到解析，您可以随时随地从云端访问所有您订阅"
+"的内容。"
 
 msgid "Streamlined Updates"
 msgstr "轻松分发"

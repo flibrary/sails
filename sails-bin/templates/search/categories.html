@@ -39,7 +39,7 @@
 
   {% if products.len() > 0 %}
   <div class="p-5 rounded shadow">
-    <h3>搜索结果</h3>
+    <h3>{{ i18n!(self.i18n.catalog, "Search Results") }}</h3>
     <div class="row grid">
 	{% for product in products %}
 	<div class="col-sm-6 col-lg-4 mb-4 grid-item">

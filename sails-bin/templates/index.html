@@ -16,13 +16,13 @@
     <br>
 
     <div class="row flex-lg-row-reverse align-items-center px-4 pb-3">
-      <div class="col-10 col-sm-8 col-lg-6">
+      <div class="col-10 col-sm-8 col-lg-6 py-3">
         <video autoplay="" muted="" loop="" playsinline="" width="100%" height="auto">
 	    <source src="/static/media/scrolling-guides-10s.webm" type="video/webm">
 	    <source src="/static/media/scrolling-guides-10s.mp4" type="video/mp4">
 	</video>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 py-3">
         <h2 class="display-5 fw-bold lh-1 mb-3">{{ i18n!(self.i18n.catalog, "Study guides for your courses") }}</h1>
         <p class="lead">{{ i18n!(self.i18n.catalog, "Tired of duplicated descriptions and hard-to-locate key-points in textbooks? Frustrated with short but impossible-to-understand others' notes lacking coherent logic? We strike a balance in between: study guides targeting specific courses you needed. They are coherent on first read and always to-the-point, providing an enjoyable learning or referencing experience.") }}</p>
 	<a href="/store" class="btn btn-primary btn-lg my-1" role="button">{{ i18n!(self.i18n.catalog, "Discover Store") }}</a>
@@ -32,15 +32,37 @@
    <br>
 
     <div class="row flex-lg-row align-items-center px-4 pb-3">
-      <div class="col-10 col-sm-8 col-lg-6">
+      <div class="col-10 col-sm-8 col-lg-6 py-3">
         <img src="/static/media/circle.png" class="d-block mx-lg-auto" alt="Learning Guides Example" loading="lazy" width="100%">
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6 py-3">
         <h2 class="display-5 fw-bold lh-1 mb-3">{{ i18n!(self.i18n.catalog, "Join the community") }}</h1>
         <p class="lead">{{ i18n!(self.i18n.catalog, "At FLibrary, you can effortlessly connect to minds behind masterpieces. Join the community, meet creators, and collaborate on new contents. Contribute your curiosity today!") }}</p>
         <a href="https://circle.flibrary.info" class="btn btn-warning btn-lg my-1" role="button">{{ i18n!(self.i18n.catalog, "FLibrary Circle") }}</a>
       </div>
+   </div>
+
+    <br>
+
+    <div class="row flex-lg-row-reverse align-items-center px-4 pb-3">
+      <div class="col-10 col-sm-8 col-lg-6 py-3">
+	<form action="https://www.getrevue.co/profile/flibrary/add_subscriber" method="post" id="revue-form" name="revue-form"  target="_blank">
+	    <h1 class="text-gradient text-info fw-bolder">FLibrary Connect</h1>
+	    <p class="lead">{{ i18n!(self.i18n.catalog, "Monthly update on everything FLibrary directly from our creators and developers.") }}</p>
+	    <div class="d-flex w-100 gap-2">
+	      <label for="member_email" class="visually-hidden">{{ i18n!(self.i18n.catalog, "Your email address") }}</label>
+	      <input class="form-control" placeholder="{{ i18n!(self.i18n.catalog, "Your email address") }}" type="email" name="member[email]" id="member_email">
+	      <input class="btn btn-lg btn-primary" type="submit" value="{{ i18n!(self.i18n.catalog, "Subscribe") }}" name="member[subscribe]" id="member_submit">
+	    </div>
+	</form>
+      </div>
+      <div class="col-lg-6 py-3">
+        <h2 class="display-5 fw-bold lh-1 mb-3">{{ i18n!(self.i18n.catalog, "Subscribe to our newsletter") }}</h1>
+<p class="lead">{{ i18n!(self.i18n.catalog, "Witness how curiosity progresses with <span class=\"text-info text-gradient fw-bold\">FLibrary Connect</span>, our monthly newsletter composed directly by our developers and creators. Get everything FLibrary delivered now.")|safe }}</p>
+	<a href="https://t.me/theflibrary" class="btn btn-primary btn-lg my-1" role="button">{{ i18n!(self.i18n.catalog, "Subscribe on  <i class=\"bi bi-telegram\"></i> Telegram")|safe }}</a>
+      </div>
     </div>
+
 
    <br>
 
