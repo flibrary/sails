@@ -13,7 +13,7 @@
 
     cargo2nix = {
       # url = "github:flibrary/cargo2nix/master";
-      url = "github:cargo2nix/cargo2nix/master";
+      url = "github:cargo2nix/cargo2nix/release-0.11.0";
       inputs = {
         rust-overlay.follows = "rust-overlay";
         nixpkgs.follows = "nixpkgs";
