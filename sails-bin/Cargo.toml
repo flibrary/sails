@@ -17,7 +17,7 @@ image = "^0.23"
 qrcode = "^0.12"
 lopdf = { version = "^0.27", features = ["embed_image"] }
 log = "^0.4"
-teloxide = { version = "^0.7", features = ["auto-send", "macros"] }
+teloxide = { version = "^0.10", features = ["auto-send", "macros"] }
 bytes = "^1"
 maplit = "^1"
 once_cell = "^1.7"
