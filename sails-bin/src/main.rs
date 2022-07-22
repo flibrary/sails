@@ -14,8 +14,6 @@ extern crate diesel_migrations;
 #[macro_use]
 extern crate rocket_sync_db_pools;
 
-use crate::i18n::I18n;
-use aead::AeadKey;
 use ammonia::Builder;
 use askama::Template;
 use diesel::connection::SimpleConnection;
@@ -40,36 +38,34 @@ use sails_db::{
 };
 use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
 use structopt::StructOpt;
-use telegram_bot::TelegramBot;
+use utils::{
+    aead::AeadKey,
+    alipay::{AlipayAppPrivKey, AlipayClient},
+    i18n::I18n,
+    images::ImageHosting,
+    recaptcha::ReCaptcha,
+    smtp::SmtpCreds,
+    telegram_bot::TelegramBot,
+};
 
 init_i18n!("sails", en, zh);
 
 // Following modules may use i18n! or t!, they are required to be called before compile_i18n! per https://github.com/Plume-org/gettext-macros#order-of-the-macros
 mod admin;
-mod aead;
-mod alipay;
 mod digicons;
 mod guards;
-mod i18n;
-mod images;
 mod messages;
 mod orders;
-mod recaptcha;
 mod root;
 mod search;
-mod smtp;
 mod store;
-mod telegram_bot;
 mod user;
+mod utils;
 
-use crate::{
-    alipay::{AlipayAppPrivKey, AlipayClient},
-    digicons::DigiconHosting,
-    images::ImageHosting,
-    recaptcha::ReCaptcha,
-    root::RootPasswd,
-    smtp::SmtpCreds,
-};
+// Type-level key used by rocket_oauth2
+pub struct FLibraryID;
+
+use crate::{digicons::DigiconHosting, root::RootPasswd};
 
 pub fn sanitize_html(html: &str) -> String {
     SANITIZER.clean(html).to_string()
@@ -276,6 +272,7 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<AlipayClient>())
         .attach(AdHoc::config::<PaypalAuth>())
         .attach(AdHoc::config::<TelegramBot>())
+        .attach(rocket_oauth2::OAuth2::<FLibraryID>::fairing("FLibraryID"))
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .manage(include_i18n!())
         .mount("/", routes![index, get_icon, joinus])
@@ -284,25 +281,14 @@ fn rocket() -> Rocket<Build> {
         .mount(
             "/user",
             routes![
+                user::signin,
+                user::signin_callback,
                 user::portal,
                 user::portal_guest,
-                user::change_passwd_page,
-                user::change_passwd_post,
-                user::signin,
-                user::validate,
-                user::signup,
-                user::create_user,
                 user::logout,
                 user::update_user,
                 user::update_user_page,
                 user::portal_unsigned,
-                user::activate_user,
-                user::signup_instruction,
-                user::email_verified,
-                user::reset_passwd_page,
-                user::reset_passwd_post,
-                user::reset_passwd_now,
-                user::reset_passwd_instruction
             ],
         )
         .mount(
@@ -345,7 +331,6 @@ fn rocket() -> Rocket<Build> {
                 root::user_status,
                 root::update_user_status,
                 root::delete_user,
-                root::activate_user,
             ],
         )
         .mount(
@@ -384,9 +369,13 @@ fn rocket() -> Rocket<Build> {
         )
         .mount(
             "/images",
-            routes![images::upload, images::get, images::get_default],
+            routes![
+                utils::images::upload,
+                utils::images::get,
+                utils::images::get_default
+            ],
         )
-        .mount("/i18n", routes![i18n::set_lang])
+        .mount("/i18n", routes![utils::i18n::set_lang])
         .mount(
             "/digicons",
             routes![

@@ -1,6 +1,6 @@
 edition = "2018"
 imports_granularity="Crate"
-report_fixme="Always"
+# report_fixme="Always"
 # We don't want to be the format-police here!
 # ignore = [
 #     "askama_shared",

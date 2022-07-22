@@ -5,7 +5,7 @@ use crate::{
 use sails_db::{products::ProductInfo, transactions::TransactionInfo, users::UserInfo};
 use serde::{Deserialize, Deserializer};
 use std::{future::Future, sync::Arc, time::Duration};
-use teloxide::{adaptors::DefaultParseMode, prelude2::*};
+use teloxide::{adaptors::DefaultParseMode, prelude::*};
 
 fn deserialize_bot_token<'de, D>(
     deserializer: D,
@@ -92,7 +92,7 @@ Total: {total}"#,
             // Discard the error
             tryn(5, Duration::from_secs(5), || {
                 bot_token
-                    .send_message(channel_id, msg.clone())
+                    .send_message(ChatId(channel_id), msg.clone())
                     .disable_web_page_preview(true)
             })
             .await

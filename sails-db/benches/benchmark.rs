@@ -9,44 +9,25 @@ use sails_db::{
 
 fn login_user(c: &mut Criterion) {
     let conn = establish_connection();
-    let user_id = UserForm::new(
-        "TestUser@example.org",
-        "Kanyang Ying",
-        "NFLS",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
-
-    user_id
-        .get_info(&conn)
+    UserForm::new("TestUser@example.org", "Kanyang Ying", "", None)
+        .to_ref()
         .unwrap()
-        .set_validated(true)
-        .update(&conn)
+        .create(&conn)
         .unwrap();
 
     c.bench_function("login an user", |b| {
-        b.iter(|| UserId::login(&conn, "TestUser@example.org", "strongpasswd").unwrap())
+        b.iter(|| UserId::find(&conn, "TestUser@example.org").unwrap())
     });
 }
 
 fn products(c: &mut Criterion) {
     let conn = establish_connection();
     // our seller
-    let user_id = UserForm::new(
-        "TestUser@example.org",
-        "Kanyang Ying",
-        "NFLS",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
+    let user_id = UserForm::new("TestUser@example.org", "Kanyang Ying", "NFLS", None)
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
     // The book category
     let mut books = Category::create(&conn, "Books", 1).unwrap();

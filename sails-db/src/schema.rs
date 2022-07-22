@@ -102,8 +102,6 @@ table! {
         id -> Text,
         name -> Text,
         school -> Text,
-        hashed_passwd -> Text,
-        validated -> Bool,
         description -> Nullable<Text>,
         user_status -> BigInt,
     }

@@ -1,4 +1,4 @@
-use crate::{guards::*, i18n::I18n, DbConn, IntoFlash};
+use crate::{guards::*, utils::i18n::I18n, DbConn, IntoFlash};
 use askama::Template;
 use rocket::{
     form::Form,

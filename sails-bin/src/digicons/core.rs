@@ -1,4 +1,8 @@
-use crate::{aead::AeadKey, guards::*, i18n::I18n, DbConn, IntoFlash};
+use crate::{
+    guards::*,
+    utils::{aead::AeadKey, i18n::I18n},
+    DbConn, IntoFlash,
+};
 use askama::Template;
 use bytes::Bytes;
 use chacha20poly1305::Nonce;

@@ -35,7 +35,8 @@
         pkgs = system:
           import nixpkgs {
             system = "${system}";
-            overlays = [ rust-overlay.overlay cargo2nix.overlay ];
+            overlays =
+              [ rust-overlay.overlays.default cargo2nix.overlays.default ];
           };
         rustPkgs = system:
           with (pkgs system);
@@ -54,7 +55,7 @@
           ((rustPkgs system).workspaceShell {
             nativeBuildInputs = with (pkgs system); [
               cargo2nix.packages."${system}".cargo2nix
-              rust-bin.nightly."2022-02-15".rustfmt
+              rust-bin.nightly."2022-07-20".rustfmt
               # cargo2nix uses the minimal profile which doesn't provide clippy
               rust-bin.stable.latest.clippy
               rust-analyzer

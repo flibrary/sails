@@ -122,41 +122,23 @@ mod tests {
     fn get_list() {
         let conn = establish_connection();
         // Our sender
-        let sender = UserForm::new(
-            "TestUser@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let sender = UserForm::new("TestUser@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
-        let sender2 = UserForm::new(
-            "AnotherSender@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let sender2 = UserForm::new("AnotherSender@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
-        let receiver = UserForm::new(
-            "Him@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let receiver = UserForm::new("Him@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
         Messages::send(&conn, &sender, &receiver, "Hello").unwrap();
         Messages::send(&conn, &sender, &receiver, "Are you there?").unwrap();
@@ -181,41 +163,23 @@ mod tests {
     fn trivial() {
         let conn = establish_connection();
         // Our sender
-        let sender = UserForm::new(
-            "TestUser@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let sender = UserForm::new("TestUser@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
-        let sender2 = UserForm::new(
-            "AnotherSender@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let sender2 = UserForm::new("AnotherSender@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
-        let receiver = UserForm::new(
-            "Him@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let receiver = UserForm::new("Him@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
         Messages::send(&conn, &receiver, &receiver, "Self-message").unwrap();
 
@@ -251,41 +215,23 @@ mod tests {
     fn delete_msg() {
         let conn = establish_connection();
         // Our sender
-        let sender = UserForm::new(
-            "TestUser@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let sender = UserForm::new("TestUser@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
-        let sender2 = UserForm::new(
-            "AnotherSender@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let sender2 = UserForm::new("AnotherSender@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
-        let receiver = UserForm::new(
-            "Him@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let receiver = UserForm::new("Him@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
         Messages::send(&conn, &receiver, &receiver, "Self-message").unwrap();
 

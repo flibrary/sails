@@ -1,4 +1,8 @@
-use crate::{guards::*, i18n::I18n, telegram_bot::TelegramBot, DbConn, IntoFlash};
+use crate::{
+    guards::*,
+    utils::{i18n::I18n, telegram_bot::TelegramBot},
+    DbConn, IntoFlash,
+};
 use askama::Template;
 use paypal_rs::{
     api::orders::*,

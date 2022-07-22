@@ -8,17 +8,11 @@ use crate::{
 fn create_digicons() {
     let conn = establish_connection();
 
-    let user_id = UserForm::new(
-        "TestUser@example.org",
-        "Kanyang Ying",
-        "NFLS",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
+    let user_id = UserForm::new("TestUser@example.org", "Kanyang Ying", "NFLS", None)
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
     let physics_done_wrong = Digicon::create(
         &conn,
@@ -54,29 +48,17 @@ fn create_digicons() {
 fn mapping() {
     let conn = establish_connection();
     // our seller
-    let user_id = UserForm::new(
-        "TestUser@example.org",
-        "NFLS",
-        "+86 18353232340",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
+    let user_id = UserForm::new("TestUser@example.org", "NFLS", "", None)
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
-    let another = UserForm::new(
-        "TestUser2@example.org",
-        "NFLS",
-        "+86 18353232340",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
+    let another = UserForm::new("TestUser2@example.org", "NFLS", "", None)
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
     let physics_done_wrong = Digicon::create(
         &conn,

@@ -52,17 +52,11 @@ fn mapping() {
     builder.build(&conn).unwrap();
 
     // our seller
-    let user_id = UserForm::new(
-        "TestUser@example.org",
-        "NFLS",
-        "+86 18353232340",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
+    let user_id = UserForm::new("TestUser@example.org", "NFLS", "", None)
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
     // The book category
     let econ = Category::create(&conn, "Economics Books", 1)

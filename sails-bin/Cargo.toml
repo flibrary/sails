@@ -7,7 +7,9 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-paypal-rs = { version = "0.2.0-alpha.7" }
+rocket_oauth2 = "0.5.0-rc.1"
+jsonwebtoken = "^8"
+paypal-rs = "^0.2"
 
 gettext-macros = "^0.6"
 gettext-utils = "0.1"
@@ -17,7 +19,7 @@ image = "^0.23"
 qrcode = "^0.12"
 lopdf = { version = "^0.27", features = ["embed_image"] }
 log = "^0.4"
-teloxide = { version = "^0.7", features = ["auto-send", "macros"] }
+teloxide = { version = "^0.10", features = ["auto-send", "macros"] }
 bytes = "^1"
 maplit = "^1"
 once_cell = "^1.7"

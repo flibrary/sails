@@ -1,4 +1,8 @@
-use crate::{guards::*, i18n::I18n, recaptcha::ReCaptcha, DbConn, IntoFlash};
+use crate::{
+    guards::*,
+    utils::{i18n::I18n, recaptcha::ReCaptcha},
+    DbConn, IntoFlash,
+};
 use askama::Template;
 use rocket::{
     form::Form,
@@ -156,19 +160,6 @@ pub async fn delete_user(
 ) -> Result<Redirect, Flash<Redirect>> {
     let id = user_id.to_id_param(&conn).await.into_flash(uri!("/"))?;
     conn.run(|c| id.id.delete(c)).await.into_flash(uri!("/"))?;
-    Ok(Redirect::to(uri!("/root", root)))
-}
-
-#[get("/activate_user?<user_id>")]
-pub async fn activate_user(
-    _guard: Role<Root>,
-    user_id: UserGuard,
-    conn: DbConn,
-) -> Result<Redirect, Flash<Redirect>> {
-    let info = user_id.to_info_param(&conn).await.into_flash(uri!("/"))?;
-    conn.run(|c| info.info.set_validated(true).update(c))
-        .await
-        .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/root", root)))
 }
 

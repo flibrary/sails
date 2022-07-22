@@ -1,17 +1,12 @@
-use crate::{aead::AeadKey, DbConn};
-use chacha20poly1305::Nonce;
+use crate::DbConn;
 use rocket::{
     form::{self, FromFormField, ValueField},
     http::uri::fmt::{FromUriParam, Query},
     outcome::{try_outcome, IntoOutcome, Outcome},
     request::FromRequest,
-    State,
 };
 use sails_db::{error::SailsDbError, users::*};
 use std::marker::PhantomData;
-
-// User ID sepcified as AEAD encrypted ciphertext
-pub struct Aead;
 
 // User ID specified in param
 pub struct Param;
@@ -51,50 +46,9 @@ impl UserGuard {
         .await
     }
 
-    pub async fn to_id_aead(
-        &self,
-        db: &DbConn,
-        nonce: String,
-        aead: &State<AeadKey>,
-    ) -> Result<UserIdGuard<Aead>, SailsDbError> {
-        let decode_fn = || -> Result<String, anyhow::Error> {
-            let nonce = Nonce::clone_from_slice(&base64::decode_config(&nonce, base64::URL_SAFE)?);
-            let decoded = base64::decode_config(&self.0, base64::URL_SAFE)?;
-            Ok(String::from_utf8(aead.decrypt(&decoded, &nonce).map_err(
-                |_| anyhow::anyhow!("mailaddress decryption failed"),
-            )?)?)
-        };
-
-        let uid = decode_fn();
-
-        db.run(move |c| -> Result<UserIdGuard<Aead>, SailsDbError> {
-            Ok(UserIdGuard {
-                id: UserFinder::new(c, None).id(&uid?).first()?,
-                plhdr: PhantomData,
-            })
-        })
-        .await
-    }
-
     pub async fn to_info_param(&self, db: &DbConn) -> Result<UserInfoGuard<Param>, SailsDbError> {
         let id = self.to_id_param(db).await?;
         db.run(move |c| -> Result<UserInfoGuard<Param>, SailsDbError> {
-            Ok(UserInfoGuard {
-                info: id.id.get_info(c)?,
-                plhdr: PhantomData,
-            })
-        })
-        .await
-    }
-
-    pub async fn to_info_aead(
-        &self,
-        db: &DbConn,
-        nonce: String,
-        aead: &State<AeadKey>,
-    ) -> Result<UserInfoGuard<Aead>, SailsDbError> {
-        let id = self.to_id_aead(db, nonce, aead).await?;
-        db.run(move |c| -> Result<UserInfoGuard<Aead>, SailsDbError> {
             Ok(UserInfoGuard {
                 info: id.id.get_info(c)?,
                 plhdr: PhantomData,

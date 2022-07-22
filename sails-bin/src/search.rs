@@ -1,7 +1,7 @@
 use crate::{
     guards::ProdGuard,
-    i18n::I18n,
     store::{cmp_product, find_first_image, ProductCard},
+    utils::i18n::I18n,
     DbConn, IntoFlash,
 };
 use askama::Template;

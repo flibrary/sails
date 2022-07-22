@@ -12,11 +12,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid ""
-"FLibrary is the ultimate destination for discovering, discussing, and "
-"distributing learning guides."
-msgstr "FLibrary 是发现、讨论、创作学习内容的终极选择。"
-
 msgid "Store"
 msgstr "Store 商店"
 
@@ -28,6 +23,11 @@ msgstr "创作者中心"
 
 msgid "Portal"
 msgstr "主页"
+
+msgid ""
+"FLibrary is the ultimate destination for discovering, discussing, and "
+"distributing learning guides."
+msgstr "FLibrary 是发现、讨论、创作学习内容的终极选择。"
 
 msgid "Digital Content Distribution Trace"
 msgstr "数字内容分发追踪"
@@ -310,6 +310,9 @@ msgstr "在您的请求下我们没有找到类别，这是一个错误。请联
 msgid "No more subcategories"
 msgstr "无更多子分类"
 
+msgid "Search Results"
+msgstr "搜索结果"
+
 msgid "No products under this category"
 msgstr "此类别下无产品"
 
@@ -397,67 +400,14 @@ msgstr "创作者信息"
 msgid "Sign in to view creator's information"
 msgstr "登录以查看创作者信息"
 
-msgid "Sign in"
-msgstr "登录"
+msgid "Welcome Back"
+msgstr "欢迎回来"
 
-msgid "Sign up"
-msgstr "注册"
+msgid "Welcome back, {0}!"
+msgstr "欢迎回来，{0}！"
 
-msgid "Reset password"
-msgstr "重置密码"
-
-msgid "Verify your email"
-msgstr "验证您的邮箱"
-
-msgid "Please complete email verification"
-msgstr "请完成邮箱验证"
-
-msgid "We have already sent confirmation email to your inbox."
-msgstr "我们向您的邮箱发送了一封验证邮件。"
-
-msgid ""
-"Please check your inbox or junk folder to see the confirmation. Click the "
-"link in the middle to complete verification."
-msgstr "请在您的收件箱或垃圾邮件中查看验证邮件。点击邮件中的链接来完成验证"
-
-msgid ""
-"If you haven't received any confirmation email from us, please <a href="
-"\"mailto:admin@flibrary.info\">reach us</a> for help."
-msgstr ""
-"如果您没有收到验证邮件，请<a href=\"mailto:admin@flibrary.info\">联系我们</a>"
-"来寻求帮助。"
-
-msgid "Reset password confirmation"
-msgstr "重置密码完成"
-
-msgid "Your password has been reset"
-msgstr "您的密码已重置"
-
-msgid "Your new password is <code>{0}</code>"
-msgstr "您的新密码为<code>{0}</code>"
-
-msgid ""
-"Please sign in using the new password above and remember to change your "
-"password soon."
-msgstr "请通过您的新密码登录并记得即使修改密码。"
-
-msgid "Type your email below"
-msgstr "请输入您的邮箱"
-
-msgid "Email verified"
-msgstr "邮箱已验证"
-
-msgid "Your have successfully completed email verification!"
-msgstr "您成功完成了邮箱验证！"
-
-msgid "Your email is verified, and your account is now activated."
-msgstr "您的邮箱已被验证且您的帐号已被激活。"
-
-msgid "Change password"
-msgstr "更改密码"
-
-msgid "New password"
-msgstr "新密码"
+msgid "Visit Portal"
+msgstr "访问主页"
 
 msgid "Update your information"
 msgstr "更新基本信息"
@@ -494,6 +444,9 @@ msgstr "此用户没有上架商品"
 
 msgid "Here you can manage your products and account"
 msgstr "在这里您可以管理您上架的商品和您的帐号"
+
+msgid "Change password"
+msgstr "更改密码"
 
 msgid "Create a product"
 msgstr "上架商品"
@@ -680,3 +633,62 @@ msgstr "基本的网络编程知识"
 
 msgid "Strive for perfection."
 msgstr "追求优秀的代码质量"
+
+#~ msgid "Sign in"
+#~ msgstr "登录"
+
+#~ msgid "Sign up"
+#~ msgstr "注册"
+
+#~ msgid "Reset password"
+#~ msgstr "重置密码"
+
+#~ msgid "Verify your email"
+#~ msgstr "验证您的邮箱"
+
+#~ msgid "Please complete email verification"
+#~ msgstr "请完成邮箱验证"
+
+#~ msgid "We have already sent confirmation email to your inbox."
+#~ msgstr "我们向您的邮箱发送了一封验证邮件。"
+
+#~ msgid ""
+#~ "Please check your inbox or junk folder to see the confirmation. Click the "
+#~ "link in the middle to complete verification."
+#~ msgstr "请在您的收件箱或垃圾邮件中查看验证邮件。点击邮件中的链接来完成验证"
+
+#~ msgid ""
+#~ "If you haven't received any confirmation email from us, please <a href="
+#~ "\"mailto:admin@flibrary.info\">reach us</a> for help."
+#~ msgstr ""
+#~ "如果您没有收到验证邮件，请<a href=\"mailto:admin@flibrary.info\">联系我们"
+#~ "</a>来寻求帮助。"
+
+#~ msgid "Reset password confirmation"
+#~ msgstr "重置密码完成"
+
+#~ msgid "Your password has been reset"
+#~ msgstr "您的密码已重置"
+
+#~ msgid "Your new password is <code>{0}</code>"
+#~ msgstr "您的新密码为<code>{0}</code>"
+
+#~ msgid ""
+#~ "Please sign in using the new password above and remember to change your "
+#~ "password soon."
+#~ msgstr "请通过您的新密码登录并记得即使修改密码。"
+
+#~ msgid "Type your email below"
+#~ msgstr "请输入您的邮箱"
+
+#~ msgid "Email verified"
+#~ msgstr "邮箱已验证"
+
+#~ msgid "Your have successfully completed email verification!"
+#~ msgstr "您成功完成了邮箱验证！"
+
+#~ msgid "Your email is verified, and your account is now activated."
+#~ msgstr "您的邮箱已被验证且您的帐号已被激活。"
+
+#~ msgid "New password"
+#~ msgstr "新密码"

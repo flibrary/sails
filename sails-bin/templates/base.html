@@ -49,8 +49,8 @@
 		<i class="bi bi-translate"></i>
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-		<li><a class="dropdown-item" href="{{uri!("/i18n", crate::i18n::set_lang("en"))}}">English</a></li>
-		<li><a class="dropdown-item" href="{{uri!("/i18n", crate::i18n::set_lang("zh"))}}">中文</a></li>
+		<li><a class="dropdown-item" href="{{uri!("/i18n", crate::utils::i18n::set_lang("en"))}}">English</a></li>
+		<li><a class="dropdown-item" href="{{uri!("/i18n", crate::utils::i18n::set_lang("zh"))}}">中文</a></li>
               </ul>
             </li>
 	    {% block navbutton %}{% endblock navbutton %}

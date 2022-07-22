@@ -594,29 +594,17 @@ mod tests {
     fn create_transaction() {
         let conn = establish_connection();
         // our seller
-        let seller = UserForm::new(
-            "TestUser@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let seller = UserForm::new("TestUser@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
-        let buyer = UserForm::new(
-            "AtypicalBuyer@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let buyer = UserForm::new("AtypicalBuyer@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
         // The book category
         let econ = Category::create(&conn, "Economics Books", 1)
@@ -752,29 +740,17 @@ mod tests {
     fn txstats() {
         let conn = establish_connection();
         // our seller
-        let seller = UserForm::new(
-            "TestUser@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let seller = UserForm::new("TestUser@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
-        let buyer = UserForm::new(
-            "AtypicalBuyer@example.org",
-            "NFLS",
-            "+86 18353232340",
-            "strongpasswd",
-            None,
-        )
-        .to_ref()
-        .unwrap()
-        .create(&conn)
-        .unwrap();
+        let buyer = UserForm::new("AtypicalBuyer@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
 
         // The book category
         let econ = Category::create(&conn, "Economics Books", 1)

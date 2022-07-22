@@ -12,6 +12,7 @@ pub struct SmtpCreds {
 }
 
 impl SmtpCreds {
+    #[allow(dead_code)]
     pub async fn send(&self, dst: &str, subject: &str, body: String) -> anyhow::Result<()> {
         let email = Message::builder()
             .from(Mailbox::new(

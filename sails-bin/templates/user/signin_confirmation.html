@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Welcome Back") }}{% endblock title %}
+{% block content %}
+<main class="container">
+    <div class="p-5 rounded shadow">
+      <h1>{{ i18n!(self.i18n.catalog, "Welcome back, {0}!"; self.name.clone())|safe }}</h1>
+      <a href="/user" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Visit Portal") }}</a>
+    </p>
+    </div>
+    <br>
+</main>
+{% endblock content %}

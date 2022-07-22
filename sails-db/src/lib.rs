@@ -1,3 +1,6 @@
+// False positive by clippy: https://github.com/rust-lang/rust-clippy/issues/9014
+#![allow(clippy::extra_unused_lifetimes)]
+
 // For the time being, the diesel doesn't play well without macro use, see also: https://github.com/diesel-rs/diesel/issues/1894
 #[macro_use]
 extern crate diesel;

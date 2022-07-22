@@ -396,64 +396,13 @@ msgstr ""
 msgid "Sign in to view creator's information"
 msgstr ""
 
-msgid "Sign in"
+msgid "Welcome Back"
 msgstr ""
 
-msgid "Sign up"
+msgid "Welcome back, {0}!"
 msgstr ""
 
-msgid "Reset password"
-msgstr ""
-
-msgid "Verify your email"
-msgstr ""
-
-msgid "Please complete email verification"
-msgstr ""
-
-msgid "We have already sent confirmation email to your inbox."
-msgstr ""
-
-msgid ""
-"Please check your inbox or junk folder to see the confirmation. Click the "
-"link in the middle to complete verification."
-msgstr ""
-
-msgid ""
-"If you haven't received any confirmation email from us, please <a href="
-"\"mailto:admin@flibrary.info\">reach us</a> for help."
-msgstr ""
-
-msgid "Reset password confirmation"
-msgstr ""
-
-msgid "Your password has been reset"
-msgstr ""
-
-msgid "Your new password is <code>{0}</code>"
-msgstr ""
-
-msgid ""
-"Please sign in using the new password above and remember to change your "
-"password soon."
-msgstr ""
-
-msgid "Type your email below"
-msgstr ""
-
-msgid "Email verified"
-msgstr ""
-
-msgid "Your have successfully completed email verification!"
-msgstr ""
-
-msgid "Your email is verified, and your account is now activated."
-msgstr ""
-
-msgid "Change password"
-msgstr ""
-
-msgid "New password"
+msgid "Visit Portal"
 msgstr ""
 
 msgid "Update your information"
@@ -490,6 +439,9 @@ msgid "No product created"
 msgstr ""
 
 msgid "Here you can manage your products and account"
+msgstr ""
+
+msgid "Change password"
 msgstr ""
 
 msgid "Create a product"

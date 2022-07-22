@@ -12,4 +12,4 @@ askama_shared = { git = "https://github.com/djc/askama", rev = "b93ce466cee51f87
 askama_derive = { git = "https://github.com/djc/askama", rev = "b93ce466cee51f879edd346d05c0faa4845ee1cc" }
 askama_escape = { git = "https://github.com/djc/askama", rev = "b93ce466cee51f879edd346d05c0faa4845ee1cc" }
 askama_rocket = { git = "https://github.com/djc/askama", rev = "b93ce466cee51f879edd346d05c0faa4845ee1cc" }
-paypal-rs = { git = "https://github.com/flibrary/paypal-rs" }
+# paypal-rs = { git = "https://github.com/flibrary/paypal-rs" }

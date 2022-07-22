@@ -23,45 +23,17 @@ impl UserId {
         Ok(users.filter(id.eq(&self.id)).first::<UserInfo>(conn)?)
     }
 
+    // Quick alternative to user finder
+    pub fn find(conn: &SqliteConnection, id: &str) -> Result<Self> {
+        UserFinder::new(conn, None).id(id).first()
+    }
+
     pub fn delete(self, conn: &SqliteConnection) -> Result<()> {
         use crate::schema::users::dsl::*;
         Products::delete_by_seller(conn, &self)?;
         Messages::delete_msg_with_user(conn, &self)?;
         diesel::delete(users.filter(id.eq(&self.id))).execute(conn)?;
         Ok(())
-    }
-
-    pub fn login(
-        conn: &SqliteConnection,
-        id_provided: &str,
-        passwd_provided: &str,
-    ) -> Result<Self> {
-        let user = UserFinder::new(conn, None)
-            .id(id_provided)
-            .first()
-            .map_err(|_| SailsDbError::UserNotFound)?;
-        let info = user.get_info(conn)?;
-
-        // If the user is disabled, he will not be allowed to login
-        if info.get_user_status() != UserStatus::DISABLED {
-            if info.get_validated() {
-                match info.verify_passwd(passwd_provided) {
-                    Ok(true) => {
-                        // Successfully validated
-                        Ok(user)
-                    }
-                    Ok(false) => {
-                        // User exists, but password is not right
-                        Err(SailsDbError::IncorrectPassword)
-                    }
-                    Err(e) => Err(e),
-                }
-            } else {
-                Err(SailsDbError::NotValidatedEmail)
-            }
-        } else {
-            Err(SailsDbError::DisabledUser)
-        }
     }
 
     /// Get a reference to the user id's id.
@@ -219,12 +191,6 @@ impl<'a> UserFinder<'a> {
             .filter(user_status.ne(UserStatus::DISABLED.bits() as i64));
         self
     }
-
-    pub fn validated(mut self, val: bool) -> Self {
-        use crate::schema::users::dsl::*;
-        self.query = self.query.filter(validated.eq(val));
-        self
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Queryable, AsChangeset, Identifiable, Clone)]
@@ -233,8 +199,6 @@ pub struct UserInfo {
     id: String,
     name: String,
     school: String,
-    hashed_passwd: String,
-    validated: bool,
     description: Option<String>,
     user_status: i64,
 }
@@ -256,19 +220,10 @@ impl UserInfo {
         &self.school
     }
 
-    pub fn verify_passwd(&self, passwd: impl AsRef<[u8]>) -> Result<bool> {
-        Ok(bcrypt::verify(passwd, &self.hashed_passwd)?)
-    }
-
     /// Set the user info's school.
     pub fn set_school(mut self, school: impl ToString) -> Self {
         self.school = school.to_string();
         self
-    }
-
-    pub fn set_password(mut self, raw_passwd: impl AsRef<[u8]>) -> Result<Self> {
-        self.hashed_passwd = bcrypt::hash(raw_passwd, bcrypt::DEFAULT_COST)?;
-        Ok(self)
     }
 
     pub fn update(self, conn: &SqliteConnection) -> Result<Self> {
@@ -302,17 +257,6 @@ impl UserInfo {
         UserStatus::from_bits_truncate(self.user_status as u32).contains(UserStatus::ADMIN)
     }
 
-    /// Get a reference to the user info's validated.
-    pub fn get_validated(&self) -> bool {
-        self.validated
-    }
-
-    /// Set the user info's validated.
-    pub fn set_validated(mut self, validated: bool) -> Self {
-        self.validated = validated;
-        self
-    }
-
     /// Get a reference to the user info's description.
     pub fn get_description(&self) -> Option<&str> {
         self.description.as_deref()
@@ -323,11 +267,6 @@ impl UserInfo {
         self.description = description;
         self
     }
-
-    /// Get a reference to the user info's hashed passwd.
-    pub fn get_hashed_passwd(&self) -> &str {
-        self.hashed_passwd.as_ref()
-    }
 }
 
 // A struct used for update and insert
@@ -337,9 +276,6 @@ pub struct UserInfoRef<'a> {
     id: &'a str,
     name: &'a str,
     school: &'a str,
-    // This is owned because we processed it
-    hashed_passwd: String,
-    validated: bool,
     description: Option<&'a str>,
     // This is owned because it was created when convert to UserInfoRef
     user_status: i64,
@@ -371,23 +307,14 @@ pub struct UserFormOwned {
     pub name: String,
     pub school: String,
     pub description: Option<String>,
-    #[field(name = "password")]
-    pub raw_passwd: String,
 }
 
 impl UserFormOwned {
-    pub fn new<T: ToString>(
-        id: T,
-        name: T,
-        school: T,
-        raw_passwd: T,
-        description: Option<T>,
-    ) -> Self {
+    pub fn new<T: ToString>(id: T, name: T, school: T, description: Option<T>) -> Self {
         Self {
             id: id.to_string(),
             school: school.to_string(),
             name: name.to_string(),
-            raw_passwd: raw_passwd.to_string(),
             description: description.map(|x| x.to_string()),
         }
     }
@@ -398,7 +325,6 @@ impl UserFormOwned {
             school: &self.school,
             name: &self.name,
             description: self.description.as_deref(),
-            raw_passwd: &self.raw_passwd,
         };
         form.to_ref()
     }
@@ -412,37 +338,26 @@ pub struct UserForm<'a> {
     pub name: &'a str,
     pub school: &'a str,
     pub description: Option<&'a str>,
-    #[field(name = "password")]
-    pub raw_passwd: &'a str,
 }
 
 impl<'a> UserForm<'a> {
-    pub fn new(
-        id: &'a str,
-        name: &'a str,
-        school: &'a str,
-        raw_passwd: &'a str,
-        description: Option<&'a str>,
-    ) -> Self {
+    pub fn new(id: &'a str, name: &'a str, school: &'a str, description: Option<&'a str>) -> Self {
         Self {
             id,
             name,
             school,
             description,
-            raw_passwd,
         }
     }
 
     // Warning: this should not be used to update user!
-    // Otherwise the validation and account role gets cleaned up to default.
+    // Otherwise the account role gets cleaned up to default.
     pub fn to_ref(&self) -> Result<UserInfoRef<'a>> {
         self.id.parse::<lettre::Address>()?;
         Ok(UserInfoRef {
             id: self.id,
-            hashed_passwd: bcrypt::hash(self.raw_passwd, bcrypt::DEFAULT_COST)?,
             school: self.school,
             name: self.name,
-            validated: false,
             description: self.description,
             user_status: UserStatus::default().bits() as i64,
         })

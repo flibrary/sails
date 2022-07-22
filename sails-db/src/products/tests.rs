@@ -6,17 +6,11 @@ use std::collections::HashMap;
 fn create_product() {
     let conn = establish_connection();
     // our seller
-    let user_id = UserForm::new(
-        "TestUser@example.org",
-        "NFLS",
-        "+86 18353232340",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
+    let user_id = UserForm::new("TestUser@example.org", "NFLS", "", None)
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
     // The book category
     let econ = Category::create(&conn, "Economics Books", 1)
@@ -40,17 +34,11 @@ fn create_product() {
 fn search_products() {
     let conn = establish_connection();
     // our seller
-    let user_id = UserForm::new(
-        "TestUser@example.org",
-        "NFLS",
-        "+86 18353232340",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
+    let user_id = UserForm::new("TestUser@example.org", "NFLS", "", None)
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
     // The book category
     let mut books = Category::create(&conn, "Books", 1).unwrap();
@@ -203,17 +191,11 @@ fn delete_product() {
     builder.build(&conn).unwrap();
 
     // our seller
-    let user_id = UserForm::new(
-        "TestUser@example.org",
-        "NFLS",
-        "+86 18353232340",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
+    let user_id = UserForm::new("TestUser@example.org", "NFLS", "", None)
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
     // The book category
     let econ = Category::create(&conn, "Economics Books", 1)
@@ -245,17 +227,11 @@ fn delete_product() {
 fn product_status() {
     let conn = establish_connection();
     // our seller
-    let user_id = UserForm::new(
-        "TestUser@example.org",
-        "NFLS",
-        "+86 18353232340",
-        "strongpasswd",
-        None,
-    )
-    .to_ref()
-    .unwrap()
-    .create(&conn)
-    .unwrap();
+    let user_id = UserForm::new("TestUser@example.org", "NFLS", "", None)
+        .to_ref()
+        .unwrap()
+        .create(&conn)
+        .unwrap();
 
     // The book category
     let econ = Category::create(&conn, "Economics Books", 1)
