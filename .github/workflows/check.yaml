@@ -62,12 +62,14 @@ jobs:
             target
           key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-test
       - run: sudo apt-get install gettext
-      - uses: actions-rs/install@v0.1
+      - uses: actions-rs/toolchain@v1
         with:
-          crate: cargo-all-features
-          version: latest
-          use-tool-cache: true
-      - run: cargo test-all-features
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
 
   bench:
     name: Benchmark

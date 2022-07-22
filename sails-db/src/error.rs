@@ -14,9 +14,6 @@ pub enum SailsDbError {
     #[error("database query failed with: {0}")]
     QueryError(#[from] diesel::result::Error),
 
-    #[error("failed to convert to a phone number: {0}")]
-    PhoneParseError(#[from] phonenumber::ParseError),
-
     #[error("failed to parse uuid: {0}")]
     UuidError(#[from] uuid::Error),
 
@@ -25,12 +22,6 @@ pub enum SailsDbError {
 
     #[error("email has already been registered")]
     UserRegistered,
-
-    #[error("no user found given the information")]
-    UserNotFound,
-
-    #[error("password was incorrect")]
-    IncorrectPassword,
 
     #[error("category already existed")]
     CategoryExisted,

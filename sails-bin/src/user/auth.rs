@@ -35,10 +35,10 @@ pub struct SignInConfirmation {
 
 #[get("/signin_callback")]
 pub async fn signin_callback(
+    i18n: I18n,
     token: TokenResponse<FLibraryID>,
     jar: &CookieJar<'_>,
     conn: DbConn,
-    i18n: I18n,
 ) -> Result<SignInConfirmation, Flash<Redirect>> {
     // Key from JWKs.json from keycloak: https://id.flibrary.info/realms/Customers/protocol/openid-connect/certs
     let key = DecodingKey::from_rsa_components("78WjV0F2wpZnHGFYP7h1LizDSaQAVthaW4_ASi8ya6lQtruT8HSzwa7hUDlXoiRKiLR2mvz73WuglHXUpQYQ8LXVK7sAEY9FH98SDAqk5tLCT9vths6eM12DZFQnDJD0yhW7L6F5BGQPydjGcfyHfqwY5cjFzO097x7kuyUND6-Jt8a5jS9rkVEEFvaIU5nfv5OTLQMRLtRMu6O_VLLBkDZH7wnbWoQ5wKDpYcEKyMSFxlAZEMYRNHAF2-xoP3QCVuVf4vwiGWSWCExos2jwm8CCsAX_E5iyorC2r1DE6sv1FS5QVLzbWe93TdJw0Rx3i_hh_fb_HCFv1yYmX60EfQ", "AQAB").into_flash(uri!("/"))?;

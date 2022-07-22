@@ -23,7 +23,6 @@ diesel_migrations = "^1.4"
 bcrypt = "^0.10"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 thiserror = "^1"
-phonenumber = "^0.3"
 lettre = "0.10.0-rc.3"
 rocket = "0.5.0-rc.1"
 chrono = { version = "^0.4", features = ["serde"] }

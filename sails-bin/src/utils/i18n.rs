@@ -1,6 +1,6 @@
 pub use gettext::*;
 use rocket::{
-    http::{Cookie as HttpCookie, CookieJar, SameSite},
+    http::{Cookie, CookieJar, SameSite},
     response::Redirect,
 };
 use std::sync::Arc;
@@ -72,9 +72,10 @@ impl<'r> FromRequest<'r> for I18n {
 
 #[get("/set?<lang>")]
 pub async fn set_lang(jar: &CookieJar<'_>, lang: String) -> Redirect {
-    let cookie = HttpCookie::build("lang", lang)
+    let cookie = Cookie::build("lang", lang)
         .secure(true)
-        .same_site(SameSite::Strict)
+        // When redirected back from FLibrary ID, unless the samesite restriction is None, firefox doesn't send lang cookie, resulting in mismatched user experience.
+        .same_site(SameSite::None)
         .finish();
     // Successfully validated, set cookie.
     jar.add(cookie);
