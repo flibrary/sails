@@ -9,7 +9,7 @@ name: Build, test, bench, and continuous deployment
 jobs:
   cachix:
     name: upload cachix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
         with:
@@ -31,7 +31,7 @@ jobs:
 
   check:
     name: Build all feature permutations
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -51,7 +51,7 @@ jobs:
 
   test:
     name: Test Suite
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -62,18 +62,16 @@ jobs:
             target
           key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-test
       - run: sudo apt-get install gettext
-      - uses: actions-rs/toolchain@v1
+      - uses: actions-rs/install@v0.1
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
+          crate: cargo-all-features
+          version: latest
+          use-tool-cache: true
+      - run: cargo test-all-features
 
   bench:
     name: Benchmark
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -96,7 +94,7 @@ jobs:
 
   clippy:
     name: Clippy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -120,7 +118,7 @@ jobs:
   repo_dispatch:
     if: github.event_name == 'push'
     name: Create repository dispatch
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       [cachix, check, test, bench, clippy]
     steps:
