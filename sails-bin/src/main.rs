@@ -200,6 +200,7 @@ fn rocket() -> Rocket<Build> {
                 user::portal,
                 user::portal_guest,
                 user::logout,
+                user::logout_fallback,
                 user::update_user,
                 user::update_user_page,
                 user::portal_unsigned,

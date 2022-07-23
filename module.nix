@@ -34,6 +34,24 @@ in {
       description = "The data dir that the service has access with";
     };
 
+    requires = mkOption {
+      type = types.listOf types.str;
+      description =
+        "The services to be specified in `Requires` of the systemd config";
+    };
+
+    after = mkOption {
+      type = types.listOf types.str;
+      description =
+        "The services to be specified in `After` of the systemd config";
+    };
+
+    wants = mkOption {
+      type = types.listOf types.str;
+      description =
+        "The services to be specified in `wants` of the systemd config";
+    };
+
     package = mkOption {
       type = types.package;
       description = "Package of the sails-bin";
@@ -59,7 +77,9 @@ in {
     systemd.services.sails = {
       description = "Sails Server Service";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      after = [ "network.target" ] ++ cfg.after;
+      requires = cfg.requires;
+      wants = cfg.wants;
 
       serviceConfig = {
         ExecStart = "${cfg.package}/bin/sails-bin --config ${confFile}";

@@ -67,13 +67,12 @@
           });
       in rec {
         # `nix build`
-        packages = {
+        packages = rec {
           # We have to do it like `nix develop .#commit` because libraries don't play well with `makeBinPath` or `makeLibraryPath`.
           commit = (workspaceShell (builtins.readFile ./commit.sh));
           sails-bin = ((rustPkgs system).workspace.sails-bin { }).bin;
+          default = sails-bin;
         };
-
-        defaultPackage = packages.sails-bin;
 
         apps = {
           sails-bin = utils.lib.mkApp { drv = packages.sails-bin; };
@@ -91,15 +90,15 @@
         defaultApp = apps.sails-bin;
 
         # `nix develop`
-        devShell = workspaceShell null;
+        devShells.default = workspaceShell null;
 
         # We don't check packages.commit because techinically it is not a pacakge
         checks = builtins.removeAttrs packages [ "commit" ];
       }));
     in attrs // {
-      nixosModule = (import ./module.nix);
+      nixosModules.default = (import ./module.nix);
 
-      overlay = final: prev: {
+      overlays.default = final: prev: {
         sails-bin = attrs.packages."${prev.pkgs.system}".sails-bin;
       };
     };

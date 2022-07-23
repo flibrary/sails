@@ -1,7 +1,7 @@
 use crate::{
     utils::{
         i18n::I18n,
-        oidc::{OIDCClient, OIDCIdToken, OIDCTokenResponse},
+        oidc::{OIDCClient, OIDCIdToken, OIDCTokenResponse, ID_TOKEN_COOKIE_NAME},
     },
     DbConn, IntoFlash,
 };
@@ -77,7 +77,7 @@ pub async fn signin_callback(
     })
 }
 
-#[get("/logout")]
+#[get("/logout", rank = 1)]
 pub async fn logout(
     jar: &CookieJar<'_>,
     id_token: OIDCIdToken,
@@ -88,9 +88,34 @@ pub async fn logout(
     } else {
         // No UID specified, do nothing
     }
+
+    if let Some(uid) = jar.get_private(ID_TOKEN_COOKIE_NAME) {
+        jar.remove_private(uid);
+    } else {
+        // No UID specified, do nothing
+    }
+
     // Redirect back to home
     Redirect::to(format!(
         "{}&id_token_hint={}",
         client.logout_redirect_uri, id_token.id_token
     ))
+}
+
+#[get("/logout", rank = 2)]
+pub async fn logout_fallback(jar: &CookieJar<'_>) -> Redirect {
+    if let Some(uid) = jar.get_private("uid") {
+        jar.remove_private(uid);
+    } else {
+        // No UID specified, do nothing
+    }
+
+    if let Some(id_token) = jar.get_private(ID_TOKEN_COOKIE_NAME) {
+        jar.remove_private(id_token);
+    } else {
+        // No id_token cookie, do noting
+    }
+
+    // Redirect back to home
+    Redirect::to(uri!("/"))
 }

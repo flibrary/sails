@@ -17,9 +17,9 @@ use rocket::{
     response::Redirect,
 };
 
-const STATE_COOKIE_NAME: &str = "sails_oidc_state";
-const NONCE_COOKIE_NAME: &str = "sails_oidc_nonce";
-const ID_TOKEN_COOKIE_NAME: &str = "sails_oidc_id_token";
+pub const STATE_COOKIE_NAME: &str = "sails_oidc_state";
+pub const NONCE_COOKIE_NAME: &str = "sails_oidc_nonce";
+pub const ID_TOKEN_COOKIE_NAME: &str = "sails_oidc_id_token";
 
 pub struct OIDCClient {
     client: CoreClient,
