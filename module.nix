@@ -36,18 +36,21 @@ in {
 
     requires = mkOption {
       type = types.listOf types.str;
+      default = [ ];
       description =
         "The services to be specified in `Requires` of the systemd config";
     };
 
     after = mkOption {
       type = types.listOf types.str;
+      default = [ ];
       description =
         "The services to be specified in `After` of the systemd config";
     };
 
     wants = mkOption {
       type = types.listOf types.str;
+      default = [ ];
       description =
         "The services to be specified in `wants` of the systemd config";
     };
