@@ -1,461 +1,479 @@
 msgid ""
+msgstr ""
+"Project-Id-Version: sails\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-06-15 16:33-0700\n"
+"PO-Revision-Date: 2018-06-15 16:33-0700\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid ""
 "FLibrary is the ultimate destination for discovering, discussing, and "
 "distributing learning guides."
-msgstr ""
+msgstr "FLibrary 是发现、讨论、创作学习内容的终极选择。"
 
 msgid "Store"
-msgstr ""
+msgstr "Store 商店"
 
 msgid "Messages"
-msgstr ""
+msgstr "消息"
 
 msgid "Creator Center"
-msgstr ""
+msgstr "创作者中心"
 
 msgid "Portal"
-msgstr ""
+msgstr "主页"
 
 msgid "Digital Content Distribution Trace"
-msgstr ""
+msgstr "数字内容分发追踪"
 
 msgid "Trace of this copy of \"{0}\""
-msgstr ""
+msgstr "此份 \"{0}\" 的跟踪信息"
 
 msgid "Created at"
-msgstr ""
+msgstr "创建于"
 
 msgid "Name"
-msgstr ""
+msgstr "名称"
 
 msgid "Downloaded by"
-msgstr ""
+msgstr "下载者"
 
 msgid "Digital Content Creator Center"
-msgstr ""
+msgstr "数字内容创作者中心"
 
 msgid "Create a Digital Content"
-msgstr ""
+msgstr "创建数字内容"
 
 msgid "Manage your Digital Contents"
-msgstr ""
+msgstr "管理数字内容"
 
 msgid "Last Modified"
-msgstr ""
+msgstr "修改时间"
 
 msgid "Digital Content \"{}\""
-msgstr ""
+msgstr "数字内容 \"{}\""
 
 msgid "Info"
-msgstr ""
+msgstr "信息"
 
 msgid "Manage"
-msgstr ""
+msgstr "管理"
 
 msgid "Apply to products"
-msgstr ""
+msgstr "应用"
 
 msgid "Storage Type"
-msgstr ""
+msgstr "存储类型"
 
 msgid "Storage Detail"
-msgstr ""
+msgstr "存储细节"
 
 msgid "Time Created"
-msgstr ""
+msgstr "创建于"
 
 msgid "Path to release asset"
-msgstr ""
+msgstr "对应 Release Asset 的路径"
 
 msgid "Update the Digital Content"
-msgstr ""
+msgstr "更新数字内容"
 
 msgid "Upload file"
-msgstr ""
+msgstr "上传文件"
 
 msgid "Delete"
-msgstr ""
+msgstr "删除"
 
 msgid "Create product"
-msgstr ""
+msgstr "上架商品"
 
 msgid "Create the Digital Content"
-msgstr ""
+msgstr "创建数字内容"
 
 msgid "Fill in relevant information to create a digital content"
-msgstr ""
+msgstr "填写数字内容相关信息"
 
 msgid "Storage Type (cannot be changed afterwards)"
-msgstr ""
+msgstr "存储类型（后续无法修改）"
 
 msgid "Manually upload file"
-msgstr ""
+msgstr "手动上传文件"
 
 msgid "Use Release Asset"
-msgstr ""
+msgstr "使用 Release Asset"
 
 msgid "Chat"
-msgstr ""
+msgstr "对话"
 
 msgid "Chat with {0}"
-msgstr ""
+msgstr "与 {0} 对话"
 
 msgid "No chat with {0}"
-msgstr ""
+msgstr "没有和 {0} 的对话"
 
 msgid "Type your message here"
-msgstr ""
+msgstr "请输入您要发送的消息"
 
 msgid "Send"
-msgstr ""
+msgstr "发送"
 
 msgid "Below are all the messages you received"
-msgstr ""
+msgstr "以下是您收到的所有信息"
 
 msgid "Recent messages"
-msgstr ""
+msgstr "最近信息"
 
 msgid "User"
-msgstr ""
+msgstr "用户"
 
 msgid "Message"
-msgstr ""
+msgstr "消息"
 
 msgid "Time"
-msgstr ""
+msgstr "时间"
 
 msgid "You haven't received any message."
-msgstr ""
+msgstr "您还没有收到任何消息"
 
 msgid "Order Details"
-msgstr ""
+msgstr "订单细节"
 
 msgid "Details of order #{0}"
-msgstr ""
+msgstr "订单 #{0} 的细节"
 
 msgid "Order has been refunded or canceled"
-msgstr ""
+msgstr "订单已被退款或取消"
 
 msgid ""
 "If you don't agree with the order details, please click the \"update\" "
 "button below."
-msgstr ""
+msgstr "如对订单状态有疑问，请点击下方 \"更新\" 按钮来刷新订单状态。"
 
 msgid "Update"
-msgstr ""
+msgstr "更新"
 
 msgid "Your order is placed"
-msgstr ""
+msgstr "您的订单已创建"
 
 msgid ""
 "Scan QR code using AliPay or click the button below to pay. Click next when "
 "you finished."
-msgstr ""
+msgstr "支付宝扫描二维码或点击下方按钮来支付。支付完成请点击下一步。"
 
 msgid "Notice: <b>Please pay within three hours after you scan.</b>"
-msgstr ""
+msgstr "注意: <b>请在扫码后三小时内完成支付。</b>"
 
 msgid "Pay with AliPay"
-msgstr ""
+msgstr "支付宝支付"
 
 msgid "<b>Failed to create order, please contact us</b>: {0}"
-msgstr ""
+msgstr "<b>创建订单遇到错误，请联系我们</b>: {0}"
 
 msgid "Next"
-msgstr ""
+msgstr "下一步"
 
 msgid "Cancel your order? This CANNOT be reverted"
-msgstr ""
+msgstr "确认取消您的订单？这不可以撤销"
 
 msgid "Cancel order"
-msgstr ""
+msgstr "取消订单"
 
 msgid "Your order is successfully paid!"
-msgstr ""
+msgstr "您的订单已成功支付！"
 
 msgid "Thanks for your order! Stay tuned as we arrange shipment."
-msgstr ""
+msgstr "感谢您的付款！我们会尽快安排发货。"
 
 msgid "Refund your order? This CANNOT be reverted"
-msgstr ""
+msgstr "确认退款？这不可以撤回"
 
 msgid "Refund"
-msgstr ""
+msgstr "退款"
 
 msgid "Congratulations, your order is completed!"
-msgstr ""
+msgstr "您的订单已完成！"
 
 msgid ""
 "For Digital Contents, please access them at <a href=\"/user\">your portal "
 "page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info"
 "\">Contact us</a>"
 msgstr ""
+"如需访问数字内容，请前往<a href=\"/user\">您的主页</a>。 如有疑问或需要帮助，"
+"请<a href=\"mailto:admin@flibrary.info\">联系我们</a>"
 
 msgid "Total"
-msgstr ""
+msgstr "总价"
 
 msgid "Price per unit"
-msgstr ""
+msgstr "单价"
 
 msgid "Quantity purchased"
-msgstr ""
+msgstr "购买数量"
 
 msgid "Address"
-msgstr ""
+msgstr "收货地址"
 
 msgid "Buyer"
-msgstr ""
+msgstr "买家"
 
 msgid "Seller"
-msgstr ""
+msgstr "卖家"
 
 msgid "Product ID"
-msgstr ""
+msgstr "商品 ID"
 
 msgid "Timestamp"
-msgstr ""
+msgstr "时间戳"
 
 msgid "Order Status"
-msgstr ""
+msgstr "订单状态"
 
 msgid "Checkout"
-msgstr ""
+msgstr "提交订单"
 
 msgid "Please review and submit your order"
-msgstr ""
+msgstr "请核对并提交您的订单"
 
 msgid "ID"
 msgstr ""
 
 msgid "Quantity in stock"
-msgstr ""
+msgstr "库存数量"
 
 msgid "Quantity to purchase"
-msgstr ""
+msgstr "购买数量"
 
 msgid "If content is completely digital, you may leave it blank."
-msgstr ""
+msgstr "如购买纯数字内容，您可以在这里填写任意内容。"
 
 msgid "Payment method"
-msgstr ""
+msgstr "支付方式"
 
 msgid "AliPay (supports CNY only)"
-msgstr ""
+msgstr "AliPay（仅支持人民币）"
 
 msgid "PayPal (supports all currency)"
-msgstr ""
+msgstr "PayPal（支持所有币种）"
 
 msgid "Submit"
-msgstr ""
+msgstr "提交"
 
 msgid "No actions needed"
-msgstr ""
+msgstr "无需更多操作"
 
 msgid "Order placed"
-msgstr ""
+msgstr "订单已创建"
 
 msgid "Order paid"
-msgstr ""
+msgstr "订单已支付"
 
 msgid "Order completed"
-msgstr ""
+msgstr "订单已完成"
 
 msgid ""
 "Use PayPal to complete your order. If you are not automatically redirected "
 "after approving the order, click \"Manual update\" button below."
 msgstr ""
+"使用 PayPal 来完成您的支付。如果您在支付后没有被自动重定向到新的页面，请点击"
+"下方\"手动更新\"按钮。"
 
 msgid "Manual update"
-msgstr ""
+msgstr "手动更新"
 
 msgid "Provide Credential"
-msgstr ""
+msgstr "提供凭证"
 
 msgid "Password"
-msgstr ""
+msgstr "密码"
 
 msgid "Verify"
-msgstr ""
+msgstr "验证"
 
 msgid "Search by categories"
-msgstr ""
+msgstr "通过类别搜索"
 
 msgid "Search products by categories"
-msgstr ""
+msgstr "通过类别搜索产品"
 
 msgid "All"
-msgstr ""
+msgstr "所有类别"
 
 msgid ""
 "No category under your request, this is an ERROR. Please contact admins."
-msgstr ""
+msgstr "在您的请求下我们没有找到类别，这是一个错误。请联系管理员。"
 
 msgid "No more subcategories"
-msgstr ""
+msgstr "无更多子分类"
 
 msgid "Search Results"
-msgstr ""
+msgstr "搜索结果"
 
 msgid "No products under this category"
-msgstr ""
+msgstr "此类别下无产品"
 
 msgid "Power Your Curiosity"
-msgstr ""
+msgstr "让好奇心为您赋能"
 
 msgid "Browse by categories"
-msgstr ""
+msgstr "通过类别浏览"
 
 msgid "Update {0}"
-msgstr ""
+msgstr "更新 {0}"
 
 msgid "Update product details"
-msgstr ""
+msgstr "更新商品信息"
 
 msgid "Change relevant information which users see in the store"
-msgstr ""
+msgstr "修改商品相关信息，买家会在商店里看到您对商品的描述"
 
 msgid "Product details"
-msgstr ""
+msgstr "商品信息"
 
 msgid "Category"
-msgstr ""
+msgstr "分类"
 
 msgid "Currency"
-msgstr ""
+msgstr "币种"
 
 msgid "Price"
-msgstr ""
+msgstr "价格"
 
 msgid "Quantity"
-msgstr ""
+msgstr "数量"
 
 msgid "Description"
-msgstr ""
+msgstr "简介"
 
 msgid "Fill in relevant information which users see in the store"
-msgstr ""
+msgstr "填写商品相关信息，买家会在商店里看到您对商品的描述"
 
 msgid "Product information"
-msgstr ""
+msgstr "商品基本信息"
 
 msgid "Create the product"
-msgstr ""
+msgstr "上架商品"
 
 msgid "{0} - Product details"
-msgstr ""
+msgstr "{0} - 商品细节"
 
 msgid "Not categorized"
-msgstr ""
+msgstr "未分类"
 
 msgid "Status"
-msgstr ""
+msgstr "状态"
 
 msgid "Purchase"
-msgstr ""
+msgstr "购买"
 
 msgid "Contact information"
-msgstr ""
+msgstr "创作者信息"
 
 msgid "Email"
-msgstr ""
+msgstr "电子邮箱"
 
 msgid "Institution"
-msgstr ""
+msgstr "学校"
 
 msgid "{0} has no description"
-msgstr ""
+msgstr "{0} 没有填写简介"
 
 msgid "Contact the creator"
-msgstr ""
+msgstr "联系创作者"
 
 msgid "Send message"
-msgstr ""
+msgstr "发送消息"
 
 msgid "Sign in to purchase"
-msgstr ""
+msgstr "登录以购买"
 
 msgid "Sign in to contact the creator"
-msgstr ""
+msgstr "登录以联系创作者"
 
 msgid "Creator's information"
-msgstr ""
+msgstr "创作者信息"
 
 msgid "Sign in to view creator's information"
-msgstr ""
+msgstr "登录以查看创作者信息"
 
 msgid "Welcome Back"
-msgstr ""
+msgstr "欢迎回来"
 
 msgid "Welcome back, {0}!"
-msgstr ""
+msgstr "欢迎回来，{0}！"
 
 msgid "Visit Portal"
-msgstr ""
+msgstr "访问主页"
 
 msgid "Update your information"
-msgstr ""
+msgstr "更新基本信息"
 
 msgid "Here you can update your account details"
-msgstr ""
+msgstr "在这里您可以更新您的帐号信息"
 
 msgid "User information"
-msgstr ""
+msgstr "帐号信息"
 
 msgid "{0}'s portal page"
-msgstr ""
+msgstr "{0} 的用户主页"
 
 msgid "Log out"
-msgstr ""
+msgstr "登出"
 
 msgid "Welcome to {0}'s portal page"
-msgstr ""
+msgstr "欢迎来到 {0} 的用户主页"
 
 msgid "Here details {0}'s information"
-msgstr ""
+msgstr "在这里您可以看到关于 {0} 的信息"
 
 msgid "Basic information"
-msgstr ""
+msgstr "基本信息"
 
 msgid "No description"
-msgstr ""
+msgstr "无简介"
 
 msgid "Products created"
-msgstr ""
+msgstr "此用户上架的商品"
 
 msgid "No product created"
-msgstr ""
+msgstr "此用户没有上架商品"
 
 msgid "Here you can manage your products and account"
-msgstr ""
+msgstr "在这里您可以管理您上架的商品和您的帐号"
 
 msgid "Change password"
-msgstr ""
+msgstr "更改密码"
 
 msgid "Create a product"
-msgstr ""
+msgstr "上架商品"
 
 msgid "Digital Contents owned"
-msgstr ""
+msgstr "拥有的数字内容"
 
 msgid "Manage Digital Contents"
-msgstr ""
+msgstr "管理数字内容"
 
 msgid "Orders placed"
-msgstr ""
+msgstr "创建的订单"
 
 msgid "Orders received"
-msgstr ""
+msgstr "收到的订单"
 
 msgid "Homepage"
-msgstr ""
+msgstr "首页"
 
 msgid "Discover Store"
-msgstr ""
+msgstr "探索 Store 商店"
 
 msgid "FLibrary Circle"
-msgstr ""
+msgstr "Circle 社区"
 
 msgid "Study guides for your courses"
-msgstr ""
+msgstr "为课程定制的学习指南"
 
 msgid ""
 "Tired of duplicated descriptions and hard-to-locate key-points in textbooks? "
@@ -464,104 +482,117 @@ msgid ""
 "specific courses you needed. They are coherent on first read and always to-"
 "the-point, providing an enjoyable learning or referencing experience."
 msgstr ""
+"对内容冗长且难以翻阅的教科书感到厌倦？他人书写的笔记难以理解且逻辑跳跃？我们"
+"衷于找到教材和笔记间的平衡：专门为您所需课程设计的学习指南。它们精简但不失逻"
+"辑，深度和示例并存，无论是第一次阅读还是快速查阅都非常高效。"
 
 msgid "Join the community"
-msgstr ""
+msgstr "加入社区"
 
 msgid ""
 "At FLibrary, you can effortlessly connect to minds behind masterpieces. Join "
 "the community, meet creators, and collaborate on new contents. Contribute "
 "your curiosity today!"
 msgstr ""
+"在 FLibrary Circle，你可以发现优秀的内容，更可以遇见内容背后优秀的创作者。加"
+"入社区，和作者面对面，一起创作新的内容。探索好奇心从今天开始！"
 
 msgid ""
 "Monthly update on everything FLibrary directly from our creators and "
 "developers."
-msgstr ""
+msgstr "来自我们的创作者和开发者的 FLibrary 每月要闻更新。"
 
 msgid "Your email address"
-msgstr ""
+msgstr "您的邮箱"
 
 msgid "Subscribe"
-msgstr ""
+msgstr "订阅"
 
 msgid "Subscribe to our newsletter"
-msgstr ""
+msgstr "订阅我们的要闻推送"
 
 msgid ""
 "Witness how curiosity progresses with <span class=\"text-info text-gradient "
 "fw-bold\">FLibrary Connect</span>, our monthly newsletter composed directly "
 "by our developers and creators. Get everything FLibrary delivered now."
 msgstr ""
+"订阅 <span class=\"text-info text-gradient fw-bold\">FLibrary Connect</span> "
+"每月更新，见证好奇心成长。每月更新的编辑们直接来自我们的开发者和创作者；现在"
+"订阅，听听内行人怎么说。"
 
 msgid "Subscribe on  <i class=\"bi bi-telegram\"></i> Telegram"
-msgstr ""
+msgstr "通过  <i class=\"bi bi-telegram\"></i> Telegram 订阅"
 
 msgid "Features"
-msgstr ""
+msgstr "特性"
 
 msgid "All Cloud"
-msgstr ""
+msgstr "全云端"
 
 msgid ""
 "FLibrary is your personalized learning hub. From notes to past papers, "
 "everything subscribed is on cloud for your access anytime, anywhere."
 msgstr ""
+"FLibrary 是您个性化的图书馆。从笔记到解析，您可以随时随地从云端访问所有您订阅"
+"的内容。"
 
 msgid "Streamlined Updates"
-msgstr ""
+msgstr "轻松分发"
 
 msgid ""
 "As a content creator, you are enabled to distribute and push content updates "
 "to your subscribers with no effort."
-msgstr ""
+msgstr "通过 FLibrary，创作者们可以轻松分发学习内容并向用户推送后续更新。"
 
 msgid "Curated Contents"
-msgstr ""
+msgstr "精心挑选"
 
 msgid ""
 "Only discover the best-in-class. Spend more time to dive in but not to "
 "wander through."
 msgstr ""
+"只有最好的内容才值得您去探索。我们的精心挑选让您专注学习和探索，而不是搜集无"
+"用的资源。"
 
 msgid "You are Protected"
-msgstr ""
+msgstr "安全无虞"
 
 msgid ""
 "From account security to content distribution fingerprinting, FLibrary "
 "strives for security in every fine detail."
-msgstr ""
+msgstr "FLibrary 在每一个细节上都追求安全：从您的账户到内容分发。"
 
 msgid "Multilingual Support"
-msgstr ""
+msgstr "多语言支持"
 
 msgid ""
 "A global learner's community is at heart to our vision, that's why we have "
 "built-in multilingual supports."
 msgstr ""
+"全球化的学习内容社区是我们愿景的核心，为此在设计之初我们就融入了多语言支持。"
 
 msgid "No Ads Forever"
-msgstr ""
+msgstr "没有广告"
 
 msgid ""
 "Ads are simply incompatible with our curiosity. Take our commitment: no ads "
 "forever."
-msgstr ""
+msgstr "广告和我们的好奇心格格不入，就这么简单。我们承诺：永远没有广告。"
 
 msgid "We are just getting started."
-msgstr ""
+msgstr "我们才刚刚开始"
 
 msgid "Join Us."
-msgstr ""
+msgstr "加入我们"
 
 msgid "Join Us"
-msgstr ""
+msgstr "加入我们"
 
 msgid "We make contents, FLibrary, and the community. Join us as"
-msgstr ""
+msgstr "我们创作内容，搭建 FLibrary 和社区，加入我们。"
 
 msgid "Creators"
-msgstr ""
+msgstr "创作者"
 
 msgid ""
 "Skilled at certain fields or courses? Create learning guides on subjects or "
@@ -569,32 +600,36 @@ msgid ""
 "course taught at your university, and receive rewards to your knowledge and "
 "contribution."
 msgstr ""
+"在某一领域或课程独树一帜？为学科或任何创造（比如自制火箭）编写指南，可以独立"
+"立项也可以和大学内的课程深度结合。并通过你的知识和贡献获得奖励。"
 
 msgid "Working proficiency in LaTeX"
-msgstr ""
+msgstr "熟练运用 LaTeX"
 
 msgid "Concrete knowledge in certain fields"
-msgstr ""
+msgstr "特定领域的扎实知识基础"
 
 msgid "Stick to our principles and standards"
-msgstr ""
+msgstr "接受我们的创作原则和内容标准"
 
 msgid "Apply"
-msgstr ""
+msgstr "申请"
 
 msgid "Developers"
-msgstr ""
+msgstr "开发者"
 
 msgid ""
 "Our code is what builds our dreams. Join us as a developer, help inform "
 "what's the next feature, and make dreams true with your unique skills."
 msgstr ""
+"代码是我们的造梦引擎。作为开发者加入我们，帮助我们寻找下一个功能，并用你独特"
+"的技能让梦想成为现实。"
 
 msgid "Working proficiency in Rust / JavaScript"
-msgstr ""
+msgstr "熟练使用 Rust / JavaScript"
 
 msgid "Basic knowledge in network programming"
-msgstr ""
+msgstr "基本的网络编程知识"
 
 msgid "Strive for perfection."
-msgstr ""
+msgstr "追求优秀的代码质量"
