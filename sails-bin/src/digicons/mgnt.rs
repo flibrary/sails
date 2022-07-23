@@ -94,7 +94,7 @@ pub async fn get(
             let assets = client
                 .get("https://api.github.com/repos/flibrary/euler/releases/latest")
                 .header(ACCEPT, "application/vnd.github.v3+json")
-                .bearer_auth(&hosting.digicon_gh_token)
+                .bearer_auth(&hosting.gh_token)
                 .send()
                 .await
                 .into_flash(uri!("/"))?
@@ -115,7 +115,7 @@ pub async fn get(
     let resp = client
         .get(link)
         .header(ACCEPT, "application/octet-stream")
-        .bearer_auth(&hosting.digicon_gh_token)
+        .bearer_auth(&hosting.gh_token)
         .send()
         .await
         .into_flash(uri!("/"))?;
@@ -163,7 +163,7 @@ pub async fn delete(
                     digicon.get_id(),
                 ))
                 .header(ACCEPT, "application/vnd.github.v3+json")
-                .bearer_auth(&hosting.digicon_gh_token)
+                .bearer_auth(&hosting.gh_token)
                 .json(&params)
                 .send()
                 .await
@@ -234,7 +234,7 @@ pub async fn upload(
             digicon.get_id(),
         ))
         .header(ACCEPT, "application/vnd.github.v3+json")
-        .bearer_auth(&hosting.digicon_gh_token)
+        .bearer_auth(&hosting.gh_token)
         .json(&params)
         .send()
         .await

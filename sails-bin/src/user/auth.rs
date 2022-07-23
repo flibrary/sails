@@ -1,11 +1,16 @@
-use crate::{utils::i18n::I18n, DbConn, FLibraryID, IntoFlash};
+use crate::{
+    utils::{
+        i18n::I18n,
+        oidc::{OIDCClient, OIDCIdToken, OIDCTokenResponse},
+    },
+    DbConn, IntoFlash,
+};
 use askama::Template;
-use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::{
     http::{Cookie as HttpCookie, CookieJar, SameSite},
     response::{Flash, Redirect},
+    State,
 };
-use rocket_oauth2::{OAuth2, TokenResponse};
 use sails_db::{error::SailsDbError, users::*};
 use serde::{Deserialize, Serialize};
 
@@ -17,13 +22,8 @@ struct Claims {
 
 // This would be mounted under namespace `user` and eventually become `/user/signin`
 #[get("/signin")]
-pub async fn signin(
-    oauth2: OAuth2<FLibraryID>,
-    cookies: &CookieJar<'_>,
-) -> Result<Redirect, Flash<Redirect>> {
-    oauth2
-        .get_redirect(cookies, &["email", "profile"])
-        .into_flash(uri!("/"))
+pub async fn signin(client: &State<OIDCClient>, cookies: &CookieJar<'_>) -> Redirect {
+    client.get_redirect(cookies, &["email", "profile"])
 }
 
 #[derive(Template)]
@@ -36,32 +36,27 @@ pub struct SignInConfirmation {
 #[get("/signin_callback")]
 pub async fn signin_callback(
     i18n: I18n,
-    token: TokenResponse<FLibraryID>,
+    token: OIDCTokenResponse,
     jar: &CookieJar<'_>,
     conn: DbConn,
 ) -> Result<SignInConfirmation, Flash<Redirect>> {
-    // Key from JWKs.json from keycloak: https://id.flibrary.info/realms/Customers/protocol/openid-connect/certs
-    let key = DecodingKey::from_rsa_components("78WjV0F2wpZnHGFYP7h1LizDSaQAVthaW4_ASi8ya6lQtruT8HSzwa7hUDlXoiRKiLR2mvz73WuglHXUpQYQ8LXVK7sAEY9FH98SDAqk5tLCT9vths6eM12DZFQnDJD0yhW7L6F5BGQPydjGcfyHfqwY5cjFzO097x7kuyUND6-Jt8a5jS9rkVEEFvaIU5nfv5OTLQMRLtRMu6O_VLLBkDZH7wnbWoQ5wKDpYcEKyMSFxlAZEMYRNHAF2-xoP3QCVuVf4vwiGWSWCExos2jwm8CCsAX_E5iyorC2r1DE6sv1FS5QVLzbWe93TdJw0Rx3i_hh_fb_HCFv1yYmX60EfQ", "AQAB").into_flash(uri!("/"))?;
+    let name = token
+        .claims
+        .name()
+        .unwrap()
+        .get(None)
+        .unwrap()
+        .as_str()
+        .to_string();
+    let email = token.claims.email().unwrap().as_str().to_string();
 
-    let claims = decode::<Claims>(
-        token.access_token(),
-        &key,
-        &Validation::new(Algorithm::RS256),
-    )
-    .into_flash(uri!("/"))?
-    .claims;
-
-    let claims_cloned = claims.clone();
+    let name_cloned = name.clone();
+    let email_cloned = email.clone();
 
     // Create user if user not found in our local database
     conn.run(move |c| -> Result<(), SailsDbError> {
-        if matches!(
-            UserId::find(c, &claims.email),
-            Err(SailsDbError::QueryError(_))
-        ) {
-            UserForm::new(&claims.email, &claims.name, "", None)
-                .to_ref()?
-                .create(c)?;
+        if matches!(UserId::find(c, &email), Err(SailsDbError::QueryError(_))) {
+            UserForm::new(&email, &name, "", None).to_ref()?.create(c)?;
         }
         Ok(())
     })
@@ -69,7 +64,7 @@ pub async fn signin_callback(
     .into_flash(uri!("/"))?;
 
     // Set the private session cookie
-    let cookie = HttpCookie::build("uid", claims_cloned.email)
+    let cookie = HttpCookie::build("uid", email_cloned)
         .secure(true)
         .same_site(SameSite::Strict)
         .finish();
@@ -78,17 +73,24 @@ pub async fn signin_callback(
 
     Ok(SignInConfirmation {
         i18n,
-        name: claims_cloned.name,
+        name: name_cloned,
     })
 }
 
 #[get("/logout")]
-pub async fn logout(jar: &CookieJar<'_>) -> Redirect {
+pub async fn logout(
+    jar: &CookieJar<'_>,
+    id_token: OIDCIdToken,
+    client: &State<OIDCClient>,
+) -> Redirect {
     if let Some(uid) = jar.get_private("uid") {
         jar.remove_private(uid);
     } else {
         // No UID specified, do nothing
     }
     // Redirect back to home
-    Redirect::to(uri!("/"))
+    Redirect::to(format!(
+        "{}&id_token_hint={}",
+        client.logout_redirect_uri, id_token.id_token
+    ))
 }

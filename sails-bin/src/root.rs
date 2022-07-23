@@ -80,7 +80,7 @@ pub struct RootVerifyPage {
 pub async fn root_verify<'a>(i18n: I18n, recaptcha: &State<ReCaptcha>) -> RootVerifyPage {
     RootVerifyPage {
         i18n,
-        recaptcha_key: recaptcha.recaptcha_site_key().to_string(),
+        recaptcha_key: recaptcha.site_key().to_string(),
     }
 }
 

@@ -29,7 +29,7 @@ use std::io::Cursor;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DigiconHosting {
-    pub digicon_gh_token: String,
+    pub gh_token: String,
 }
 
 pub struct DigiconFile {

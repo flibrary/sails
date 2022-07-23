@@ -14,39 +14,26 @@ extern crate diesel_migrations;
 #[macro_use]
 extern crate rocket_sync_db_pools;
 
-use ammonia::Builder;
 use askama::Template;
 use diesel::connection::SimpleConnection;
-use once_cell::sync::Lazy;
-use orders::PaypalAuth;
 use rocket::{
     fairing::AdHoc,
     figment::{
         providers::{Format, Toml},
         Figment,
     },
-    http::{uri::Reference, Header, Status},
     request::FlashMessage,
-    response::{self, Flash, Redirect},
+    response::Redirect,
     shield::Shield,
     Build, Rocket,
 };
-use rust_embed::RustEmbed;
 use sails_db::{
     categories::{Categories, CtgBuilder},
     tags::{Tags, TagsBuilder},
 };
-use std::{convert::TryInto, ffi::OsStr, io::Cursor, path::PathBuf};
+use std::path::PathBuf;
 use structopt::StructOpt;
-use utils::{
-    aead::AeadKey,
-    alipay::{AlipayAppPrivKey, AlipayClient},
-    i18n::I18n,
-    images::ImageHosting,
-    recaptcha::ReCaptcha,
-    smtp::SmtpCreds,
-    telegram_bot::TelegramBot,
-};
+use utils::{i18n::I18n, misc::*};
 
 init_i18n!("sails", en, zh);
 
@@ -62,63 +49,8 @@ mod store;
 mod user;
 mod utils;
 
-// Type-level key used by rocket_oauth2
-pub struct FLibraryID;
-
-use crate::{digicons::DigiconHosting, root::RootPasswd};
-
-pub fn sanitize_html(html: &str) -> String {
-    SANITIZER.clean(html).to_string()
-}
-
-// Comrak options. We selectively enabled a few GFM standards.
-static SANITIZER: Lazy<Builder> = Lazy::new(|| {
-    let mut builder = ammonia::Builder::default();
-    // DANGEROUS: Style attributes are dangerous
-    builder
-        .add_tag_attributes("img", &["style"])
-        .add_tag_attributes("span", &["style"])
-        .add_tags(&["font"])
-        .add_tag_attributes("font", &["color"])
-        .add_generic_attributes(&["align"]);
-    builder
-});
-
-pub trait IntoFlash<T> {
-    fn into_flash(self, uri: impl TryInto<Reference<'static>>) -> Result<T, Flash<Redirect>>;
-}
-
-impl<T, E> IntoFlash<T> for Result<T, E>
-where
-    E: std::fmt::Display,
-{
-    fn into_flash(self, uri: impl TryInto<Reference<'static>>) -> Result<T, Flash<Redirect>> {
-        self.map_err(|e| Flash::error(Redirect::to(uri), e.to_string()))
-    }
-}
-
 #[database("flibrary")]
 pub struct DbConn(diesel::SqliteConnection);
-
-// A short hand message <-> flash conversion
-pub struct Msg {
-    flash: Option<String>,
-}
-
-impl Msg {
-    // Construct a message from a flash message
-    pub fn from_flash(flash: Option<FlashMessage<'_>>) -> Self {
-        Self {
-            flash: flash.map(|f| format!("{}: {}", f.kind(), f.message())),
-        }
-    }
-
-    pub fn new(payload: impl ToString) -> Self {
-        Self {
-            flash: Some(payload.to_string()),
-        }
-    }
-}
 
 async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     // This macro from `diesel_migrations` defines an `embedded_migrations`
@@ -180,36 +112,6 @@ async fn joinus(i18n: I18n) -> JoinUs {
     JoinUs { i18n }
 }
 
-#[derive(RustEmbed)]
-#[folder = "static/"]
-struct Asset;
-
-struct StaticFile(PathBuf);
-
-impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for StaticFile {
-    fn respond_to(self, _: &'r rocket::request::Request<'_>) -> rocket::response::Result<'o> {
-        let filename = self.0.display().to_string();
-        Asset::get(&filename).map_or_else(
-            || Err(Status::NotFound),
-            |d| {
-                let ext = self
-                    .0
-                    .as_path()
-                    .extension()
-                    .and_then(OsStr::to_str)
-                    .ok_or_else(|| Status::new(400))?;
-                let content_type = rocket::http::ContentType::from_extension(ext)
-                    .ok_or_else(|| Status::new(400))?;
-                response::Response::build()
-                    .header(content_type)
-                    .header(Header::new("Cache-Control", "max-age=31536000"))
-                    .sized_body(d.data.len(), Cursor::new(d.data))
-                    .ok()
-            },
-        )
-    }
-}
-
 #[get("/<path..>")]
 async fn get_file(path: PathBuf) -> StaticFile {
     StaticFile(path)
@@ -250,6 +152,18 @@ compile_i18n!();
 
 #[launch]
 fn rocket() -> Rocket<Build> {
+    use crate::{digicons::DigiconHosting, root::RootPasswd, utils::oidc::OIDCClient};
+    use orders::PaypalAuth;
+    use utils::{
+        aead::AeadKey,
+        alipay::{AlipayAppPrivKey, AlipayClient},
+        images::ImageHosting,
+        misc::*,
+        recaptcha::ReCaptcha,
+        smtp::SmtpCreds,
+        telegram_bot::TelegramBot,
+    };
+
     let args: DcompassOpts = DcompassOpts::from_args();
 
     // This helps us manage run-time Rocket.toml easily
@@ -263,16 +177,16 @@ fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<CtgBuilder>())
         .attach(AdHoc::config::<TagsBuilder>())
         .attach(AdHoc::config::<RootPasswd>())
-        .attach(AdHoc::config::<ReCaptcha>())
-        .attach(AdHoc::config::<SmtpCreds>())
-        .attach(AdHoc::config::<AeadKey>())
-        .attach(AdHoc::config::<ImageHosting>())
-        .attach(AdHoc::config::<DigiconHosting>())
-        .attach(AdHoc::config::<AlipayAppPrivKey>())
-        .attach(AdHoc::config::<AlipayClient>())
-        .attach(AdHoc::config::<PaypalAuth>())
-        .attach(AdHoc::config::<TelegramBot>())
-        .attach(rocket_oauth2::OAuth2::<FLibraryID>::fairing("FLibraryID"))
+        .attach(create_fairing::<ReCaptcha>("recaptcha"))
+        .attach(create_fairing::<SmtpCreds>("mailbox"))
+        .attach(create_fairing::<AeadKey>("encryption"))
+        .attach(create_fairing::<ImageHosting>("images"))
+        .attach(create_fairing::<DigiconHosting>("digicons"))
+        .attach(create_fairing::<AlipayAppPrivKey>("alipay"))
+        .attach(create_fairing::<AlipayClient>("alipay"))
+        .attach(create_fairing::<PaypalAuth>("paypal"))
+        .attach(create_fairing::<TelegramBot>("telegram"))
+        .attach(OIDCClient::fairing())
         .attach(AdHoc::on_ignite("Run database migrations", run_migrations))
         .manage(include_i18n!())
         .mount("/", routes![index, get_icon, joinus])

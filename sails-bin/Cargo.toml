@@ -7,8 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket_oauth2 = "0.5.0-rc.1"
-jsonwebtoken = "^8"
+openidconnect = "^2"
 paypal-rs = "^0.2"
 
 gettext-macros = "^0.6"

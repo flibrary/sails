@@ -41,7 +41,7 @@ where
 #[derive(Clone, Debug, Deserialize)]
 pub struct AlipayPubKey {
     #[serde(deserialize_with = "deserialize_rsa_pubkey")]
-    alipay_pubkey: RsaPublicKey,
+    pubkey: RsaPublicKey,
 }
 
 impl AlipayPubKey {
@@ -51,7 +51,7 @@ impl AlipayPubKey {
         sh.update(content);
         let hashed: &[u8] = &sh.finalize();
         let sig = base64::decode(sig)?;
-        Ok(self.alipay_pubkey.verify(
+        Ok(self.pubkey.verify(
             PKCS1v15Sign {
                 hash: Some(Hash::SHA2_256),
             },
@@ -65,7 +65,7 @@ impl AlipayPubKey {
 #[derive(Clone, Debug, Deserialize)]
 pub struct AlipayAppPrivKey {
     #[serde(deserialize_with = "deserialize_rsa_privkey")]
-    alipay_app_privkey: RsaPrivateKey,
+    app_privkey: RsaPrivateKey,
 }
 
 impl AlipayAppPrivKey {
@@ -73,7 +73,7 @@ impl AlipayAppPrivKey {
         let mut sh = Sha256::new();
         sh.update(content.to_string());
         let hashed: &[u8] = &sh.finalize();
-        let res = self.alipay_app_privkey.sign(
+        let res = self.app_privkey.sign(
             PKCS1v15Sign {
                 hash: Some(Hash::SHA2_256),
             },
@@ -95,15 +95,15 @@ where
 #[derive(Clone, Debug, Deserialize)]
 pub struct AlipayClient {
     #[serde(deserialize_with = "deserialize_reqwest_client")]
-    #[serde(rename = "alipay_app_id")]
+    #[serde(rename = "app_id")]
     inner: (String, Client),
 }
 
 impl AlipayClient {
     #[allow(unused)]
-    pub fn new(alipay_app_id: String) -> Self {
+    pub fn new(app_id: String) -> Self {
         AlipayClient {
-            inner: (alipay_app_id, Client::new()),
+            inner: (app_id, Client::new()),
         }
     }
 
@@ -366,7 +366,7 @@ mod tests {
         )
         .unwrap();
         AlipayAppPrivKey {
-            alipay_app_privkey: RsaPrivateKey::from_pkcs1_der(&decoded).unwrap(),
+            app_privkey: RsaPrivateKey::from_pkcs1_der(&decoded).unwrap(),
         }
     }
 
@@ -377,7 +377,7 @@ mod tests {
             "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAryYXsAzhfM+s8JKvauMBO34WSppYTnlI8VY5cSeJ4zPjgtJcZzq2GLJy/BztQj30+QzDOLvH4a7cPylF35EAyrgvyNDU5nVVVEZFUMldScjltZZiAEt5wmrNpB2ruAuPas9pfPzC8g1Wz5c/JlLryzXuMnQ65YplJ+knvujU5xsrHeNJN5PMqUVpvzEv9FXDRlVYBf3tiJlEwL19xdy5vowdQOkU9YoAEUwHdQWd9t2uOmp/Rz3jOMUnbpW9X/hDjsUfweJQskp5Gmg9g+Dz9b6be8Uejr2V3L8GGSZux3C+457RbCz1kHJzub8KsRqqTXRIt5QDLAMpLMnI4uW3CQIDAQAB",
         ).unwrap();
         AlipayPubKey {
-            alipay_pubkey: RsaPublicKey::from_public_key_der(&decoded).unwrap(),
+            pubkey: RsaPublicKey::from_public_key_der(&decoded).unwrap(),
         }
     }
 

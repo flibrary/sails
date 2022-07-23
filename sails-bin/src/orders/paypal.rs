@@ -22,8 +22,8 @@ use serde::Deserialize;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct PaypalAuth {
-    paypal_client_id: String,
-    paypal_secret: String,
+    client_id: String,
+    secret: String,
 }
 
 #[derive(Template)]
@@ -51,7 +51,7 @@ pub async fn order_info_paypal(
         i18n,
         prod: order.prod_info,
         order: order.order_info,
-        client_id: paypal_auth.paypal_client_id.clone(),
+        client_id: paypal_auth.client_id.clone(),
     })
 }
 
@@ -73,8 +73,8 @@ pub async fn progress_paypal(
         .into_flash(uri!("/"))?;
 
     let mut client = Client::new(
-        paypal_auth.paypal_client_id.clone(),
-        paypal_auth.paypal_secret.clone(),
+        paypal_auth.client_id.clone(),
+        paypal_auth.secret.clone(),
         #[cfg(debug_assertions)]
         true,
         #[cfg(not(debug_assertions))]
@@ -177,8 +177,8 @@ pub async fn capture_paypal_order(
         .map_err(|_| Status::new(500))?;
 
     let mut client = Client::new(
-        paypal_auth.paypal_client_id.clone(),
-        paypal_auth.paypal_secret.clone(),
+        paypal_auth.client_id.clone(),
+        paypal_auth.secret.clone(),
         #[cfg(debug_assertions)]
         true,
         #[cfg(not(debug_assertions))]
@@ -237,8 +237,8 @@ pub async fn create_paypal_order(
         .map_err(|_| Status::new(500))?;
 
     let mut client = Client::new(
-        paypal_auth.paypal_client_id.clone(),
-        paypal_auth.paypal_secret.clone(),
+        paypal_auth.client_id.clone(),
+        paypal_auth.secret.clone(),
         #[cfg(debug_assertions)]
         true,
         #[cfg(not(debug_assertions))]
