@@ -512,11 +512,11 @@ in
     ];
   });
   
-  "registry+https://github.com/rust-lang/crates.io-index".bytemuck."1.10.0" = overridableMkRustCrate (profileName: rec {
+  "registry+https://github.com/rust-lang/crates.io-index".bytemuck."1.11.0" = overridableMkRustCrate (profileName: rec {
     name = "bytemuck";
-    version = "1.10.0";
+    version = "1.11.0";
     registry = "registry+https://github.com/rust-lang/crates.io-index";
-    src = fetchCratesIo { inherit name version; sha256 = "c53dfa917ec274df8ed3c572698f381a24eef2efba9492d797301b72b6db408a"; };
+    src = fetchCratesIo { inherit name version; sha256 = "a5377c8865e74a160d21f29c2d40669f53286db6eab59b88540cbb12ffc8b835"; };
   });
   
   "registry+https://github.com/rust-lang/crates.io-index".byteorder."1.4.3" = overridableMkRustCrate (profileName: rec {
@@ -2143,7 +2143,7 @@ in
       [ "webp" ]
     ];
     dependencies = {
-      bytemuck = rustPackages."registry+https://github.com/rust-lang/crates.io-index".bytemuck."1.10.0" { inherit profileName; };
+      bytemuck = rustPackages."registry+https://github.com/rust-lang/crates.io-index".bytemuck."1.11.0" { inherit profileName; };
       byteorder = rustPackages."registry+https://github.com/rust-lang/crates.io-index".byteorder."1.4.3" { inherit profileName; };
       color_quant = rustPackages."registry+https://github.com/rust-lang/crates.io-index".color_quant."1.1.0" { inherit profileName; };
       gif = rustPackages."registry+https://github.com/rust-lang/crates.io-index".gif."0.11.4" { inherit profileName; };

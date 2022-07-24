@@ -15,7 +15,7 @@
 </style>
 {% endblock head %}
 {% block title %}{{ i18n!(self.i18n.catalog, "{0}'s portal page"; self.user.get_name()) }}{% endblock title %}
-{% block navbutton %}<li class="nav-item"><a href="/user/logout" class="btn btn-warning" role="button"><i class="bi bi-box-arrow-left"></i> {{ i18n!(self.i18n.catalog, "Log out") }}</a></li>{% endblock navbutton %}
+{% block navbutton %}<li class="nav-item"><a href="/user/logout" class="btn btn-warning my-1" role="button"><i class="bi bi-box-arrow-left"></i> {{ i18n!(self.i18n.catalog, "Log out") }}</a></li>{% endblock navbutton %}
 
 {% block content %}
 <main class="container">
