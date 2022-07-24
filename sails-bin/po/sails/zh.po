@@ -445,8 +445,8 @@ msgstr "此用户没有上架商品"
 msgid "Here you can manage your products and account"
 msgstr "在这里您可以管理您上架的商品和您的帐号"
 
-msgid "Change password"
-msgstr "更改密码"
+msgid "Manage your FLibrary ID"
+msgstr "管理您的 FLibrary ID"
 
 msgid "Create a product"
 msgstr "上架商品"
@@ -633,3 +633,6 @@ msgstr "基本的网络编程知识"
 
 msgid "Strive for perfection."
 msgstr "追求优秀的代码质量"
+
+#~ msgid "Change password"
+#~ msgstr "更改密码"

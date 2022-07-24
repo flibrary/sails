@@ -441,7 +441,7 @@ msgstr ""
 msgid "Here you can manage your products and account"
 msgstr ""
 
-msgid "Change password"
+msgid "Manage your FLibrary ID"
 msgstr ""
 
 msgid "Create a product"

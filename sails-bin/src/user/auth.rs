@@ -43,12 +43,20 @@ pub async fn signin_callback(
     let name = token
         .claims
         .name()
-        .unwrap()
+        .ok_or("No name provided by FLibrary ID")
+        .into_flash(uri!("/"))?
         .get(None)
-        .unwrap()
+        .ok_or("Name without locale specification is not provided by FLibrary ID")
+        .into_flash(uri!("/"))?
         .as_str()
         .to_string();
-    let email = token.claims.email().unwrap().as_str().to_string();
+    let email = token
+        .claims
+        .email()
+        .ok_or("No name provided by FLibrary ID")
+        .into_flash(uri!("/"))?
+        .as_str()
+        .to_string();
 
     let name_cloned = name.clone();
     let email_cloned = email.clone();
