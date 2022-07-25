@@ -22,7 +22,7 @@
         <tbody>
 	  {% for message in message_list %}
 	  <tr>
-	    <th scope="row"><a href="{{ uri!("/messages", crate::messages::chat(message.get_send())) }}">{{ message.get_send() }}</a></th>
+	    <th scope="row"><a href="{{ uri!("/messages", crate::pages::msgs::chat(message.get_send())) }}">{{ message.get_send() }}</a></th>
 	    <td>{{message.get_body()}}</td>
 	    <td>{{message.get_time_sent()}}</td>
 	  </tr>

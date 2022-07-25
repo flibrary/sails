@@ -26,12 +26,12 @@
       <tbody>
 	{% for order in paid_tx %}
 	<tr>
-	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
-	  <td><a href="{{ uri!("/store", crate::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
+	  <th scope="row"><a href="{{ uri!("/admin", crate::pages::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
+	  <td><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
-	  <td><a href="{{ uri!("/orders", crate::orders::cancel_order_alipay(order.1.get_id())) }}" class="btn btn-warning" role="button">Refund</a> <a href="{{ uri!("/admin", crate::admin::finish_order(order.1.get_id())) }}" class="btn btn-success" role="button">Finish</a></td>
+	  <td><a href="{{ uri!("/orders", crate::services::orders::cancel_order_alipay(order.1.get_id())) }}" class="btn btn-warning" role="button">Refund</a> <a href="{{ uri!("/admin", crate::services::admin::finish_order(order.1.get_id())) }}" class="btn btn-success" role="button">Finish</a></td>
 	</tr>
 	{% endfor %}
       </tbody>
@@ -62,12 +62,12 @@
       <tbody>
 	{% for order in placed_tx %}
 	<tr>
-	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
-	  <td><a href="{{ uri!("/store", crate::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
+	  <th scope="row"><a href="{{ uri!("/admin", crate::pages::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
+	  <td><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
-	  <td><a href="{{ uri!("/orders", crate::orders::cancel_order_alipay(order.1.get_id())) }}" class="btn btn-warning" role="button">Cancel</a></td>
+	  <td><a href="{{ uri!("/orders", crate::services::orders::cancel_order_alipay(order.1.get_id())) }}" class="btn btn-warning" role="button">Cancel</a></td>
 	</tr>
 	{% endfor %}
       </tbody>
@@ -97,8 +97,8 @@
       <tbody>
 	{% for order in refunded_tx %}
 	<tr>
-	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
-	  <td><a href="{{ uri!("/store", crate::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
+	  <th scope="row"><a href="{{ uri!("/admin", crate::pages::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
+	  <td><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
@@ -133,12 +133,12 @@
       <tbody>
 	{% for order in finished_tx %}
 	<tr>
-	  <th scope="row"><a href="{{ uri!("/admin", crate::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
-	  <td><a href="{{ uri!("/store", crate::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
+	  <th scope="row"><a href="{{ uri!("/admin", crate::pages::admin::order_info(order.1.get_id())) }}">{{order.1.get_shortid()}}</a></th>
+	  <td><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(order.1.get_product())) }}">{{order.0.get_shortid()}}</a></td>
 	  <td>{{order.0.get_prodname()}}</td>
 	  <td>{{order.1.get_price()}}</td>
 	  <td>{{order.1.get_buyer()}}</td>
-	  <td><a href="{{ uri!("/admin", crate::admin::refund_order(order.1.get_id())) }}" class="btn btn-warning" role="button">Cancel</a></td>
+	  <td><a href="{{ uri!("/admin", crate::services::admin::refund_order(order.1.get_id())) }}" class="btn btn-warning" role="button">Cancel</a></td>
 	</tr>
 	{% endfor %}
       </tbody>

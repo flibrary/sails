@@ -52,7 +52,7 @@
     {% match digicon.get_storage_type() %}
     {% when sails_db::enums::StorageType::ReleaseAsset %}
 
-    <form action="{{uri!("/digicons", crate::digicons::update_digicon(self.digicon.get_id()))}}" method="post">
+    <form action="{{uri!("/digicons", crate::services::digicons::update_digicon(self.digicon.get_id()))}}" method="post">
     <div class="form-group row">
       <label for="inputName" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Name") }}</label>
       <div class="col-sm-10">
@@ -76,7 +76,7 @@
     </form>
 
     {% when sails_db::enums::StorageType::GitRepo %}
-    <form action="{{uri!("/digicons", crate::digicons::update_digicon(self.digicon.get_id()))}}" method="post">
+    <form action="{{uri!("/digicons", crate::services::digicons::update_digicon(self.digicon.get_id()))}}" method="post">
     <div class="form-group row">
       <label for="inputName" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Name") }}</label>
       <div class="col-sm-10">
@@ -88,7 +88,7 @@
     </form>
     <br>
 
-    <form action="{{uri!("/digicons", crate::digicons::upload(self.digicon.get_id()))}}" enctype="multipart/form-data" method="post">
+    <form action="{{uri!("/digicons", crate::services::digicons::upload(self.digicon.get_id()))}}" enctype="multipart/form-data" method="post">
       <div class="form-group row">
         <label for="inputFile" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Upload file") }}</label>
         <div class="col-sm-10">
@@ -101,7 +101,7 @@
     {% endmatch %}
     <br>
 
-    <a href="{{ uri!("/digicons", crate::digicons::delete(self.digicon.get_id())) }}" class="btn btn-danger" role="button">{{ i18n!(self.i18n.catalog, "Delete") }}</a>
+    <a href="{{ uri!("/digicons", crate::services::digicons::delete(self.digicon.get_id())) }}" class="btn btn-danger" role="button">{{ i18n!(self.i18n.catalog, "Delete") }}</a>
     </div>
 
     <div class="tab-pane fade" id="nav-mapping" role="tabpanel" aria-labelledby="nav-mapping-tab">
@@ -118,15 +118,15 @@
 	<tbody>
 	  {% for (prod, mapped) in prods %}
 	  <tr>
-	    <th scope="row"><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
+	    <th scope="row"><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
 	    <td>{{prod.get_prodname()}}</td>
 	    <td>{{prod.get_price()}}</td>
-	    <td><a href="{{ uri!("/user", crate::user::portal_guest(prod.get_seller_id())) }}">{{prod.get_seller_id()}}</a></td>
+	    <td><a href="{{ uri!("/user", crate::pages::users::portal_guest(prod.get_seller_id())) }}">{{prod.get_seller_id()}}</a></td>
 	    <td>
 	      {% if mapped %}
-	      <a href="{{ uri!("/digicons", crate::digicons::remove_digicon_mapping(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-warning" role="button">Remove</a>
+	      <a href="{{ uri!("/digicons", crate::services::digicons::remove_digicon_mapping(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-warning" role="button">Remove</a>
 	      {% else %}
-	      <a href="{{ uri!("/digicons", crate::digicons::add_digicon_mapping(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-success" role="button">Add</a>
+	      <a href="{{ uri!("/digicons", crate::services::digicons::add_digicon_mapping(self.digicon.get_id(),prod.get_id())) }}" class="btn btn-success" role="button">Add</a>
 	      {% endif %}
 	    </td>
 	  </tr>

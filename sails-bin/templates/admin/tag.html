@@ -25,11 +25,11 @@
       <tbody>
 	{% for prod in tagged %}
 	<tr>
-	  <th scope="row"><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
+	  <th scope="row"><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
 	  <td>{{prod.get_prodname()}}</td>
 	  <td>{{prod.get_price()}}</td>
-	  <td><a href="{{ uri!("/user", crate::user::portal_guest(prod.get_seller_id())) }}">{{prod.get_seller_id()}}</a></td>
-	  <td><a href="{{ uri!("/admin", crate::admin::remove_tag(self.tag.get_id(),prod.get_id())) }}" class="btn btn-warning" role="button">Remove</a></td>
+	  <td><a href="{{ uri!("/user", crate::pages::users::portal_guest(prod.get_seller_id())) }}">{{prod.get_seller_id()}}</a></td>
+	  <td><a href="{{ uri!("/admin", crate::services::admin::remove_tag(self.tag.get_id(),prod.get_id())) }}" class="btn btn-warning" role="button">Remove</a></td>
 	</tr>
 	{% endfor %}
       </tbody>
@@ -59,11 +59,11 @@
       <tbody>
 	{% for prod in untagged %}
 	<tr>
-	  <th scope="row"><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
+	  <th scope="row"><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
 	  <td>{{prod.get_prodname()}}</td>
 	  <td>{{prod.get_price()}}</td>
-	  <td><a href="{{ uri!("/user", crate::user::portal_guest(prod.get_seller_id())) }}">{{prod.get_seller_id()}}</a></td>
-	  <td><a href="{{ uri!("/admin", crate::admin::add_tag(self.tag.get_id(),prod.get_id())) }}" class="btn btn-success" role="button">Add</a></td>
+	  <td><a href="{{ uri!("/user", crate::pages::users::portal_guest(prod.get_seller_id())) }}">{{prod.get_seller_id()}}</a></td>
+	  <td><a href="{{ uri!("/admin", crate::services::admin::add_tag(self.tag.get_id(),prod.get_id())) }}" class="btn btn-success" role="button">Add</a></td>
 	</tr>
 	{% endfor %}
       </tbody>

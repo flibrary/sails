@@ -42,7 +42,7 @@
       <th scope="row">{{ i18n!(self.i18n.catalog, "Category") }}</th>
       	{% match category %}
 	{% when Some with (ctg) %}
-        <td><a href="{{ uri!("/search", crate::search::categories(ctg.id())) }}">{{ ctg.name() }}</a></td>
+        <td><a href="{{ uri!("/search", crate::pages::search::categories(ctg.id())) }}">{{ ctg.name() }}</a></td>
         {% when None %}
 	<td>{{ i18n!(self.i18n.catalog, "Not categorized") }}</td>
         {% endmatch %}

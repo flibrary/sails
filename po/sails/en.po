@@ -29,19 +29,158 @@ msgstr ""
 msgid "Portal"
 msgstr ""
 
-msgid "Digital Content Distribution Trace"
+msgid "Homepage"
 msgstr ""
 
-msgid "Trace of this copy of \"{0}\""
+msgid "Discover Store"
 msgstr ""
 
-msgid "Created at"
+msgid "FLibrary Circle"
 msgstr ""
 
-msgid "Name"
+msgid "Study guides for your courses"
 msgstr ""
 
-msgid "Downloaded by"
+msgid ""
+"Tired of duplicated descriptions and hard-to-locate key-points in textbooks? "
+"Frustrated with short but impossible-to-understand others' notes lacking "
+"coherent logic? We strike a balance in between: study guides targeting "
+"specific courses you needed. They are coherent on first read and always to-"
+"the-point, providing an enjoyable learning or referencing experience."
+msgstr ""
+
+msgid "Join the community"
+msgstr ""
+
+msgid ""
+"At FLibrary, you can effortlessly connect to minds behind masterpieces. Join "
+"the community, meet creators, and collaborate on new contents. Contribute "
+"your curiosity today!"
+msgstr ""
+
+msgid ""
+"Monthly update on everything FLibrary directly from our creators and "
+"developers."
+msgstr ""
+
+msgid "Your email address"
+msgstr ""
+
+msgid "Subscribe"
+msgstr ""
+
+msgid "Subscribe to our newsletter"
+msgstr ""
+
+msgid ""
+"Witness how curiosity progresses with <span class=\"text-info text-gradient "
+"fw-bold\">FLibrary Connect</span>, our monthly newsletter composed directly "
+"by our developers and creators. Get everything FLibrary delivered now."
+msgstr ""
+
+msgid "Subscribe on  <i class=\"bi bi-telegram\"></i> Telegram"
+msgstr ""
+
+msgid "Features"
+msgstr ""
+
+msgid "All Cloud"
+msgstr ""
+
+msgid ""
+"FLibrary is your personalized learning hub. From notes to past papers, "
+"everything subscribed is on cloud for your access anytime, anywhere."
+msgstr ""
+
+msgid "Streamlined Updates"
+msgstr ""
+
+msgid ""
+"As a content creator, you are enabled to distribute and push content updates "
+"to your subscribers with no effort."
+msgstr ""
+
+msgid "Curated Contents"
+msgstr ""
+
+msgid ""
+"Only discover the best-in-class. Spend more time to dive in but not to "
+"wander through."
+msgstr ""
+
+msgid "You are Protected"
+msgstr ""
+
+msgid ""
+"From account security to content distribution fingerprinting, FLibrary "
+"strives for security in every fine detail."
+msgstr ""
+
+msgid "Multilingual Support"
+msgstr ""
+
+msgid ""
+"A global learner's community is at heart to our vision, that's why we have "
+"built-in multilingual supports."
+msgstr ""
+
+msgid "No Ads Forever"
+msgstr ""
+
+msgid ""
+"Ads are simply incompatible with our curiosity. Take our commitment: no ads "
+"forever."
+msgstr ""
+
+msgid "We are just getting started."
+msgstr ""
+
+msgid "Join Us."
+msgstr ""
+
+msgid "Join Us"
+msgstr ""
+
+msgid "We make contents, FLibrary, and the community. Join us as"
+msgstr ""
+
+msgid "Creators"
+msgstr ""
+
+msgid ""
+"Skilled at certain fields or courses? Create learning guides on subjects or "
+"anything creative (like building a rocket), either independent or based on a "
+"course taught at your university, and receive rewards to your knowledge and "
+"contribution."
+msgstr ""
+
+msgid "Working proficiency in LaTeX"
+msgstr ""
+
+msgid "Concrete knowledge in certain fields"
+msgstr ""
+
+msgid "Stick to our principles and standards"
+msgstr ""
+
+msgid "Apply"
+msgstr ""
+
+msgid "Developers"
+msgstr ""
+
+msgid ""
+"Our code is what builds our dreams. Join us as a developer, help inform "
+"what's the next feature, and make dreams true with your unique skills."
+msgstr ""
+
+msgid "Working proficiency in Rust / JavaScript"
+msgstr ""
+
+msgid "Basic knowledge in network programming"
+msgstr ""
+
+msgid "Strive for perfection."
 msgstr ""
 
 msgid "Digital Content Creator Center"
@@ -51,6 +190,9 @@ msgid "Create a Digital Content"
 msgstr ""
 
 msgid "Manage your Digital Contents"
+msgstr ""
+
+msgid "Name"
 msgstr ""
 
 msgid "Last Modified"
@@ -105,6 +247,18 @@ msgid "Manually upload file"
 msgstr ""
 
 msgid "Use Release Asset"
+msgstr ""
+
+msgid "Digital Content Distribution Trace"
+msgstr ""
+
+msgid "Trace of this copy of \"{0}\""
+msgstr ""
+
+msgid "Created at"
+msgstr ""
+
+msgid "Downloaded by"
 msgstr ""
 
 msgid "Chat"
@@ -231,6 +385,14 @@ msgstr ""
 msgid "Order Status"
 msgstr ""
 
+msgid ""
+"Use PayPal to complete your order. If you are not automatically redirected "
+"after approving the order, click \"Manual update\" button below."
+msgstr ""
+
+msgid "Manual update"
+msgstr ""
+
 msgid "Checkout"
 msgstr ""
 
@@ -271,14 +433,6 @@ msgid "Order paid"
 msgstr ""
 
 msgid "Order completed"
-msgstr ""
-
-msgid ""
-"Use PayPal to complete your order. If you are not automatically redirected "
-"after approving the order, click \"Manual update\" button below."
-msgstr ""
-
-msgid "Manual update"
 msgstr ""
 
 msgid "Provide Credential"
@@ -457,158 +611,4 @@ msgid "Orders placed"
 msgstr ""
 
 msgid "Orders received"
-msgstr ""
-
-msgid "Homepage"
-msgstr ""
-
-msgid "Discover Store"
-msgstr ""
-
-msgid "FLibrary Circle"
-msgstr ""
-
-msgid "Study guides for your courses"
-msgstr ""
-
-msgid ""
-"Tired of duplicated descriptions and hard-to-locate key-points in textbooks? "
-"Frustrated with short but impossible-to-understand others' notes lacking "
-"coherent logic? We strike a balance in between: study guides targeting "
-"specific courses you needed. They are coherent on first read and always to-"
-"the-point, providing an enjoyable learning or referencing experience."
-msgstr ""
-
-msgid "Join the community"
-msgstr ""
-
-msgid ""
-"At FLibrary, you can effortlessly connect to minds behind masterpieces. Join "
-"the community, meet creators, and collaborate on new contents. Contribute "
-"your curiosity today!"
-msgstr ""
-
-msgid ""
-"Monthly update on everything FLibrary directly from our creators and "
-"developers."
-msgstr ""
-
-msgid "Your email address"
-msgstr ""
-
-msgid "Subscribe"
-msgstr ""
-
-msgid "Subscribe to our newsletter"
-msgstr ""
-
-msgid ""
-"Witness how curiosity progresses with <span class=\"text-info text-gradient "
-"fw-bold\">FLibrary Connect</span>, our monthly newsletter composed directly "
-"by our developers and creators. Get everything FLibrary delivered now."
-msgstr ""
-
-msgid "Subscribe on  <i class=\"bi bi-telegram\"></i> Telegram"
-msgstr ""
-
-msgid "Features"
-msgstr ""
-
-msgid "All Cloud"
-msgstr ""
-
-msgid ""
-"FLibrary is your personalized learning hub. From notes to past papers, "
-"everything subscribed is on cloud for your access anytime, anywhere."
-msgstr ""
-
-msgid "Streamlined Updates"
-msgstr ""
-
-msgid ""
-"As a content creator, you are enabled to distribute and push content updates "
-"to your subscribers with no effort."
-msgstr ""
-
-msgid "Curated Contents"
-msgstr ""
-
-msgid ""
-"Only discover the best-in-class. Spend more time to dive in but not to "
-"wander through."
-msgstr ""
-
-msgid "You are Protected"
-msgstr ""
-
-msgid ""
-"From account security to content distribution fingerprinting, FLibrary "
-"strives for security in every fine detail."
-msgstr ""
-
-msgid "Multilingual Support"
-msgstr ""
-
-msgid ""
-"A global learner's community is at heart to our vision, that's why we have "
-"built-in multilingual supports."
-msgstr ""
-
-msgid "No Ads Forever"
-msgstr ""
-
-msgid ""
-"Ads are simply incompatible with our curiosity. Take our commitment: no ads "
-"forever."
-msgstr ""
-
-msgid "We are just getting started."
-msgstr ""
-
-msgid "Join Us."
-msgstr ""
-
-msgid "Join Us"
-msgstr ""
-
-msgid "We make contents, FLibrary, and the community. Join us as"
-msgstr ""
-
-msgid "Creators"
-msgstr ""
-
-msgid ""
-"Skilled at certain fields or courses? Create learning guides on subjects or "
-"anything creative (like building a rocket), either independent or based on a "
-"course taught at your university, and receive rewards to your knowledge and "
-"contribution."
-msgstr ""
-
-msgid "Working proficiency in LaTeX"
-msgstr ""
-
-msgid "Concrete knowledge in certain fields"
-msgstr ""
-
-msgid "Stick to our principles and standards"
-msgstr ""
-
-msgid "Apply"
-msgstr ""
-
-msgid "Developers"
-msgstr ""
-
-msgid ""
-"Our code is what builds our dreams. Join us as a developer, help inform "
-"what's the next feature, and make dreams true with your unique skills."
-msgstr ""
-
-msgid "Working proficiency in Rust / JavaScript"
-msgstr ""
-
-msgid "Basic knowledge in network programming"
-msgstr ""
-
-msgid "Strive for perfection."
 msgstr ""

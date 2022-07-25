@@ -22,7 +22,7 @@
     <tbody>
       {% for digicon in digicons %}
       <tr>
-	<th scope="row"><a href="{{ uri!("/digicons", crate::digicons::digicon_page(digicon.get_id())) }}">{{ digicon.get_name() }}</a></th>
+	<th scope="row"><a href="{{ uri!("/digicons", crate::pages::digicons::digicon_page(digicon.get_id())) }}">{{ digicon.get_name() }}</a></th>
 	<th scope="row">{{digicon.get_time_modified().format("%Y-%m-%d %H:%M:%S")}}</th>
       </tr>
       {% endfor %}

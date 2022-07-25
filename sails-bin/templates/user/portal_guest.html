@@ -72,8 +72,8 @@
     <tbody>
       {% for prod in prods %}
       <tr>
-	<th scope="row"><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
-	<td><a href="{{ uri!("/store", crate::store::prod_page_owned(prod.get_id())) }}">{{prod.get_prodname()}}</a></td>
+	<th scope="row"><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(prod.get_id())) }}">{{prod.get_shortid()}}</a></th>
+	<td><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(prod.get_id())) }}">{{prod.get_prodname()}}</a></td>
 	<td>{{prod.get_price()}}</td>
       </tr>
       {% endfor %}

@@ -8,9 +8,9 @@
 
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ uri!("/search", crate::search::categories_all) }}">{{ i18n!(self.i18n.catalog, "All") }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ uri!("/search", crate::pages::search::categories_all) }}">{{ i18n!(self.i18n.catalog, "All") }}</a></li>
 	{% for parent in parent_ctgs %}
-	  <li class="breadcrumb-item"><a href="{{ uri!("/search", crate::search::categories(parent.id())) }}">{{parent.name()}}</a></li>
+	  <li class="breadcrumb-item"><a href="{{ uri!("/search", crate::pages::search::categories(parent.id())) }}">{{parent.name()}}</a></li>
         {% endfor %}
         {% match current_ctg %}
         {% when Some with (current_ctg)%}
@@ -25,7 +25,7 @@
       {% if categories.len() > 0 %}
       <div class="list-group">
         {% for category in categories %}
-        <a href="{{ uri!("/search", crate::search::categories(category.id())) }}" class="list-group-item list-group-item-action">{{category.name()}}</a>
+        <a href="{{ uri!("/search", crate::pages::search::categories(category.id())) }}" class="list-group-item list-group-item-action">{{category.name()}}</a>
         {% endfor %}
       </div>
       {% else %}
@@ -46,13 +46,13 @@
 	  <div class="card">
 	    {% match product.1 %}
 	    {% when Some with (img) %}
-	    <a href="{{ uri!("/store", crate::store::prod_page_owned(product.0.get_id())) }}">
+	    <a href="{{ uri!("/store", crate::pages::store::prod_page_owned(product.0.get_id())) }}">
 	      <img src="{{img}}?size=thumbnail" loading="lazy" class="card-img-top">
             </a>
             {% when None %}
             {% endmatch %}
             <div class="card-body">
-              <h5 class="card-title"><a href="{{ uri!("/store", crate::store::prod_page_owned(product.0.get_id())) }}">{{product.0.get_prodname()}}</a></h5>
+              <h5 class="card-title"><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(product.0.get_id())) }}">{{product.0.get_prodname()}}</a></h5>
 	      <h5 class="card-subtitle mb-2">
          	{% let tags = product.3.clone() %}
 		{% include "display_tag.html" %}

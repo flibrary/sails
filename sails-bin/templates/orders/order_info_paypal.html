@@ -2,7 +2,7 @@
 
 {% block refunded_details %}
       {{ i18n!(self.i18n.catalog, "If you don't agree with the order details, please click the \"update\" button below.") }}<br>
-      <a href="{{ uri!("/orders", crate::orders::progress_paypal(self.order.get_id())) }}" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Update") }}</a>
+      <a href="{{ uri!("/orders", crate::services::orders::progress_paypal(self.order.get_id())) }}" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Update") }}</a>
 {% endblock refunded_details %}
 
 {% block placed_details %}
@@ -12,8 +12,8 @@
     <!-- Set up a container element for the button -->
     <div id="paypal-button-container"></div>
     <br>
-    <a href="{{ uri!("/orders", crate::orders::progress_alipay(self.order.get_id())) }}" class="btn btn-success" role="button">{{ i18n!(self.i18n.catalog, "Manual update") }}</a>
-    <a href="{{ uri!("/orders", crate::orders::cancel_order_paypal(self.order.get_id())) }}" class="btn btn-danger" role="button" onclick="return confirm('{{ i18n!(self.i18n.catalog, "Cancel your order? This CANNOT be reverted") }}');">{{ i18n!(self.i18n.catalog, "Cancel order") }}</a>
+    <a href="{{ uri!("/orders", crate::services::orders::progress_alipay(self.order.get_id())) }}" class="btn btn-success" role="button">{{ i18n!(self.i18n.catalog, "Manual update") }}</a>
+    <a href="{{ uri!("/orders", crate::services::orders::cancel_order_paypal(self.order.get_id())) }}" class="btn btn-danger" role="button" onclick="return confirm('{{ i18n!(self.i18n.catalog, "Cancel your order? This CANNOT be reverted") }}');">{{ i18n!(self.i18n.catalog, "Cancel order") }}</a>
 
     <script>
       paypal

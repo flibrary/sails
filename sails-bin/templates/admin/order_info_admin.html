@@ -65,7 +65,7 @@
     </tr>
     <tr>
       <th scope="row">商品 ID</th>
-      <td><a href="{{ uri!("/store", crate::store::prod_page_owned(self.prod.get_id())) }}">{{ prod.get_shortid() }}</a></td>
+      <td><a href="{{ uri!("/store", crate::pages::store::prod_page_owned(self.prod.get_id())) }}">{{ prod.get_shortid() }}</a></td>
     </tr>
     <tr>
       <th scope="row">时间戳</th>

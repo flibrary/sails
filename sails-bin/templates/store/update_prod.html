@@ -11,7 +11,7 @@
   <div class="p-5 rounded shadow">
     <h1>{{ i18n!(self.i18n.catalog, "Product details") }}</h1>
     {% block form_link %}
-    <form action="{{ uri!("/store", crate::store::update_prod(self.prod.get_id())) }}" method="post">
+    <form action="{{ uri!("/store", crate::services::prods::update_prod(self.prod.get_id())) }}" method="post">
     {% endblock form_link %}
     <div class="form-group row">
       <label for="inputProd" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Name") }}</label>

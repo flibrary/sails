@@ -14,7 +14,7 @@
   {% if tags.len() > 0 %}
     <div class="list-group">
       {% for tag in tags %}
-        <a href="{{ uri!("/admin", crate::admin::admin_tag(tag.get_id())) }}" class="list-group-item list-group-item-action">
+        <a href="{{ uri!("/admin", crate::pages::admin::admin_tag(tag.get_id())) }}" class="list-group-item list-group-item-action">
         {% match tag.get_html() %}
         {% when Some with (html) %}
           {% match tag.get_description() %}
