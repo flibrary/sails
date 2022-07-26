@@ -47,8 +47,8 @@ lettre = { version = "0.10.0-rc.3", features = ["tokio1-native-tls", "builder", 
 reqwest = { version = "0.11", features = ["json", "blocking"]}
 chacha20poly1305 = "^0.9"
 # We need askama as the backend template engine because it is type safe.
-askama = { version = "=0.11.0-beta.1", features = ["with-rocket", "mime", "mime_guess"]}
-askama_rocket = "=0.11.0-rc.2"
+askama = { version = "^0.11", features = ["with-rocket", "mime", "mime_guess"]}
+askama_rocket = "^0.11"
 tokio = { version = "^1" }
 
 [dependencies.rocket_sync_db_pools]

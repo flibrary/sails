@@ -7,9 +7,8 @@ members = [
 
 [patch.crates-io]
 # This workaround should be removed once the all the crates are updated
-askama = { git = "https://github.com/djc/askama", rev = "b93ce466cee51f879edd346d05c0faa4845ee1cc" }
-askama_shared = { git = "https://github.com/djc/askama", rev = "b93ce466cee51f879edd346d05c0faa4845ee1cc" }
-askama_derive = { git = "https://github.com/djc/askama", rev = "b93ce466cee51f879edd346d05c0faa4845ee1cc" }
-askama_escape = { git = "https://github.com/djc/askama", rev = "b93ce466cee51f879edd346d05c0faa4845ee1cc" }
-askama_rocket = { git = "https://github.com/djc/askama", rev = "b93ce466cee51f879edd346d05c0faa4845ee1cc" }
+askama = { git = "https://github.com/djc/askama", rev = "16a37f409776775341c5de8a8812eaeb8b1fe7f0" }
+askama_derive = { git = "https://github.com/djc/askama", rev = "16a37f409776775341c5de8a8812eaeb8b1fe7f0" }
+askama_escape = { git = "https://github.com/djc/askama", rev = "16a37f409776775341c5de8a8812eaeb8b1fe7f0" }
+askama_rocket = { git = "https://github.com/djc/askama", rev = "16a37f409776775341c5de8a8812eaeb8b1fe7f0" }
 # paypal-rs = { git = "https://github.com/flibrary/paypal-rs" }
