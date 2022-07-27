@@ -18,7 +18,7 @@ gettext = "^0.4"
 
 image = "^0.23"
 qrcode = "^0.12"
-lopdf = { version = "^0.27", features = ["embed_image"] }
+lopdf = { version = "^0.28", features = ["embed_image"] }
 log = "^0.4"
 teloxide = { version = "^0.10", features = ["auto-send", "macros"] }
 bytes = "^1"
