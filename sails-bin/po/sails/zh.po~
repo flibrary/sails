@@ -12,9 +12,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid "Homepage"
-msgstr "首页"
-
 msgid ""
 "FLibrary is the ultimate destination for discovering, discussing, and "
 "distributing learning guides."
@@ -32,189 +29,6 @@ msgstr "创作者中心"
 msgid "Portal"
 msgstr "主页"
 
-msgid "Discover Store"
-msgstr "探索 Store 商店"
-
-msgid "FLibrary Circle"
-msgstr "Circle 社区"
-
-msgid "Study guides for your courses"
-msgstr "为课程定制的学习指南"
-
-msgid ""
-"Tired of duplicated descriptions and hard-to-locate key-points in textbooks? "
-"Frustrated with short but impossible-to-understand others' notes lacking "
-"coherent logic? We strike a balance in between: study guides targeting "
-"specific courses you needed. They are coherent on first read and always to-"
-"the-point, providing an enjoyable learning or referencing experience."
-msgstr ""
-"对内容冗长且难以翻阅的教科书感到厌倦？他人书写的笔记难以理解且逻辑跳跃？我们"
-"衷于找到教材和笔记间的平衡：专门为您所需课程设计的学习指南。它们精简但不失逻"
-"辑，深度和示例并存，无论是第一次阅读还是快速查阅都非常高效。"
-
-msgid "Join the community"
-msgstr "加入社区"
-
-msgid ""
-"At FLibrary, you can effortlessly connect to minds behind masterpieces. Join "
-"the community, meet creators, and collaborate on new contents. Contribute "
-"your curiosity today!"
-msgstr ""
-"在 FLibrary Circle，你可以发现优秀的内容，更可以遇见内容背后优秀的创作者。加"
-"入社区，和作者面对面，一起创作新的内容。探索好奇心从今天开始！"
-
-msgid ""
-"Monthly update on everything FLibrary directly from our creators and "
-"developers."
-msgstr "来自我们的创作者和开发者的 FLibrary 每月要闻更新。"
-
-msgid "Your email address"
-msgstr "您的邮箱"
-
-msgid "Subscribe"
-msgstr "订阅"
-
-msgid "Subscribe to our newsletter"
-msgstr "订阅我们的要闻推送"
-
-msgid ""
-"Witness how curiosity progresses with <span class=\"text-info text-gradient "
-"fw-bold\">FLibrary Connect</span>, our monthly newsletter composed directly "
-"by our developers and creators. Get everything FLibrary delivered now."
-msgstr ""
-"订阅 <span class=\"text-info text-gradient fw-bold\">FLibrary Connect</span> "
-"每月更新，见证好奇心成长。每月更新的编辑们直接来自我们的开发者和创作者；现在"
-"订阅，听听内行人怎么说。"
-
-msgid "Subscribe on  <i class=\"bi bi-telegram\"></i> Telegram"
-msgstr "通过  <i class=\"bi bi-telegram\"></i> Telegram 订阅"
-
-msgid "Features"
-msgstr "特性"
-
-msgid "All Cloud"
-msgstr "全云端"
-
-msgid ""
-"FLibrary is your personalized learning hub. From notes to past papers, "
-"everything subscribed is on cloud for your access anytime, anywhere."
-msgstr ""
-"FLibrary 是您个性化的图书馆。从笔记到解析，您可以随时随地从云端访问所有您订阅"
-"的内容。"
-
-msgid "Streamlined Updates"
-msgstr "轻松分发"
-
-msgid ""
-"As a content creator, you are enabled to distribute and push content updates "
-"to your subscribers with no effort."
-msgstr "通过 FLibrary，创作者们可以轻松分发学习内容并向用户推送后续更新。"
-
-msgid "Curated Contents"
-msgstr "精心挑选"
-
-msgid ""
-"Only discover the best-in-class. Spend more time to dive in but not to "
-"wander through."
-msgstr ""
-"只有最好的内容才值得您去探索。我们的精心挑选让您专注学习和探索，而不是搜集无"
-"用的资源。"
-
-msgid "You are Protected"
-msgstr "安全无虞"
-
-msgid ""
-"From account security to content distribution fingerprinting, FLibrary "
-"strives for security in every fine detail."
-msgstr "FLibrary 在每一个细节上都追求安全：从您的账户到内容分发。"
-
-msgid "Multilingual Support"
-msgstr "多语言支持"
-
-msgid ""
-"A global learner's community is at heart to our vision, that's why we have "
-"built-in multilingual supports."
-msgstr ""
-"全球化的学习内容社区是我们愿景的核心，为此在设计之初我们就融入了多语言支持。"
-
-msgid "No Ads Forever"
-msgstr "没有广告"
-
-msgid ""
-"Ads are simply incompatible with our curiosity. Take our commitment: no ads "
-"forever."
-msgstr "广告和我们的好奇心格格不入，就这么简单。我们承诺：永远没有广告。"
-
-msgid "We are just getting started."
-msgstr "我们才刚刚开始"
-
-msgid "Join Us."
-msgstr "加入我们"
-
-msgid "Join Us"
-msgstr "加入我们"
-
-msgid "We make contents, FLibrary, and the community. Join us as"
-msgstr "我们创作内容，搭建 FLibrary 和社区，加入我们。"
-
-msgid "Creators"
-msgstr "创作者"
-
-msgid ""
-"Skilled at certain fields or courses? Create learning guides on subjects or "
-"anything creative (like building a rocket), either independent or based on a "
-"course taught at your university, and receive rewards to your knowledge and "
-"contribution."
-msgstr ""
-"在某一领域或课程独树一帜？为学科或任何创造（比如自制火箭）编写指南，可以独立"
-"立项也可以和大学内的课程深度结合。并通过你的知识和贡献获得奖励。"
-
-msgid "Working proficiency in LaTeX"
-msgstr "熟练运用 LaTeX"
-
-msgid "Concrete knowledge in certain fields"
-msgstr "特定领域的扎实知识基础"
-
-msgid "Stick to our principles and standards"
-msgstr "接受我们的创作原则和内容标准"
-
-msgid "Apply"
-msgstr "申请"
-
-msgid "Developers"
-msgstr "开发者"
-
-msgid ""
-"Our code is what builds our dreams. Join us as a developer, help inform "
-"what's the next feature, and make dreams true with your unique skills."
-msgstr ""
-"代码是我们的造梦引擎。作为开发者加入我们，帮助我们寻找下一个功能，并用你独特"
-"的技能让梦想成为现实。"
-
-msgid "Working proficiency in Rust / JavaScript"
-msgstr "熟练使用 Rust / JavaScript"
-
-msgid "Basic knowledge in network programming"
-msgstr "基本的网络编程知识"
-
-msgid "Strive for perfection."
-msgstr "追求优秀的代码质量"
-
-msgid "Digital Content Creator Center"
-msgstr "数字内容创作者中心"
-
-msgid "Create a Digital Content"
-msgstr "创建数字内容"
-
-msgid "Manage your Digital Contents"
-msgstr "管理数字内容"
-
-msgid "Name"
-msgstr "名称"
-
-msgid "Last Modified"
-msgstr "修改时间"
-
 msgid "Digital Content \"{}\""
 msgstr "数字内容 \"{}\""
 
@@ -227,6 +41,9 @@ msgstr "管理"
 msgid "Apply to products"
 msgstr "应用"
 
+msgid "Name"
+msgstr "名称"
+
 msgid "Storage Type"
 msgstr "存储类型"
 
@@ -235,6 +52,9 @@ msgstr "存储细节"
 
 msgid "Time Created"
 msgstr "创建于"
+
+msgid "Last Modified"
+msgstr "修改时间"
 
 msgid "Path to release asset"
 msgstr "对应 Release Asset 的路径"
@@ -260,7 +80,12 @@ msgstr "填写数字内容相关信息"
 msgid "Storage Type (cannot be changed afterwards)"
 msgstr "存储类型（后续无法修改）"
 
-msgid "Manually upload file"
+#, fuzzy
+msgid "Manually upload file (S3)"
+msgstr "手动上传文件"
+
+#, fuzzy
+msgid "Manually upload file (git)"
 msgstr "手动上传文件"
 
 msgid "Use Release Asset"
@@ -633,6 +458,186 @@ msgstr "创建的订单"
 
 msgid "Orders received"
 msgstr "收到的订单"
+
+msgid "Homepage"
+msgstr "首页"
+
+msgid "Discover Store"
+msgstr "探索 Store 商店"
+
+msgid "FLibrary Circle"
+msgstr "Circle 社区"
+
+msgid "Study guides for your courses"
+msgstr "为课程定制的学习指南"
+
+msgid ""
+"Tired of duplicated descriptions and hard-to-locate key-points in textbooks? "
+"Frustrated with short but impossible-to-understand others' notes lacking "
+"coherent logic? We strike a balance in between: study guides targeting "
+"specific courses you needed. They are coherent on first read and always to-"
+"the-point, providing an enjoyable learning or referencing experience."
+msgstr ""
+"对内容冗长且难以翻阅的教科书感到厌倦？他人书写的笔记难以理解且逻辑跳跃？我们"
+"衷于找到教材和笔记间的平衡：专门为您所需课程设计的学习指南。它们精简但不失逻"
+"辑，深度和示例并存，无论是第一次阅读还是快速查阅都非常高效。"
+
+msgid "Join the community"
+msgstr "加入社区"
+
+msgid ""
+"At FLibrary, you can effortlessly connect to minds behind masterpieces. Join "
+"the community, meet creators, and collaborate on new contents. Contribute "
+"your curiosity today!"
+msgstr ""
+"在 FLibrary Circle，你可以发现优秀的内容，更可以遇见内容背后优秀的创作者。加"
+"入社区，和作者面对面，一起创作新的内容。探索好奇心从今天开始！"
+
+msgid ""
+"Monthly update on everything FLibrary directly from our creators and "
+"developers."
+msgstr "来自我们的创作者和开发者的 FLibrary 每月要闻更新。"
+
+msgid "Your email address"
+msgstr "您的邮箱"
+
+msgid "Subscribe"
+msgstr "订阅"
+
+msgid "Subscribe to our newsletter"
+msgstr "订阅我们的要闻推送"
+
+msgid ""
+"Witness how curiosity progresses with <span class=\"text-info text-gradient "
+"fw-bold\">FLibrary Connect</span>, our monthly newsletter composed directly "
+"by our developers and creators. Get everything FLibrary delivered now."
+msgstr ""
+"订阅 <span class=\"text-info text-gradient fw-bold\">FLibrary Connect</span> "
+"每月更新，见证好奇心成长。每月更新的编辑们直接来自我们的开发者和创作者；现在"
+"订阅，听听内行人怎么说。"
+
+msgid "Subscribe on  <i class=\"bi bi-telegram\"></i> Telegram"
+msgstr "通过  <i class=\"bi bi-telegram\"></i> Telegram 订阅"
+
+msgid "Features"
+msgstr "特性"
+
+msgid "All Cloud"
+msgstr "全云端"
+
+msgid ""
+"FLibrary is your personalized learning hub. From notes to past papers, "
+"everything subscribed is on cloud for your access anytime, anywhere."
+msgstr ""
+"FLibrary 是您个性化的图书馆。从笔记到解析，您可以随时随地从云端访问所有您订阅"
+"的内容。"
+
+msgid "Streamlined Updates"
+msgstr "轻松分发"
+
+msgid ""
+"As a content creator, you are enabled to distribute and push content updates "
+"to your subscribers with no effort."
+msgstr "通过 FLibrary，创作者们可以轻松分发学习内容并向用户推送后续更新。"
+
+msgid "Curated Contents"
+msgstr "精心挑选"
+
+msgid ""
+"Only discover the best-in-class. Spend more time to dive in but not to "
+"wander through."
+msgstr ""
+"只有最好的内容才值得您去探索。我们的精心挑选让您专注学习和探索，而不是搜集无"
+"用的资源。"
+
+msgid "You are Protected"
+msgstr "安全无虞"
+
+msgid ""
+"From account security to content distribution fingerprinting, FLibrary "
+"strives for security in every fine detail."
+msgstr "FLibrary 在每一个细节上都追求安全：从您的账户到内容分发。"
+
+msgid "Multilingual Support"
+msgstr "多语言支持"
+
+msgid ""
+"A global learner's community is at heart to our vision, that's why we have "
+"built-in multilingual supports."
+msgstr ""
+"全球化的学习内容社区是我们愿景的核心，为此在设计之初我们就融入了多语言支持。"
+
+msgid "No Ads Forever"
+msgstr "没有广告"
+
+msgid ""
+"Ads are simply incompatible with our curiosity. Take our commitment: no ads "
+"forever."
+msgstr "广告和我们的好奇心格格不入，就这么简单。我们承诺：永远没有广告。"
+
+msgid "We are just getting started."
+msgstr "我们才刚刚开始"
+
+msgid "Join Us."
+msgstr "加入我们"
+
+msgid "Join Us"
+msgstr "加入我们"
+
+msgid "We make contents, FLibrary, and the community. Join us as"
+msgstr "我们创作内容，搭建 FLibrary 和社区，加入我们。"
+
+msgid "Creators"
+msgstr "创作者"
+
+msgid ""
+"Skilled at certain fields or courses? Create learning guides on subjects or "
+"anything creative (like building a rocket), either independent or based on a "
+"course taught at your university, and receive rewards to your knowledge and "
+"contribution."
+msgstr ""
+"在某一领域或课程独树一帜？为学科或任何创造（比如自制火箭）编写指南，可以独立"
+"立项也可以和大学内的课程深度结合。并通过你的知识和贡献获得奖励。"
+
+msgid "Working proficiency in LaTeX"
+msgstr "熟练运用 LaTeX"
+
+msgid "Concrete knowledge in certain fields"
+msgstr "特定领域的扎实知识基础"
+
+msgid "Stick to our principles and standards"
+msgstr "接受我们的创作原则和内容标准"
+
+msgid "Apply"
+msgstr "申请"
+
+msgid "Developers"
+msgstr "开发者"
+
+msgid ""
+"Our code is what builds our dreams. Join us as a developer, help inform "
+"what's the next feature, and make dreams true with your unique skills."
+msgstr ""
+"代码是我们的造梦引擎。作为开发者加入我们，帮助我们寻找下一个功能，并用你独特"
+"的技能让梦想成为现实。"
+
+msgid "Working proficiency in Rust / JavaScript"
+msgstr "熟练使用 Rust / JavaScript"
+
+msgid "Basic knowledge in network programming"
+msgstr "基本的网络编程知识"
+
+msgid "Strive for perfection."
+msgstr "追求优秀的代码质量"
+
+msgid "Digital Content Creator Center"
+msgstr "数字内容创作者中心"
+
+msgid "Create a Digital Content"
+msgstr "创建数字内容"
+
+msgid "Manage your Digital Contents"
+msgstr "管理数字内容"
 
 #~ msgid "Change password"
 #~ msgstr "更改密码"

@@ -19,8 +19,9 @@
       <label for="inputStorageType" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Storage Type (cannot be changed afterwards)") }}</label>
       <div class="col-sm-4">
         <select class="form-select" aria-label="Default select example" name="storage_type">
-	    <option value="gitrepo">{{ i18n!(self.i18n.catalog, "Manually upload file") }}</option>
-	    <option value="releaseasset">{{ i18n!(self.i18n.catalog, "Use Release Asset") }}</option>
+  	   <option value="s3">{{ i18n!(self.i18n.catalog, "Manually upload file (S3)") }}</option>
+           <option value="gitrepo">{{ i18n!(self.i18n.catalog, "Manually upload file (git)") }}</option>
+	   <option value="releaseasset">{{ i18n!(self.i18n.catalog, "Use Release Asset") }}</option>
 	</select>
       </div>
     </div>

@@ -18,7 +18,7 @@
     <tbody>
       {% for digicon in digicons_owned %}
       <tr>
-	<th scope="row"><a href="{{ uri!("/digicons", crate::services::digicons::get(digicon.get_id())) }}">{{digicon.get_name()}}</a></th>
+	<th scope="row"><a href="{{ uri!("/digicons", crate::services::digicons::get_release_asset(digicon.get_id())) }}">{{digicon.get_name()}}</a></th>
 	<th scope="row">{{digicon.get_time_modified().format("%Y-%m-%d %H:%M:%S")}}</th>
       </tr>
       {% endfor %}

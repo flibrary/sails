@@ -89,7 +89,7 @@ fn rocket() -> Rocket<Build> {
         .attach(create_fairing::<SmtpCreds>("mailbox"))
         .attach(create_fairing::<AeadKey>("encryption"))
         .attach(create_fairing::<ImageHosting>("images"))
-        .attach(create_fairing::<DigiconHosting>("digicons"))
+        .attach(DigiconHosting::fairing())
         .attach(create_fairing::<AlipayAppPrivKey>("alipay"))
         .attach(create_fairing::<AlipayClient>("alipay"))
         .attach(create_fairing::<PaypalAuth>("paypal"))
@@ -212,11 +212,16 @@ fn rocket() -> Rocket<Build> {
         .mount(
             "/digicons",
             routes![
-                services::digicons::get,
+                services::digicons::get_release_asset,
+                services::digicons::get_git_repo,
+                services::digicons::get_s3,
                 pages::digicons::trace,
                 pages::digicons::trace_unauthorized,
-                services::digicons::delete,
-                services::digicons::upload,
+                services::digicons::delete_release_asset,
+                services::digicons::delete_git_repo,
+                services::digicons::delete_s3,
+                services::digicons::upload_git_repo,
+                services::digicons::upload_s3,
                 services::digicons::update_digicon,
                 services::digicons::create_digicon,
                 pages::digicons::create_digicon_page,

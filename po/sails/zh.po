@@ -260,8 +260,11 @@ msgstr "填写数字内容相关信息"
 msgid "Storage Type (cannot be changed afterwards)"
 msgstr "存储类型（后续无法修改）"
 
-msgid "Manually upload file"
-msgstr "手动上传文件"
+msgid "Manually upload file (S3)"
+msgstr "手动上传文件 (S3)"
+
+msgid "Manually upload file (git)"
+msgstr "手动上传文件 (git)"
 
 msgid "Use Release Asset"
 msgstr "使用 Release Asset"

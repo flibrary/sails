@@ -7,6 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+aws-sdk-s3 = "^0.16"
+
 openidconnect = "^2"
 paypal-rs = "^0.2"
 
@@ -39,6 +41,7 @@ rsa = {version = "^0.5", features = ["alloc"]}
 num-bigint = {version = "^0.4", features = ["serde"]}
 sha2 = "^0.10"
 sha1 = "^0.10"
+md-5 = "^0.10"
 rand = {version = "^0.8", features = ["std_rng"]}
 base64 = "^0.13"
 chrono = "^0.4"
@@ -49,6 +52,7 @@ chacha20poly1305 = "^0.9"
 # We need askama as the backend template engine because it is type safe.
 askama = { version = "^0.11", features = ["with-rocket", "mime", "mime_guess"]}
 askama_rocket = "^0.11"
+tokio-stream = "^0.1"
 tokio = { version = "^1" }
 
 [dependencies.rocket_sync_db_pools]

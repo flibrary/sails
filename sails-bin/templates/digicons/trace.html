@@ -13,7 +13,7 @@
     </tr>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Name") }}</th>
-      <td><a href="{{ uri!("/digicons", crate::services::digicons::get(self.digicon.get_id())) }}">{{self.digicon.get_name()}}</a></td>
+      <td><a href="{{ uri!("/digicons", crate::services::digicons::get_release_asset(self.digicon.get_id())) }}">{{self.digicon.get_name()}}</a></td>
     </tr>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Downloaded by") }}</th>

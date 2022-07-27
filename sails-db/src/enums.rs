@@ -169,6 +169,8 @@ pub enum StorageType {
     ReleaseAsset,
     // Store files in github repository
     GitRepo,
+    // Store files in S3-compatible object storage
+    S3,
 }
 
 #[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, FromFormField)]

@@ -1,24 +1,89 @@
 use crate::{infras::aead::AeadKey, pages::digicons::*};
+use aws_sdk_s3::{
+    client::Builder, middleware::DefaultMiddleware, Client, Config, Credentials, Endpoint, Region,
+};
 use bytes::Bytes;
 use chacha20poly1305::Nonce;
-
 use image::{DynamicImage, ImageOutputFormat, Rgb};
 use lopdf::{self, xobject, Document};
 use qrcode::QrCode;
 use rand::{prelude::StdRng, RngCore, SeedableRng};
-use reqwest::Response;
 use rocket::{
     data::ToByteUnit,
+    fairing::{AdHoc, Fairing},
+    figment::Figment,
     form::{self, error::ErrorKind, DataField, FromFormField},
     http::{ContentType, Header},
 };
-
-use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
 pub struct DigiconHosting {
     pub gh_token: String,
+    pub s3_client: Client,
+    pub s3_bucket: String,
+}
+
+impl DigiconHosting {
+    fn from_figment(figment: &Figment) -> Result<Self, anyhow::Error> {
+        #[derive(serde::Deserialize)]
+        struct S3Config {
+            endpoint: String,
+            region: String,
+            access_key: String,
+            secret_key: String,
+            bucket: String,
+        }
+
+        let gh_token: String = figment.extract_inner("digicons.gh_token")?;
+
+        let config: S3Config = figment.extract_inner("digicons.s3")?;
+
+        // One has to define something to be the credential provider name,
+        // but it doesn't seem like the value matters
+        let provider_name = "custom";
+        let creds = Credentials::new(
+            &config.access_key,
+            &config.secret_key,
+            None,
+            None,
+            provider_name,
+        );
+
+        let endpoint = Endpoint::immutable(config.endpoint.parse().unwrap());
+
+        let mut client = Builder::dyn_https().middleware(DefaultMiddleware::new());
+        client.set_sleep_impl(None);
+        let client = client.build_dyn();
+
+        let s3_config = Config::builder()
+            .region(Region::new(config.region))
+            .endpoint_resolver(endpoint)
+            .credentials_provider(creds)
+            .build();
+
+        Ok(Self {
+            gh_token,
+            s3_client: Client::with_config(client, s3_config),
+            s3_bucket: config.bucket,
+        })
+    }
+
+    pub fn fairing() -> impl Fairing {
+        AdHoc::try_on_ignite("digicons", move |rocket| async move {
+            let hosting = match Self::from_figment(rocket.figment()) {
+                Ok(c) => c,
+                Err(e) => {
+                    log::error!(
+                        "Failed on constructing Digital Content hosting backend: {:?}",
+                        e
+                    );
+                    return Err(rocket);
+                }
+            };
+            Ok(rocket.manage(hosting))
+        })
+    }
 }
 
 pub struct DigiconFile {
@@ -57,17 +122,17 @@ impl<'r> FromFormField<'r> for DigiconFile {
 }
 
 impl DigiconFile {
-    pub async fn from_response(
-        resp: Response,
+    pub fn from_response(
+        resp: Bytes,
         ctt_type: ContentType,
         aead: &AeadKey,
         trace: &str,
     ) -> anyhow::Result<Self> {
         Ok(Self {
             bytes: if ctt_type == ContentType::PDF {
-                watermark_pdf(&resp.bytes().await?, aead, trace)?.into()
+                watermark_pdf(&resp, aead, trace)?.into()
             } else {
-                resp.bytes().await?
+                resp
             },
             // Use the file extension to indicate the content type;
             // If no file extension is indicated, we use Any which works pretty well.

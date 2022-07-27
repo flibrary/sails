@@ -88,7 +88,31 @@
     </form>
     <br>
 
-    <form action="{{uri!("/digicons", crate::services::digicons::upload(self.digicon.get_id()))}}" enctype="multipart/form-data" method="post">
+    <form action="{{uri!("/digicons", crate::services::digicons::upload_git_repo(self.digicon.get_id()))}}" enctype="multipart/form-data" method="post">
+      <div class="form-group row">
+        <label for="inputFile" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Upload file") }}</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="file" id="inputFile" name="file" required>
+	</div>
+      </div>
+      <br>
+      <button class="w-100 btn btn-lg btn-primary" type="submit">{{ i18n!(self.i18n.catalog, "Upload file") }}</button>
+    </form>
+
+    {% when sails_db::enums::StorageType::S3 %}
+    <form action="{{uri!("/digicons", crate::services::digicons::update_digicon(self.digicon.get_id()))}}" method="post">
+    <div class="form-group row">
+      <label for="inputName" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Name") }}</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="inputProd" placeholder="name" value="{{ digicon.get_name() }}" name="name" required>
+      </div>
+    </div>
+    <br>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">{{ i18n!(self.i18n.catalog, "Update the Digital Content") }}</button>
+    </form>
+    <br>
+
+    <form action="{{uri!("/digicons", crate::services::digicons::upload_s3(self.digicon.get_id()))}}" enctype="multipart/form-data" method="post">
       <div class="form-group row">
         <label for="inputFile" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Upload file") }}</label>
         <div class="col-sm-10">
@@ -101,7 +125,7 @@
     {% endmatch %}
     <br>
 
-    <a href="{{ uri!("/digicons", crate::services::digicons::delete(self.digicon.get_id())) }}" class="btn btn-danger" role="button">{{ i18n!(self.i18n.catalog, "Delete") }}</a>
+    <a href="{{ uri!("/digicons", crate::services::digicons::delete_release_asset(self.digicon.get_id())) }}" class="btn btn-danger" role="button">{{ i18n!(self.i18n.catalog, "Delete") }}</a>
     </div>
 
     <div class="tab-pane fade" id="nav-mapping" role="tabpanel" aria-labelledby="nav-mapping-tab">

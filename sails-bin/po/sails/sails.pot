@@ -210,7 +210,10 @@ msgstr ""
 msgid "Storage Type (cannot be changed afterwards)"
 msgstr ""
 
-msgid "Manually upload file"
+msgid "Manually upload file (S3)"
+msgstr ""
+
+msgid "Manually upload file (git)"
 msgstr ""
 
 msgid "Use Release Asset"

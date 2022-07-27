@@ -6,7 +6,7 @@ use rocket::{
 };
 use sails_db::{
     digicons::DigiconMappingFinder,
-    enums::{Payment, UserStatus},
+    enums::{Payment, StorageType, UserStatus},
 };
 use std::marker::PhantomData;
 
@@ -38,6 +38,14 @@ pub struct DigiconReadable;
 pub struct DigiconWritable;
 pub struct DigiconRemovable;
 pub struct DigiconContentReadable;
+pub struct DigiconStorageType<T> {
+    plhdr: PhantomData<T>,
+}
+
+// Storage Type
+pub struct GitRepo;
+pub struct ReleaseAsset;
+pub struct S3;
 
 pub struct Auth<T> {
     plhdr: PhantomData<T>,
@@ -217,6 +225,72 @@ impl<'r> FromRequest<'r> for Auth<DigiconReadable> {
             .await
             .unwrap_or(false)
         {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<DigiconStorageType<GitRepo>> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let digicon = try_outcome!(request
+            .query_value::<DigiconGuard>("digicon_id")
+            .and_then(|x| x.ok())
+            .or_forward(()));
+        let digicon = try_outcome!(digicon.to_digicon(&db).await.ok().or_forward(()));
+
+        if *digicon.get_storage_type() == StorageType::GitRepo {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<DigiconStorageType<ReleaseAsset>> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let digicon = try_outcome!(request
+            .query_value::<DigiconGuard>("digicon_id")
+            .and_then(|x| x.ok())
+            .or_forward(()));
+        let digicon = try_outcome!(digicon.to_digicon(&db).await.ok().or_forward(()));
+
+        if *digicon.get_storage_type() == StorageType::ReleaseAsset {
+            Outcome::Success(Auth { plhdr: PhantomData })
+        } else {
+            Outcome::Forward(())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Auth<DigiconStorageType<S3>> {
+    type Error = ();
+
+    async fn from_request(
+        request: &'r rocket::Request<'_>,
+    ) -> rocket::request::Outcome<Self, Self::Error> {
+        let db = try_outcome!(request.guard::<DbConn>().await);
+        let digicon = try_outcome!(request
+            .query_value::<DigiconGuard>("digicon_id")
+            .and_then(|x| x.ok())
+            .or_forward(()));
+        let digicon = try_outcome!(digicon.to_digicon(&db).await.ok().or_forward(()));
+
+        if *digicon.get_storage_type() == StorageType::S3 {
             Outcome::Success(Auth { plhdr: PhantomData })
         } else {
             Outcome::Forward(())
