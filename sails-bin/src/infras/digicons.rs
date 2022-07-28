@@ -189,7 +189,7 @@ fn watermark_pdf(bytes: &[u8], aead: &AeadKey, trace: &str) -> anyhow::Result<Ve
             // Therefore, unless it is set to [0u8; 3], it is not gonna be transparent.
             // More info: https://stackoverflow.com/questions/42516203/converting-rgba-image-to-grayscale-golang
             .light_color(Rgb([0u8; 3]))
-            .dark_color(Rgb([150u8, 150u8, 150u8]))
+            .dark_color(Rgb([0u8, 125u8, 255u8]))
             .quiet_zone(false) // disable quiet zone (white border)
             .build(),
     );

@@ -20,7 +20,7 @@
       <div class="col-sm-4">
         <select class="form-select" aria-label="Default select example" name="storage_type">
   	   <option value="s3">{{ i18n!(self.i18n.catalog, "Manually upload file (S3)") }}</option>
-           <option value="gitrepo">{{ i18n!(self.i18n.catalog, "Manually upload file (git)") }}</option>
+           <option value="gitrepo" disabled>{{ i18n!(self.i18n.catalog, "Manually upload file (git)") }}</option>
 	   <option value="releaseasset">{{ i18n!(self.i18n.catalog, "Use Release Asset") }}</option>
 	</select>
       </div>
