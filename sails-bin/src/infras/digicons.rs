@@ -4,8 +4,8 @@ use aws_sdk_s3::{
 };
 use bytes::Bytes;
 use chacha20poly1305::Nonce;
-use image::{DynamicImage, ImageOutputFormat, Rgb};
-use lopdf::{self, xobject, Document};
+use image::{ColorType, DynamicImage, ImageOutputFormat, Rgb};
+use lopdf::{self, Document, ObjectId};
 use qrcode::QrCode;
 use rand::{prelude::StdRng, RngCore, SeedableRng};
 use rocket::{
@@ -178,23 +178,107 @@ fn watermark_pdf(bytes: &[u8], aead: &AeadKey, trace: &str) -> anyhow::Result<Ve
     let nonce = base64::encode_config(&nonce, base64::URL_SAFE);
 
     let mut buf = Vec::new();
+
+    // We use grayscale (to mimic alpha channel) and smask to implement transparent QR code.
+
     // IMPORTANT: Luma<u8> doesn't seem to work, while Rgb does
     let qrcode = DynamicImage::ImageRgb8(
         QrCode::new(uri!("https://flibrary.info/digicons", trace(ciphertext, nonce)).to_string())?
             .render::<Rgb<u8>>()
-            .dark_color(Rgb([125u8, 125u8, 125u8]))
+            // The grayscale is not the alpha channel, it is computed from all the RGB color channels.
+            // Therefore, unless it is set to [0u8; 3], it is not gonna be transparent.
+            // More info: https://stackoverflow.com/questions/42516203/converting-rgba-image-to-grayscale-golang
+            .light_color(Rgb([0u8; 3]))
+            .dark_color(Rgb([150u8, 150u8, 150u8]))
             .quiet_zone(false) // disable quiet zone (white border)
             .build(),
     );
     qrcode.write_to(&mut buf, ImageOutputFormat::Png)?;
 
-    let stream = xobject::image_from(buf)?;
+    let (rgb, mask) = ImageXObject::from_rgb(&buf);
+    let mask_id = doc.add_object(mask.into_object_with_mask(None));
 
     for (_, page_id) in doc.get_pages() {
-        doc.insert_image(page_id, stream.clone(), (10.0, 10.0), (75.0, 75.0))?;
+        let stream = rgb.clone().into_object_with_mask(Some(mask_id));
+
+        doc.insert_image(page_id, stream, (10.0, 10.0), (75.0, 75.0))?;
     }
 
     doc.compress();
     doc.save_to(&mut result)?;
     Ok(result)
+}
+
+#[derive(Clone)]
+struct ImageXObject {
+    /// Width of the image (original width, not scaled width)
+    pub width: u32,
+    /// Height of the image (original height, not scaled height)
+    pub height: u32,
+    /// Color space (Greyscale, RGB, CMYK)
+    pub color_space: ColorType,
+    /// The actual data from the image
+    pub data: Vec<u8>,
+}
+
+impl ImageXObject {
+    fn from_rgb(data: &[u8]) -> (Self, Self) {
+        use image::GenericImageView;
+
+        let img = image::load_from_memory(data).unwrap();
+
+        let (width, height) = img.dimensions();
+
+        let rgb = img.to_rgb8().to_vec();
+        let gray = img.to_luma8().to_vec();
+
+        (
+            Self {
+                width,
+                height,
+                color_space: img.color(),
+                data: rgb,
+            },
+            Self {
+                width,
+                height,
+                // We need to have it converted to "DeviceGray"
+                color_space: ColorType::La8,
+                data: gray,
+            },
+        )
+    }
+
+    fn into_object_with_mask(self, mask_id: Option<ObjectId>) -> lopdf::Stream {
+        use lopdf::{Dictionary, Object, Object::*, Stream};
+
+        let color_space = match self.color_space {
+            ColorType::La8 => b"DeviceGray".to_vec(),
+            ColorType::Rgb8 => b"DeviceRGB".to_vec(),
+            ColorType::Rgb16 => b"DeviceRGB".to_vec(),
+            ColorType::La16 => b"DeviceN".to_vec(),
+            ColorType::Rgba8 => b"DeviceN".to_vec(),
+            ColorType::Rgba16 => b"DeviceN".to_vec(),
+            ColorType::Bgr8 => b"DeviceN".to_vec(),
+            ColorType::Bgra8 => b"DeviceN".to_vec(),
+            _ => b"Indexed".to_vec(),
+        };
+
+        let mut dict = Dictionary::new();
+        dict.set("Type", Object::Name(b"XObject".to_vec()));
+        dict.set("Subtype", Object::Name(b"Image".to_vec()));
+        dict.set("Width", self.width);
+        dict.set("Height", self.height);
+        dict.set("ColorSpace", Object::Name(color_space));
+        dict.set("BitsPerComponent", 8);
+
+        if let Some(mask_id) = mask_id {
+            dict.set("SMask", Reference(mask_id));
+        }
+
+        let mut img_object = Stream::new(dict, self.data);
+        // Ignore any compression error.
+        let _ = img_object.compress();
+        img_object
+    }
 }
