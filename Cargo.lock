@@ -82,9 +82,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.58"
+version = "1.0.59"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb07d2053ccdbe10e2af2995a2f116c1330396493dc1269f6a91d0ae82e19704"
+checksum = "c91f1f46651137be86f3a2b9a8359f9ab421d04d941c62b5982e1ca21113adf9"
 
 [[package]]
 name = "aquamarine"
@@ -163,9 +163,9 @@ dependencies = [
 
 [[package]]
 name = "async-trait"
-version = "0.1.56"
+version = "0.1.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96cf8829f67d2eab0b2dfa42c5d0ef737e0724e4a82b01b3e292456202b19716"
+checksum = "76464446b8bc32758d7e88ee1a804d9914cd9b1cb264c029899680b0be29826f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -293,7 +293,7 @@ dependencies = [
  "percent-encoding",
  "regex",
  "ring",
- "time 0.3.11",
+ "time 0.3.12",
  "tracing",
 ]
 
@@ -389,7 +389,7 @@ dependencies = [
  "itoa 1.0.2",
  "num-integer",
  "ryu",
- "time 0.3.11",
+ "time 0.3.12",
 ]
 
 [[package]]
@@ -545,9 +545,9 @@ checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 
 [[package]]
 name = "bytes"
-version = "1.2.0"
+version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0b3de4a0c5e67e16066a0715723abd91edc2f9001d09c46e1dca929351e130e"
+checksum = "ec8a7b6a70fde80372154c65702f00a0f56f3e1c36abbc6c440484be248856db"
 
 [[package]]
 name = "bytes-utils"
@@ -694,7 +694,7 @@ dependencies = [
  "rand 0.8.5",
  "sha2 0.10.2",
  "subtle",
- "time 0.3.11",
+ "time 0.3.12",
  "version_check",
 ]
 
@@ -1133,6 +1133,12 @@ checksum = "d81175dab5ec79c30e0576df2ed2c244e1721720c302000bb321b107e82e265c"
 dependencies = [
  "futures",
 ]
+
+[[package]]
+name = "dtoa"
+version = "0.4.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "56899898ce76aaf4a0f24d914c97ea6ed976d42fec6ad33fcbb0a1103e07b2b0"
 
 [[package]]
 name = "either"
@@ -1900,9 +1906,9 @@ checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
 
 [[package]]
 name = "libm"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33a33a362ce288760ec6a508b94caaec573ae7d3bbbd91b87aa0bad4456839db"
+checksum = "da83a57f3f5ba3680950aa3cbc806fc297bc0b289d42e8942ed528ace71b8145"
 
 [[package]]
 name = "libsqlite3-sys"
@@ -1956,15 +1962,17 @@ dependencies = [
 
 [[package]]
 name = "lopdf"
-version = "0.28.0"
+version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "562e3837dc5a573f5c64df446eaa50f46636ad64af6f8de8b7f45b5e48d1d0f3"
+checksum = "8146695b97752d9c66da0092c6364f8f3ca683f5ea34341db21e5550c3b8c4f4"
 dependencies = [
  "chrono",
+ "dtoa",
  "encoding",
  "flate2",
  "image",
- "itoa 1.0.2",
+ "itoa 0.4.8",
+ "lazy_static",
  "linked-hash-map",
  "log",
  "pom",
@@ -3100,7 +3108,7 @@ dependencies = [
  "serde_json",
  "state",
  "tempfile",
- "time 0.3.11",
+ "time 0.3.12",
  "tokio",
  "tokio-stream",
  "tokio-util",
@@ -3147,7 +3155,7 @@ dependencies = [
  "smallvec",
  "stable-pattern",
  "state",
- "time 0.3.11",
+ "time 0.3.12",
  "tokio",
  "uncased",
 ]
@@ -3503,9 +3511,9 @@ checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
 
 [[package]]
 name = "serde"
-version = "1.0.140"
+version = "1.0.141"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc855a42c7967b7c369eb5860f7164ef1f6f81c20c7cc1141f2a604e18723b03"
+checksum = "7af873f2c95b99fcb0bd0fe622a43e29514658873c8ceba88c4cb88833a22500"
 dependencies = [
  "serde_derive",
 ]
@@ -3532,9 +3540,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.140"
+version = "1.0.141"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f2122636b9fe3b81f1cb25099fcf2d3f542cdb1d45940d56c713158884a05da"
+checksum = "75743a150d003dd863b51dc809bcad0d73f2102c53632f1e954e738192a3413f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3683,7 +3691,7 @@ dependencies = [
  "num-bigint",
  "num-traits",
  "thiserror",
- "time 0.3.11",
+ "time 0.3.12",
 ]
 
 [[package]]
@@ -4094,11 +4102,12 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.11"
+version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72c91f41dcb2f096c05f0873d667dceec1087ce5bcf984ec8ffb19acddbb3217"
+checksum = "74b7cc93fc23ba97fde84f7eea56c55d1ba183f495c6715defdfc7b9cb8c870f"
 dependencies = [
  "itoa 1.0.2",
+ "js-sys",
  "libc",
  "num_threads",
  "time-macros 0.2.4",
@@ -4285,9 +4294,9 @@ checksum = "b6bc1c9ce2b5135ac7f93c72918fc37feb872bdc6a5533a8b85eb4b86bfdae52"
 
 [[package]]
 name = "tracing"
-version = "0.1.35"
+version = "0.1.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a400e31aa60b9d44a52a8ee0343b5b18566b03a8321e0d321f695cf56e940160"
+checksum = "2fce9567bd60a67d08a16488756721ba392f24f29006402881e43b19aac64307"
 dependencies = [
  "cfg-if",
  "log",
@@ -4309,9 +4318,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-core"
-version = "0.1.28"
+version = "0.1.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b7358be39f2f274f322d2aaed611acc57f382e8eb1e5b48cb9ae30933495ce7"
+checksum = "5aeea4303076558a00714b823f9ad67d58a3bbda1df83d8827d21193156e22f7"
 dependencies = [
  "once_cell",
  "valuable",

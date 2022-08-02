@@ -39,11 +39,22 @@ impl OIDCClient {
 
         let config: Config = figment.extract_inner("oidc")?;
 
-        let provider_metadata = CoreProviderMetadata::discover_async(
-            IssuerUrl::new(config.discovery_uri)?,
-            async_http_client,
-        )
-        .await?;
+        let provider_metadata = loop {
+            use tokio::time::{sleep, Duration};
+
+            match CoreProviderMetadata::discover_async(
+                IssuerUrl::new(config.discovery_uri.clone())?,
+                async_http_client,
+            )
+            .await
+            {
+                Ok(metadata) => break metadata,
+                Err(e) => {
+                    log::error!("Failed to fetch provider metadata: {}", e);
+                    sleep(Duration::from_secs(5)).await;
+                }
+            }
+        };
 
         // Create an OpenID Connect client by specifying the client ID, client secret, authorization URL
         // and token URL.
