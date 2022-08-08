@@ -55,7 +55,7 @@ pub async fn home_page(i18n: I18n, conn: DbConn) -> Result<StoreHomePage, Flash<
                     .into_iter()
                     .map(
                         |x| -> Result<(LeafCategory, Vec<ProductCard>), SailsDbError> {
-                            let products = ProductFinder::new(c, None)
+                            let mut products = ProductFinder::new(c, None)
                                 .status(ProductStatus::Verified, Cmp::Equal)
                                 .category(&x)?
                                 .search_info()?
@@ -74,6 +74,9 @@ pub async fn home_page(i18n: I18n, conn: DbConn) -> Result<StoreHomePage, Flash<
                                 // Reverse the prod order
                                 .rev()
                                 .collect::<Result<Vec<ProductCard>, SailsDbError>>()?;
+
+                            products.sort_by(cmp_product);
+
                             Ok((x, products))
                         },
                     )
