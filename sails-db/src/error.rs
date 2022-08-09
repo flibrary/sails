@@ -23,7 +23,7 @@ pub enum SailsDbError {
     #[error("exec script failed: {0}")]
     ScriptEvalError(#[from] Box<rhai::EvalAltResult>),
 
-    #[error(transparent)]
+    #[error("parsing script failed: {0}")]
     ScriptParseError(#[from] rhai::ParseError),
 
     #[error("email has already been registered")]
@@ -80,10 +80,10 @@ pub enum SailsDbError {
     #[error("illegal query")]
     IllegalQuery,
 
-    #[error("Coupon not applicable")]
-    CouponNotApplicable,
+    #[error("the amount of discount returned by the coupon is invalid")]
+    InvalidDiscountAmount,
 
-    #[error("The coupon ID is reserved and not valid")]
+    #[error("the coupon ID is reserved and not valid")]
     CouponIDReserved,
 
     #[error("other errors: {0}")]

@@ -108,12 +108,19 @@ impl Coupon {
         let ast = engine.compile(&self.script)?;
 
         // Try both output type: i64 and decimal
-        match engine.eval_ast_with_scope::<i64>(&mut scope, &ast) {
-            Ok(r) => Ok(r),
+        let result = match engine.eval_ast_with_scope::<i64>(&mut scope, &ast) {
+            Ok(r) => r,
             Err(_) => engine
                 .eval_ast_with_scope::<Decimal>(&mut scope, &ast)?
                 .to_i64()
-                .ok_or(SailsDbError::CouponNotApplicable),
+                .ok_or(SailsDbError::Overflow)?,
+        };
+
+        // We should always return a non-negative discount
+        if !result.is_negative() {
+            Ok(result)
+        } else {
+            Err(SailsDbError::InvalidDiscountAmount)
         }
     }
 
@@ -273,5 +280,109 @@ mod tests {
         assert_eq!(tx_id.get_info(&conn).unwrap().get_coupon(), "DEFAULT");
         assert_eq!(tx_id.get_info(&conn).unwrap().get_total(), 560u32.into());
         assert_eq!(tx_id.get_info(&conn).unwrap().get_subtotal(), 700u32.into());
+    }
+
+    #[test]
+    fn invalid_coupons() {
+        let conn = establish_connection();
+        // our seller
+        let seller = UserForm::new("TestUser@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
+
+        let buyer = UserForm::new("AtypicalBuyer@example.org", "NFLS", "", None)
+            .to_ref()
+            .unwrap()
+            .create(&conn)
+            .unwrap();
+
+        buyer
+            .get_info(&conn)
+            .unwrap()
+            .set_user_status(UserStatus::CONTENT_CREATOR)
+            .update(&conn)
+            .unwrap();
+
+        // The book category
+        let econ = Category::create(&conn, "Economics Books", 1)
+            .and_then(Category::into_leaf)
+            .unwrap();
+        let book_id = IncompleteProduct::new(
+            &econ,
+            "Krugman's Economics 2nd Edition",
+            700,
+            10,
+            "A very great book on the subject of Economics",
+            crate::enums::Currency::USD,
+        )
+        .unwrap()
+        .create(&conn, &seller)
+        .unwrap();
+
+        // Larger than i64
+        Coupon::new(&conn, "DEFAULT", "9_223_372_036_854_775_809").unwrap();
+        // Larger than Decimal::MAX
+        Coupon::new(&conn, "VERYLARGE", "79_228_162_514_264_337_593_543_950_435").unwrap();
+        // Negative discount
+        Coupon::new(&conn, "NEGATIVE", "-9").unwrap();
+
+        // Verify the book
+        book_id
+            .get_info(&conn)
+            .unwrap()
+            .set_product_status(ProductStatus::Verified)
+            .update(&conn)
+            .unwrap();
+
+        // There should be no transaction entry
+        assert_eq!(TransactionFinder::list(&conn).unwrap().len(), 0);
+
+        // overflow i64
+        assert!(matches!(
+            Transactions::buy(
+                &conn,
+                &book_id,
+                &buyer,
+                1,
+                "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+                "",
+                Payment::Paypal,
+            )
+            .err()
+            .unwrap(),
+            SailsDbError::Overflow
+        ));
+
+        assert!(matches!(
+            Transactions::buy(
+                &conn,
+                &book_id,
+                &buyer,
+                1,
+                "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+                "VERYLARGE",
+                Payment::Paypal,
+            )
+            .err()
+            .unwrap(),
+            SailsDbError::ScriptParseError(_)
+        ));
+
+        assert!(matches!(
+            Transactions::buy(
+                &conn,
+                &book_id,
+                &buyer,
+                1,
+                "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+                "NEGATIVE",
+                Payment::Paypal,
+            )
+            .err()
+            .unwrap(),
+            SailsDbError::InvalidDiscountAmount
+        ));
     }
 }

@@ -44,7 +44,7 @@ impl Transactions {
         }
 
         if product_info.get_product_status() == &ProductStatus::Verified {
-            let coupon_p = if coupon_p == "" {
+            let coupon_p = if coupon_p.is_empty() {
                 // Try find the default coupon
                 if let Ok(r) = CouponFinder::new(conn, None).id("DEFAULT").first() {
                     // Use default coupon
