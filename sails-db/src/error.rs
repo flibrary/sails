@@ -20,6 +20,12 @@ pub enum SailsDbError {
     #[error("invalid email address: {0}")]
     InvalidIdentity(#[from] lettre::address::AddressError),
 
+    #[error("exec script failed: {0}")]
+    ScriptEvalError(#[from] Box<rhai::EvalAltResult>),
+
+    #[error(transparent)]
+    ScriptParseError(#[from] rhai::ParseError),
+
     #[error("email has already been registered")]
     UserRegistered,
 
@@ -73,6 +79,12 @@ pub enum SailsDbError {
 
     #[error("illegal query")]
     IllegalQuery,
+
+    #[error("Coupon not applicable")]
+    CouponNotApplicable,
+
+    #[error("The coupon ID is reserved and not valid")]
+    CouponIDReserved,
 
     #[error("other errors: {0}")]
     Anyhow(#[from] anyhow::Error),

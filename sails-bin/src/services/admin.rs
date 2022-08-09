@@ -7,10 +7,12 @@ use crate::{
     DbConn, IntoFlash,
 };
 use rocket::{
+    form::Form,
     response::{Flash, Redirect},
     State,
 };
 use sails_db::{
+    coupons::*,
     enums::{ProductStatus, TransactionStatus},
     tags::*,
 };
@@ -135,4 +137,44 @@ pub async fn finish_order(
     .await
     .into_flash(uri!("/"))?;
     Ok(Redirect::to(uri!("/admin", admin_orders)))
+}
+
+#[post("/cow_coupon?<coupon_id>", data = "<info>", rank = 1)]
+pub async fn update_coupon(
+    coupon_id: CouponGuard,
+    _role: Role<Admin>,
+    info: Form<Coupon>,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    let coupon = coupon_id.to_coupon(&conn).await.into_flash(uri!("/"))?;
+    let id = coupon.get_id().to_string();
+    conn.run(move |c| info.into_inner().update(c))
+        .await
+        .into_flash(uri!("/"))?;
+    Ok(Redirect::to(uri!("/admin", update_coupon_page(id))))
+}
+
+#[post("/cow_coupon", data = "<info>", rank = 2)]
+pub async fn create_coupon(
+    _role: Role<Admin>,
+    info: Form<Coupon>,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    conn.run(move |c| info.into_inner().create(c))
+        .await
+        .into_flash(uri!("/"))?;
+    Ok(Redirect::to(uri!("/admin", coupons_page)))
+}
+
+#[get("/delete_coupon?<coupon_id>")]
+pub async fn delete_coupon(
+    coupon_id: CouponGuard,
+    _role: Role<Admin>,
+    conn: DbConn,
+) -> Result<Redirect, Flash<Redirect>> {
+    let coupon = coupon_id.to_coupon(&conn).await.into_flash(uri!("/"))?;
+    conn.run(move |c| coupon.delete(c))
+        .await
+        .into_flash(uri!("/"))?;
+    Ok(Redirect::to(uri!("/admin", coupons_page)))
 }

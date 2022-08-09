@@ -1,0 +1,5 @@
+-- Your SQL goes here
+CREATE TABLE IF NOT EXISTS coupons (
+  id VARCHAR(60) NOT NULL PRIMARY KEY,
+  script VARCHAR(40000) NOT NULL
+);

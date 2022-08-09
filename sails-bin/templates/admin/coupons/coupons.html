@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Manage coupons") }}{% endblock title %}
+
+{% block content %}
+<main class="container">
+  <div class="p-5 rounded shadow">
+    <h1>{{ i18n!(self.i18n.catalog, "Manage coupons") }}</h1>
+    <a href="{{ uri!("/admin", crate::pages::admin::create_coupon_page) }}" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Create a coupon") }}</a>
+  </div>
+  <br>
+
+  <div class="shadow p-5 rounded ">
+    <h1>{{ i18n!(self.i18n.catalog, "Active coupons") }}</h1>
+
+    <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+    <thead>
+      <tr>
+	<th data-field="name" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "ID") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for coupon in coupons %}
+      <tr>
+	<th scope="row"><a href="{{ uri!("/admin", crate::pages::admin::update_coupon_page(coupon.get_id())) }}">{{ coupon.get_id() }}</a></th>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+
+</main>
+{% endblock content %}

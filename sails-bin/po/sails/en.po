@@ -29,6 +29,33 @@ msgstr ""
 msgid "Portal"
 msgstr ""
 
+msgid "Create a coupon"
+msgstr ""
+
+msgid "Fill in relevant information to create a coupon"
+msgstr ""
+
+msgid "ID"
+msgstr ""
+
+msgid "Script"
+msgstr ""
+
+msgid "Update the coupon"
+msgstr ""
+
+msgid "Fill in relevant information to update the coupon"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Manage coupons"
+msgstr ""
+
+msgid "Active coupons"
+msgstr ""
+
 msgid "Homepage"
 msgstr ""
 
@@ -228,12 +255,6 @@ msgstr ""
 msgid "Upload file"
 msgstr ""
 
-msgid "Delete"
-msgstr ""
-
-msgid "Create product"
-msgstr ""
-
 msgid "Create the Digital Content"
 msgstr ""
 
@@ -370,6 +391,15 @@ msgstr ""
 msgid "Quantity purchased"
 msgstr ""
 
+msgid "Subtotal before discount"
+msgstr ""
+
+msgid "Discount"
+msgstr ""
+
+msgid "Coupon used"
+msgstr ""
+
 msgid "Address"
 msgstr ""
 
@@ -402,9 +432,6 @@ msgstr ""
 msgid "Please review and submit your order"
 msgstr ""
 
-msgid "ID"
-msgstr ""
-
 msgid "Quantity in stock"
 msgstr ""
 
@@ -412,6 +439,9 @@ msgid "Quantity to purchase"
 msgstr ""
 
 msgid "If content is completely digital, you may leave it blank."
+msgstr ""
+
+msgid "Coupon"
 msgstr ""
 
 msgid "Payment method"
@@ -500,6 +530,9 @@ msgid "Quantity"
 msgstr ""
 
 msgid "Description"
+msgstr ""
+
+msgid "Create product"
 msgstr ""
 
 msgid "Fill in relevant information which users see in the store"

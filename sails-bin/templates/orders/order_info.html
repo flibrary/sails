@@ -50,15 +50,27 @@
     <tbody>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Total") }}</th>
-      <td>{{ "{:?}"|format(prod.get_currency()) }} {{ order.get_total() }}</td>
+      <td>{{ "{:?}"|format(order.get_currency()) }} {{ order.get_total() }}</td>
     </tr>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Price per unit") }}</th>
-      <td>{{ "{:?}"|format(prod.get_currency()) }} {{ order.get_price() }}</td>
+      <td>{{ "{:?}"|format(order.get_currency()) }} {{ order.get_price() }}</td>
     </tr>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Quantity purchased") }}</th>
       <td>{{ order.get_quantity() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Subtotal before discount") }}</th>
+      <td>{{ "{:?}"|format(order.get_currency()) }} {{ order.get_subtotal() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Discount") }}</th>
+      <td>{{ "{:?}"|format(order.get_currency()) }} {{ order.get_discount() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Coupon used") }}</th>
+      <td><code>{{ order.get_coupon() }}</code></td>
     </tr>
     <tr>
       <th scope="row">{{ i18n!(self.i18n.catalog, "Address") }}</th>

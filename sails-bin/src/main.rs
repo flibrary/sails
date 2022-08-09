@@ -176,12 +176,18 @@ fn rocket() -> Rocket<Build> {
                 pages::admin::admin_metrics,
                 pages::admin::admin_orders,
                 pages::admin::order_info,
+                pages::admin::update_coupon_page,
+                pages::admin::create_coupon_page,
+                pages::admin::coupons_page,
                 services::admin::refund_order,
                 services::admin::finish_order,
                 services::admin::verify_prod,
                 services::admin::disable_prod,
                 services::admin::add_tag,
                 services::admin::remove_tag,
+                services::admin::update_coupon,
+                services::admin::create_coupon,
+                services::admin::delete_coupon,
             ],
         )
         .mount(

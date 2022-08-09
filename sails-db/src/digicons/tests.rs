@@ -1,7 +1,7 @@
 use super::{Digicon, DigiconMapping};
 use crate::{
-    categories::*, digicons::DigiconMappingFinder, error::SailsDbError, products::*,
-    test_utils::establish_connection, transactions::Transactions, users::*,
+    categories::*, coupons::Coupon, digicons::DigiconMappingFinder, error::SailsDbError,
+    products::*, test_utils::establish_connection, transactions::Transactions, users::*,
 };
 
 #[test]
@@ -100,12 +100,15 @@ fn mapping() {
         false
     );
 
+    Coupon::new(&conn, "DEFAULT", "0").unwrap();
+
     let tx = Transactions::buy(
         &conn,
         &subscription,
         &another,
         1,
         "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+        "",
         crate::enums::Payment::Alipay,
     )
     .unwrap();

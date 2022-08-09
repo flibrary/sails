@@ -9,6 +9,13 @@ table! {
 }
 
 table! {
+    coupons (id) {
+        id -> Text,
+        script -> Text,
+    }
+}
+
+table! {
     digiconmappings (id) {
         id -> Text,
         digicon -> Text,
@@ -94,6 +101,8 @@ table! {
         payment -> PaymentMapping,
         currency -> CurrencyMapping,
         payment_detail -> Nullable<Text>,
+        coupon -> Text,
+        discount -> BigInt,
     }
 }
 
@@ -118,6 +127,7 @@ joinable!(transactions -> products (product));
 
 allow_tables_to_appear_in_same_query!(
     categories,
+    coupons,
     digiconmappings,
     digicons,
     messages,

@@ -41,11 +41,11 @@
     <tbody>
     <tr>
       <th scope="row">总价</th>
-      <td>CN¥ {{ order.get_total() }}</td>
+      <td>{{ "{:?}"|format(order.get_currency()) }} {{ order.get_total() }}</td>
     </tr>
     <tr>
       <th scope="row">单价</th>
-      <td>CN¥ {{ order.get_price() }}</td>
+      <td>{{ "{:?}"|format(order.get_currency()) }} {{ order.get_price() }}</td>
     </tr>
     <tr>
       <th scope="row">购买数量</th>

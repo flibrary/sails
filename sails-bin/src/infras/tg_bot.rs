@@ -72,16 +72,22 @@ Order: {order}
 Buyer: {buyer}
 Seller: {seller}
 Product: {product}
+Coupon: {coupon}
 Price: {price}
 Quantity: {qty}
+Subtotal: {subtotal}
+Discount: {discount}
 Total: {total}"#,
             order.get_transaction_status(),
             order = order_link(&order),
             buyer = user_link(&buyer),
             seller = user_link(&seller),
+            coupon = order.get_coupon(),
             product = product_link(&product),
             price = order.get_price(),
             qty = order.get_quantity(),
+            subtotal = order.get_subtotal(),
+            discount = order.get_discount(),
             total = order.get_total()
         );
 

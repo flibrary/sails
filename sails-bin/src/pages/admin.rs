@@ -5,6 +5,7 @@ use crate::{
 use askama::Template;
 use rocket::response::{Flash, Redirect};
 use sails_db::{
+    coupons::*,
     enums::{ProductStatus, TransactionStatus},
     error::SailsDbError,
     products::{ProductFinder, ProductInfo},
@@ -289,6 +290,58 @@ pub async fn order_info(
         prod: order.prod_info,
         order: order.order_info,
     })
+}
+
+#[derive(Template)]
+#[template(path = "admin/coupons/create_coupon.html")]
+pub struct AdminCreateCouponPage {
+    i18n: I18n,
+}
+
+#[get("/create_coupon")]
+pub async fn create_coupon_page(
+    i18n: I18n,
+    _role: Role<Admin>,
+) -> Result<AdminCreateCouponPage, Flash<Redirect>> {
+    Ok(AdminCreateCouponPage { i18n })
+}
+
+#[derive(Template)]
+#[template(path = "admin/coupons/update_coupon.html")]
+pub struct AdminUpdateCouponPage {
+    i18n: I18n,
+    coupon: Coupon,
+}
+
+#[get("/create_coupon?<coupon_id>")]
+pub async fn update_coupon_page(
+    i18n: I18n,
+    coupon_id: CouponGuard,
+    _role: Role<Admin>,
+    conn: DbConn,
+) -> Result<AdminUpdateCouponPage, Flash<Redirect>> {
+    let coupon = coupon_id.to_coupon(&conn).await.into_flash(uri!("/"))?;
+    Ok(AdminUpdateCouponPage { i18n, coupon })
+}
+
+#[derive(Template)]
+#[template(path = "admin/coupons/coupons.html")]
+pub struct AdminCouponsPage {
+    i18n: I18n,
+    coupons: Vec<Coupon>,
+}
+
+#[get("/coupons")]
+pub async fn coupons_page(
+    i18n: I18n,
+    _role: Role<Admin>,
+    conn: DbConn,
+) -> Result<AdminCouponsPage, Flash<Redirect>> {
+    let coupons = conn
+        .run(move |c| CouponFinder::list(c))
+        .await
+        .into_flash(uri!("/"))?;
+    Ok(AdminCouponsPage { i18n, coupons })
 }
 
 #[get("/")]

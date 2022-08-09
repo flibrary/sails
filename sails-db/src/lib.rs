@@ -14,7 +14,9 @@ pub mod products;
 #[rustfmt::skip]
 mod schema;
 pub mod categories;
+pub mod coupons;
 pub mod digicons;
+mod script;
 pub mod tags;
 pub mod test_utils;
 pub mod transactions;

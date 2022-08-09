@@ -45,6 +45,13 @@
     <br>
 
     <div class="form-group row">
+      <label for="inputQuantity" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Coupon") }}</label>
+      <!--<input type="number" min="1" max="{{prod.get_quantity()}}" class="form-control" id="inputQuantity" placeholder="Quantity" value="1" name="quantity" required>-->
+      <input type="text" class="form-control" id="inputQuantity" placeholder="" value="" name="coupon">
+    </div>
+    <br>
+
+    <div class="form-group row">
       <label for="inputPayment" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Payment method") }}</label>
       <div class="col-sm-4">
         <select class="form-select" aria-label="Default select example" name="payment">

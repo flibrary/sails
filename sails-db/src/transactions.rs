@@ -1,4 +1,5 @@
 use crate::{
+    coupons::{Coupon, CouponContext, CouponFinder},
     enums::{Currency, Payment, ProductStatus, TransactionStatus, UserStatus},
     error::{SailsDbError, SailsDbResult as Result},
     products::{ProductFinder, ProductId},
@@ -23,6 +24,7 @@ impl Transactions {
         buyer_p: &UserId,
         qty: u32,
         addr: impl ToString,
+        coupon_p: &str,
         payment_p: Payment,
     ) -> Result<TransactionId> {
         let qty = NonZeroU32::new(qty).ok_or(SailsDbError::IllegalPriceOrQuantity)?;
@@ -42,9 +44,38 @@ impl Transactions {
         }
 
         if product_info.get_product_status() == &ProductStatus::Verified {
+            let coupon_p = if coupon_p == "" {
+                // Try find the default coupon
+                if let Ok(r) = CouponFinder::new(conn, None).id("DEFAULT").first() {
+                    // Use default coupon
+                    // Default coupon should not error on exec otherwise users cannot proceed transaction without a coupon
+                    r
+                } else {
+                    // If "DEFAULT"  coupon is not available, use builtin coupon
+                    Coupon::new_without_db("_BUILTIN_", "0")
+                }
+            } else {
+                // Search for the specific coupon
+                CouponFinder::new(conn, None).id(coupon_p).first()?
+            };
+
+            let coupon_ctx = CouponContext {
+                buyer: buyer_p.get_info(conn)?,
+                seller: UserId::find(conn, product_info.get_seller_id())?.get_info(conn)?,
+                product: product_info.clone(),
+                quantity: qty.get() as i64,
+                buyer_used: TransactionFinder::new(conn, None)
+                    .buyer(buyer_p)
+                    .coupon(coupon_p.get_id())
+                    .count_i64()?,
+                total_used: TransactionFinder::new(conn, None)
+                    .coupon(coupon_p.get_id())
+                    .count_i64()?,
+            };
+
             let id_cloned = Uuid::new_v4();
             let shortid_str = id_cloned.as_fields().0.to_string();
-            let tx = TransactionInfo {
+            let mut tx = TransactionInfo {
                 id: id_cloned.to_string(),
                 shortid: shortid_str,
                 seller: product_info.get_seller_id().to_string(),
@@ -57,13 +88,16 @@ impl Transactions {
                 buyer: buyer_p.get_id().to_string(),
                 time_sent: chrono::offset::Local::now().naive_utc(),
                 currency: product_info.get_currency().clone(),
-                transaction_status: if product_info.get_price() != 0 {
-                    TransactionStatus::Placed
-                } else {
-                    // If the product is free, we just finish the transaction
-                    TransactionStatus::Finished
-                },
+                coupon: coupon_p.get_id().to_string(),
+                discount: coupon_p.exec(coupon_ctx)?,
+                transaction_status: TransactionStatus::Placed,
             };
+
+            if tx.get_total() == 0u32.into() {
+                // If the product is free, we just finish the transaction
+                // Ideally, we should set this to paid. However, since most free products are digital content and digital content are not obtainable until order gets finished, we set order status "finished" to expedite the process.
+                tx = tx.set_transaction_status(TransactionStatus::Finished);
+            }
 
             // Create transaction record
             diesel::insert_into(transactions).values(tx).execute(conn)?;
@@ -146,6 +180,8 @@ pub struct TransactionInfo {
     payment: Payment,
     currency: Currency,
     payment_detail: Option<String>,
+    coupon: String,
+    discount: i64,
 }
 
 impl TransactionInfo {
@@ -186,10 +222,17 @@ impl TransactionInfo {
         self.quantity as u32
     }
 
-    pub fn get_total(&self) -> BigUint {
+    pub fn get_subtotal(&self) -> BigUint {
         let qty: BigUint = self.get_quantity().into();
         let price: BigUint = self.get_price().into();
         qty * price
+    }
+
+    pub fn get_total(&self) -> BigUint {
+        let qty: BigUint = self.get_quantity().into();
+        let price: BigUint = self.get_price().into();
+        let discount: BigUint = self.get_discount().into();
+        qty * price - discount
     }
 
     /// Get a reference to the transaction info's product.
@@ -221,6 +264,14 @@ impl TransactionInfo {
     /// Get a reference to the transaction info's time sent.
     pub fn get_time_sent(&self) -> &NaiveDateTime {
         &self.time_sent
+    }
+
+    pub fn get_coupon(&self) -> &str {
+        &self.coupon
+    }
+
+    pub fn get_discount(&self) -> u32 {
+        self.discount as u32
     }
 
     /// Get a reference to the transaction info's transaction status.
@@ -418,6 +469,11 @@ impl<'a> TransactionFinder<'a> {
             .unwrap()) // guranteed to be positive.
     }
 
+    pub fn count_i64(self) -> Result<i64> {
+        use crate::schema::transactions::dsl::*;
+        Ok(self.query.select(count(id)).first::<i64>(self.conn)?) // guranteed to be positive.
+    }
+
     pub fn most_recent_order(
         conn: &'a SqliteConnection,
         user: &'a UserId,
@@ -546,6 +602,12 @@ impl<'a> TransactionFinder<'a> {
         self
     }
 
+    pub fn coupon(mut self, coupon_id: &'a str) -> Self {
+        use crate::schema::transactions::dsl::*;
+        self.query = self.query.filter(coupon.eq(coupon_id));
+        self
+    }
+
     pub fn time(mut self, time_provided: NaiveDateTime, cmp: Cmp) -> Self {
         use crate::schema::transactions::dsl::*;
         match cmp {
@@ -630,6 +692,7 @@ mod tests {
                 &buyer,
                 1,
                 "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+                "",
                 Payment::Paypal,
             )
             .err()
@@ -653,6 +716,7 @@ mod tests {
                 &buyer,
                 1,
                 "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+                "DEFAULT", // Should be equivalent to ""
                 Payment::Alipay,
             )
             .err()
@@ -668,6 +732,7 @@ mod tests {
                 &buyer,
                 2,
                 "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+                "",
                 Payment::Paypal,
             )
             .err()
@@ -685,6 +750,7 @@ mod tests {
             &buyer,
             1,
             "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+            "",
             Payment::Paypal,
         )
         .unwrap();
@@ -719,6 +785,8 @@ mod tests {
         // The transaction price should remain unchanged.
         assert_eq!(tx_id.get_info(&conn).unwrap().get_price(), 700);
         assert_eq!(tx_id.get_info(&conn).unwrap().get_quantity(), 1);
+        // The coupon applied to the transaction should be the builtin coupon.
+        assert_eq!(tx_id.get_info(&conn).unwrap().get_coupon(), "_BUILTIN_");
 
         // Refund the book, returning the book to verfied state
         tx_id.refund(&conn).unwrap();
@@ -867,6 +935,7 @@ mod tests {
             &buyer,
             1,
             "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+            "",
             Payment::Alipay,
         )
         .unwrap();
@@ -884,6 +953,7 @@ mod tests {
             &buyer,
             1,
             "258 Huanhu South Road, Dongqian Lake, Ningbo, China",
+            "",
             Payment::Alipay,
         )
         .unwrap();
@@ -893,6 +963,7 @@ mod tests {
             &buyer,
             2,
             "宁波外国语学校 S2202",
+            "",
             Payment::Alipay,
         )
         .unwrap();
@@ -909,6 +980,7 @@ mod tests {
             &buyer,
             1,
             "宁波外国语学校 S2301",
+            "",
             Payment::Alipay,
         )
         .unwrap();
@@ -925,6 +997,7 @@ mod tests {
             &buyer,
             1,
             "宁波市海曙区天一广场",
+            "",
             Payment::Alipay,
         )
         .unwrap();

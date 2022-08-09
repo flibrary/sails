@@ -1,0 +1,2 @@
+-- Your SQL goes here
+ALTER TABLE transactions ADD COLUMN coupon TEXT NOT NULL DEFAULT "_NO_COUPON_APPLIED_";

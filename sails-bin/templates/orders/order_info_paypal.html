@@ -8,7 +8,7 @@
 {% block placed_details %}
     {{ i18n!(self.i18n.catalog, "Use PayPal to complete your order. If you are not automatically redirected after approving the order, click \"Manual update\" button below.") }}<br>
     <br>
-    <script src="https://www.paypal.com/sdk/js?client-id={{client_id}}&currency={{ "{:?}"|format(prod.get_currency()) }}"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id={{client_id}}&currency={{ "{:?}"|format(order.get_currency()) }}"></script>
     <!-- Set up a container element for the button -->
     <div id="paypal-button-container"></div>
     <br>

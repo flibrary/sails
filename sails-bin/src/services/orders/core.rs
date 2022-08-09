@@ -16,6 +16,7 @@ pub struct CheckoutInfo {
     quantity: NonZeroU32,
     address: String,
     payment: Payment,
+    coupon: String,
 }
 
 #[post("/purchase?<prod_id>", data = "<info>")]
@@ -37,6 +38,7 @@ pub async fn purchase(
                 &user.info.to_id(),
                 info.quantity.get(),
                 &info.address,
+                &info.coupon,
                 info.payment.clone(),
             )
             .map(|t| t.get_info(c))

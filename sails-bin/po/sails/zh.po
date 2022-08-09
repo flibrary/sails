@@ -29,6 +29,33 @@ msgstr "创作者中心"
 msgid "Portal"
 msgstr "主页"
 
+msgid "Create a coupon"
+msgstr "创建优惠券"
+
+msgid "Fill in relevant information to create a coupon"
+msgstr "填写优惠券相关信息"
+
+msgid "ID"
+msgstr ""
+
+msgid "Script"
+msgstr "脚本"
+
+msgid "Update the coupon"
+msgstr "更新优惠券"
+
+msgid "Fill in relevant information to update the coupon"
+msgstr "填写优惠券相关信息"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Manage coupons"
+msgstr "管理优惠券"
+
+msgid "Active coupons"
+msgstr "活跃的优惠券"
+
 msgid "Homepage"
 msgstr "首页"
 
@@ -245,12 +272,6 @@ msgstr "更新数字内容"
 msgid "Upload file"
 msgstr "上传文件"
 
-msgid "Delete"
-msgstr "删除"
-
-msgid "Create product"
-msgstr "上架商品"
-
 msgid "Create the Digital Content"
 msgstr "创建数字内容"
 
@@ -389,6 +410,15 @@ msgstr "单价"
 msgid "Quantity purchased"
 msgstr "购买数量"
 
+msgid "Subtotal before discount"
+msgstr "优惠前小计"
+
+msgid "Discount"
+msgstr "优惠"
+
+msgid "Coupon used"
+msgstr "使用的优惠券"
+
 msgid "Address"
 msgstr "收货地址"
 
@@ -423,9 +453,6 @@ msgstr "提交订单"
 msgid "Please review and submit your order"
 msgstr "请核对并提交您的订单"
 
-msgid "ID"
-msgstr ""
-
 msgid "Quantity in stock"
 msgstr "库存数量"
 
@@ -434,6 +461,9 @@ msgstr "购买数量"
 
 msgid "If content is completely digital, you may leave it blank."
 msgstr "如购买纯数字内容，您可以在这里填写任意内容。"
+
+msgid "Coupon"
+msgstr "优惠券"
 
 msgid "Payment method"
 msgstr "支付方式"
@@ -522,6 +552,9 @@ msgstr "数量"
 
 msgid "Description"
 msgstr "简介"
+
+msgid "Create product"
+msgstr "上架商品"
 
 msgid "Fill in relevant information which users see in the store"
 msgstr "填写商品相关信息，买家会在商店里看到您对商品的描述"
