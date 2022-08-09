@@ -67,9 +67,11 @@ impl Transactions {
                 buyer_used: TransactionFinder::new(conn, None)
                     .buyer(buyer_p)
                     .coupon(coupon_p.get_id())
+                    .status(TransactionStatus::Refunded, Cmp::NotEqual)
                     .count_i64()?,
                 total_used: TransactionFinder::new(conn, None)
                     .coupon(coupon_p.get_id())
+                    .status(TransactionStatus::Refunded, Cmp::NotEqual)
                     .count_i64()?,
             };
 
