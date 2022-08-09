@@ -231,10 +231,14 @@ impl TransactionInfo {
     }
 
     pub fn get_total(&self) -> BigUint {
-        let qty: BigUint = self.get_quantity().into();
-        let price: BigUint = self.get_price().into();
+        let subtotal = self.get_subtotal();
         let discount: BigUint = self.get_discount().into();
-        qty * price - discount
+        // Don't panic on underflow
+        if subtotal >= discount {
+            subtotal - discount
+        } else {
+            0u32.into()
+        }
     }
 
     /// Get a reference to the transaction info's product.
