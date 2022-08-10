@@ -1,0 +1,18 @@
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js" integrity="sha512-3S64QagKiTlNjSfuh3UYtYSkP494WHoWc96YvbmB2BReHpNtxlrMNY6MbJLDpavcgD8Pj5p44F/PY586uVO5iA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.css" integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/theme/darcula.min.css" integrity="sha512-kqCOYFDdyQF4JM8RddA6rMBi9oaLdR0aEACdB95Xl1EgaBhaXMIe8T4uxmPitfq4qRmHqo+nBU2d1l+M4zUx1g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/keymap/emacs.min.js" integrity="sha512-vkAJFl6fSbUY4MDhe50ATyWN/8jLYZPtxqELsXbbxA+bSxk8n/0iVBeGQqCJJYv2mn1bhBKs7du3A0HbtgrLEA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/mode/simple.min.js" integrity="sha512-CGM6DWPHs250F/m90YZ9NEiEUhd9a4+u8wAzeKC6uHzZbYyt9/e2dLC5BGGB6Y0HtEdZQdSDYjDsoTyNGdMrMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/rust/rust.min.js" integrity="sha512-g3Nhw36S0p4ZJQcky87D5M+vZbFvLrgsHWYltUy5IW0zKbvi8GlPRjJSo2CyUyQiU01Ier7u+rBABDs3BawKyQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+  var myTextArea = document.querySelector('.editorContainer');
+
+  var editor = CodeMirror.fromTextArea(myTextArea, {
+        lineNumbers: true,
+        lineWrapping: true,
+        mode: "rust",
+        theme: "darcula",
+        keyMap: "emacs"
+      });
+  </script>

@@ -18,7 +18,7 @@
     <div class="form-group row">
       <label for="inputScript" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Script") }}</label>
       <div class="col-sm-10">
-	<textarea class="form-control" id="inputScript" rows="15" name="script">{{coupon.get_script()}}</textarea>
+	<textarea class="form-control editorContainer" id="inputScript" rows="15" name="script">{{coupon.get_script()}}</textarea>
       </div>
     </div>
     <br>
@@ -32,3 +32,8 @@
   <br>
 </main>
 {% endblock content %}
+
+{% block script %}
+  {% call super()%}
+  {% include "codemirror.html" %}
+{% endblock script %}
