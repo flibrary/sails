@@ -40,13 +40,48 @@
       <label for="inputCurrency" class="col-sm-2 col-form-label">{{ i18n!(self.i18n.catalog, "Currency") }}</label>
       <div class="col-sm-4">
         <select class="form-select" aria-label="Default select example" name="currency">
+	  {% let currency = format!("{:?}", self.prod.get_currency()) %}
+	  {% if currency == "USD" %}
+	  <option value="usd" selected>USD</option>
+	  {% else %}
 	  <option value="usd">USD</option>
+	  {% endif %}
+
+	  {% if currency == "CNY" %}
+	  <option value="cny" selected>CNY</option>
+	  {% else %}
 	  <option value="cny">CNY</option>
+	  {% endif %}
+
+	  {% if currency == "GBP" %}
+	  <option value="gbp" selected>GBP</option>
+	  {% else %}
 	  <option value="gbp">GBP</option>
+	  {% endif %}
+
+	  {% if currency == "EUR" %}
+	  <option value="eur" selected>EUR</option>
+	  {% else %}
 	  <option value="eur">EUR</option>
+	  {% endif %}
+
+	  {% if currency == "CHF" %}
+	  <option value="chf" selected>CHF</option>
+	  {% else %}
 	  <option value="chf">CHF</option>
+	  {% endif %}
+
+	  {% if currency == "HKD" %}
+	  <option value="hkd" selected>HKD</option>
+	  {% else %}
 	  <option value="hkd">HKD</option>
+	  {% endif %}
+
+	  {% if currency == "JPY" %}
+	  <option value="jpy" selected>JPY</option>
+	  {% else %}
 	  <option value="jpy">JPY</option>
+	  {% endif %}
 	</select>
       </div>
     </div>
