@@ -12,6 +12,60 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "Email"
+msgstr "电子邮箱"
+
+msgid "Name"
+msgstr "名称"
+
+msgid "Institution"
+msgstr "学校"
+
+msgid "Update"
+msgstr "更新"
+
+msgid "Manage your FLibrary ID"
+msgstr "管理您的 FLibrary ID"
+
+msgid "No description"
+msgstr "无简介"
+
+msgid "Products created"
+msgstr "此用户上架的商品"
+
+msgid "ID"
+msgstr ""
+
+msgid "Price"
+msgstr "价格"
+
+msgid "No product created"
+msgstr "此用户没有上架商品"
+
+msgid "Create a product"
+msgstr "上架商品"
+
+msgid "Digital Contents owned"
+msgstr "拥有的数字内容"
+
+msgid "Last Modified"
+msgstr "修改时间"
+
+msgid "Manage Digital Contents"
+msgstr "管理数字内容"
+
+msgid "Orders placed"
+msgstr "创建的订单"
+
+msgid "Seller"
+msgstr "卖家"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Orders received"
+msgstr "收到的订单"
+
 msgid ""
 "FLibrary is the ultimate destination for discovering, discussing, and "
 "distributing learning guides."
@@ -34,9 +88,6 @@ msgstr "创建优惠券"
 
 msgid "Fill in relevant information to create a coupon"
 msgstr "填写优惠券相关信息"
-
-msgid "ID"
-msgstr ""
 
 msgid "Script"
 msgstr "脚本"
@@ -236,12 +287,6 @@ msgstr "创建数字内容"
 msgid "Manage your Digital Contents"
 msgstr "管理数字内容"
 
-msgid "Name"
-msgstr "名称"
-
-msgid "Last Modified"
-msgstr "修改时间"
-
 msgid "Digital Content \"{}\""
 msgstr "数字内容 \"{}\""
 
@@ -349,9 +394,6 @@ msgid ""
 "button below."
 msgstr "如对订单状态有疑问，请点击下方 \"更新\" 按钮来刷新订单状态。"
 
-msgid "Update"
-msgstr "更新"
-
 msgid "Your order is placed"
 msgstr "您的订单已创建"
 
@@ -416,18 +458,14 @@ msgstr "优惠前小计"
 msgid "Discount"
 msgstr "优惠"
 
-#, fuzzy
-msgid "Coupon Used"
-msgstr "优惠券"
+msgid "Coupon used"
+msgstr "使用的优惠券"
 
 msgid "Address"
 msgstr "收货地址"
 
 msgid "Buyer"
 msgstr "买家"
-
-msgid "Seller"
-msgstr "卖家"
 
 msgid "Product ID"
 msgstr "商品 ID"
@@ -545,9 +583,6 @@ msgstr "分类"
 msgid "Currency"
 msgstr "币种"
 
-msgid "Price"
-msgstr "价格"
-
 msgid "Quantity"
 msgstr "数量"
 
@@ -572,20 +607,11 @@ msgstr "{0} - 商品细节"
 msgid "Not categorized"
 msgstr "未分类"
 
-msgid "Status"
-msgstr "状态"
-
 msgid "Purchase"
 msgstr "购买"
 
 msgid "Contact information"
 msgstr "创作者信息"
-
-msgid "Email"
-msgstr "电子邮箱"
-
-msgid "Institution"
-msgstr "学校"
 
 msgid "{0} has no description"
 msgstr "{0} 没有填写简介"
@@ -641,35 +667,8 @@ msgstr "在这里您可以看到关于 {0} 的信息"
 msgid "Basic information"
 msgstr "基本信息"
 
-msgid "No description"
-msgstr "无简介"
-
-msgid "Products created"
-msgstr "此用户上架的商品"
-
-msgid "No product created"
-msgstr "此用户没有上架商品"
-
 msgid "Here you can manage your products and account"
 msgstr "在这里您可以管理您上架的商品和您的帐号"
-
-msgid "Manage your FLibrary ID"
-msgstr "管理您的 FLibrary ID"
-
-msgid "Create a product"
-msgstr "上架商品"
-
-msgid "Digital Contents owned"
-msgstr "拥有的数字内容"
-
-msgid "Manage Digital Contents"
-msgstr "管理数字内容"
-
-msgid "Orders placed"
-msgstr "创建的订单"
-
-msgid "Orders received"
-msgstr "收到的订单"
 
 #~ msgid "Change password"
 #~ msgstr "更改密码"

@@ -80,7 +80,6 @@ pub async fn get_release_asset(
         digicon.get_id(),
         &user.id.get_id(),
     );
-    let name = digicon.get_name().to_string();
 
     let client = reqwest::Client::builder()
         .user_agent("curl")
@@ -121,7 +120,7 @@ pub async fn get_release_asset(
         .await
         .into_flash(uri!("/"))?;
 
-    let ctt_type = std::path::Path::new(&name)
+    let ctt_type = std::path::Path::new(storage_detail)
         .extension()
         .map(|x| ContentType::from_extension(x.to_str().unwrap()).unwrap())
         // If there is no extension, we set content type to any

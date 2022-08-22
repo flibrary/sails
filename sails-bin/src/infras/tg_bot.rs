@@ -35,10 +35,32 @@ impl TelegramBot {
         let product = order.prod_info;
         let order = order.order_info;
 
+        // In all other places characters '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!' must be escaped with the preceding character '\'.
+        let escape = |u: &str| {
+            u.replace('_', "\\_")
+                .replace('*', "\\*")
+                .replace('[', "\\[")
+                .replace(']', "\\]")
+                .replace('(', "\\(")
+                .replace(')', "\\)")
+                .replace('~', "\\~")
+                .replace('`', "\\`")
+                .replace('>', "\\>")
+                .replace('#', "\\#")
+                .replace('+', "\\+")
+                .replace('-', "\\-")
+                .replace('=', "\\=")
+                .replace('|', "\\|")
+                .replace('{', "\\{")
+                .replace('}', "\\}")
+                .replace('.', "\\.")
+                .replace('!', "\\!")
+        };
+
         let user_link = |u: &UserInfo| {
             format!(
                 "[{}]({})",
-                u.get_name(),
+                escape(u.get_name()),
                 uri!(
                     "https://flibrary.info/user",
                     crate::pages::users::portal_guest(u.get_id())
@@ -48,7 +70,7 @@ impl TelegramBot {
         let product_link = |p: &ProductInfo| {
             format!(
                 "[{}]({})",
-                p.get_prodname(),
+                escape(p.get_prodname()),
                 uri!(
                     "https://flibrary.info/store",
                     crate::pages::store::prod_page_guest(p.get_id())
@@ -57,8 +79,8 @@ impl TelegramBot {
         };
         let order_link = |t: &TransactionInfo| {
             format!(
-                "[{}]({})",
-                t.get_shortid(),
+                "[\\#{}]({})",
+                escape(t.get_shortid()),
                 uri!(
                     "https://flibrary.info/admin",
                     crate::pages::admin::order_info(t.get_id())
@@ -67,7 +89,7 @@ impl TelegramBot {
         };
 
         let msg = format!(
-            r#"Order Status Update: *{:?}*:
+            r#"Order Status Update: *\#{:?}*:
 Order: {order}
 Buyer: {buyer}
 Seller: {seller}
@@ -82,7 +104,7 @@ Total: {total}"#,
             order = order_link(&order),
             buyer = user_link(&buyer),
             seller = user_link(&seller),
-            coupon = order.get_coupon(),
+            coupon = escape(order.get_coupon()),
             product = product_link(&product),
             price = order.get_price(),
             qty = order.get_quantity(),

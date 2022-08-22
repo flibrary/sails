@@ -12,6 +12,60 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Email"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Institution"
+msgstr ""
+
+msgid "Update"
+msgstr ""
+
+msgid "Manage your FLibrary ID"
+msgstr ""
+
+msgid "No description"
+msgstr ""
+
+msgid "Products created"
+msgstr ""
+
+msgid "ID"
+msgstr ""
+
+msgid "Price"
+msgstr ""
+
+msgid "No product created"
+msgstr ""
+
+msgid "Create a product"
+msgstr ""
+
+msgid "Digital Contents owned"
+msgstr ""
+
+msgid "Last Modified"
+msgstr ""
+
+msgid "Manage Digital Contents"
+msgstr ""
+
+msgid "Orders placed"
+msgstr ""
+
+msgid "Seller"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Orders received"
+msgstr ""
+
 msgid ""
 "FLibrary is the ultimate destination for discovering, discussing, and "
 "distributing learning guides."
@@ -33,9 +87,6 @@ msgid "Create a coupon"
 msgstr ""
 
 msgid "Fill in relevant information to create a coupon"
-msgstr ""
-
-msgid "ID"
 msgstr ""
 
 msgid "Script"
@@ -219,12 +270,6 @@ msgstr ""
 msgid "Manage your Digital Contents"
 msgstr ""
 
-msgid "Name"
-msgstr ""
-
-msgid "Last Modified"
-msgstr ""
-
 msgid "Digital Content \"{}\""
 msgstr ""
 
@@ -332,9 +377,6 @@ msgid ""
 "button below."
 msgstr ""
 
-msgid "Update"
-msgstr ""
-
 msgid "Your order is placed"
 msgstr ""
 
@@ -397,16 +439,13 @@ msgstr ""
 msgid "Discount"
 msgstr ""
 
-msgid "Coupon Used"
+msgid "Coupon used"
 msgstr ""
 
 msgid "Address"
 msgstr ""
 
 msgid "Buyer"
-msgstr ""
-
-msgid "Seller"
 msgstr ""
 
 msgid "Product ID"
@@ -523,9 +562,6 @@ msgstr ""
 msgid "Currency"
 msgstr ""
 
-msgid "Price"
-msgstr ""
-
 msgid "Quantity"
 msgstr ""
 
@@ -550,19 +586,10 @@ msgstr ""
 msgid "Not categorized"
 msgstr ""
 
-msgid "Status"
-msgstr ""
-
 msgid "Purchase"
 msgstr ""
 
 msgid "Contact information"
-msgstr ""
-
-msgid "Email"
-msgstr ""
-
-msgid "Institution"
 msgstr ""
 
 msgid "{0} has no description"
@@ -619,32 +646,5 @@ msgstr ""
 msgid "Basic information"
 msgstr ""
 
-msgid "No description"
-msgstr ""
-
-msgid "Products created"
-msgstr ""
-
-msgid "No product created"
-msgstr ""
-
 msgid "Here you can manage your products and account"
-msgstr ""
-
-msgid "Manage your FLibrary ID"
-msgstr ""
-
-msgid "Create a product"
-msgstr ""
-
-msgid "Digital Contents owned"
-msgstr ""
-
-msgid "Manage Digital Contents"
-msgstr ""
-
-msgid "Orders placed"
-msgstr ""
-
-msgid "Orders received"
 msgstr ""
