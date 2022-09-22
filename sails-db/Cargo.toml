@@ -27,7 +27,7 @@ lettre = "0.10.0-rc.3"
 rocket = "0.5.0-rc.1"
 chrono = { version = "^0.4", features = ["serde"] }
 paypal-rs = { version = "0.2.0-alpha.7" }
-rhai = { version = "1.8.0", features = ["sync", "no_closure", "no_float", "decimal", "no_module"]}
+rhai = { version = "1.10.1", features = ["sync", "no_closure", "no_float", "decimal", "no_module"]}
 rust_decimal = "^1"
 
 [dev-dependencies]
