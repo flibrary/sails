@@ -1,5 +1,5 @@
 set -e
-find . -type f -name '*.nix' -exec nixfmt {} +
+find . -type f -name '*.nix' -exec nixpkgs-fmt {} +
 
 cargo update
 cargo2nix -f

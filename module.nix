@@ -5,11 +5,13 @@ with lib;
 let
   cfg = config.sails;
   toTOML = (import ./to-toml.nix { inherit lib; });
-  confFile = if cfg.configFile != null then
-    cfg.configFile
-  else
-    pkgs.writeText "sails-config.toml" (toTOML cfg.config);
-in {
+  confFile =
+    if cfg.configFile != null then
+      cfg.configFile
+    else
+      pkgs.writeText "sails-config.toml" (toTOML cfg.config);
+in
+{
   options.sails = {
     enable = mkOption {
       type = types.bool;

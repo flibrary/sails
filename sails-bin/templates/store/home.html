@@ -12,9 +12,18 @@
 {% if entries.len() > 0 %}
   {% for entry in entries %}
   <div class="p-5 rounded shadow">
-    <h3><b>{{entry.0.name()}}</b></h3>
-    <div class="row grid" id="{{entry.0.id()}}">
-       {% for product in entry.1 %}
+    <h3>
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+      <ol class="breadcrumb">
+	{% for parent in entry.0 %}
+	  <li class="breadcrumb-item"><a href="{{ uri!("/search", crate::pages::search::categories(parent.id())) }}" class="text-decoration-none">{{parent.name()}}</a></li>
+        {% endfor %}
+        <li class="breadcrumb-item active" aria-current="page">{{entry.1.name()}}</li>
+      </ol>
+    </nav>
+    </h3>
+    <div class="row grid" id="{{entry.1.id()}}">
+       {% for product in entry.2 %}
        <div class="col-sm-6 col-lg-4 mb-4 grid-item">
 	  <div class="card">
 	    {% match product.1 %}

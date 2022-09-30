@@ -42,19 +42,23 @@ pub fn find_first_image(fragment: &str) -> Option<String> {
 #[template(path = "store/home.html")]
 pub struct StoreHomePage {
     i18n: I18n,
-    pub entries: Vec<(LeafCategory, Vec<ProductCard>)>,
+    pub entries: Vec<(Vec<Category>, LeafCategory, Vec<ProductCard>)>,
 }
 
+#[allow(clippy::type_complexity)]
 #[get("/")]
 pub async fn home_page(i18n: I18n, conn: DbConn) -> Result<StoreHomePage, Flash<Redirect>> {
     let entries = conn
         .run(
-            move |c| -> Result<Vec<(LeafCategory, Vec<ProductCard>)>, SailsDbError> {
+            move |c| -> Result<Vec<(Vec<Category>, LeafCategory, Vec<ProductCard>)>, SailsDbError> {
                 let categories = Categories::list_leaves::<Category>(c, None)?;
                 categories
                     .into_iter()
                     .map(
-                        |x| -> Result<(LeafCategory, Vec<ProductCard>), SailsDbError> {
+                        |x| -> Result<
+                            (Vec<Category>, LeafCategory, Vec<ProductCard>),
+                            SailsDbError,
+                        > {
                             let mut products = ProductFinder::new(c, None)
                                 .status(ProductStatus::Verified, Cmp::Equal)
                                 .category(&x)?
@@ -77,7 +81,19 @@ pub async fn home_page(i18n: I18n, conn: DbConn) -> Result<StoreHomePage, Flash<
 
                             products.sort_by(cmp_product);
 
-                            Ok((x, products))
+                            let mut parent_categories = Vec::new();
+                            // The parent ID of the current category
+                            let mut current_parent = x.parent_id();
+                            while let Some(parent_ctg) = current_parent
+                                .map(|t| Categories::find_by_id(c, t))
+                                .transpose()?
+                            {
+                                parent_categories.insert(0, parent_ctg);
+                                // Change the "current parent" to the parent of the "current parent"
+                                current_parent = parent_categories[0].parent_id();
+                            }
+
+                            Ok((parent_categories, x, products))
                         },
                     )
                     .collect()

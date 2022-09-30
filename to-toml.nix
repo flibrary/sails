@@ -17,7 +17,8 @@ let
         vals =
           mapAttrsToList (k': v': "${quoteKey k'} = ${outputValInner v'}") v;
         valsStr = concatStringsSep ", " vals;
-      in "{ ${valsStr} }"
+      in
+      "{ ${valsStr} }"
     else
       outputVal v;
 
@@ -31,7 +32,8 @@ let
       let
         vals = map quoteString v;
         valsStr = concatStringsSep ", " vals;
-      in "[ ${valsStr} ]"
+      in
+      "[ ${valsStr} ]"
     else if ty == "set" then
       abort "unsupported set for not-inner value"
     else
@@ -44,7 +46,8 @@ let
         vals =
           mapAttrsToList (k': v': "${quoteKey k'} = ${outputValInner v'}") v;
         valsStr = concatStringsSep ", " vals;
-      in [ "${quoteKey k} = { ${valsStr} }" ]
+      in
+      [ "${quoteKey k} = { ${valsStr} }" ]
     else
       outputKeyVal k v;
 
@@ -56,14 +59,17 @@ let
     else if ty == "string" then
       [ "${quoteKey k} = ${quoteString v}" ]
     else if ty == "list_of_attrs" then
-      concatMap (inner:
-        [ "[[${k}]]" ]
-        ++ (concatLists (mapAttrsToList outputKeyValInner inner))) v
+      concatMap
+        (inner:
+          [ "[[${k}]]" ]
+          ++ (concatLists (mapAttrsToList outputKeyValInner inner)))
+        v
     else if ty == "list" then
       let
         vals = map quoteString v;
         valsStr = concatStringsSep ", " vals;
-      in [ "${quoteKey k} = [ ${valsStr} ]" ]
+      in
+      [ "${quoteKey k} = [ ${valsStr} ]" ]
     else if ty == "set" then
       [ "[${k}]" ] ++ (concatLists (mapAttrsToList outputKeyValInner v))
     else
@@ -87,19 +93,25 @@ let
         let
           ty = typeOf (elemAt x 0);
           #assert (all (v: typeOf v == ty) x);
-        in if ty == "set" then "list_of_attrs" else "list"
+        in
+        if ty == "set" then "list_of_attrs" else "list"
     else
       abort "Not implemented: toml type for ${typeOf x}";
 
   toTOML = attrs:
     assert (typeOf attrs == "set");
     let
-      byTy = lib.foldl (acc: x:
-        let ty = tomlTy x.v;
-        in acc // { "${ty}" = (acc.${ty} or [ ]) ++ [ x ]; }) { }
+      byTy = lib.foldl
+        (acc: x:
+          let ty = tomlTy x.v;
+          in acc // { "${ty}" = (acc.${ty} or [ ]) ++ [ x ]; })
+        { }
         (mapAttrsToList (k: v: { inherit k v; }) attrs);
-    in concatMapStringsSep "\n"
-    (kv: concatStringsSep "\n" (outputKeyVal kv.k kv.v)) ((byTy.string or [ ])
-      ++ (byTy.int or [ ]) ++ (byTy.float or [ ]) ++ (byTy.list or [ ])
-      ++ (byTy.list_of_attrs or [ ]) ++ (byTy.set or [ ]));
-in toTOML
+    in
+    concatMapStringsSep "\n"
+      (kv: concatStringsSep "\n" (outputKeyVal kv.k kv.v))
+      ((byTy.string or [ ])
+        ++ (byTy.int or [ ]) ++ (byTy.float or [ ]) ++ (byTy.list or [ ])
+        ++ (byTy.list_of_attrs or [ ]) ++ (byTy.set or [ ]));
+in
+toTOML

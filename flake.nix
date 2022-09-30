@@ -28,74 +28,83 @@
       # we are not allowed to use IFD because of the presence of foreign platforms. However, IFD is used in cargo2nix since we use git dependencies.
       # therefore, we temporarily disable the build/eval on aarch64-linux as practically we don't use that platform.
       # info: https://github.com/NixOS/nix/issues/4265
-      attrs = (utils.lib.eachSystem ([
-        "x86_64-linux"
-        # "aarch64-linux"
-      ]) (let
-        pkgs = system:
-          import nixpkgs {
-            system = "${system}";
-            overlays =
-              [ rust-overlay.overlays.default cargo2nix.overlays.default ];
-          };
-        rustPkgs = system:
-          with (pkgs system);
-          (rustBuilder.makePackageSet {
-            rustChannel = "stable";
-            rustVersion = "latest";
-            packageFun = import ./Cargo.nix;
-            # packageOverrides = pkgs: pkgs.rustBuilder.overrides.all; # Implied, if not specified
-            packageOverrides = pkgs:
-              pkgs.rustBuilder.overrides.all
-              ++ ((import ./overrides-list.nix) pkgs);
-          });
-      in system:
-      let
-        workspaceShell = hook:
-          ((rustPkgs system).workspaceShell {
-            nativeBuildInputs = with (pkgs system); [
-              cargo2nix.packages."${system}".cargo2nix
-              rust-bin.nightly."2022-07-20".rustfmt
-              # cargo2nix uses the minimal profile which doesn't provide clippy
-              rust-bin.stable.latest.clippy
-              rust-analyzer
-              diesel-cli
-              # required by gettext-macro to create PO files
-              gettext
-            ];
-            shellHook = if hook == null then "" else hook;
-          });
-      in rec {
-        # `nix build`
-        packages = rec {
-          # We have to do it like `nix develop .#commit` because libraries don't play well with `makeBinPath` or `makeLibraryPath`.
-          commit = (workspaceShell (builtins.readFile ./commit.sh));
-          sails-bin = ((rustPkgs system).workspace.sails-bin { }).bin;
-          default = sails-bin;
-        };
-
-        apps = {
-          sails-bin = utils.lib.mkApp { drv = packages.sails-bin; };
-          # sync the migrations
-          sync-migrations = utils.lib.mkApp {
-            drv = with (pkgs system);
-              (writeShellApplication {
-                name = "sync-migrations";
-                runtimeInputs = [ rsync ];
-                text = (builtins.readFile ./sync-migrations.sh);
+      attrs = (utils.lib.eachSystem
+        ([
+          "x86_64-linux"
+          # "aarch64-linux"
+        ])
+        (
+          let
+            pkgs = system:
+              import nixpkgs {
+                system = "${system}";
+                overlays =
+                  [ rust-overlay.overlays.default cargo2nix.overlays.default ];
+              };
+            rustPkgs = system:
+              with (pkgs system);
+              (rustBuilder.makePackageSet {
+                rustChannel = "stable";
+                rustVersion = "latest";
+                packageFun = import ./Cargo.nix;
+                # packageOverrides = pkgs: pkgs.rustBuilder.overrides.all; # Implied, if not specified
+                packageOverrides = pkgs:
+                  pkgs.rustBuilder.overrides.all
+                  ++ ((import ./overrides-list.nix) pkgs);
               });
-          };
-        };
+          in
+          system:
+          let
+            workspaceShell = hook:
+              ((rustPkgs system).workspaceShell {
+                nativeBuildInputs = with (pkgs system); [
+                  cargo2nix.packages."${system}".cargo2nix
+                  rust-bin.nightly."2022-07-20".rustfmt
+                  # cargo2nix uses the minimal profile which doesn't provide clippy
+                  rust-bin.stable.latest.clippy
+                  rust-analyzer
+                  diesel-cli
+                  # required by gettext-macro to create PO files
+                  gettext
 
-        defaultApp = apps.sails-bin;
+                  nixpkgs-fmt
+                ];
+                shellHook = if hook == null then "" else hook;
+              });
+          in
+          rec {
+            # `nix build`
+            packages = rec {
+              # We have to do it like `nix develop .#commit` because libraries don't play well with `makeBinPath` or `makeLibraryPath`.
+              commit = (workspaceShell (builtins.readFile ./commit.sh));
+              sails-bin = ((rustPkgs system).workspace.sails-bin { }).bin;
+              default = sails-bin;
+            };
 
-        # `nix develop`
-        devShells.default = workspaceShell null;
+            apps = {
+              sails-bin = utils.lib.mkApp { drv = packages.sails-bin; };
+              # sync the migrations
+              sync-migrations = utils.lib.mkApp {
+                drv = with (pkgs system);
+                  (writeShellApplication {
+                    name = "sync-migrations";
+                    runtimeInputs = [ rsync ];
+                    text = (builtins.readFile ./sync-migrations.sh);
+                  });
+              };
+            };
 
-        # We don't check packages.commit because techinically it is not a pacakge
-        checks = builtins.removeAttrs packages [ "commit" ];
-      }));
-    in attrs // {
+            defaultApp = apps.sails-bin;
+
+            # `nix develop`
+            devShells.default = workspaceShell null;
+
+            # We don't check packages.commit because techinically it is not a pacakge
+            checks = builtins.removeAttrs packages [ "commit" ];
+          }
+        ));
+    in
+    attrs // {
       nixosModules.default = (import ./module.nix);
 
       overlays.default = final: prev: {
