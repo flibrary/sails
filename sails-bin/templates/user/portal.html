@@ -5,31 +5,6 @@
 {% block update_button %}<a href="/user/update_user_page" class="btn btn-primary my-1" role="button">{{ i18n!(self.i18n.catalog, "Update") }}</a> <a href="https://id.flibrary.info/realms/Customers/account/" class="btn btn-warning my-1" role="button">{{ i18n!(self.i18n.catalog, "Manage your FLibrary ID") }}</a>{% endblock update_button %}
 {% block postprod_button %}<a href="/store/post_prod" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Create a product") }}</a>{% endblock postprod_button %}
 
-{% block digicons_owned %}
-<div class="p-5 rounded shadow">
-  <h3>{{ i18n!(self.i18n.catalog, "Digital Contents owned") }}</h3>
-  <table class="table" data-toggle="table" data-pagination="true" data-search="true">
-    <thead>
-      <tr>
-	<th data-field="name" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Name") }}</th>
-	<th data-field="timestamp" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Last Modified") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for digicon in digicons_owned %}
-      <tr>
-	<th scope="row"><a href="{{ uri!("/digicons", crate::services::digicons::get_release_asset(digicon.get_id())) }}">{{digicon.get_name()}}</a></th>
-	<th scope="row">{{digicon.get_time_modified().format("%Y-%m-%d %H:%M:%S")}}</th>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <br>
-  <a href="/digicons" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Manage Digital Contents") }}</a>
-</div>
-<br>
-{% endblock digicons_owned %}
-
 {% block orders_placed %}
 <div class="p-5 rounded shadow">
   <h3>{{ i18n!(self.i18n.catalog, "Orders placed") }}</h3>

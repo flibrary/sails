@@ -95,7 +95,7 @@ impl Default for UserStatus {
     }
 }
 
-#[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum ProductStatus {
     // The product is currently disabled (not showing up in the store, etc.)
     Disabled,
@@ -192,7 +192,7 @@ impl Payment {
     }
 }
 
-#[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, FromFormField)]
+#[derive(DbEnum, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, FromFormField, Hash)]
 pub enum Currency {
     /// Chinese renminbi
     CNY,

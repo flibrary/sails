@@ -1,14 +1,16 @@
 // We have to ensure: all the places where category can be supplied has to be using type Category instead of String.
 // If we cannot ensure on derivations like those did by serde, we then have to use isolation types to ensure it on a type level
 
-use std::num::NonZeroU32;
+use std::{collections::HashSet, num::NonZeroU32};
 
 use crate::{
     categories::{Categories, CtgTrait, LeafCategory},
+    digicons::DigiconMappingFinder,
     enums::{Currency, ProductStatus, UserStatus},
     error::{SailsDbError, SailsDbResult as Result},
     schema::products,
     tags::TagMappingFinder,
+    transactions::TransactionFinder,
     users::UserId,
     Cmp, Order,
 };
@@ -17,7 +19,7 @@ use rocket::FromForm;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, Identifiable, Queryable, Clone)]
+#[derive(Debug, Serialize, Deserialize, Identifiable, Queryable, Clone, Hash, PartialEq, Eq)]
 #[table_name = "products"]
 pub struct ProductId {
     id: String,
@@ -87,6 +89,54 @@ pub struct ProductFinder<'a> {
 }
 
 impl<'a> ProductFinder<'a> {
+    pub fn readable_digital_products_info(
+        conn: &'a SqliteConnection,
+        user: &UserId,
+    ) -> Result<Vec<ProductInfo>> {
+        Self::readable_digital_products(conn, user)?
+            .iter()
+            .map(|p| ProductFinder::new(conn, None).id(p.get_id()).first_info())
+            .collect()
+    }
+
+    pub fn readable_digital_products(
+        conn: &'a SqliteConnection,
+        user: &UserId,
+    ) -> Result<Vec<ProductId>> {
+        let mut bought_products = TransactionFinder::new(conn, None)
+            .buyer(user)
+            // Products with digicons don't have status paid
+            // Only effective orders count and we don't need to care about duplication as HashSet takes care after it.
+            .status(crate::enums::TransactionStatus::Finished, crate::Cmp::Equal)
+            .search_info()?
+            .into_iter()
+            .map(|t| {
+                ProductFinder::new(conn, None)
+                    .id(t.get_product())
+                    .first()
+                    .unwrap()
+            })
+            .collect::<HashSet<ProductId>>();
+        let owned_products = ProductFinder::new(conn, None)
+            .seller(user)
+            .search()?
+            .into_iter()
+            .collect::<HashSet<ProductId>>();
+
+        bought_products = owned_products.union(&bought_products).cloned().collect();
+        Ok(bought_products
+            .iter()
+            .filter(|p| {
+                DigiconMappingFinder::new(conn, None)
+                    .product(p)
+                    .count()
+                    .unwrap_or(0)
+                    > 0
+            })
+            .cloned()
+            .collect())
+    }
+
     pub fn list_info(conn: &'a SqliteConnection) -> Result<Vec<ProductInfo>> {
         Self::new(conn, None).search_info()
     }
@@ -377,7 +427,17 @@ impl<'a> IncompleteProduct<'a> {
 
 /// A single product info entry, corresponding to a row in the table `products`.
 #[derive(
-    Debug, Serialize, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, Clone,
+    Debug,
+    Serialize,
+    Deserialize,
+    Queryable,
+    Identifiable,
+    Insertable,
+    AsChangeset,
+    Clone,
+    Hash,
+    PartialEq,
+    Eq,
 )]
 #[table_name = "products"]
 pub struct ProductInfo {

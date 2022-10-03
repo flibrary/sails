@@ -26,6 +26,9 @@ msgstr ""
 msgid "Creator Center"
 msgstr ""
 
+msgid "Library"
+msgstr ""
+
 msgid "Portal"
 msgstr ""
 
@@ -285,6 +288,18 @@ msgstr ""
 msgid "Downloaded by"
 msgstr ""
 
+msgid "Your Personal Digital Content Collection"
+msgstr ""
+
+msgid "Quick Search"
+msgstr ""
+
+msgid "Number of Digital Content included"
+msgstr ""
+
+msgid "Digital Content included"
+msgstr ""
+
 msgid "Chat"
 msgstr ""
 
@@ -377,8 +392,8 @@ msgid "Congratulations, your order is completed!"
 msgstr ""
 
 msgid ""
-"For Digital Contents, please access them at <a href=\"/user\">your portal "
-"page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info"
+"For Digital Contents, please access them at <a href=\"/library\">your "
+"library</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info"
 "\">Contact us</a>"
 msgstr ""
 
@@ -635,12 +650,6 @@ msgid "Manage your FLibrary ID"
 msgstr ""
 
 msgid "Create a product"
-msgstr ""
-
-msgid "Digital Contents owned"
-msgstr ""
-
-msgid "Manage Digital Contents"
 msgstr ""
 
 msgid "Orders placed"

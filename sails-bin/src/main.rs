@@ -141,6 +141,10 @@ fn rocket() -> Rocket<Build> {
             ],
         )
         .mount(
+            "/library",
+            routes![pages::library::home_page, pages::library::prod_page],
+        )
+        .mount(
             "/search",
             routes![pages::search::categories, pages::search::categories_all],
         )

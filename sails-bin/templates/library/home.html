@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Library") }}{% endblock title %}
+
+{% block content %}
+<main class="container">
+  <div class="p-5 rounded shadow">
+    <h1>
+    <b>
+      {{ i18n!(self.i18n.catalog, "Library") }}
+      <p class="text-muted">{{ i18n!(self.i18n.catalog, "Your Personal Digital Content Collection") }}</p>
+    </b>
+    </h1>
+    <div class="row grid">
+       {% for product in prods %}
+       <div class="col-sm-6 col-lg-4 mb-4 grid-item">
+	  <div class="card">
+	    {% match product.1 %}
+	    {% when Some with (img) %}
+	    <a href="{{ uri!("/library", crate::pages::library::prod_page(product.0.get_id())) }}">
+	      <img src="{{img}}?size=thumbnail" loading="lazy" class="card-img-bottom">
+            </a>
+            {% when None %}
+            {% endmatch %}
+            <div class="card-body">
+              <h5 class="card-title"><a href="{{ uri!("/library", crate::pages::library::prod_page(product.0.get_id())) }}">{{product.0.get_prodname()}}</a></h5>
+            </div>
+	  </div>
+	</div>
+	{% endfor %}
+      </div>
+    </div>
+  <br>
+  <div class="p-5 rounded shadow">
+  <h3><b>{{ i18n!(self.i18n.catalog, "Quick Search") }}</b></h3>
+  <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+    <thead>
+      <tr>
+	<th data-field="name" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Name") }}</th>
+	<th data-field="timestamp" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Last Modified") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for digicon in digicons_owned %}
+      <tr>
+	<th scope="row"><a href="{{ uri!("/digicons", crate::services::digicons::get_release_asset(digicon.get_id())) }}">{{digicon.get_name()}}</a></th>
+	<th scope="row">{{digicon.get_time_modified().format("%Y-%m-%d %H:%M:%S")}}</th>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br>
+</div>
+<br>
+</main>
+{% endblock content %}
+
+{% block script %}
+  {% call super()%}
+  <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/imagesloaded@4.1.4/imagesloaded.min.js"></script>
+  <script>
+    var elements = document.getElementsByClassName('grid');
+    var msnry;
+
+    imagesLoaded( document.querySelector('body'), function() {
+      // init Isotope after all images have loaded
+      var n = elements.length;
+      for(var i = 0; i < n; i++){
+        msnry = new Masonry( elements[i], {
+          itemSelector: '.grid-item',
+          percentPosition: true
+        });
+      }
+    });
+  </script>
+{% endblock script %}

@@ -26,6 +26,9 @@ msgstr "消息"
 msgid "Creator Center"
 msgstr "创作者中心"
 
+msgid "Library"
+msgstr "库"
+
 msgid "Portal"
 msgstr "主页"
 
@@ -302,6 +305,18 @@ msgstr "创建于"
 msgid "Downloaded by"
 msgstr "下载者"
 
+msgid "Your Personal Digital Content Collection"
+msgstr "您的个性化数字内容收藏夹"
+
+msgid "Quick Search"
+msgstr "快速检索"
+
+msgid "Number of Digital Content included"
+msgstr "包含的数字内容数量"
+
+msgid "Digital Content included"
+msgstr "包含的数字内容"
+
 msgid "Chat"
 msgstr "对话"
 
@@ -394,12 +409,12 @@ msgid "Congratulations, your order is completed!"
 msgstr "您的订单已完成！"
 
 msgid ""
-"For Digital Contents, please access them at <a href=\"/user\">your portal "
-"page</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info"
+"For Digital Contents, please access them at <a href=\"/library\">your "
+"library</a>. Any questions or need help? <a href=\"mailto:admin@flibrary.info"
 "\">Contact us</a>"
 msgstr ""
-"如需访问数字内容，请前往<a href=\"/user\">您的主页</a>。 如有疑问或需要帮助，"
-"请<a href=\"mailto:admin@flibrary.info\">联系我们</a>"
+"如需访问数字内容，请前往<a href=\"/library\">您的库</a>。 如有疑问或需要帮"
+"助，请<a href=\"mailto:admin@flibrary.info\">联系我们</a>"
 
 msgid "Total"
 msgstr "总价"
@@ -658,17 +673,17 @@ msgstr "管理您的 FLibrary ID"
 msgid "Create a product"
 msgstr "上架商品"
 
-msgid "Digital Contents owned"
-msgstr "拥有的数字内容"
-
-msgid "Manage Digital Contents"
-msgstr "管理数字内容"
-
 msgid "Orders placed"
 msgstr "创建的订单"
 
 msgid "Orders received"
 msgstr "收到的订单"
+
+#~ msgid "Digital Contents owned"
+#~ msgstr "拥有的数字内容"
+
+#~ msgid "Manage Digital Contents"
+#~ msgstr "管理数字内容"
 
 #~ msgid "Change password"
 #~ msgstr "更改密码"

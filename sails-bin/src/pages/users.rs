@@ -5,7 +5,7 @@ use crate::{
 };
 use askama::Template;
 use rocket::response::{Flash, Redirect};
-use sails_db::{digicons::*, error::SailsDbError, products::*, transactions::*, users::*};
+use sails_db::{error::SailsDbError, products::*, transactions::*, users::*};
 
 type OrderEntry = (ProductInfo, TransactionInfo);
 
@@ -44,7 +44,6 @@ pub struct PortalGuestPage {
 pub struct PortalPage {
     i18n: I18n,
     user: UserInfo,
-    digicons_owned: Vec<Digicon>,
     prods_owned: Vec<ProductInfo>,
     orders_placed: Vec<OrderEntry>,
     orders_received: Vec<OrderEntry>,
@@ -84,10 +83,9 @@ pub async fn portal(
 ) -> Result<PortalPage, Flash<Redirect>> {
     let uid = user.info.to_id();
     #[allow(clippy::type_complexity)]
-    let (digicons_owned, prods_owned, orders_placed, orders_received) = conn
+    let (prods_owned, orders_placed, orders_received) = conn
         .run(move |c| -> Result<_, SailsDbError> {
             let prods_owned = ProductFinder::new(c, None).seller(&uid).search_info()?;
-            let digicons_owned = Digicons::list_all_content_readable(c, &uid)?;
 
             let orders_placed = TransactionFinder::new(c, None)
                 .buyer(&uid)
@@ -112,7 +110,7 @@ pub async fn portal(
                     Ok((product, x))
                 })
                 .collect::<Result<Vec<OrderEntry>, SailsDbError>>()?;
-            Ok((digicons_owned, prods_owned, orders_placed, orders_received))
+            Ok((prods_owned, orders_placed, orders_received))
         })
         .await
         .into_flash(uri!("/"))?;
@@ -120,7 +118,6 @@ pub async fn portal(
     Ok(PortalPage {
         i18n,
         user: user.info,
-        digicons_owned,
         orders_placed,
         orders_received,
         prods_owned,

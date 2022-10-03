@@ -54,6 +54,7 @@ impl ProdGuard {
                 .product(&prod.prod_id)
                 .search_tag()?;
             Ok(ProdInfo {
+                prod_id: prod.prod_id,
                 prod_info,
                 seller_info: prod.seller_id.get_info(c)?,
                 category,
@@ -71,6 +72,7 @@ pub struct ProdId {
 }
 
 pub struct ProdInfo<T> {
+    pub prod_id: ProductId,
     pub prod_info: T,
     pub seller_info: UserInfo,
     pub category: Option<Category>,

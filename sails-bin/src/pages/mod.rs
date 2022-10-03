@@ -2,6 +2,7 @@
 pub mod admin;
 pub mod basics;
 pub mod digicons;
+pub mod library;
 pub mod msgs;
 pub mod orders;
 pub mod root;

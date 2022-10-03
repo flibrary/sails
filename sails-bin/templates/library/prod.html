@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ i18n!(self.i18n.catalog, "Library") }}{% endblock title %}
+
+{% block content %}
+<main class="container">
+<div class="p-5 rounded shadow">
+    <h1>{{ prod.get_prodname() }}</h1>
+    <table class="table table-hover">
+    <tbody>
+    <tr>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "ID") }}</th>
+      <td>{{ prod.get_shortid() }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{{ i18n!(self.i18n.catalog, "Number of Digital Content included") }}</th>
+      <td>{{ digicons.len() }}</td>
+    </tr>
+    </tbody>
+    </table>
+</div>
+<br>
+
+<div class="p-5 rounded shadow">
+  <h3>
+      {{ i18n!(self.i18n.catalog, "Digital Content included") }}
+  </h3>
+  <table class="table" data-toggle="table" data-pagination="true" data-search="true">
+    <thead>
+      <tr>
+	<th data-field="name" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Name") }}</th>
+	<th data-field="timestamp" data-sortable="true" scope="col">{{ i18n!(self.i18n.catalog, "Last Modified") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for digicon in digicons %}
+      <tr>
+	<th scope="row"><a href="{{ uri!("/digicons", crate::services::digicons::get_release_asset(digicon.get_id())) }}">{{digicon.get_name()}}</a></th>
+	<th scope="row">{{digicon.get_time_modified().format("%Y-%m-%d %H:%M:%S")}}</th>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br>
+</div>
+<br>
+</main>
+{% endblock content %}
