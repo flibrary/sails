@@ -23,7 +23,7 @@ pub struct LibHomePage {
     pub digicons_owned: Vec<Digicon>,
 }
 
-#[get("/")]
+#[get("/", rank = 1)]
 pub async fn home_page(
     i18n: I18n,
     conn: DbConn,
@@ -64,6 +64,11 @@ pub async fn home_page(
         prods,
         i18n,
     })
+}
+
+#[get("/", rank = 2)]
+pub async fn home_page_unlogged() -> Redirect {
+    Redirect::to(uri!("/user"))
 }
 
 #[derive(Template)]

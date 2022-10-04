@@ -142,7 +142,11 @@ fn rocket() -> Rocket<Build> {
         )
         .mount(
             "/library",
-            routes![pages::library::home_page, pages::library::prod_page],
+            routes![
+                pages::library::home_page,
+                pages::library::prod_page,
+                pages::library::home_page_unlogged
+            ],
         )
         .mount(
             "/search",

@@ -329,7 +329,7 @@ dependencies = [
  "percent-encoding",
  "regex",
  "ring",
- "time 0.3.14",
+ "time 0.3.15",
  "tracing",
 ]
 
@@ -425,7 +425,7 @@ dependencies = [
  "itoa 1.0.3",
  "num-integer",
  "ryu",
- "time 0.3.14",
+ "time 0.3.15",
 ]
 
 [[package]]
@@ -723,7 +723,7 @@ dependencies = [
  "rand 0.8.5",
  "sha2",
  "subtle",
- "time 0.3.14",
+ "time 0.3.15",
  "version_check",
 ]
 
@@ -3185,7 +3185,7 @@ dependencies = [
  "serde_json",
  "state",
  "tempfile",
- "time 0.3.14",
+ "time 0.3.15",
  "tokio",
  "tokio-stream",
  "tokio-util",
@@ -3232,7 +3232,7 @@ dependencies = [
  "smallvec",
  "stable-pattern",
  "state",
- "time 0.3.14",
+ "time 0.3.15",
  "tokio",
  "uncased",
 ]
@@ -3695,7 +3695,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_with_macros 2.0.1",
- "time 0.3.14",
+ "time 0.3.15",
 ]
 
 [[package]]
@@ -3786,7 +3786,7 @@ dependencies = [
  "num-bigint",
  "num-traits",
  "thiserror",
- "time 0.3.14",
+ "time 0.3.15",
 ]
 
 [[package]]
@@ -4214,9 +4214,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.14"
+version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c3f9a28b618c3a6b9251b6908e9c99e04b9e5c02e6581ccbb67d59c34ef7f9b"
+checksum = "d634a985c4d4238ec39cacaed2e7ae552fbd3c476b552c1deac3021b7d7eaf0c"
 dependencies = [
  "itoa 1.0.3",
  "libc",
