@@ -33,7 +33,7 @@ diesel = { version = "^1.4", features = ["sqlite", "r2d2"] }
 uuid = { version = "^1", features = ["serde", "v4"] }
 diesel_migrations = "^1.4"
 sails-db = { path = "../sails-db" }
-rust-embed="^6.0"
+rust-embed="^6.4"
 select = "0.6.0-alpha.1"
 structopt = "^0.3"
 urlencoding = "^2"
