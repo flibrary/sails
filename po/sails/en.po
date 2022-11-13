@@ -592,6 +592,9 @@ msgstr ""
 msgid "Sign in to purchase"
 msgstr ""
 
+msgid "See what's included"
+msgstr ""
+
 msgid "Sign in to contact the creator"
 msgstr ""
 

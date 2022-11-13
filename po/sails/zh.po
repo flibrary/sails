@@ -613,6 +613,9 @@ msgstr "发送消息"
 msgid "Sign in to purchase"
 msgstr "登录以购买"
 
+msgid "See what's included"
+msgstr "查看包含的数字内容"
+
 msgid "Sign in to contact the creator"
 msgstr "登录以联系创作者"
 
@@ -678,6 +681,10 @@ msgstr "创建的订单"
 
 msgid "Orders received"
 msgstr "收到的订单"
+
+#, fuzzy
+#~ msgid "Browse digital content included"
+#~ msgstr "包含的数字内容"
 
 #~ msgid "Digital Contents owned"
 #~ msgstr "拥有的数字内容"

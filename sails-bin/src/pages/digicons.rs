@@ -138,7 +138,8 @@ pub async fn trace(
             .map(|x| x.to_string())
             .collect();
 
-    let time = NaiveDateTime::from_timestamp(decrypted[0].parse().into_flash(uri!("/"))?, 0);
+    let time =
+        NaiveDateTime::from_timestamp_opt(decrypted[0].parse().into_flash(uri!("/"))?, 0).unwrap();
 
     let (digicon, user) = db
         .run(move |c| -> Result<_, SailsDbError> {

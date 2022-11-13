@@ -79,12 +79,12 @@ pub struct LibProdPage {
     prod: ProductInfo,
 }
 
+// Explicitly allow guest to access this page to see what's included in a subscription.
 #[get("/prod_info?<prod_id>")]
 pub async fn prod_page(
     i18n: I18n,
     conn: DbConn,
     prod_id: ProdGuard,
-    _user: UserIdGuard<Cookie>,
 ) -> Result<LibProdPage, Flash<Redirect>> {
     let prod = prod_id.to_info(&conn).await.into_flash(uri!("/"))?;
     let prod_info = prod.prod_info.clone();

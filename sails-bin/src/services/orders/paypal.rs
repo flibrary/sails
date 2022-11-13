@@ -5,6 +5,7 @@ use crate::{
 };
 use paypal_rs::{
     api::orders::*,
+    client::PaypalEnv,
     data::orders::{Order, *},
     Client, HeaderParams,
 };
@@ -45,9 +46,9 @@ pub async fn progress_paypal(
         paypal_auth.client_id.clone(),
         paypal_auth.secret.clone(),
         #[cfg(debug_assertions)]
-        true,
+        PaypalEnv::Sandbox,
         #[cfg(not(debug_assertions))]
-        false,
+        PaypalEnv::Live,
     );
 
     client.get_access_token().await.into_flash(uri!("/"))?;
@@ -149,9 +150,9 @@ pub async fn capture_paypal_order(
         paypal_auth.client_id.clone(),
         paypal_auth.secret.clone(),
         #[cfg(debug_assertions)]
-        true,
+        PaypalEnv::Sandbox,
         #[cfg(not(debug_assertions))]
-        false,
+        PaypalEnv::Live,
     );
 
     client.get_access_token().await.map_err(|e| {
@@ -209,9 +210,9 @@ pub async fn create_paypal_order(
         paypal_auth.client_id.clone(),
         paypal_auth.secret.clone(),
         #[cfg(debug_assertions)]
-        true,
+        PaypalEnv::Sandbox,
         #[cfg(not(debug_assertions))]
-        false,
+        PaypalEnv::Live,
     );
 
     client.get_access_token().await.map_err(|e| {

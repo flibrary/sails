@@ -56,6 +56,7 @@
     {% endblock prod %}
     {% block actions %}
     <a href="/user" class="btn btn-primary" role="button">{{ i18n!(self.i18n.catalog, "Sign in to purchase") }}</a>
+    <a href="{{ uri!("/library", crate::pages::library::prod_page(self.prod.get_id())) }}" class="btn btn-success" role="button">{{ i18n!(self.i18n.catalog, "See what's included") }}</a>
     {% endblock actions %}
     </div>
     <br>

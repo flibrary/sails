@@ -121,7 +121,7 @@ impl AlipayClient {
             sign_type: "RSA2",
             sign: None,
             timestamp: Utc::now()
-                .with_timezone(&FixedOffset::east(8 * 3600))
+                .with_timezone(&FixedOffset::east_opt(8 * 3600).unwrap())
                 .format("%Y-%m-%d %H:%M:%S")
                 .to_string(),
             version: "1.0",

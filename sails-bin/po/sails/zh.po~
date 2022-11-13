@@ -308,8 +308,8 @@ msgstr "下载者"
 msgid "Your Personal Digital Content Collection"
 msgstr "您的个性化数字内容收藏夹"
 
-msgid "Quick Lookup"
-msgstr ""
+msgid "Quick Search"
+msgstr "快速检索"
 
 msgid "Number of Digital Content included"
 msgstr "包含的数字内容数量"
@@ -612,6 +612,10 @@ msgstr "发送消息"
 
 msgid "Sign in to purchase"
 msgstr "登录以购买"
+
+#, fuzzy
+msgid "Browse digital content included"
+msgstr "包含的数字内容"
 
 msgid "Sign in to contact the creator"
 msgstr "登录以联系创作者"
