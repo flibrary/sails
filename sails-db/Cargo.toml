@@ -18,7 +18,7 @@ diesel = { version = "^1.4", features = ["sqlite", "r2d2", "chrono", "uuidv07"] 
 num-bigint = "^0.4"
 bitflags = "^1"
 # Testing only, however, benchmark used it as well, and we have to use it in test_utils which cannot be gated
-diesel_migrations = "^1.4"
+diesel_migrations = "^2.0"
 # Verify users in a secure manner
 bcrypt = "^0.12"
 uuid = { version = "^1", features = ["serde", "v4"] }
