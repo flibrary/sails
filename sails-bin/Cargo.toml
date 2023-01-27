@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-aws-sdk-s3 = "^0.16"
+aws-sdk-s3 = "^0.24"
 
 openidconnect = "^2"
 paypal-rs = "^0.2"
